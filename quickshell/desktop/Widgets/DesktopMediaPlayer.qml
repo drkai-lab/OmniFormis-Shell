@@ -35,14 +35,15 @@ PanelWindow {
 
     Item {
         id: playerContainer
-        width: 500
-        height: 180
+        width: 548 // 500 + 48 for shadows
+        height: 228 // 180 + 48 for shadows
         x: playerSettings.posX
         y: playerSettings.posY
 
         CC.MediaPlayer {
             id: player
             anchors.fill: parent
+            anchors.margins: 24 // Give space for shadow
         }
 
         DragHandler {

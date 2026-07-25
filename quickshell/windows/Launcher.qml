@@ -17,7 +17,17 @@ Item {
     
     property bool expanded: false
     property var focusWindow: null
-    property bool gameMode: false
+    property bool gameMode: Vars.gameMode !== undefined ? Vars.gameMode : false
+    Timer {
+        interval: 100
+        running: true
+        repeat: true
+        onTriggered: {
+            if (Vars.gameMode !== undefined && parent.gameMode !== Vars.gameMode) {
+                parent.gameMode = Vars.gameMode;
+            }
+        }
+    }
     
     // Expose panel for TopPills Wayland mask tracking
     property alias panel: panel

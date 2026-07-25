@@ -2,13 +2,35 @@ import QtQuick
 import QtQuick.Layouts
 import "../.."
 import "../../theme/variables.js" as Vars
+import Quickshell.Networking
+import Quickshell.Bluetooth
 
 ColumnLayout {
     id: rootSidebar
     
     property string currentSection: "wifi"
-    property string wifiIcon: "\ue1d8"
-    property string bluetoothIcon: "\ue1a7"
+
+    property var wifiDevice: Networking.devices.values.find(d => d.type === DeviceType.Wifi)
+    property var activeNet: wifiDevice ? wifiDevice.networks.values.find(n => n.connected) : null
+    property var signal: activeNet ? activeNet.signalStrength : 0
+
+    property string wifiIcon: {
+        if (!Networking.wifiEnabled) return "\ue63e";
+        if (!activeNet) return "\ue1ba";
+        let tier = Math.min(Math.floor(signal / 25), 3);
+        let icons = ["\ue1ba", "\uebe4", "\uebd6", "\uebe1"];
+        return icons[tier] || "\ue1ba";
+    }
+
+    property var adapter: Bluetooth.defaultAdapter
+    property bool adapterState: adapter ? adapter.enabled : false
+    property var connectDevice: adapter ? adapter.devices.values.find(d => d.connected) : null
+
+    property string bluetoothIcon: {
+        if (!adapterState) return "\ue1a9";
+        if (!connectDevice) return "\ue1a7";
+        return "\ue1a8";
+    }
 
     Layout.fillWidth: true
     spacing: 4

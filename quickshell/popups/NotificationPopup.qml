@@ -14,7 +14,17 @@ Item {
 
     property bool expanded: false
     property var focusWindow: null
-    property bool gameMode: false
+    property bool gameMode: Vars.gameMode !== undefined ? Vars.gameMode : false
+    Timer {
+        interval: 100
+        running: true
+        repeat: true
+        onTriggered: {
+            if (Vars.gameMode !== undefined && parent.gameMode !== Vars.gameMode) {
+                parent.gameMode = Vars.gameMode;
+            }
+        }
+    }
 
     // Expose panel for TopPills Wayland mask tracking
     property alias panel: panel
@@ -152,58 +162,7 @@ Item {
                 anchors.fill: parent
                 spacing: 8
 
-                // Header
-                RowLayout {
-                    Layout.fillWidth: true
-                    spacing: 8
 
-                    Text {
-                        text: "\ue7f4"
-                        font.family: "Material Symbols Outlined"
-                        font.pixelSize: 18
-                        color: Theme.on_surface
-                    }
-
-                    Text {
-                        text: root.notifications ? root.notifications.length + " notification" + (root.notifications.length > 1 ? "s" : "") : ""
-                        font.family: Vars.fontFamily
-                        font.pixelSize: 13
-                        font.weight: 500
-                        color: Theme.on_surface
-                        opacity: 0.7
-                        Layout.fillWidth: true
-                    }
-
-                    // Close all button
-                    Rectangle {
-                        width: 28
-                        height: 28
-                        radius: 14
-                        color: closeAllHover.containsMouse ? Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.12) : "transparent"
-                        Text {
-                            anchors.centerIn: parent
-                            font.family: "Material Symbols Outlined"
-                            font.pixelSize: 16
-                            color: Theme.on_surface
-                            text: "\ue5cd"
-                        }
-                        MouseArea {
-                            id: closeAllHover
-                            anchors.fill: parent
-                            hoverEnabled: true
-                            cursorShape: Qt.PointingHandCursor
-                            onClicked: {
-                                NotificationService.dismissAll();
-                                root.expanded = false;
-                            }
-                        }
-                        Behavior on color {
-                            ColorAnimation {
-                                duration: Vars.animationDuration
-                            }
-                        }
-                    }
-                }
 
                 // Show only the latest notification
                 Repeater {
@@ -213,6 +172,9 @@ Item {
                         Layout.fillWidth: true
                         isPopup: true
                         fontName: Vars.fontFamily
+                        onPopupRightClicked: {
+                            root.expanded = false;
+                        }
                     }
                 }
             }

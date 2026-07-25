@@ -14,7 +14,17 @@ Item {
     signal scrolled(int delta)
     property string timeString: ""
     property string dateString: ""
-    property bool gameMode: false
+    property bool gameMode: Vars.gameMode !== undefined ? Vars.gameMode : false
+    Timer {
+        interval: 100
+        running: true
+        repeat: true
+        onTriggered: {
+            if (Vars.gameMode !== undefined && parent.gameMode !== Vars.gameMode) {
+                parent.gameMode = Vars.gameMode;
+            }
+        }
+    }
     property alias panel: clockRect
     property bool isHovered: dragArea.containsMouse
 

@@ -277,7 +277,7 @@ PanelWindow {
             layer.enabled: true
             layer.effect: MultiEffect {
                 blurEnabled: true
-                blurMax: 128
+                blurMax: Vars.blurAmount
                 blur: 1.0
                 autoPaddingEnabled: false
             }

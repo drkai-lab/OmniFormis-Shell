@@ -12,8 +12,22 @@ import "../.."
 ColumnLayout {
     id: moduleGridRoot
     
+    FontLoader {
+        id: filledIconFont
+        source: "../../theme/assets/MaterialSymbolsRounded-Filled.ttf"
+    }
     property bool isEditorMode: false
-    property bool gameMode: false
+    property bool gameMode: Vars.gameMode !== undefined ? Vars.gameMode : false
+    Timer {
+        interval: 100
+        running: true
+        repeat: true
+        onTriggered: {
+            if (Vars.gameMode !== undefined && parent.gameMode !== Vars.gameMode) {
+                parent.gameMode = Vars.gameMode;
+            }
+        }
+    }
     property bool systemModeIsDark: Theme.surface.r < 0.5
     property int activeMaxRow: 4
     property real baseCellWidth: (width - (12 * 3)) / 4
@@ -33,7 +47,7 @@ ColumnLayout {
         if (!Networking.wifiEnabled) return "\ue1da"; 
         if (!activeNet) return "\uf067"; 
         let tier = Math.min(Math.floor(signal / 25), 3);
-        let icons = ["\ue1ba", "\uebe4", "\uebd6", "\uebe1"];
+        let icons = ["\ue1ba", "\uebe4", "\uebd6", "\ue1d8"];
         return icons[tier];
     }
 
@@ -379,7 +393,6 @@ ColumnLayout {
                 
                 Behavior on scale { NumberAnimation { duration: 200; easing.type: Easing.OutCubic } }
                 Behavior on color { ColorAnimation { duration: 150 } }
-                
                 border.color: moduleGridRoot.isEditorMode ? Theme.outline_variant : "transparent"
                 border.width: 1
                 Behavior on border.color { ColorAnimation { duration: 250 } }
@@ -421,12 +434,12 @@ ColumnLayout {
                 function getExpandedSubtitle() {
                     switch(moduleId) {
                         case "wifi": 
-                            return moduleGridRoot.activeNet ? moduleGridRoot.activeNet.name : "Not Connected";
+                            return moduleGridRoot.activeNet ? moduleGridRoot.activeNet.name : "";
                         case "bluetooth": 
-                            if (!moduleGridRoot.adapterState) return "Off";
+                            if (!moduleGridRoot.adapterState) return "";
                             let count = moduleGridRoot.connectedBluetoothCount;
-                            if (count === 0) return "Available";
-                            if (count === 1) return moduleGridRoot.connectDevice ? moduleGridRoot.connectDevice.name : "Connected";
+                            if (count === 0) return "";
+                            if (count === 1) return moduleGridRoot.connectDevice ? moduleGridRoot.connectDevice.name : "";
                             return count + " devices";
                         case "audio": 
                             return moduleGridRoot.audioNode && moduleGridRoot.audioNode.audio.muted ? "Muted" : "Active";
@@ -483,8 +496,11 @@ ColumnLayout {
                         
                         Text {
                             anchors.centerIn: parent
-                            font.family: "Material Symbols Outlined"
+                            font.family: tileDelegate.isActive ? filledIconFont.name : "Material Symbols Outlined"
                             font.pixelSize: 24
+                            antialiasing: true
+                            renderType: Text.QtRendering
+                            font.hintingPreference: Font.PreferNoHinting
                             color: tileDelegate.isActive ? Theme.primary : Theme.on_surface_variant
                             Behavior on color { ColorAnimation { duration: 250; easing.type: Easing.OutCubic } }
                             text: tileDelegate.mIcon
@@ -506,8 +522,9 @@ ColumnLayout {
                         
                         // Left Toggle Square
                         Item {
-                            Layout.preferredWidth: parent.height
-                            Layout.preferredHeight: parent.height
+                            Layout.preferredWidth: 64
+                            Layout.preferredHeight: 64
+                            Layout.alignment: Qt.AlignVCenter
                             
                             Rectangle {
                                 anchors.fill: parent
@@ -519,8 +536,11 @@ ColumnLayout {
                                 
                                 Text {
                                     anchors.centerIn: parent
-                                    font.family: "Material Symbols Outlined"
+                                    font.family: tileDelegate.isActive ? filledIconFont.name : "Material Symbols Outlined"
                                     font.pixelSize: 24
+                                    antialiasing: true
+                                    renderType: Text.QtRendering
+                                    font.hintingPreference: Font.PreferNoHinting
                                     color: tileDelegate.isActive ? Theme.on_primary : Theme.on_surface_variant
                                     Behavior on color { ColorAnimation { duration: 250; easing.type: Easing.OutCubic } }
                                     text: tileDelegate.mIcon
@@ -573,6 +593,7 @@ ColumnLayout {
                                     Layout.fillWidth: true
                                     
                                     text: tileDelegate.getExpandedSubtitle()
+                                    visible: text !== ""
                                 }
                             }
                             
@@ -639,6 +660,9 @@ ColumnLayout {
                             text: "remove"
                             font.family: "Material Symbols Outlined"
                             font.pixelSize: 16
+                            antialiasing: true
+                            renderType: Text.QtRendering
+                            font.hintingPreference: Font.PreferNoHinting
                             color: Theme.on_error 
                         }
                         

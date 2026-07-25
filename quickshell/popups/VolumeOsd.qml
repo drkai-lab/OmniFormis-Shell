@@ -19,7 +19,17 @@ Item {
 
     property bool isVisible: false
     property bool preventShow: false
-    property bool gameMode: false
+    property bool gameMode: Vars.gameMode !== undefined ? Vars.gameMode : false
+    Timer {
+        interval: 100
+        running: true
+        repeat: true
+        onTriggered: {
+            if (Vars.gameMode !== undefined && parent.gameMode !== Vars.gameMode) {
+                parent.gameMode = Vars.gameMode;
+            }
+        }
+    }
     property alias panel: osdBackground
     property alias panelMask: panelMask
     

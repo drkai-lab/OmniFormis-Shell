@@ -13,7 +13,17 @@ GridLayout {
     property int totalWorkspaces: 10
     property real wsWidth: 100
     property real wsHeight: 100
-    property bool gameMode: false
+    property bool gameMode: Vars.gameMode !== undefined ? Vars.gameMode : false
+    Timer {
+        interval: 100
+        running: true
+        repeat: true
+        onTriggered: {
+            if (Vars.gameMode !== undefined && parent.gameMode !== Vars.gameMode) {
+                parent.gameMode = Vars.gameMode;
+            }
+        }
+    }
 
     property var overviewPanel
 

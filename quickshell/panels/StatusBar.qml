@@ -11,6 +11,7 @@ import "../theme/variables.js" as Vars
 Rectangle {
     id: systemTrayContainer
     layer.enabled: true
+    layer.samples: 4
     layer.effect: MultiEffect { shadowEnabled: true; shadowBlur: 1.0; shadowColor: Qt.rgba(0,0,0,0.25); shadowVerticalOffset: 4; shadowHorizontalOffset: 0 }
     color: Theme.surface_container_high
     radius: height / 2

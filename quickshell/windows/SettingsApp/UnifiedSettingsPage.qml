@@ -25,7 +25,7 @@ ColumnLayout {
         var cmdArray = [];
         var isLive = false;
         if (isQs) {
-            var liveVars = ["clockShape", "clockShowTicks", "clockShowCenterDot", "wallpaperMaskShape", "wallpaperMaskScale", "wallpaperMaskColor", "wallpaperMaskEnabled", "wallpaperMaskOffsetX", "wallpaperMaskOffsetY", "mediaPlayerShape"];
+            var liveVars = ["clockShape", "clockShowTicks", "clockShowCenterDot", "wallpaperMaskShape", "wallpaperMaskScale", "wallpaperMaskColor", "wallpaperMaskEnabled", "wallpaperMaskOffsetX", "wallpaperMaskOffsetY", "mediaPlayerShape", "mediaPlayerArtScale", "gameMode"];
             isLive = liveVars.indexOf(key) !== -1;
             cmdArray = ["sh", "-c", "$HOME/.local/bin/omniformis qs set \"$1\" \"$2\"", "sh", key, val];
         } else {
@@ -143,6 +143,7 @@ ColumnLayout {
         spacing: 4
         model: settingsModel
         focus: true
+        bottomMargin: 112
         KeyNavigation.up: searchInput
 
         // boundsBehavior: Flickable.StopAtBounds
@@ -591,7 +592,7 @@ ColumnLayout {
                                 implicitWidth: 220
                                 color: Theme.surface_container_highest
                                 radius: 12
-                                border.color: Qt.rgba(Theme.outline_variant.r, Theme.outline_variant.g, Theme.outline_variant.b, 0.4)
+                                border.color: Theme.outline_variant
                                 border.width: 1
                                 layer.enabled: true
                                 layer.effect: MultiEffect {
@@ -1433,7 +1434,7 @@ ColumnLayout {
                         category = "Appearance";
                     } else if (key.startsWith("radius")) {
                         category = "Appearance";
-                    } else if (key === "overviewGridRows" || key === "overviewGridColumns" || key === "overviewScale" || key.startsWith("desktop") || key === "mediaPlayerShape") {
+                    } else if (key === "overviewGridRows" || key === "overviewGridColumns" || key === "overviewScale" || key.startsWith("desktop") || key === "mediaPlayerShape" || key === "mediaPlayerArtScale" || key === "gameMode") {
                         category = "General";
                     }
 
@@ -1455,6 +1456,12 @@ ColumnLayout {
                         min = 0.0;
                         max = 1.0;
                         step = 0.1;
+                    } else if (key === "blurAmount") {
+                        type = "slider";
+                        min = 0;
+                        max = 128;
+                        step = 2;
+                        category = "General";
                     } else if (key.startsWith("radius") || key.startsWith("spacing") || key.startsWith("padding")) {
                         type = "slider";
                         min = 0;
@@ -1560,18 +1567,25 @@ ColumnLayout {
             }
 
             Item {
-                id: finalMaskedContainer
+                id: shadowContainer
                 anchors.fill: parent
                 layer.enabled: true
                 layer.effect: MultiEffect {
-                    maskEnabled: true
-                    maskSource: fabMask
                     shadowEnabled: true
                     shadowBlur: 1.0
                     shadowColor: Qt.rgba(0,0,0,0.25)
                     shadowVerticalOffset: 4
                     shadowHorizontalOffset: 0
                 }
+
+                Item {
+                    id: finalMaskedContainer
+                    anchors.fill: parent
+                    layer.enabled: true
+                    layer.effect: MultiEffect {
+                        maskEnabled: true
+                        maskSource: fabMask
+                    }
 
                 ShaderEffectSource {
                     anchors.fill: parent
@@ -1581,7 +1595,7 @@ ColumnLayout {
                     layer.enabled: true
                     layer.effect: MultiEffect {
                         blurEnabled: true
-                        blurMax: 48
+                        blurMax: Vars.blurAmount
                         blur: 1.0
                         autoPaddingEnabled: false
                     }
@@ -1589,8 +1603,12 @@ ColumnLayout {
 
                 Rectangle {
                     anchors.fill: parent
+                    radius: reloadFab.radius
                     color: Vars.translucent ? Qt.rgba(Theme.primary.r, Theme.primary.g, Theme.primary.b, 0.4) : Theme.primary
+                    border.color: Theme.outline_variant
+                    border.width: 1
                 }
+            }
             }
 
             Text {

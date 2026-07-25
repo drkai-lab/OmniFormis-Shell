@@ -1,6 +1,7 @@
 .pragma library
-var animationDuration = 240;
+var animationDuration = 200;
 var translucent = true;
+var blurAmount = 4;
 
 var overviewGridRows = 2;
 var overviewGridColumns = 5;
@@ -22,15 +23,17 @@ var paddingLarge = 24
 
 var wallpaperMaskEnabled = true;
 var wallpaperMaskScale = 1.1;
-var wallpaperMaskShape = "Clamshell";
+var wallpaperMaskShape = "Triangle";
 var wallpaperMaskColor = "surface_variant";
 var wallpaperMaskOffsetX = 17;
 var wallpaperMaskOffsetY = 12;
-var clockShape = "6SidedCookie";
+var clockShape = "4SidedCookie";
 var clockShowTicks = false;
 var clockShowCenterDot = false;
 var panelStyle = "Framed";
-var mediaPlayerShape = "12SidedCookie";
+var mediaPlayerShape = "PuffyDiamond";
+var mediaPlayerArtScale = 1;
+var gameMode = false;
 
 var desktopClockEnabled = true;
 var desktopCalenderEnabled = false;

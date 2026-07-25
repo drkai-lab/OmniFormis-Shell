@@ -15,7 +15,7 @@ Item {
     
     // We bind height to the card container's height so the list layout reacts properly
     width: parent ? parent.width : 360
-    height: container.height
+    height: rootCard.dismissing ? 0 : container.height
 
     // Animate height changes for smooth insertions/removals
     Behavior on height {
@@ -30,6 +30,33 @@ Item {
     // Drag-to-dismiss properties
     property real dragThreshold: width * 0.4
 
+    property int listIndex: -1
+    property int listCount: 1
+    
+    // Drag coordination
+    property int activeDragIndex: -1
+    property real activeDragX: 0
+    signal dragStarted(int idx)
+    signal dragMoved(int idx, real dx)
+    signal dragEnded(int idx)
+    signal popupRightClicked()
+
+    property bool isEffectivelyFirst: isPopup || listIndex === 0 || 
+        (activeDragIndex === listIndex - 1 && Math.abs(activeDragX) > dragThreshold * 0.3) ||
+        (activeDragIndex === listIndex && Math.abs(activeDragX) > dragThreshold * 0.3)
+        
+    property bool isEffectivelyLast: isPopup || listIndex === listCount - 1 || 
+        (activeDragIndex === listIndex + 1 && Math.abs(activeDragX) > dragThreshold * 0.3) ||
+        (activeDragIndex === listIndex && Math.abs(activeDragX) > dragThreshold * 0.3)
+
+    property real adjacentDragShift: {
+        if (activeDragIndex === -1 || activeDragIndex === listIndex) return 0;
+        if (Math.abs(listIndex - activeDragIndex) === 1) {
+            return activeDragX * 0.12;
+        }
+        return 0;
+    }
+
     // Actual visual card
     Rectangle {
         id: container
@@ -41,7 +68,29 @@ Item {
         // Drag logic transforms the container X
         x: 0
         
-        radius: Vars.radiusLarge // Material 3 expressive rounded corners for all notifications
+        onXChanged: {
+            if (activeDragIndex === listIndex || dragArea.drag.active) {
+                rootCard.dragMoved(listIndex, x);
+                if (!dragArea.drag.active && !rootCard.dismissing && Math.abs(x) < 0.1) {
+                    rootCard.dragEnded(listIndex);
+                }
+            }
+        }
+        
+        transform: Translate {
+            x: rootCard.adjacentDragShift
+        }
+        
+        topLeftRadius: isEffectivelyFirst ? Vars.radiusLarge : 4
+        topRightRadius: isEffectivelyFirst ? Vars.radiusLarge : 4
+        bottomLeftRadius: isEffectivelyLast ? Vars.radiusLarge : 4
+        bottomRightRadius: isEffectivelyLast ? Vars.radiusLarge : 4
+        
+        Behavior on topLeftRadius { NumberAnimation { duration: 250; easing.type: Easing.OutCubic } }
+        Behavior on topRightRadius { NumberAnimation { duration: 250; easing.type: Easing.OutCubic } }
+        Behavior on bottomLeftRadius { NumberAnimation { duration: 250; easing.type: Easing.OutCubic } }
+        Behavior on bottomRightRadius { NumberAnimation { duration: 250; easing.type: Easing.OutCubic } }
+        
         color: isPopup ? (modelData.urgency === NotificationUrgency.Critical ? Theme.error : "transparent") : (modelData.urgency === NotificationUrgency.Critical ? Theme.error_container : (Vars.translucent ? Qt.rgba(Theme.surface_container_high.r, Theme.surface_container_high.g, Theme.surface_container_high.b, 0.6) : Theme.surface_container_high))
         border.width: 0
         clip: true
@@ -86,6 +135,7 @@ Item {
 
         // Drag handling
         MouseArea {
+            id: dragArea
             anchors.fill: parent
             drag.target: container
             drag.axis: Drag.XAxis
@@ -93,6 +143,8 @@ Item {
             // Limit drag depending on whether we want free drag
             drag.minimumX: -rootCard.width * 1.5
             drag.maximumX: rootCard.width * 1.5
+            
+            onPressed: rootCard.dragStarted(listIndex)
             
             onReleased: {
                 if (Math.abs(container.x) > rootCard.dragThreshold) {
@@ -104,20 +156,31 @@ Item {
                     // Delay actual dismiss to let animation play
                     dismissTimer.start();
                 } else {
-                    // Snap back
-                    container.x = 0;
+                    if (Math.abs(container.x) < 0.1) {
+                        rootCard.dragEnded(listIndex);
+                    } else {
+                        // Snap back (dragEnded will be called when x reaches 0)
+                        container.x = 0;
+                    }
                 }
             }
             cursorShape: Qt.PointingHandCursor
             
+            acceptedButtons: Qt.LeftButton | Qt.RightButton
             onClicked: (mouse) => {
                 if (Math.abs(container.x) < 5) {
-                    if (typeof modelData.dismiss === "function") {
-                        modelData.dismiss();
-                    }
-                    if (isPopup) {
-                        rootCard.dismissing = true;
-                        dismissTimer.start();
+                    if (mouse.button === Qt.RightButton) {
+                        if (isPopup) {
+                            rootCard.popupRightClicked();
+                        }
+                    } else {
+                        if (typeof modelData.dismiss === "function") {
+                            modelData.dismiss();
+                        }
+                        if (isPopup) {
+                            rootCard.dismissing = true;
+                            dismissTimer.start();
+                        }
                     }
                 }
             }
@@ -130,6 +193,7 @@ Item {
                 if (typeof modelData.dismiss === "function") {
                     modelData.dismiss();
                 }
+                rootCard.dragEnded(listIndex);
             }
         }
 
@@ -183,57 +247,17 @@ Item {
                     }
                 }
 
+                // Summary (Title) moved to header
                 Text {
-                    text: modelData.appName || "Notification"
+                    text: modelData.summary || ""
                     color: rootCard.textColor
-                    font.pixelSize: 14
-                    font.weight: 600
+                    font.pixelSize: 16
                     font.family: rootCard.fontName
-                    Layout.alignment: Qt.AlignVCenter
+                    font.weight: 600
+                    elide: Text.ElideRight
+                    Layout.fillWidth: true
+                    visible: text !== ""
                 }
-
-                Item { Layout.fillWidth: true }
-                
-                Rectangle {
-                    width: 24
-                    height: 24
-                    radius: Math.floor(Vars.radiusMedium * 0.75)
-                    color: closeHover.pressed ? Qt.rgba(Theme.error.r, Theme.error.g, Theme.error.b, 0.12) : (closeHover.containsMouse ? Qt.rgba(Theme.error.r, Theme.error.g, Theme.error.b, 0.08) : "transparent")
-                    Layout.alignment: Qt.AlignVCenter
-                    
-                    Behavior on color { ColorAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
-
-                    Text {
-                        anchors.centerIn: parent
-                        text: "\ue5cd"
-                        color: closeHover.containsMouse ? Theme.error : rootCard.textColor
-                        font.pixelSize: 16
-                        font.family: "Material Symbols Outlined"
-                    }
-
-                    MouseArea {
-                        id: closeHover
-                        anchors.fill: parent
-                        hoverEnabled: true
-                        cursorShape: Qt.PointingHandCursor
-                        onClicked: {
-                            rootCard.dismissing = true;
-                            dismissTimer.start();
-                        }
-                    }
-                }
-            }
-
-            // Summary (Title)
-            Text {
-                text: modelData.summary || ""
-                color: rootCard.textColor
-                font.pixelSize: 16
-                font.family: rootCard.fontName
-                font.weight: 600
-                elide: Text.ElideRight
-                Layout.fillWidth: true
-                visible: text !== ""
             }
 
             // Body and Image
@@ -343,7 +367,7 @@ Item {
 
                     SequentialAnimation {
                         running: rootCard.modelData.urgency !== NotificationUrgency.Critical && isPopup
-                        paused: cardHover.hovered
+                        paused: running && cardHover.hovered
                         PauseAnimation { duration: Vars.animationDuration }
                         NumberAnimation {
                             target: progressBar

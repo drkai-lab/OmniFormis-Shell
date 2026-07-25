@@ -28,7 +28,17 @@ PanelWindow {
     signal popupOpened
     signal openOverviewRequested
 
-    property bool gameMode: false
+    property bool gameMode: Vars.gameMode !== undefined ? Vars.gameMode : false
+    Timer {
+        interval: 100
+        running: true
+        repeat: true
+        onTriggered: {
+            if (Vars.gameMode !== undefined && parent.gameMode !== Vars.gameMode) {
+                parent.gameMode = Vars.gameMode;
+            }
+        }
+    }
 
     property int currentSpacingSmall: Vars.spacingSmall !== undefined ? Vars.spacingSmall : 11
     property int currentRadiusExtraLarge: Vars.radiusExtraLarge !== undefined ? Vars.radiusExtraLarge : 38
@@ -122,8 +132,8 @@ PanelWindow {
         id: clockHoverZone
         anchors.top: parent.top
         anchors.horizontalCenter: parent.horizontalCenter
-        width: 300
-        height: 100
+        width: 160
+        height: 60
         MouseArea {
             id: clockHoverArea
             anchors.fill: parent

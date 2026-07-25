@@ -27,6 +27,25 @@ Rectangle {
     }
     property bool isPlaying: mprisPlayer ? mprisPlayer.isPlaying : false
 
+    property string currentMediaPlayerShape: Vars.mediaPlayerShape !== undefined ? Vars.mediaPlayerShape : "12SidedCookie"
+    property real currentMediaPlayerArtScale: Vars.mediaPlayerArtScale !== undefined ? Vars.mediaPlayerArtScale : 1.0
+
+    Timer {
+        interval: 100
+        running: true
+        repeat: true
+        onTriggered: {
+            var shape = Vars.mediaPlayerShape !== undefined ? Vars.mediaPlayerShape : "12SidedCookie";
+            if (mediaPlayerRoot.currentMediaPlayerShape !== shape) {
+                mediaPlayerRoot.currentMediaPlayerShape = shape;
+            }
+            var scale = Vars.mediaPlayerArtScale !== undefined ? Vars.mediaPlayerArtScale : 1.0;
+            if (mediaPlayerRoot.currentMediaPlayerArtScale !== scale) {
+                mediaPlayerRoot.currentMediaPlayerArtScale = scale;
+            }
+        }
+    }
+
     Layout.fillWidth: true
     Layout.preferredHeight: 180
     radius: 16
@@ -64,7 +83,7 @@ Rectangle {
             layer.enabled: true
             layer.effect: MultiEffect {
                 blurEnabled: true
-                blurMax: 64
+                blurMax: Vars.blurAmount
                 blur: 1.0
                 saturation: 1.2
                 autoPaddingEnabled: false
@@ -87,11 +106,23 @@ Rectangle {
     }
 
     // Stage 2: Mask the combined background to perfectly fit the rounded corners
-    MultiEffect {
+    Item {
         anchors.fill: parent
-        source: combinedBackground
-        maskEnabled: true
-        maskSource: rootMask
+        layer.enabled: true
+        layer.effect: MultiEffect {
+            shadowEnabled: !Vars.gameMode
+            shadowBlur: 1.0
+            shadowColor: Qt.rgba(0, 0, 0, 0.25)
+            shadowVerticalOffset: 4
+            shadowHorizontalOffset: 0
+        }
+
+        MultiEffect {
+            anchors.fill: parent
+            source: combinedBackground
+            maskEnabled: true
+            maskSource: rootMask
+        }
     }
 
     property int slideDirection: 1
@@ -118,16 +149,34 @@ Rectangle {
         }
     }
 
-    RowLayout {
+    Item {
+        id: contentLayer
         anchors.fill: parent
-        anchors.margins: 16
-        spacing: 16
+        layer.enabled: true
+        layer.samples: 4
+        layer.effect: MultiEffect {
+            maskEnabled: true
+            maskSource: rootMask
+        }
 
-        // Left: Album Art
-        Item {
-            id: albumArtContainer
-            width: 148
-            height: 148
+        RowLayout {
+            anchors.fill: parent
+            anchors.margins: 16
+            spacing: 16
+
+            // Left: Album Art
+            Item {
+                id: albumArtContainer
+                width: 148
+                height: 148
+                scale: mediaPlayerRoot.currentMediaPlayerArtScale
+                Behavior on scale {
+                    NumberAnimation {
+                        duration: Vars.animationDuration
+                        easing.type: Easing.BezierSpline
+                        easing.bezierCurve: Vars.customStandard
+                    }
+                }
 
             M3Shapes {
                 id: m3
@@ -143,9 +192,10 @@ Rectangle {
                 Item {
                     id: rotationWrapper
                     anchors.centerIn: parent
-                    width: parent.width * 4
-                    height: parent.height * 4
-                    scale: 0.25
+                    property real scaleFactor: Math.min(4, 4096 / Math.max(parent.width, parent.height, 1))
+                    width: parent.width * scaleFactor
+                    height: parent.height * scaleFactor
+                    scale: 1.0 / scaleFactor
 
                     RotationAnimation {
                         target: rotationWrapper
@@ -158,13 +208,42 @@ Rectangle {
                     }
 
                     Image {
+                        id: maskImage
                         anchors.fill: parent
                         sourceSize.width: width
                         sourceSize.height: height
-                        source: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><path d='" + m3.getPath(Vars.mediaPlayerShape || "12SidedCookie") + "' fill='white'/></svg>"
+                        
+                        property string currentPathName: mediaPlayerRoot.currentMediaPlayerShape
+                        property string currentPath: m3.getPath(currentPathName)
+
+                        source: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><path d='" + currentPath + "' fill='white'/></svg>"
                         smooth: true
                         antialiasing: true
                         mipmap: true
+
+                        onCurrentPathNameChanged: {
+                            if (maskImage.status === Image.Ready) {
+                                shapeAnim.restart();
+                            }
+                        }
+
+                        SequentialAnimation {
+                            id: shapeAnim
+                            NumberAnimation {
+                                target: maskImage
+                                property: "scale"
+                                to: 0.01
+                                duration: 250
+                                easing.type: Easing.InBack
+                            }
+                            NumberAnimation {
+                                target: maskImage
+                                property: "scale"
+                                to: 1.0
+                                duration: 550
+                                easing.type: Easing.OutElastic
+                            }
+                        }
                     }
                 }
             }
@@ -184,6 +263,9 @@ Rectangle {
                         anchors.centerIn: parent
                         font.family: "Material Symbols Outlined"
                         font.pixelSize: 48
+                        antialiasing: true
+                        renderType: Text.QtRendering
+                        font.hintingPreference: Font.PreferNoHinting
                         color: Theme.on_surface_variant
                         text: "\ue405"
                     }
@@ -206,6 +288,12 @@ Rectangle {
                 anchors.fill: parent
                 maskEnabled: true
                 maskSource: maskContainer
+                antialiasing: true
+                smooth: true
+                maskThresholdMin: 0.5
+                maskSpreadAtMin: 1.0
+                maskSpreadAtMax: 0.0
+                maskThresholdMax: 1.0
             }
 
         }
@@ -260,14 +348,16 @@ Rectangle {
                 // Player Selector and Play/Pause Button
                 RowLayout {
                     Layout.alignment: Qt.AlignBottom | Qt.AlignRight
-                    spacing: 12
+                    spacing: 12 // Reverted spacing
 
                     // Player Selector Pill
                     Rectangle {
+                        id: playerSelectorPill
                         Layout.alignment: Qt.AlignVCenter
-                        width: playerSelectorRow.implicitWidth + 24
-                        height: 32
-                        radius: 16
+                        Layout.preferredWidth: playerSelectorRow.implicitWidth + 16 // Less padding
+                        Layout.preferredHeight: 28 // Smaller height
+                        Layout.minimumWidth: Layout.preferredWidth
+                        radius: 14 // Scaled radius
                         color: Qt.rgba(Theme.on_surface_variant.r, Theme.on_surface_variant.g, Theme.on_surface_variant.b, 0.15)
                         visible: Mpris.players.values.length > 1
 
@@ -278,13 +368,16 @@ Rectangle {
                             Text {
                                 text: mprisPlayer ? (mprisPlayer.identity || "Unknown") : "Player"
                                 font.family: Vars.fontFamily
-                                font.pixelSize: 13
+                                font.pixelSize: 12 // Slightly smaller text
                                 color: Theme.on_surface_variant
                                 font.weight: 500
                             }
                             Text {
                                 font.family: "Material Symbols Rounded"
-                                font.pixelSize: 18
+                                font.pixelSize: 16 // Slightly smaller icon
+                                antialiasing: true
+                                renderType: Text.QtRendering
+                                font.hintingPreference: Font.PreferNoHinting
                                 color: Theme.on_surface_variant
                                 font.weight: 700
                                 text: "\ue5cf" // expand_more
@@ -300,8 +393,9 @@ Rectangle {
                     // Play/Pause Button
                     Rectangle {
                         Layout.alignment: Qt.AlignVCenter
-                        width: 52
-                        height: 52
+                        Layout.preferredWidth: 52
+                        Layout.preferredHeight: 52
+                        Layout.minimumWidth: 52
                         radius: 18
                         color: Theme.primary
 
@@ -309,6 +403,9 @@ Rectangle {
                             anchors.centerIn: parent
                             font.family: filledIconFont.name
                             font.pixelSize: 28
+                            antialiasing: true
+                            renderType: Text.QtRendering
+                            font.hintingPreference: Font.PreferNoHinting
                             color: Theme.on_primary
                             text: mprisPlayer && mprisPlayer.isPlaying ? "\ue034" : "\ue037" // pause : play_arrow
                         }
@@ -340,6 +437,9 @@ Rectangle {
                 Text {
                     font.family: filledIconFont.name
                     font.pixelSize: 26
+                    antialiasing: true
+                    renderType: Text.QtRendering
+                    font.hintingPreference: Font.PreferNoHinting
                     color: Theme.on_surface_variant
                     text: "\ue045" // skip_previous
                     MouseArea {
@@ -477,6 +577,9 @@ Rectangle {
                 Text {
                     font.family: filledIconFont.name
                     font.pixelSize: 26
+                    antialiasing: true
+                    renderType: Text.QtRendering
+                    font.hintingPreference: Font.PreferNoHinting
                     color: Theme.on_surface_variant
                     text: "\ue044" // skip_next
                     MouseArea {
@@ -492,22 +595,86 @@ Rectangle {
             }
         }
     }
+    } // end of contentLayer
 
     // MPRIS Player Dropdown
-    Rectangle {
+    Item {
         id: playerDropdown
-        anchors.top: parent.top
-        anchors.right: parent.right
-        anchors.topMargin: Vars.spacingMedium + 28 + 4
-        anchors.rightMargin: Vars.spacingMedium
+        x: {
+            if (typeof playerSelectorPill !== 'undefined' && playerSelectorPill !== null) {
+                var p = playerSelectorPill.mapToItem(mediaPlayerRoot, 0, 0);
+                return p.x - (width - playerSelectorPill.width) - 12; // Aligned just left of the play button's bounds
+            }
+            return parent.width - width - Vars.spacingMedium - 64;
+        }
+        y: {
+            if (typeof playerSelectorPill !== 'undefined' && playerSelectorPill !== null) {
+                var p = playerSelectorPill.mapToItem(mediaPlayerRoot, 0, 0);
+                return p.y + playerSelectorPill.height + 8;
+            }
+            return Vars.spacingMedium + 32;
+        }
         width: 180
         height: playerColumn.implicitHeight + 8
-        radius: Vars.radiusMedium
-        color: Theme.surface_container_highest
-        border.color: Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.1)
-        border.width: 1
+        property real radius: Vars.radiusMedium
         visible: false
         z: 10
+
+        Rectangle {
+            id: dropdownMask
+            anchors.fill: parent
+            radius: playerDropdown.radius
+            color: "black"
+            visible: false
+            layer.enabled: true
+            layer.samples: 4
+        }
+
+        Item {
+            id: dropdownShadow
+            anchors.fill: parent
+            layer.enabled: true
+            layer.effect: MultiEffect {
+                shadowEnabled: true
+                shadowBlur: 1.0
+                shadowColor: Qt.rgba(0,0,0,0.25)
+                shadowVerticalOffset: 4
+                shadowHorizontalOffset: 0
+            }
+
+            Item {
+                id: dropdownFinalMasked
+                anchors.fill: parent
+                layer.enabled: true
+                layer.effect: MultiEffect {
+                    maskEnabled: true
+                    maskSource: dropdownMask
+                }
+
+                ShaderEffectSource {
+                    anchors.fill: parent
+                    sourceItem: mediaPlayerRoot
+                    sourceRect: Qt.rect(playerDropdown.x, playerDropdown.y, playerDropdown.width, playerDropdown.height)
+                    
+                    layer.enabled: true
+                    layer.effect: MultiEffect {
+                        blurEnabled: true
+                        blurMax: Vars.blurAmount
+                        blur: 1.0
+                        autoPaddingEnabled: false
+                    }
+                }
+
+                Rectangle {
+                    anchors.fill: parent
+                    radius: playerDropdown.radius
+                    color: Vars.translucent ? Qt.rgba(Theme.surface_container_highest.r, Theme.surface_container_highest.g, Theme.surface_container_highest.b, 0.6) : Theme.surface_container_highest
+                    border.color: Theme.outline_variant
+                    border.width: 1
+                }
+
+            } // End of dropdownFinalMasked
+        } // End of dropdownShadow
 
         Column {
             id: playerColumn
@@ -541,6 +708,9 @@ Rectangle {
                         Text {
                             font.family: "Material Symbols Outlined"
                             font.pixelSize: 18
+                            antialiasing: true
+                            renderType: Text.QtRendering
+                            font.hintingPreference: Font.PreferNoHinting
                             color: Theme.primary
                             text: "\ue876" // check
                             visible: mprisPlayer === modelData

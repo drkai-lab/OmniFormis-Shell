@@ -39,7 +39,7 @@ ColumnLayout {
         Rectangle {
             width: 40; height: 40; radius: 20
             color: backHoverWifi.pressed ? Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.12) : (backHoverWifi.containsMouse ? Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.08) : "transparent")
-            Text { anchors.centerIn: parent; font.family: "Material Symbols Outlined"; font.pixelSize: 20; color: Theme.on_surface; text: "\ue5c4" }
+            Text { anchors.centerIn: parent; font.family: "Material Symbols Outlined"; font.pixelSize: 20; antialiasing: true; renderType: Text.QtRendering; font.hintingPreference: Font.PreferNoHinting; color: Theme.on_surface; text: "\ue5c4" }
             MouseArea { id: backHoverWifi; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: wifiMenu.backRequested() }
             Behavior on color { ColorAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
         }
@@ -91,12 +91,14 @@ ColumnLayout {
                                 anchors.centerIn: parent
                                 font.family: modelData.connected ? filledIconFont.name : "Material Symbols Outlined"
                                 font.pixelSize: 22
+                                antialiasing: true
+                                renderType: Text.QtRendering
+                                font.hintingPreference: Font.PreferNoHinting
                                 color: modelData.connected ? Theme.on_primary : Theme.on_surface_variant
                                 text: {
-                                    if (modelData.connected) return "\ue1d8";
                                     if (modelData.signalStrength === undefined) return "\ue63e";
                                     let tier = Math.min(Math.floor(modelData.signalStrength / 25), 3);
-                                    return ["\ue1ba", "\uebe4", "\uebd6", "\uebe1"][tier] || "\ue63e";
+                                    return ["\ue1ba", "\uebe4", "\uebd6", "\ue1d8"][tier] || "\ue63e";
                                 }
                                 Behavior on color { ColorAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
                             }

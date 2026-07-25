@@ -17,7 +17,17 @@ Item {
     property alias panelMask: panelMask
     property bool expanded: flow !== null && !flow.isCompleted
     property var focusWindow: null
-    property bool gameMode: false
+    property bool gameMode: Vars.gameMode !== undefined ? Vars.gameMode : false
+    Timer {
+        interval: 100
+        running: true
+        repeat: true
+        onTriggered: {
+            if (Vars.gameMode !== undefined && parent.gameMode !== Vars.gameMode) {
+                parent.gameMode = Vars.gameMode;
+            }
+        }
+    }
 
     HyprlandFocusGrab {
         active: root.expanded && root.focusWindow !== null
