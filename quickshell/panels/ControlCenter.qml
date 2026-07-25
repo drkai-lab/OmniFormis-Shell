@@ -112,8 +112,12 @@ Item {
         layer.enabled: true
         layer.samples: 4
         layer.effect: MultiEffect { shadowEnabled: !root.gameMode; shadowBlur: 1.0; shadowColor: Qt.rgba(0,0,0,0.25); shadowVerticalOffset: 4; shadowHorizontalOffset: 0 }
-        anchors.top: parent.top
-        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.top: (!Vars.pillPosition || Vars.pillPosition === "Top") ? parent.top : undefined
+        anchors.bottom: Vars.pillPosition === "Bottom" ? parent.bottom : undefined
+        anchors.left: Vars.pillPosition === "Left" ? parent.left : (root.gameMode ? parent.left : undefined)
+        anchors.right: Vars.pillPosition === "Right" ? parent.right : (root.gameMode ? parent.right : undefined)
+        anchors.horizontalCenter: (root.gameMode || Vars.pillPosition === "Left" || Vars.pillPosition === "Right") ? undefined : parent.horizontalCenter
+        anchors.verticalCenter: (Vars.pillPosition === "Left" || Vars.pillPosition === "Right") ? parent.verticalCenter : undefined
         
         property real targetHeight: {
             if (!root.expanded) return 40;
@@ -127,10 +131,11 @@ Item {
         height: targetHeight
         
         color: Vars.translucent ? Qt.rgba(Theme.surface.r, Theme.surface.g, Theme.surface.b, 0.85) : Theme.surface
-        topLeftRadius: root.gameMode || Vars.panelStyle === "Attached" || Vars.panelStyle === "Framed" ? 0 : (root.expanded ? Vars.radiusExtraLarge : height / 2)
-        topRightRadius: root.gameMode || Vars.panelStyle === "Attached" || Vars.panelStyle === "Framed" ? 0 : (root.expanded ? Vars.radiusExtraLarge : height / 2)
-        bottomLeftRadius: root.gameMode ? 0 : (root.expanded ? Vars.radiusExtraLarge : height / 2)
-        bottomRightRadius: root.gameMode ? 0 : (root.expanded ? Vars.radiusExtraLarge : height / 2)
+        property real targetRad: root.expanded ? Vars.radiusExtraLarge : height / 2
+        topLeftRadius: Vars.getTopLeftRadius(Vars.panelStyle, Vars.pillPosition, root.gameMode, targetRad)
+        topRightRadius: Vars.getTopRightRadius(Vars.panelStyle, Vars.pillPosition, root.gameMode, targetRad)
+        bottomLeftRadius: Vars.getBottomLeftRadius(Vars.panelStyle, Vars.pillPosition, root.gameMode, targetRad)
+        bottomRightRadius: Vars.getBottomRightRadius(Vars.panelStyle, Vars.pillPosition, root.gameMode, targetRad)
         
         opacity: root.expanded || panel.width > 105 ? 1.0 : 0.0
         visible: opacity > 0

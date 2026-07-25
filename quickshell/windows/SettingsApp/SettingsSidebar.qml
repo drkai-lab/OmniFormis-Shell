@@ -11,7 +11,7 @@ ColumnLayout {
     
     M3Shapes { id: m3Shapes }
     
-    property string currentSection: "wifi"
+    property string currentSection: "quick"
 
     property var wifiDevice: Networking.devices.values.find(d => d.type === DeviceType.Wifi)
     property var activeNet: wifiDevice ? wifiDevice.networks.values.find(n => n.connected) : null
@@ -45,15 +45,18 @@ ColumnLayout {
 
     Repeater {
         model: [
+            // Presets & Quick Settings
+            { id: "quick", name: "Quick & Presets", subtitle: "Presets, wallpaper, schemes", icon: "\ue41d", section: "Presets & Customization", isFirst: true, isLast: true, hue: 0.80, shape: "Sunny" },
+
             // Connections
             { id: "wifi", name: "Wi-Fi", subtitle: "Wi-Fi, ethernet", icon: rootSidebar.wifiIcon, section: "Connections", isFirst: true, isLast: false, hue: 0.60, shape: "Circle" },
-            { id: "bluetooth", name: "Bluetooth", subtitle: "Bluetooth, pairing", icon: rootSidebar.bluetoothIcon, section: "Connections", isFirst: false, isLast: true, hue: 0.65, shape: "Square" },
+            { id: "bluetooth", name: "Connected devices", subtitle: "Bluetooth, devices, pairing", icon: "\ue337", section: "Connections", isFirst: false, isLast: true, hue: 0.65, shape: "Square" },
             
             // General and Appearance
             { id: "General", name: "General", subtitle: "System config, spacing, layout", icon: "\ue8b8", section: "General and Appearance", isFirst: true, isLast: false, hue: 0.70, shape: "4SidedCookie" },
             { id: "Appearance", name: "Appearance", subtitle: "Theme, rounding, colors", icon: "\ue3b7", section: "General and Appearance", isFirst: false, isLast: false, hue: 0.85, shape: "Bun" },
             { id: "Input", name: "Input", subtitle: "Keyboard, mouse, gestures", icon: "\ue312", section: "General and Appearance", isFirst: false, isLast: false, hue: 0.95, shape: "Pill" },
-            { id: "bezier", name: "Motion", subtitle: "Custom curve editor", icon: "\ue922", section: "General and Appearance", isFirst: false, isLast: true, hue: 0.05, shape: "Oval" },
+            { id: "bezier", name: "Animation", subtitle: "Custom curve editor", icon: "\ue71c", section: "General and Appearance", isFirst: false, isLast: true, hue: 0.05, shape: "Oval" },
             
             // System
             { id: "taskmanager", name: "Task Manager", subtitle: "System resources, processes", icon: "\ue85c", section: "System", isFirst: true, isLast: false, hue: 0.12, shape: "6SidedCookie" },
@@ -139,12 +142,32 @@ ColumnLayout {
                             source: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><path d='" + m3Shapes.getPath(modelData.shape) + "' fill='" + parent.containerColor.toString() + "'/></svg>"
                         }
 
+                        // Outlined (Empty) Icon
                         Text {
                             anchors.centerIn: parent
                             text: modelData.icon
-                            font.family: parent.parent.parent.isSelected ? filledIconFont.name : "Material Symbols Outlined"
-                            font.pixelSize: 22
+                            font.family: "Material Symbols Outlined"
+                            font.pixelSize: 24
                             color: parent.onContainerColor
+                            opacity: parent.parent.parent.isSelected ? 0.0 : 1.0
+                            scale: parent.parent.parent.isSelected ? 0.8 : 1.0
+                            
+                            Behavior on opacity { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.InOutQuad } }
+                            Behavior on scale { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.OutBack } }
+                        }
+
+                        // Filled Icon
+                        Text {
+                            anchors.centerIn: parent
+                            text: modelData.icon
+                            font.family: filledIconFont.name
+                            font.pixelSize: 24
+                            color: parent.onContainerColor
+                            opacity: parent.parent.parent.isSelected ? 1.0 : 0.0
+                            scale: parent.parent.parent.isSelected ? 1.0 : 0.5
+                            
+                            Behavior on opacity { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.InOutQuad } }
+                            Behavior on scale { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.OutBack } }
                         }
                     }
                     ColumnLayout {

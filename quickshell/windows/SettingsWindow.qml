@@ -16,8 +16,8 @@ Item {
     FloatingWindow {
         id: floatingWindow
         visible: root.isActive
-        implicitWidth: 1100
-        implicitHeight: 750
+        implicitWidth: 1340
+        implicitHeight: 780
         color: "transparent"
         
         // When the floating window is closed by the WM, update expanded state

@@ -24,7 +24,7 @@ ColumnLayout {
         Layout.fillWidth: true
         spacing: 2
         Text {
-            text: "Bluetooth"
+            text: "Connected devices"
             font.family: Vars.fontFamily
             font.pixelSize: 16
             font.weight: 500

@@ -82,7 +82,7 @@ ColumnLayout {
         Layout.fillWidth: true
         spacing: 2
         Text {
-            text: "Motion Editor"
+            text: "Animation Editor"
             font.family: Vars.fontFamily
             font.pixelSize: 16
             font.weight: 500

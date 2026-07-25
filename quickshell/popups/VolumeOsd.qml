@@ -126,10 +126,10 @@ Item {
         anchors.centerIn: parent
         width: mainContainer.isVisible ? 352 : 132 // 320 + 32 and 100 + 32 padding
         height: 80 // 48 + 32 padding
-        topLeftRadius: mainContainer.gameMode || Vars.panelStyle === "Attached" || Vars.panelStyle === "Framed" ? 0 : Vars.radiusLarge
-        topRightRadius: mainContainer.gameMode || Vars.panelStyle === "Attached" || Vars.panelStyle === "Framed" ? 0 : Vars.radiusLarge
-        bottomLeftRadius: mainContainer.gameMode ? 0 : Vars.radiusLarge
-        bottomRightRadius: mainContainer.gameMode ? 0 : Vars.radiusLarge
+        topLeftRadius: Vars.getTopLeftRadius(Vars.panelStyle, Vars.pillPosition, mainContainer.gameMode, Vars.radiusLarge)
+        topRightRadius: Vars.getTopRightRadius(Vars.panelStyle, Vars.pillPosition, mainContainer.gameMode, Vars.radiusLarge)
+        bottomLeftRadius: Vars.getBottomLeftRadius(Vars.panelStyle, Vars.pillPosition, mainContainer.gameMode, Vars.radiusLarge)
+        bottomRightRadius: Vars.getBottomRightRadius(Vars.panelStyle, Vars.pillPosition, mainContainer.gameMode, Vars.radiusLarge)
         color: Theme.surface
         
         layer.enabled: true

@@ -95,10 +95,10 @@ Item {
         }
         anchors.fill: parent
         color: Vars.translucent ? Qt.rgba(Theme.surface.r, Theme.surface.g, Theme.surface.b, 0.85) : Theme.surface
-        topLeftRadius: mainContainer.gameMode || Vars.panelStyle === "Attached" || Vars.panelStyle === "Framed" ? 0 : height / 2
-        topRightRadius: mainContainer.gameMode || Vars.panelStyle === "Attached" || Vars.panelStyle === "Framed" ? 0 : height / 2
-        bottomLeftRadius: mainContainer.gameMode ? 0 : height / 2
-        bottomRightRadius: mainContainer.gameMode ? 0 : height / 2
+        topLeftRadius: Vars.getTopLeftRadius(Vars.panelStyle, Vars.pillPosition, mainContainer.gameMode, height / 2)
+        topRightRadius: Vars.getTopRightRadius(Vars.panelStyle, Vars.pillPosition, mainContainer.gameMode, height / 2)
+        bottomLeftRadius: Vars.getBottomLeftRadius(Vars.panelStyle, Vars.pillPosition, mainContainer.gameMode, height / 2)
+        bottomRightRadius: Vars.getBottomRightRadius(Vars.panelStyle, Vars.pillPosition, mainContainer.gameMode, height / 2)
 
         opacity: (overlayVisible && !mainContainer.forceHidePill) ? (Vars.translucent ? 0.85 : 1.0) : 0.0
         visible: opacity > 0

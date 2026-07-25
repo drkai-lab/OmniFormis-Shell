@@ -38,7 +38,8 @@ Item {
     property bool isFloatingInstance: false
     signal detachToggled(bool isFloating)
     
-    property string currentSection: "wifi"
+    property string currentSection: "quick"
+    signal openWallpaperSwitcherRequested()
     
     // Wi-Fi
     property var wifiDevice: Networking.devices.values.find(d => d.type === DeviceType.Wifi)
@@ -84,17 +85,22 @@ Item {
         id: panel
         layer.enabled: true
         layer.effect: MultiEffect { shadowEnabled: !root.gameMode; shadowBlur: 1.0; shadowColor: Qt.rgba(0,0,0,0.25); shadowVerticalOffset: 4; shadowHorizontalOffset: 0 }
-        anchors.top: parent.top
-        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.top: (!Vars.pillPosition || Vars.pillPosition === "Top" || root.isFloatingInstance) ? parent.top : undefined
+        anchors.bottom: (!root.isFloatingInstance && Vars.pillPosition === "Bottom") ? parent.bottom : undefined
+        anchors.left: (!root.isFloatingInstance && Vars.pillPosition === "Left") ? parent.left : ((root.gameMode && !root.isFloatingInstance) ? parent.left : undefined)
+        anchors.right: (!root.isFloatingInstance && Vars.pillPosition === "Right") ? parent.right : ((root.gameMode && !root.isFloatingInstance) ? parent.right : undefined)
+        anchors.horizontalCenter: ((root.gameMode && !root.isFloatingInstance) || (!root.isFloatingInstance && (Vars.pillPosition === "Left" || Vars.pillPosition === "Right"))) ? undefined : parent.horizontalCenter
+        anchors.verticalCenter: (!root.isFloatingInstance && (Vars.pillPosition === "Left" || Vars.pillPosition === "Right")) ? parent.verticalCenter : undefined
         
-        width: root.expanded ? (root.isFloatingInstance ? root.width : 1100) : 100
-        height: root.expanded ? (root.isFloatingInstance ? root.height : 650) : 40
+        width: root.expanded ? (root.isFloatingInstance ? root.width : 1320) : 100
+        height: root.expanded ? (root.isFloatingInstance ? root.height : 740) : 40
         
         color: Vars.translucent ? Qt.rgba(Theme.surface_container_low.r, Theme.surface_container_low.g, Theme.surface_container_low.b, 0.85) : Theme.surface_container_low
-        topLeftRadius: root.gameMode || Vars.panelStyle === "Attached" || Vars.panelStyle === "Framed" ? 0 : (root.expanded ? Vars.radiusExtraLarge : height / 2)
-        topRightRadius: root.gameMode || Vars.panelStyle === "Attached" || Vars.panelStyle === "Framed" ? 0 : (root.expanded ? Vars.radiusExtraLarge : height / 2)
-        bottomLeftRadius: root.gameMode || Vars.panelStyle === "Flat" ? 0 : (root.expanded ? Vars.radiusExtraLarge : height / 2)
-        bottomRightRadius: root.gameMode || Vars.panelStyle === "Flat" ? 0 : (root.expanded ? Vars.radiusExtraLarge : height / 2)
+        property real targetRad: root.expanded ? Vars.radiusExtraLarge : height / 2
+        topLeftRadius: root.isFloatingInstance ? Vars.radiusExtraLarge : Vars.getTopLeftRadius(Vars.panelStyle, Vars.pillPosition, root.gameMode, targetRad)
+        topRightRadius: root.isFloatingInstance ? Vars.radiusExtraLarge : Vars.getTopRightRadius(Vars.panelStyle, Vars.pillPosition, root.gameMode, targetRad)
+        bottomLeftRadius: root.isFloatingInstance ? Vars.radiusExtraLarge : Vars.getBottomLeftRadius(Vars.panelStyle, Vars.pillPosition, root.gameMode, targetRad)
+        bottomRightRadius: root.isFloatingInstance ? Vars.radiusExtraLarge : Vars.getBottomRightRadius(Vars.panelStyle, Vars.pillPosition, root.gameMode, targetRad)
         
         opacity: root.expanded || panel.width > 105 ? 1.0 : 0.0
         visible: opacity > 0
@@ -199,15 +205,26 @@ Item {
                     Layout.fillWidth: true
                     Layout.fillHeight: true
                     currentIndex: {
-                        if (root.currentSection === "bezier") return 1;
-                        if (root.currentSection === "wifi") return 2;
-                        if (root.currentSection === "bluetooth") return 3;
-                        if (root.currentSection === "about") return 4;
-                        if (root.currentSection === "taskmanager") return 5;
-                        return 0; // "General", "Appearance", "Input" map to UnifiedSettingsPage
+                        if (root.currentSection === "quick") return 0;
+                        if (root.currentSection === "bezier") return 2;
+                        if (root.currentSection === "wifi") return 3;
+                        if (root.currentSection === "bluetooth") return 4;
+                        if (root.currentSection === "about") return 5;
+                        if (root.currentSection === "taskmanager") return 6;
+                        return 1; // "General", "Appearance", "Input" map to UnifiedSettingsPage
                     }
 
-                    // 0: Unified Settings (Hyprland + Quickshell)
+                    // 0: Quick Page & Presets
+                    QuickPage {
+                        id: quickPage
+                        Layout.fillWidth: true
+                        Layout.fillHeight: true
+                        onOpenWallpaperSwitcher: {
+                            root.openWallpaperSwitcherRequested();
+                        }
+                    }
+
+                    // 1: Unified Settings (Hyprland + Quickshell)
                     UnifiedSettingsPage {
                         id: unifiedPage
                         activeCategory: root.currentSection === "bezier" || root.currentSection === "wifi" || root.currentSection === "bluetooth" ? "General" : root.currentSection

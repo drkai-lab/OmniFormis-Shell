@@ -115,7 +115,7 @@ local vars = {
 
     -- Groupbar
     -- Enable group bar
-    groupBar = false,
+    groupBar = true,
 
     -- General
     -- Enable resize on border
@@ -149,7 +149,7 @@ local vars = {
 
     -- Animation Style
     -- Select animation style for hyprland ("expressive", "spring", "jelly", "flyingcards", "snappy", "cinematic", "minimal", "fluid", "aggressive", "elegant", "playful", "elastic", "swift", "relaxed", "slipstream", "standard", "fluent", "custom", "none")
-    AnimateStyle = "slipstream",
+    AnimateStyle = "flyingcards",
     
     -- --- Custom Animation Profile ---
     

@@ -43,18 +43,18 @@ Item {
         width: parent.width
         height: parent.height
         color: Vars.translucent ? Qt.rgba(Theme.surface.r, Theme.surface.g, Theme.surface.b, 0.85) : Theme.surface
-        topLeftRadius: root.gameMode || Vars.panelStyle === "Attached" || Vars.panelStyle === "Framed" ? 0 : height / 2
-        topRightRadius: root.gameMode || Vars.panelStyle === "Attached" || Vars.panelStyle === "Framed" ? 0 : height / 2
-        bottomLeftRadius: root.gameMode ? 0 : height / 2
-        bottomRightRadius: root.gameMode ? 0 : height / 2
+        topLeftRadius: Vars.getTopLeftRadius(Vars.panelStyle, Vars.pillPosition, root.gameMode, height / 2)
+        topRightRadius: Vars.getTopRightRadius(Vars.panelStyle, Vars.pillPosition, root.gameMode, height / 2)
+        bottomLeftRadius: Vars.getBottomLeftRadius(Vars.panelStyle, Vars.pillPosition, root.gameMode, height / 2)
+        bottomRightRadius: Vars.getBottomRightRadius(Vars.panelStyle, Vars.pillPosition, root.gameMode, height / 2)
         z: 1
 
         Rectangle {
             anchors.fill: parent
-            topLeftRadius: root.gameMode || Vars.panelStyle === "Attached" || Vars.panelStyle === "Framed" ? 0 : height / 2
-            topRightRadius: root.gameMode || Vars.panelStyle === "Attached" || Vars.panelStyle === "Framed" ? 0 : height / 2
-            bottomLeftRadius: root.gameMode ? 0 : height / 2
-            bottomRightRadius: root.gameMode ? 0 : height / 2
+            topLeftRadius: clockRect.topLeftRadius
+            topRightRadius: clockRect.topRightRadius
+            bottomLeftRadius: clockRect.bottomLeftRadius
+            bottomRightRadius: clockRect.bottomRightRadius
             color: dragArea.pressed ? Qt.rgba(Theme.surface.r, Theme.surface.g, Theme.surface.b, 0.12) : (dragArea.containsMouse ? Qt.rgba(Theme.surface.r, Theme.surface.g, Theme.surface.b, 0.08) : "transparent")
             Behavior on color {
                 enabled: !root.gameMode

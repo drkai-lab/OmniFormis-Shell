@@ -1,7 +1,7 @@
 .pragma library
 var animationDuration = 200;
-var translucent = true;
-var blurAmount = 4;
+var translucent = false;
+var blurAmount = 42;
 
 var overviewGridRows = 2;
 var overviewGridColumns = 5;
@@ -22,16 +22,17 @@ var paddingMedium = 15
 var paddingLarge = 24
 
 var wallpaperMaskEnabled = true;
-var wallpaperMaskScale = 1.1;
-var wallpaperMaskShape = "Triangle";
+var wallpaperMaskScale = 1.05;
+var wallpaperMaskShape = "4SidedCookie";
 var wallpaperMaskColor = "surface_variant";
-var wallpaperMaskOffsetX = 17;
-var wallpaperMaskOffsetY = 12;
+var wallpaperMaskOffsetX = 0;
+var wallpaperMaskOffsetY = 0;
 var clockShape = "4SidedCookie";
 var clockShowTicks = false;
-var clockShowCenterDot = false;
-var panelStyle = "Framed";
-var mediaPlayerShape = "PuffyDiamond";
+var clockShowCenterDot = true;
+var panelStyle = "Floating";
+var pillPosition = "Top";
+var mediaPlayerShape = "Pill";
 var mediaPlayerArtScale = 1;
 var gameMode = false;
 
@@ -148,4 +149,28 @@ function clearNotifications() {
     }
     notificationHistory = [];
     historyUpdated++;
+}
+
+function getTopLeftRadius(style, pos, gm, r) {
+    if (gm || style === "Flat") return 0;
+    if ((style === "Attached" || style === "Framed") && (!pos || pos === "Top" || pos === "Left")) return 0;
+    return r;
+}
+
+function getTopRightRadius(style, pos, gm, r) {
+    if (gm || style === "Flat") return 0;
+    if ((style === "Attached" || style === "Framed") && (!pos || pos === "Top" || pos === "Right")) return 0;
+    return r;
+}
+
+function getBottomLeftRadius(style, pos, gm, r) {
+    if (gm || style === "Flat") return 0;
+    if ((style === "Attached" || style === "Framed") && (pos === "Bottom" || pos === "Left")) return 0;
+    return r;
+}
+
+function getBottomRightRadius(style, pos, gm, r) {
+    if (gm || style === "Flat") return 0;
+    if ((style === "Attached" || style === "Framed") && (pos === "Bottom" || pos === "Right")) return 0;
+    return r;
 }

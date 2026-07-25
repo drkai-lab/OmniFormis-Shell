@@ -1,4 +1,5 @@
 module SettingsApp
+QuickPage 1.0 QuickPage.qml
 SettingsSidebar 1.0 SettingsSidebar.qml
 WifiPage 1.0 wifi/WifiPage.qml
 BluetoothPage 1.0 bluetooth/BluetoothPage.qml

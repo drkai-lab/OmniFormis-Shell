@@ -19,10 +19,14 @@ PanelWindow {
         top: true
         left: true
         right: true
+        bottom: true
     }
 
     implicitHeight: 750
     color: "transparent"
+
+    property string pillPos: Vars.pillPosition || "Top"
+    property int defaultEdgeMargin: (gameMode || Vars.panelStyle === "Attached" || Vars.panelStyle === "Flat") ? 0 : currentSpacingSmall
 
 
     signal popupOpened
@@ -130,10 +134,14 @@ PanelWindow {
 
     Item {
         id: clockHoverZone
-        anchors.top: parent.top
-        anchors.horizontalCenter: parent.horizontalCenter
-        width: 160
-        height: 60
+        anchors.top: topWindow.pillPos === "Bottom" || topWindow.pillPos === "Right" || topWindow.pillPos === "Left" ? undefined : parent.top
+        anchors.bottom: topWindow.pillPos === "Bottom" ? parent.bottom : undefined
+        anchors.left: topWindow.pillPos === "Left" ? parent.left : undefined
+        anchors.right: topWindow.pillPos === "Right" ? parent.right : undefined
+        anchors.horizontalCenter: (topWindow.pillPos === "Left" || topWindow.pillPos === "Right") ? undefined : parent.horizontalCenter
+        anchors.verticalCenter: (topWindow.pillPos === "Left" || topWindow.pillPos === "Right") ? parent.verticalCenter : undefined
+        width: (topWindow.pillPos === "Left" || topWindow.pillPos === "Right") ? 60 : 160
+        height: (topWindow.pillPos === "Left" || topWindow.pillPos === "Right") ? 160 : 60
         MouseArea {
             id: clockHoverArea
             anchors.fill: parent
@@ -177,29 +185,32 @@ PanelWindow {
     ClockPill {
         id: clockPill
         gameMode: topWindow.gameMode
-        anchors.top: parent.top
-        anchors.horizontalCenter: topWindow.gameMode ? undefined : parent.horizontalCenter
-        anchors.left: topWindow.gameMode ? parent.left : undefined
-        anchors.right: topWindow.gameMode ? parent.right : undefined
+        anchors.top: topWindow.pillPos === "Bottom" || topWindow.pillPos === "Right" || topWindow.pillPos === "Left" ? undefined : parent.top
+        anchors.bottom: topWindow.pillPos === "Bottom" ? parent.bottom : undefined
+        anchors.left: topWindow.pillPos === "Left" ? parent.left : (topWindow.gameMode ? parent.left : undefined)
+        anchors.right: topWindow.pillPos === "Right" ? parent.right : (topWindow.gameMode ? parent.right : undefined)
+        anchors.horizontalCenter: (topWindow.gameMode || topWindow.pillPos === "Left" || topWindow.pillPos === "Right") ? undefined : parent.horizontalCenter
+        anchors.verticalCenter: (topWindow.pillPos === "Left" || topWindow.pillPos === "Right") ? parent.verticalCenter : undefined
         
         property bool isShown: ((clockHoverArea.containsMouse || clockPill.isHovered) && !(launcherItem.expanded || controlCenterItem.expanded || wallpaperSwitcherItem.expanded || colorSchemeSwitcherItem.expanded || powerMenuItem.expanded || polkitItem.expanded || notificationPopupItem.expanded || emojiPickerItem.expanded || settingsAppItem.expanded || volumeOsdItem.isVisible || workspacesItem.overlayVisible) && !topWindow.gameMode)
         
-        anchors.topMargin: {
+        property real targetMargin: {
             if (topWindow.gameMode) return 0;
             if (!isShown) return -clockPill.height - 20;
             return (Vars.panelStyle === "Attached" || Vars.panelStyle === "Flat") ? 0 : currentSpacingSmall;
         }
         
+        anchors.topMargin: (topWindow.pillPos === "Bottom" || topWindow.pillPos === "Right" || topWindow.pillPos === "Left") ? 0 : targetMargin
+        anchors.bottomMargin: topWindow.pillPos === "Bottom" ? targetMargin : 0
+        anchors.leftMargin: topWindow.pillPos === "Left" ? targetMargin : 0
+        anchors.rightMargin: topWindow.pillPos === "Right" ? targetMargin : 0
+        
         opacity: isShown ? 1.0 : 0.0
         
-        Behavior on anchors.topMargin {
-            enabled: !topWindow.gameMode
-            NumberAnimation {
-                duration: currentAnimationDuration
-                easing.type: Easing.BezierSpline
-                easing.bezierCurve: Vars.customExpressiveSpatialSlow
-            }
-        }
+        Behavior on anchors.topMargin { enabled: !topWindow.gameMode; NumberAnimation { duration: currentAnimationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customExpressiveSpatialSlow } }
+        Behavior on anchors.bottomMargin { enabled: !topWindow.gameMode; NumberAnimation { duration: currentAnimationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customExpressiveSpatialSlow } }
+        Behavior on anchors.leftMargin { enabled: !topWindow.gameMode; NumberAnimation { duration: currentAnimationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customExpressiveSpatialSlow } }
+        Behavior on anchors.rightMargin { enabled: !topWindow.gameMode; NumberAnimation { duration: currentAnimationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customExpressiveSpatialSlow } }
 
         Behavior on opacity {
             enabled: !topWindow.gameMode
@@ -226,18 +237,32 @@ PanelWindow {
     HyprWorkspaces {
         id: workspacesItem
         gameMode: topWindow.gameMode
-        anchors.top: parent.top
-        anchors.horizontalCenter: parent.horizontalCenter
-        anchors.topMargin: topWindow.gameMode || Vars.panelStyle === "Attached" || Vars.panelStyle === "Flat" ? 0 : currentSpacingSmall
+        anchors.top: topWindow.pillPos === "Bottom" || topWindow.pillPos === "Right" || topWindow.pillPos === "Left" ? undefined : parent.top
+        anchors.bottom: topWindow.pillPos === "Bottom" ? parent.bottom : undefined
+        anchors.left: topWindow.pillPos === "Left" ? parent.left : undefined
+        anchors.right: topWindow.pillPos === "Right" ? parent.right : undefined
+        anchors.horizontalCenter: (topWindow.pillPos === "Left" || topWindow.pillPos === "Right") ? undefined : parent.horizontalCenter
+        anchors.verticalCenter: (topWindow.pillPos === "Left" || topWindow.pillPos === "Right") ? parent.verticalCenter : undefined
+        anchors.topMargin: topWindow.pillPos === "Bottom" || topWindow.pillPos === "Right" || topWindow.pillPos === "Left" ? 0 : topWindow.defaultEdgeMargin
+        anchors.bottomMargin: topWindow.pillPos === "Bottom" ? topWindow.defaultEdgeMargin : 0
+        anchors.leftMargin: topWindow.pillPos === "Left" ? topWindow.defaultEdgeMargin : 0
+        anchors.rightMargin: topWindow.pillPos === "Right" ? topWindow.defaultEdgeMargin : 0
         forceHidePill: launcherItem.expanded || controlCenterItem.expanded || wallpaperSwitcherItem.expanded || colorSchemeSwitcherItem.expanded || powerMenuItem.expanded || polkitItem.expanded || notificationPopupItem.expanded || emojiPickerItem.expanded || settingsAppItem.expanded || volumeOsdItem.isVisible
     }
 
     Launcher {
         id: launcherItem
         gameMode: topWindow.gameMode
-        anchors.top: parent.top
-        anchors.horizontalCenter: parent.horizontalCenter
-        anchors.topMargin: topWindow.gameMode || Vars.panelStyle === "Attached" || Vars.panelStyle === "Flat" ? 0 : currentSpacingSmall
+        anchors.top: topWindow.pillPos === "Bottom" || topWindow.pillPos === "Right" || topWindow.pillPos === "Left" ? undefined : parent.top
+        anchors.bottom: topWindow.pillPos === "Bottom" ? parent.bottom : undefined
+        anchors.left: topWindow.pillPos === "Left" ? parent.left : undefined
+        anchors.right: topWindow.pillPos === "Right" ? parent.right : undefined
+        anchors.horizontalCenter: (topWindow.pillPos === "Left" || topWindow.pillPos === "Right") ? undefined : parent.horizontalCenter
+        anchors.verticalCenter: (topWindow.pillPos === "Left" || topWindow.pillPos === "Right") ? parent.verticalCenter : undefined
+        anchors.topMargin: topWindow.pillPos === "Bottom" || topWindow.pillPos === "Right" || topWindow.pillPos === "Left" ? 0 : topWindow.defaultEdgeMargin
+        anchors.bottomMargin: topWindow.pillPos === "Bottom" ? topWindow.defaultEdgeMargin : 0
+        anchors.leftMargin: topWindow.pillPos === "Left" ? topWindow.defaultEdgeMargin : 0
+        anchors.rightMargin: topWindow.pillPos === "Right" ? topWindow.defaultEdgeMargin : 0
         width: 100
         height: 40
         focusWindow: topWindow
@@ -391,9 +416,16 @@ PanelWindow {
     PowerMenu {
         id: powerMenuItem
         gameMode: topWindow.gameMode
-        anchors.top: parent.top
-        anchors.horizontalCenter: parent.horizontalCenter
-        anchors.topMargin: topWindow.gameMode || Vars.panelStyle === "Attached" || Vars.panelStyle === "Flat" ? 0 : currentSpacingSmall
+        anchors.top: topWindow.pillPos === "Bottom" || topWindow.pillPos === "Right" || topWindow.pillPos === "Left" ? undefined : parent.top
+        anchors.bottom: topWindow.pillPos === "Bottom" ? parent.bottom : undefined
+        anchors.left: topWindow.pillPos === "Left" ? parent.left : undefined
+        anchors.right: topWindow.pillPos === "Right" ? parent.right : undefined
+        anchors.horizontalCenter: (topWindow.pillPos === "Left" || topWindow.pillPos === "Right") ? undefined : parent.horizontalCenter
+        anchors.verticalCenter: (topWindow.pillPos === "Left" || topWindow.pillPos === "Right") ? parent.verticalCenter : undefined
+        anchors.topMargin: topWindow.pillPos === "Bottom" || topWindow.pillPos === "Right" || topWindow.pillPos === "Left" ? 0 : topWindow.defaultEdgeMargin
+        anchors.bottomMargin: topWindow.pillPos === "Bottom" ? topWindow.defaultEdgeMargin : 0
+        anchors.leftMargin: topWindow.pillPos === "Left" ? topWindow.defaultEdgeMargin : 0
+        anchors.rightMargin: topWindow.pillPos === "Right" ? topWindow.defaultEdgeMargin : 0
         width: 100
         height: 40
         focusWindow: topWindow
@@ -414,9 +446,16 @@ PanelWindow {
     PolkitDialog {
         id: polkitItem
         gameMode: topWindow.gameMode
-        anchors.top: parent.top
-        anchors.horizontalCenter: parent.horizontalCenter
-        anchors.topMargin: topWindow.gameMode || Vars.panelStyle === "Attached" || Vars.panelStyle === "Flat" ? 0 : currentSpacingSmall
+        anchors.top: topWindow.pillPos === "Bottom" || topWindow.pillPos === "Right" || topWindow.pillPos === "Left" ? undefined : parent.top
+        anchors.bottom: topWindow.pillPos === "Bottom" ? parent.bottom : undefined
+        anchors.left: topWindow.pillPos === "Left" ? parent.left : undefined
+        anchors.right: topWindow.pillPos === "Right" ? parent.right : undefined
+        anchors.horizontalCenter: (topWindow.pillPos === "Left" || topWindow.pillPos === "Right") ? undefined : parent.horizontalCenter
+        anchors.verticalCenter: (topWindow.pillPos === "Left" || topWindow.pillPos === "Right") ? parent.verticalCenter : undefined
+        anchors.topMargin: topWindow.pillPos === "Bottom" || topWindow.pillPos === "Right" || topWindow.pillPos === "Left" ? 0 : topWindow.defaultEdgeMargin
+        anchors.bottomMargin: topWindow.pillPos === "Bottom" ? topWindow.defaultEdgeMargin : 0
+        anchors.leftMargin: topWindow.pillPos === "Left" ? topWindow.defaultEdgeMargin : 0
+        anchors.rightMargin: topWindow.pillPos === "Right" ? topWindow.defaultEdgeMargin : 0
         width: 100
         height: 40
         focusWindow: topWindow
@@ -438,9 +477,16 @@ PanelWindow {
     NotificationPopup {
         id: notificationPopupItem
         gameMode: topWindow.gameMode
-        anchors.top: parent.top
-        anchors.horizontalCenter: parent.horizontalCenter
-        anchors.topMargin: topWindow.gameMode || Vars.panelStyle === "Attached" || Vars.panelStyle === "Flat" ? 0 : currentSpacingSmall
+        anchors.top: topWindow.pillPos === "Bottom" || topWindow.pillPos === "Right" || topWindow.pillPos === "Left" ? undefined : parent.top
+        anchors.bottom: topWindow.pillPos === "Bottom" ? parent.bottom : undefined
+        anchors.left: topWindow.pillPos === "Left" ? parent.left : undefined
+        anchors.right: topWindow.pillPos === "Right" ? parent.right : undefined
+        anchors.horizontalCenter: (topWindow.pillPos === "Left" || topWindow.pillPos === "Right") ? undefined : parent.horizontalCenter
+        anchors.verticalCenter: (topWindow.pillPos === "Left" || topWindow.pillPos === "Right") ? parent.verticalCenter : undefined
+        anchors.topMargin: topWindow.pillPos === "Bottom" || topWindow.pillPos === "Right" || topWindow.pillPos === "Left" ? 0 : topWindow.defaultEdgeMargin
+        anchors.bottomMargin: topWindow.pillPos === "Bottom" ? topWindow.defaultEdgeMargin : 0
+        anchors.leftMargin: topWindow.pillPos === "Left" ? topWindow.defaultEdgeMargin : 0
+        anchors.rightMargin: topWindow.pillPos === "Right" ? topWindow.defaultEdgeMargin : 0
         width: 100
         height: 40
         focusWindow: topWindow
@@ -462,9 +508,16 @@ PanelWindow {
     ControlCenter {
         id: controlCenterItem
         gameMode: topWindow.gameMode
-        anchors.top: parent.top
-        anchors.horizontalCenter: parent.horizontalCenter
-        anchors.topMargin: topWindow.gameMode || Vars.panelStyle === "Attached" || Vars.panelStyle === "Flat" ? 0 : currentSpacingSmall
+        anchors.top: topWindow.pillPos === "Bottom" || topWindow.pillPos === "Right" || topWindow.pillPos === "Left" ? undefined : parent.top
+        anchors.bottom: topWindow.pillPos === "Bottom" ? parent.bottom : undefined
+        anchors.left: topWindow.pillPos === "Left" ? parent.left : undefined
+        anchors.right: topWindow.pillPos === "Right" ? parent.right : undefined
+        anchors.horizontalCenter: (topWindow.pillPos === "Left" || topWindow.pillPos === "Right") ? undefined : parent.horizontalCenter
+        anchors.verticalCenter: (topWindow.pillPos === "Left" || topWindow.pillPos === "Right") ? parent.verticalCenter : undefined
+        anchors.topMargin: topWindow.pillPos === "Bottom" || topWindow.pillPos === "Right" || topWindow.pillPos === "Left" ? 0 : topWindow.defaultEdgeMargin
+        anchors.bottomMargin: topWindow.pillPos === "Bottom" ? topWindow.defaultEdgeMargin : 0
+        anchors.leftMargin: topWindow.pillPos === "Left" ? topWindow.defaultEdgeMargin : 0
+        anchors.rightMargin: topWindow.pillPos === "Right" ? topWindow.defaultEdgeMargin : 0
         width: 100
         height: 40
         focusWindow: topWindow
@@ -506,18 +559,32 @@ PanelWindow {
     VolumeOsd {
         id: volumeOsdItem
         gameMode: topWindow.gameMode
-        anchors.top: parent.top
-        anchors.horizontalCenter: parent.horizontalCenter
-        anchors.topMargin: topWindow.gameMode ? 55 : (Vars.panelStyle === "Attached" || Vars.panelStyle === "Flat" ? 0 : currentSpacingSmall)
+        anchors.top: topWindow.pillPos === "Bottom" || topWindow.pillPos === "Right" || topWindow.pillPos === "Left" ? undefined : parent.top
+        anchors.bottom: topWindow.pillPos === "Bottom" ? parent.bottom : undefined
+        anchors.left: topWindow.pillPos === "Left" ? parent.left : undefined
+        anchors.right: topWindow.pillPos === "Right" ? parent.right : undefined
+        anchors.horizontalCenter: (topWindow.pillPos === "Left" || topWindow.pillPos === "Right") ? undefined : parent.horizontalCenter
+        anchors.verticalCenter: (topWindow.pillPos === "Left" || topWindow.pillPos === "Right") ? parent.verticalCenter : undefined
+        anchors.topMargin: topWindow.pillPos === "Bottom" || topWindow.pillPos === "Right" || topWindow.pillPos === "Left" ? 0 : (topWindow.gameMode ? 55 : topWindow.defaultEdgeMargin)
+        anchors.bottomMargin: topWindow.pillPos === "Bottom" ? (topWindow.gameMode ? 55 : topWindow.defaultEdgeMargin) : 0
+        anchors.leftMargin: topWindow.pillPos === "Left" ? (topWindow.gameMode ? 55 : topWindow.defaultEdgeMargin) : 0
+        anchors.rightMargin: topWindow.pillPos === "Right" ? (topWindow.gameMode ? 55 : topWindow.defaultEdgeMargin) : 0
         preventShow: launcherItem.expanded || controlCenterItem.expanded || wallpaperSwitcherItem.expanded || colorSchemeSwitcherItem.expanded || powerMenuItem.expanded || polkitItem.expanded || notificationPopupItem.expanded || emojiPickerItem.expanded || settingsAppItem.expanded || launcherItem.panel.width > 105 || controlCenterItem.panel.width > 105 || powerMenuItem.panel.width > 105 || polkitItem.panel.width > 105 || notificationPopupItem.panel.width > 105 || emojiPickerItem.panel.width > 105 || wallpaperSwitcherItem.panel.width > 105 || colorSchemeSwitcherItem.panel.width > 105 || settingsAppItem.panel.width > 105
     }
 
     WallpaperSwitcher {
         id: wallpaperSwitcherItem
         gameMode: topWindow.gameMode
-        anchors.top: parent.top
-        anchors.horizontalCenter: parent.horizontalCenter
-        anchors.topMargin: topWindow.gameMode || Vars.panelStyle === "Attached" || Vars.panelStyle === "Flat" ? 0 : currentSpacingSmall
+        anchors.top: topWindow.pillPos === "Bottom" || topWindow.pillPos === "Right" || topWindow.pillPos === "Left" ? undefined : parent.top
+        anchors.bottom: topWindow.pillPos === "Bottom" ? parent.bottom : undefined
+        anchors.left: topWindow.pillPos === "Left" ? parent.left : undefined
+        anchors.right: topWindow.pillPos === "Right" ? parent.right : undefined
+        anchors.horizontalCenter: (topWindow.pillPos === "Left" || topWindow.pillPos === "Right") ? undefined : parent.horizontalCenter
+        anchors.verticalCenter: (topWindow.pillPos === "Left" || topWindow.pillPos === "Right") ? parent.verticalCenter : undefined
+        anchors.topMargin: topWindow.pillPos === "Bottom" || topWindow.pillPos === "Right" || topWindow.pillPos === "Left" ? 0 : topWindow.defaultEdgeMargin
+        anchors.bottomMargin: topWindow.pillPos === "Bottom" ? topWindow.defaultEdgeMargin : 0
+        anchors.leftMargin: topWindow.pillPos === "Left" ? topWindow.defaultEdgeMargin : 0
+        anchors.rightMargin: topWindow.pillPos === "Right" ? topWindow.defaultEdgeMargin : 0
         focusWindow: topWindow
         forceHidePill: launcherItem.expanded || controlCenterItem.expanded || colorSchemeSwitcherItem.expanded || powerMenuItem.expanded || polkitItem.expanded || notificationPopupItem.expanded || emojiPickerItem.expanded || settingsAppItem.expanded || volumeOsdItem.isVisible
 
@@ -538,9 +605,16 @@ PanelWindow {
     EmojiPicker {
         id: emojiPickerItem
         gameMode: topWindow.gameMode
-        anchors.top: parent.top
-        anchors.horizontalCenter: parent.horizontalCenter
-        anchors.topMargin: topWindow.gameMode || Vars.panelStyle === "Attached" || Vars.panelStyle === "Flat" ? 0 : currentSpacingSmall
+        anchors.top: topWindow.pillPos === "Bottom" || topWindow.pillPos === "Right" || topWindow.pillPos === "Left" ? undefined : parent.top
+        anchors.bottom: topWindow.pillPos === "Bottom" ? parent.bottom : undefined
+        anchors.left: topWindow.pillPos === "Left" ? parent.left : undefined
+        anchors.right: topWindow.pillPos === "Right" ? parent.right : undefined
+        anchors.horizontalCenter: (topWindow.pillPos === "Left" || topWindow.pillPos === "Right") ? undefined : parent.horizontalCenter
+        anchors.verticalCenter: (topWindow.pillPos === "Left" || topWindow.pillPos === "Right") ? parent.verticalCenter : undefined
+        anchors.topMargin: topWindow.pillPos === "Bottom" || topWindow.pillPos === "Right" || topWindow.pillPos === "Left" ? 0 : topWindow.defaultEdgeMargin
+        anchors.bottomMargin: topWindow.pillPos === "Bottom" ? topWindow.defaultEdgeMargin : 0
+        anchors.leftMargin: topWindow.pillPos === "Left" ? topWindow.defaultEdgeMargin : 0
+        anchors.rightMargin: topWindow.pillPos === "Right" ? topWindow.defaultEdgeMargin : 0
         width: 100
         height: 40
         focusWindow: topWindow
@@ -561,9 +635,16 @@ PanelWindow {
     ColorSchemeSwitcher {
         id: colorSchemeSwitcherItem
         gameMode: topWindow.gameMode
-        anchors.top: parent.top
-        anchors.horizontalCenter: parent.horizontalCenter
-        anchors.topMargin: topWindow.gameMode || Vars.panelStyle === "Attached" || Vars.panelStyle === "Flat" ? 0 : currentSpacingSmall
+        anchors.top: topWindow.pillPos === "Bottom" || topWindow.pillPos === "Right" || topWindow.pillPos === "Left" ? undefined : parent.top
+        anchors.bottom: topWindow.pillPos === "Bottom" ? parent.bottom : undefined
+        anchors.left: topWindow.pillPos === "Left" ? parent.left : undefined
+        anchors.right: topWindow.pillPos === "Right" ? parent.right : undefined
+        anchors.horizontalCenter: (topWindow.pillPos === "Left" || topWindow.pillPos === "Right") ? undefined : parent.horizontalCenter
+        anchors.verticalCenter: (topWindow.pillPos === "Left" || topWindow.pillPos === "Right") ? parent.verticalCenter : undefined
+        anchors.topMargin: topWindow.pillPos === "Bottom" || topWindow.pillPos === "Right" || topWindow.pillPos === "Left" ? 0 : topWindow.defaultEdgeMargin
+        anchors.bottomMargin: topWindow.pillPos === "Bottom" ? topWindow.defaultEdgeMargin : 0
+        anchors.leftMargin: topWindow.pillPos === "Left" ? topWindow.defaultEdgeMargin : 0
+        anchors.rightMargin: topWindow.pillPos === "Right" ? topWindow.defaultEdgeMargin : 0
         focusWindow: topWindow
         forceHidePill: launcherItem.expanded || controlCenterItem.expanded || wallpaperSwitcherItem.expanded || powerMenuItem.expanded || polkitItem.expanded || notificationPopupItem.expanded || emojiPickerItem.expanded || settingsAppItem.expanded || volumeOsdItem.isVisible
 
@@ -585,9 +666,16 @@ PanelWindow {
     SettingsApp {
         id: settingsAppItem
         gameMode: topWindow.gameMode
-        anchors.top: parent.top
-        anchors.horizontalCenter: parent.horizontalCenter
-        anchors.topMargin: topWindow.gameMode || Vars.panelStyle === "Attached" || Vars.panelStyle === "Flat" ? 0 : currentSpacingSmall
+        anchors.top: topWindow.pillPos === "Bottom" || topWindow.pillPos === "Right" || topWindow.pillPos === "Left" ? undefined : parent.top
+        anchors.bottom: topWindow.pillPos === "Bottom" ? parent.bottom : undefined
+        anchors.left: topWindow.pillPos === "Left" ? parent.left : undefined
+        anchors.right: topWindow.pillPos === "Right" ? parent.right : undefined
+        anchors.horizontalCenter: (topWindow.pillPos === "Left" || topWindow.pillPos === "Right") ? undefined : parent.horizontalCenter
+        anchors.verticalCenter: (topWindow.pillPos === "Left" || topWindow.pillPos === "Right") ? parent.verticalCenter : undefined
+        anchors.topMargin: topWindow.pillPos === "Bottom" || topWindow.pillPos === "Right" || topWindow.pillPos === "Left" ? 0 : topWindow.defaultEdgeMargin
+        anchors.bottomMargin: topWindow.pillPos === "Bottom" ? topWindow.defaultEdgeMargin : 0
+        anchors.leftMargin: topWindow.pillPos === "Left" ? topWindow.defaultEdgeMargin : 0
+        anchors.rightMargin: topWindow.pillPos === "Right" ? topWindow.defaultEdgeMargin : 0
         focusWindow: topWindow
         forceHidePill: launcherItem.expanded || controlCenterItem.expanded || wallpaperSwitcherItem.expanded || powerMenuItem.expanded || polkitItem.expanded || notificationPopupItem.expanded || emojiPickerItem.expanded || colorSchemeSwitcherItem.expanded || volumeOsdItem.isVisible
         onDetachToggled: function(isFloating) {
@@ -606,6 +694,10 @@ PanelWindow {
             }
         }
 
+        onOpenWallpaperSwitcherRequested: {
+            toggleWallpaper();
+        }
+
         onCloseRequested: expanded = false
     }
 
@@ -614,21 +706,26 @@ PanelWindow {
         delegate: Item {
             property var targetPanel: modelData
             property bool hasPanel: !!targetPanel.panel
+            property real px: parent.hasPanel ? parent.targetPanel.x + parent.targetPanel.panel.x : parent.targetPanel.x
+            property real py: parent.hasPanel ? parent.targetPanel.y + parent.targetPanel.panel.y : parent.targetPanel.y
+            property real pw: parent.hasPanel ? parent.targetPanel.panel.width : parent.targetPanel.width
+            property real ph: parent.hasPanel ? parent.targetPanel.panel.height : parent.targetPanel.height
+            property string pos: Vars.pillPosition || "Top"
             
             InvertedCorner {
-                x: (parent.hasPanel ? parent.targetPanel.x + parent.targetPanel.panel.x : parent.targetPanel.x) - width + 1
-                y: (parent.hasPanel ? parent.targetPanel.y + parent.targetPanel.panel.y : parent.targetPanel.y)
-                side: "left"
-                visible: Vars.panelStyle === "Framed" && opacity > 0 && (parent.hasPanel ? parent.targetPanel.panel.width : parent.targetPanel.width) > 0
+                x: parent.pos === "Bottom" ? parent.px - width + 1 : (parent.pos === "Right" || parent.pos === "Left" ? parent.px + (parent.pos === "Right" ? parent.pw - width : 0) : parent.px - width + 1)
+                y: parent.pos === "Right" || parent.pos === "Left" ? parent.py - height + 1 : (parent.pos === "Bottom" ? parent.py + parent.ph - height : parent.py)
+                side: parent.pos === "Right" ? "right-top" : (parent.pos === "Left" ? "left-top" : (parent.pos === "Bottom" ? "bottom-left-attach" : "left"))
+                visible: Vars.panelStyle === "Framed" && opacity > 0 && parent.pw > 0 && parent.ph > 0
                 color: parent.hasPanel ? parent.targetPanel.panel.color : "transparent"
                 opacity: (parent.hasPanel ? parent.targetPanel.panel.opacity : 1.0) * parent.targetPanel.opacity
                 radius: Math.max(0, currentRadiusExtraLarge - currentSpacingSmall)
             }
             InvertedCorner {
-                x: (parent.hasPanel ? parent.targetPanel.x + parent.targetPanel.panel.x + parent.targetPanel.panel.width : parent.targetPanel.x + parent.targetPanel.width) - 1
-                y: (parent.hasPanel ? parent.targetPanel.y + parent.targetPanel.panel.y : parent.targetPanel.y)
-                side: "right"
-                visible: Vars.panelStyle === "Framed" && opacity > 0 && (parent.hasPanel ? parent.targetPanel.panel.width : parent.targetPanel.width) > 0
+                x: parent.pos === "Bottom" || parent.pos === "Top" ? parent.px + parent.pw - 1 : parent.px + (parent.pos === "Right" ? parent.pw - width : 0)
+                y: parent.pos === "Right" || parent.pos === "Left" ? parent.py + parent.ph - 1 : (parent.pos === "Bottom" ? parent.py + parent.ph - height : parent.py)
+                side: parent.pos === "Right" ? "right-bottom" : (parent.pos === "Left" ? "left-bottom" : (parent.pos === "Bottom" ? "bottom-right-attach" : "right"))
+                visible: Vars.panelStyle === "Framed" && opacity > 0 && parent.pw > 0 && parent.ph > 0
                 color: parent.hasPanel ? parent.targetPanel.panel.color : "transparent"
                 opacity: (parent.hasPanel ? parent.targetPanel.panel.opacity : 1.0) * parent.targetPanel.opacity
                 radius: Math.max(0, currentRadiusExtraLarge - currentSpacingSmall)

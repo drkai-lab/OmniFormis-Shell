@@ -156,8 +156,12 @@ Item {
                     shadowHorizontalOffset: 0
                 }
 
-                anchors.top: parent.top
-                anchors.horizontalCenter: parent.horizontalCenter
+                anchors.top: (!Vars.pillPosition || Vars.pillPosition === "Top") ? parent.top : undefined
+                anchors.bottom: Vars.pillPosition === "Bottom" ? parent.bottom : undefined
+                anchors.left: Vars.pillPosition === "Left" ? parent.left : (overviewContainer.gameMode ? parent.left : undefined)
+                anchors.right: Vars.pillPosition === "Right" ? parent.right : (overviewContainer.gameMode ? parent.right : undefined)
+                anchors.horizontalCenter: (overviewContainer.gameMode || Vars.pillPosition === "Left" || Vars.pillPosition === "Right") ? undefined : parent.horizontalCenter
+                anchors.verticalCenter: (Vars.pillPosition === "Left" || Vars.pillPosition === "Right") ? parent.verticalCenter : undefined
 
                 property real targetWidth: workspaceGrid.implicitWidth + overviewPanel.bgPadding * 2
                 property real targetHeight: workspaceGrid.implicitHeight + overviewPanel.bgPadding * 2
@@ -165,7 +169,11 @@ Item {
                 property real innerMaxWidth: parent.width - (2 * Vars.spacingSmall)
                 property bool touchesEdges: Vars.panelStyle === "Framed" && targetWidth >= innerMaxWidth - 20
 
-                anchors.topMargin: overviewContainer.gameMode || Vars.panelStyle === "Attached" || Vars.panelStyle === "Flat" ? 0 : Vars.spacingSmall
+                property real activeMargin: overviewContainer.gameMode || Vars.panelStyle === "Attached" || Vars.panelStyle === "Flat" ? 0 : Vars.spacingSmall
+                anchors.topMargin: (!Vars.pillPosition || Vars.pillPosition === "Top") ? activeMargin : 0
+                anchors.bottomMargin: Vars.pillPosition === "Bottom" ? activeMargin : 0
+                anchors.leftMargin: Vars.pillPosition === "Left" ? activeMargin : 0
+                anchors.rightMargin: Vars.pillPosition === "Right" ? activeMargin : 0
 
                 width: overviewContainer.visibleState ? (touchesEdges ? innerMaxWidth : targetWidth) : 100
                 height: overviewContainer.visibleState ? targetHeight : 40
@@ -173,10 +181,10 @@ Item {
                 property real defaultRadius: overviewContainer.gameMode ? 0 : (overviewContainer.visibleState ? Vars.radiusExtraLarge : height / 2)
                 property real innerFrameRadius: Math.max(0, Vars.radiusExtraLarge - Vars.spacingSmall)
 
-                topLeftRadius: overviewContainer.gameMode || Vars.panelStyle === "Attached" ? 0 : (Vars.panelStyle === "Framed" ? (touchesEdges ? innerFrameRadius : 0) : defaultRadius)
-                topRightRadius: overviewContainer.gameMode || Vars.panelStyle === "Attached" ? 0 : (Vars.panelStyle === "Framed" ? (touchesEdges ? innerFrameRadius : 0) : defaultRadius)
-                bottomLeftRadius: overviewContainer.gameMode || touchesEdges ? 0 : defaultRadius
-                bottomRightRadius: overviewContainer.gameMode || touchesEdges ? 0 : defaultRadius
+                topLeftRadius: touchesEdges ? innerFrameRadius : Vars.getTopLeftRadius(Vars.panelStyle, Vars.pillPosition, overviewContainer.gameMode, defaultRadius)
+                topRightRadius: touchesEdges ? innerFrameRadius : Vars.getTopRightRadius(Vars.panelStyle, Vars.pillPosition, overviewContainer.gameMode, defaultRadius)
+                bottomLeftRadius: touchesEdges ? 0 : Vars.getBottomLeftRadius(Vars.panelStyle, Vars.pillPosition, overviewContainer.gameMode, defaultRadius)
+                bottomRightRadius: touchesEdges ? 0 : Vars.getBottomRightRadius(Vars.panelStyle, Vars.pillPosition, overviewContainer.gameMode, defaultRadius)
 
                 color: Vars.translucent ? Qt.rgba(Theme.surface.r, Theme.surface.g, Theme.surface.b, 0.85) : Theme.surface
                 
