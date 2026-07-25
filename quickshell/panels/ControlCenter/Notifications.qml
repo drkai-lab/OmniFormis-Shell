@@ -92,14 +92,33 @@ Item {
 
     // Floating action bar
     Rectangle {
-        width: parent.width
+        id: fabContainer
+        
+        property color opaqueSecondary: Qt.rgba(Theme.secondary_container.r, Theme.secondary_container.g, Theme.secondary_container.b, 1.0)
+        property color opaqueSurface: Qt.rgba(Theme.surface_container_highest.r, Theme.surface_container_highest.g, Theme.surface_container_highest.b, 1.0)
+
+        
+        function getFlickable(item) {
+            let p = item.parent;
+            while (p) {
+                if (p.toString().includes("Flickable")) return p;
+                p = p.parent;
+            }
+            return item;
+        }
+        
+        // Reparent to Flickable so it floats above the scrolling content
+        parent: getFlickable(notificationsRoot)
+        
+        width: notificationsRoot.width
         height: 64
         anchors.bottom: parent.bottom
-        anchors.bottomMargin: 0
-        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.bottomMargin: 8
+        x: notificationsRoot.mapToItem(parent, 0, 0).x
+        
         color: "transparent"
         visible: notificationsRoot.historyList.length > 0
-        z: 10
+        z: 100
         
         RowLayout {
             anchors.fill: parent
@@ -109,7 +128,7 @@ Item {
             
             // Snooze button
             Rectangle {
-                property real targetWidth: snoozeHover.pressed ? 96 : (clearAllHover.pressed ? 48 : 64)
+                property real targetWidth: snoozeHover.pressed ? 96 : (clearAllHover.pressed ? 32 : 64)
                 Layout.preferredWidth: targetWidth
                 Behavior on targetWidth { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
 
@@ -118,7 +137,7 @@ Item {
                 layer.enabled: true
                 layer.effect: MultiEffect { shadowEnabled: true; shadowBlur: 1.0; shadowColor: Qt.rgba(0,0,0,0.25); shadowVerticalOffset: 4; shadowHorizontalOffset: 0 }
                 
-                color: snoozeHover.pressed ? Qt.rgba(Theme.secondary_container.r, Theme.secondary_container.g, Theme.secondary_container.b, 0.7) : (snoozeHover.containsMouse ? Qt.rgba(Theme.secondary_container.r, Theme.secondary_container.g, Theme.secondary_container.b, 0.85) : Theme.secondary_container)
+                color: snoozeHover.pressed ? Qt.tint(fabContainer.opaqueSecondary, Qt.rgba(Theme.on_secondary_container.r, Theme.on_secondary_container.g, Theme.on_secondary_container.b, 0.12)) : (snoozeHover.containsMouse ? Qt.tint(fabContainer.opaqueSecondary, Qt.rgba(Theme.on_secondary_container.r, Theme.on_secondary_container.g, Theme.on_secondary_container.b, 0.08)) : fabContainer.opaqueSecondary)
                 Behavior on color { ColorAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
                 
                 Text {
@@ -145,7 +164,7 @@ Item {
                 layer.enabled: true
                 layer.effect: MultiEffect { shadowEnabled: true; shadowBlur: 1.0; shadowColor: Qt.rgba(0,0,0,0.25); shadowVerticalOffset: 4; shadowHorizontalOffset: 0 }
                 
-                color: clearAllHover.pressed ? Qt.rgba(Theme.surface_container_highest.r, Theme.surface_container_highest.g, Theme.surface_container_highest.b, 0.7) : (clearAllHover.containsMouse ? Qt.rgba(Theme.surface_container_highest.r, Theme.surface_container_highest.g, Theme.surface_container_highest.b, 0.85) : Theme.surface_container_highest)
+                color: clearAllHover.pressed ? Qt.tint(fabContainer.opaqueSurface, Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.12)) : (clearAllHover.containsMouse ? Qt.tint(fabContainer.opaqueSurface, Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.08)) : fabContainer.opaqueSurface)
                 Behavior on color { ColorAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
                 
                 Text {
@@ -167,7 +186,7 @@ Item {
 
             // Settings button
             Rectangle {
-                property real targetWidth: settingsHover.pressed ? 96 : (clearAllHover.pressed ? 48 : 64)
+                property real targetWidth: settingsHover.pressed ? 96 : (clearAllHover.pressed ? 32 : 64)
                 Layout.preferredWidth: targetWidth
                 Behavior on targetWidth { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
 
@@ -176,7 +195,7 @@ Item {
                 layer.enabled: true
                 layer.effect: MultiEffect { shadowEnabled: true; shadowBlur: 1.0; shadowColor: Qt.rgba(0,0,0,0.25); shadowVerticalOffset: 4; shadowHorizontalOffset: 0 }
                 
-                color: settingsHover.pressed ? Qt.rgba(Theme.secondary_container.r, Theme.secondary_container.g, Theme.secondary_container.b, 0.7) : (settingsHover.containsMouse ? Qt.rgba(Theme.secondary_container.r, Theme.secondary_container.g, Theme.secondary_container.b, 0.85) : Theme.secondary_container)
+                color: settingsHover.pressed ? Qt.tint(fabContainer.opaqueSecondary, Qt.rgba(Theme.on_secondary_container.r, Theme.on_secondary_container.g, Theme.on_secondary_container.b, 0.12)) : (settingsHover.containsMouse ? Qt.tint(fabContainer.opaqueSecondary, Qt.rgba(Theme.on_secondary_container.r, Theme.on_secondary_container.g, Theme.on_secondary_container.b, 0.08)) : fabContainer.opaqueSecondary)
                 Behavior on color { ColorAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
                 
                 Text {

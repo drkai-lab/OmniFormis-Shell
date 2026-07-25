@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Layouts
+import QtQuick.Shapes
 import "../.."
 import "../../theme/variables.js" as Vars
 import Quickshell.Networking
@@ -7,6 +8,8 @@ import Quickshell.Bluetooth
 
 ColumnLayout {
     id: rootSidebar
+    
+    M3Shapes { id: m3Shapes }
     
     property string currentSection: "wifi"
 
@@ -43,32 +46,25 @@ ColumnLayout {
     Repeater {
         model: [
             // Connections
-            { id: "wifi", name: "Wi-Fi", subtitle: "Wi-Fi, ethernet", icon: rootSidebar.wifiIcon, section: "Connections", isFirst: true, isLast: false },
-            { id: "bluetooth", name: "Bluetooth", subtitle: "Bluetooth, pairing", icon: rootSidebar.bluetoothIcon, section: "Connections", isFirst: false, isLast: true },
+            { id: "wifi", name: "Wi-Fi", subtitle: "Wi-Fi, ethernet", icon: rootSidebar.wifiIcon, section: "Connections", isFirst: true, isLast: false, hue: 0.60, shape: "Circle" },
+            { id: "bluetooth", name: "Bluetooth", subtitle: "Bluetooth, pairing", icon: rootSidebar.bluetoothIcon, section: "Connections", isFirst: false, isLast: true, hue: 0.65, shape: "Square" },
             
             // General and Appearance
-            { id: "General", name: "General", subtitle: "System config, spacing, layout", icon: "\ue8b8", section: "General and Appearance", isFirst: true, isLast: false },
-            { id: "Appearance", name: "Appearance", subtitle: "Theme, rounding, colors", icon: "\ue3b7", section: "General and Appearance", isFirst: false, isLast: false },
-            { id: "Input", name: "Input", subtitle: "Keyboard, mouse, gestures", icon: "\ue312", section: "General and Appearance", isFirst: false, isLast: false },
-            { id: "bezier", name: "Motion", subtitle: "Custom curve editor", icon: "\ue922", section: "General and Appearance", isFirst: false, isLast: true },
+            { id: "General", name: "General", subtitle: "System config, spacing, layout", icon: "\ue8b8", section: "General and Appearance", isFirst: true, isLast: false, hue: 0.70, shape: "4SidedCookie" },
+            { id: "Appearance", name: "Appearance", subtitle: "Theme, rounding, colors", icon: "\ue3b7", section: "General and Appearance", isFirst: false, isLast: false, hue: 0.85, shape: "Bun" },
+            { id: "Input", name: "Input", subtitle: "Keyboard, mouse, gestures", icon: "\ue312", section: "General and Appearance", isFirst: false, isLast: false, hue: 0.95, shape: "Pill" },
+            { id: "bezier", name: "Motion", subtitle: "Custom curve editor", icon: "\ue922", section: "General and Appearance", isFirst: false, isLast: true, hue: 0.05, shape: "Oval" },
             
             // System
-            { id: "taskmanager", name: "Task Manager", subtitle: "System resources, processes", icon: "\ue85c", section: "System", isFirst: true, isLast: false },
-            { id: "about", name: "About", subtitle: "Omniformis Shell info", icon: "\ue88e", section: "System", isFirst: false, isLast: true }
+            { id: "taskmanager", name: "Task Manager", subtitle: "System resources, processes", icon: "\ue85c", section: "System", isFirst: true, isLast: false, hue: 0.12, shape: "6SidedCookie" },
+            { id: "about", name: "About", subtitle: "Omniformis Shell info", icon: "\ue88e", section: "System", isFirst: false, isLast: true, hue: 0.18, shape: "12SidedCookie" }
         ]
         delegate: ColumnLayout {
             Layout.fillWidth: true
+            Layout.topMargin: (modelData.isFirst && index !== 0) ? 16 : 0
             spacing: 4
 
-            Text {
-                visible: modelData.isFirst
-                text: modelData.section
-                color: Theme.primary
-                font.pixelSize: 14
-                font.bold: true
-                font.family: Vars.fontFamily
-                Layout.topMargin: index === 0 ? 0 : 8
-            }
+
 
             Item {
                 Layout.fillWidth: true
@@ -125,11 +121,31 @@ ColumnLayout {
                     anchors.rightMargin: 20
                     spacing: 16
                     
-                    Text {
-                        text: modelData.icon
-                        font.family: parent.parent.isSelected ? filledIconFont.name : "Material Symbols Outlined"
-                        font.pixelSize: 24
-                        color: parent.parent.isSelected ? Theme.on_secondary_container : Theme.on_surface_variant
+                    Item {
+                        Layout.preferredWidth: 48
+                        Layout.preferredHeight: 48
+                        
+                        property color containerColor: Qt.hsla(modelData.hue, 0.35, 0.82, 1.0)
+                        property color onContainerColor: Qt.hsla(modelData.hue, 0.40, 0.25, 1.0)
+                        
+                        Image {
+                            anchors.fill: parent
+                            sourceSize.width: width * 2
+                            sourceSize.height: height * 2
+                            smooth: true
+                            antialiasing: true
+                            mipmap: true
+                            
+                            source: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><path d='" + m3Shapes.getPath(modelData.shape) + "' fill='" + parent.containerColor.toString() + "'/></svg>"
+                        }
+
+                        Text {
+                            anchors.centerIn: parent
+                            text: modelData.icon
+                            font.family: parent.parent.parent.isSelected ? filledIconFont.name : "Material Symbols Outlined"
+                            font.pixelSize: 22
+                            color: parent.onContainerColor
+                        }
                     }
                     ColumnLayout {
                         Layout.fillWidth: true

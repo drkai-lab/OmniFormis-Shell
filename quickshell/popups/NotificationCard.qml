@@ -51,8 +51,17 @@ Item {
 
     property real adjacentDragShift: {
         if (activeDragIndex === -1 || activeDragIndex === listIndex) return 0;
-        if (Math.abs(listIndex - activeDragIndex) === 1) {
-            return activeDragX * 0.12;
+        
+        let dist = Math.abs(listIndex - activeDragIndex);
+        if (dist >= 1) {
+            // Formula: base factor 0.24 divided by 2^dist
+            // dist=1: 0.12, dist=2: 0.06, dist=3: 0.03, etc.
+            let factor = 0.24 / Math.pow(2, dist);
+            
+            // To ensure the effect doesn't get too microscopic, we can cap it at 4 items
+            if (dist <= 4) {
+                return activeDragX * factor;
+            }
         }
         return 0;
     }
@@ -97,6 +106,7 @@ Item {
 
         // Spring animation for X (when released)
         Behavior on x {
+            enabled: !dragArea.drag.active
             SpringAnimation {
                 spring: dismissing ? 1.5 : 3.0
                 damping: dismissing ? 1.0 : 0.7
@@ -139,6 +149,7 @@ Item {
             anchors.fill: parent
             drag.target: container
             drag.axis: Drag.XAxis
+            preventStealing: true
             
             // Limit drag depending on whether we want free drag
             drag.minimumX: -rootCard.width * 1.5
