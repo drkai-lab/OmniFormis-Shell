@@ -14,7 +14,7 @@ PanelWindow {
     exclusionMode: ExclusionMode.Ignore
     exclusiveZone: 0
     WlrLayershell.namespace: "quickshell"
-    WlrLayershell.layer: WlrLayer.Top
+    WlrLayershell.layer: WlrLayer.Overlay
     anchors {
         top: true
         left: true
@@ -26,10 +26,15 @@ PanelWindow {
     color: "transparent"
 
     property string pillPos: Vars.pillPosition || "Top"
-    property int defaultEdgeMargin: (gameMode || Vars.panelStyle === "Attached" || Vars.panelStyle === "Flat") ? 0 : currentSpacingSmall
+    property int defaultEdgeMargin: (gameMode || Vars.panelStyle === "Framed" || Vars.panelStyle === "Flat") ? 0 : currentSpacingSmall
 
 
     signal popupOpened
+    onPopupOpened: {
+        topWindow.suppressHover = true;
+        pillGraceTimer.stop();
+        topWindow.pillHoverGrace = false;
+    }
     signal openOverviewRequested
 
     property bool gameMode: Vars.gameMode !== undefined ? Vars.gameMode : false
@@ -98,9 +103,6 @@ PanelWindow {
             item: workspacesItem.panelMask
         }
         Region {
-            item: statusBarItem
-        }
-        Region {
             item: controlCenterItem.panelMask
         }
         Region {
@@ -132,6 +134,26 @@ PanelWindow {
         }
     }
 
+    property bool suppressHover: false
+    property bool pillHoverGrace: false
+    property bool pillHoverActive: clockHoverArea.containsMouse || clockPill.isHovered
+    onPillHoverActiveChanged: {
+        if (pillHoverActive) {
+            pillGraceTimer.stop();
+            topWindow.pillHoverGrace = true;
+        } else {
+            topWindow.suppressHover = false;
+            pillGraceTimer.restart();
+        }
+    }
+
+    Timer {
+        id: pillGraceTimer
+        interval: 400
+        repeat: false
+        onTriggered: topWindow.pillHoverGrace = false
+    }
+
     Item {
         id: clockHoverZone
         anchors.top: topWindow.pillPos === "Bottom" || topWindow.pillPos === "Right" || topWindow.pillPos === "Left" ? undefined : parent.top
@@ -140,13 +162,34 @@ PanelWindow {
         anchors.right: topWindow.pillPos === "Right" ? parent.right : undefined
         anchors.horizontalCenter: (topWindow.pillPos === "Left" || topWindow.pillPos === "Right") ? undefined : parent.horizontalCenter
         anchors.verticalCenter: (topWindow.pillPos === "Left" || topWindow.pillPos === "Right") ? parent.verticalCenter : undefined
-        width: (topWindow.pillPos === "Left" || topWindow.pillPos === "Right") ? 60 : 160
-        height: (topWindow.pillPos === "Left" || topWindow.pillPos === "Right") ? 160 : 60
+        width: (topWindow.pillPos === "Left" || topWindow.pillPos === "Right") ? (clockPill.isShown ? 80 : 18) : Math.max(300, clockPill.width + 60)
+        height: (topWindow.pillPos === "Left" || topWindow.pillPos === "Right") ? Math.max(300, clockPill.height + 60) : (clockPill.isShown ? 80 : 18)
+        
         MouseArea {
             id: clockHoverArea
-            anchors.fill: parent
+            anchors.top: topWindow.pillPos === "Bottom" || topWindow.pillPos === "Right" || topWindow.pillPos === "Left" ? undefined : parent.top
+            anchors.bottom: topWindow.pillPos === "Bottom" ? parent.bottom : undefined
+            anchors.left: topWindow.pillPos === "Left" ? parent.left : undefined
+            anchors.right: topWindow.pillPos === "Right" ? parent.right : undefined
+            anchors.horizontalCenter: (topWindow.pillPos === "Left" || topWindow.pillPos === "Right") ? undefined : parent.horizontalCenter
+            anchors.verticalCenter: (topWindow.pillPos === "Left" || topWindow.pillPos === "Right") ? parent.verticalCenter : undefined
+            width: (topWindow.pillPos === "Left" || topWindow.pillPos === "Right") ? (clockPill.isShown ? 54 : 18) : Math.max(260, clockPill.width + 20)
+            height: (topWindow.pillPos === "Left" || topWindow.pillPos === "Right") ? Math.max(260, clockPill.height + 20) : (clockPill.isShown ? 54 : 18)
             hoverEnabled: true
             acceptedButtons: Qt.NoButton
+            onEntered: {
+                if (!(launcherItem.expanded || controlCenterItem.expanded || wallpaperSwitcherItem.expanded || colorSchemeSwitcherItem.expanded || powerMenuItem.expanded || polkitItem.expanded || notificationPopupItem.expanded || emojiPickerItem.expanded || settingsAppItem.expanded || volumeOsdItem.isVisible || workspacesItem.overlayVisible)) {
+                    topWindow.suppressHover = false;
+                }
+            }
+            onExited: {
+                topWindow.suppressHover = false;
+            }
+            onPositionChanged: {
+                if (topWindow.suppressHover && !(launcherItem.expanded || controlCenterItem.expanded || wallpaperSwitcherItem.expanded || colorSchemeSwitcherItem.expanded || powerMenuItem.expanded || polkitItem.expanded || notificationPopupItem.expanded || emojiPickerItem.expanded || settingsAppItem.expanded || volumeOsdItem.isVisible || workspacesItem.overlayVisible)) {
+                    topWindow.suppressHover = false;
+                }
+            }
         }
     }
 
@@ -160,26 +203,6 @@ PanelWindow {
             onClicked: closeAll()
         }
 
-        RowLayout {
-            anchors.fill: parent
-            anchors.leftMargin: currentSpacingSmall
-            anchors.rightMargin: currentSpacingSmall
-            anchors.topMargin: currentSpacingSmall
-            anchors.bottomMargin: currentSpacingSmall
-
-            Item {
-                Layout.fillWidth: true
-            }
-
-            Item {
-                Layout.fillWidth: true
-            }
-
-            StatusBar {
-                id: statusBarItem
-                Layout.alignment: Qt.AlignTop
-            }
-        }
     }
 
     ClockPill {
@@ -192,12 +215,16 @@ PanelWindow {
         anchors.horizontalCenter: (topWindow.gameMode || topWindow.pillPos === "Left" || topWindow.pillPos === "Right") ? undefined : parent.horizontalCenter
         anchors.verticalCenter: (topWindow.pillPos === "Left" || topWindow.pillPos === "Right") ? parent.verticalCenter : undefined
         
-        property bool isShown: ((clockHoverArea.containsMouse || clockPill.isHovered) && !(launcherItem.expanded || controlCenterItem.expanded || wallpaperSwitcherItem.expanded || colorSchemeSwitcherItem.expanded || powerMenuItem.expanded || polkitItem.expanded || notificationPopupItem.expanded || emojiPickerItem.expanded || settingsAppItem.expanded || volumeOsdItem.isVisible || workspacesItem.overlayVisible) && !topWindow.gameMode)
+        property bool isShown: (!topWindow.suppressHover && (topWindow.pillHoverGrace || clockHoverArea.containsMouse || clockPill.isHovered) && !(launcherItem.expanded || controlCenterItem.expanded || wallpaperSwitcherItem.expanded || colorSchemeSwitcherItem.expanded || powerMenuItem.expanded || polkitItem.expanded || notificationPopupItem.expanded || emojiPickerItem.expanded || settingsAppItem.expanded || volumeOsdItem.isVisible || workspacesItem.overlayVisible) && !topWindow.gameMode)
         
         property real targetMargin: {
             if (topWindow.gameMode) return 0;
-            if (!isShown) return -clockPill.height - 20;
-            return (Vars.panelStyle === "Attached" || Vars.panelStyle === "Flat") ? 0 : currentSpacingSmall;
+            if (!isShown) {
+                if (topWindow.pillPos === "Left" || topWindow.pillPos === "Right")
+                    return -clockPill.width - 20;
+                return -clockPill.height - 20;
+            }
+            return (Vars.panelStyle === "Framed" || Vars.panelStyle === "Flat") ? 0 : currentSpacingSmall;
         }
         
         anchors.topMargin: (topWindow.pillPos === "Bottom" || topWindow.pillPos === "Right" || topWindow.pillPos === "Left") ? 0 : targetMargin
@@ -222,9 +249,15 @@ PanelWindow {
         }
 
         onClicked: {
+            topWindow.suppressHover = true;
+            pillGraceTimer.stop();
+            topWindow.pillHoverGrace = false;
             toggleControlCenter();
         }
         onRightClicked: {
+            topWindow.suppressHover = true;
+            pillGraceTimer.stop();
+            topWindow.pillHoverGrace = false;
             toggleLauncher();
         }
         onScrolled: delta => {
@@ -705,30 +738,30 @@ PanelWindow {
         model: [launcherItem, clockPill, workspacesItem, powerMenuItem, emojiPickerItem, colorSchemeSwitcherItem, wallpaperSwitcherItem, settingsAppItem, controlCenterItem, notificationPopupItem, polkitItem, volumeOsdItem]
         delegate: Item {
             property var targetPanel: modelData
-            property bool hasPanel: !!targetPanel.panel
-            property real px: parent.hasPanel ? parent.targetPanel.x + parent.targetPanel.panel.x : parent.targetPanel.x
-            property real py: parent.hasPanel ? parent.targetPanel.y + parent.targetPanel.panel.y : parent.targetPanel.y
-            property real pw: parent.hasPanel ? parent.targetPanel.panel.width : parent.targetPanel.width
-            property real ph: parent.hasPanel ? parent.targetPanel.panel.height : parent.targetPanel.height
+            property bool hasPanel: !!(targetPanel?.panel)
+            property real px: (targetPanel?.x ?? 0) + (targetPanel?.panel?.x ?? 0)
+            property real py: (targetPanel?.y ?? 0) + (targetPanel?.panel?.y ?? 0)
+            property real pw: targetPanel?.panel?.width ?? targetPanel?.width ?? 0
+            property real ph: targetPanel?.panel?.height ?? targetPanel?.height ?? 0
             property string pos: Vars.pillPosition || "Top"
             
             InvertedCorner {
-                x: parent.pos === "Bottom" ? parent.px - width + 1 : (parent.pos === "Right" || parent.pos === "Left" ? parent.px + (parent.pos === "Right" ? parent.pw - width : 0) : parent.px - width + 1)
-                y: parent.pos === "Right" || parent.pos === "Left" ? parent.py - height + 1 : (parent.pos === "Bottom" ? parent.py + parent.ph - height : parent.py)
-                side: parent.pos === "Right" ? "right-top" : (parent.pos === "Left" ? "left-top" : (parent.pos === "Bottom" ? "bottom-left-attach" : "left"))
-                visible: Vars.panelStyle === "Framed" && opacity > 0 && parent.pw > 0 && parent.ph > 0
-                color: parent.hasPanel ? parent.targetPanel.panel.color : "transparent"
-                opacity: (parent.hasPanel ? parent.targetPanel.panel.opacity : 1.0) * parent.targetPanel.opacity
-                radius: Math.max(0, currentRadiusExtraLarge - currentSpacingSmall)
+                x: Math.round(parent.pos === "Right" ? (parent.px + parent.pw - width) : (parent.pos === "Left" ? parent.px : parent.px - width))
+                y: Math.round((parent.pos === "Right" || parent.pos === "Left") ? parent.py - height : (parent.pos === "Bottom" ? parent.py + parent.ph - height : parent.py))
+                side: parent.pos === "Right" ? "bottom-right" : (parent.pos === "Left" ? "bottom-left" : (parent.pos === "Bottom" ? "bottom-right" : "top-right"))
+                visible: Vars.panelStyle === "Attached" && opacity > 0 && parent.pw > 0 && parent.ph > 0
+                color: parent.targetPanel?.panel?.color ?? "transparent"
+                opacity: (parent.targetPanel?.panel?.opacity ?? 1.0) * (parent.targetPanel?.opacity ?? 1.0)
+                radius: Math.max(0, Math.min(currentRadiusExtraLarge, Math.min(parent.pw, parent.ph) / 2))
             }
             InvertedCorner {
-                x: parent.pos === "Bottom" || parent.pos === "Top" ? parent.px + parent.pw - 1 : parent.px + (parent.pos === "Right" ? parent.pw - width : 0)
-                y: parent.pos === "Right" || parent.pos === "Left" ? parent.py + parent.ph - 1 : (parent.pos === "Bottom" ? parent.py + parent.ph - height : parent.py)
-                side: parent.pos === "Right" ? "right-bottom" : (parent.pos === "Left" ? "left-bottom" : (parent.pos === "Bottom" ? "bottom-right-attach" : "right"))
-                visible: Vars.panelStyle === "Framed" && opacity > 0 && parent.pw > 0 && parent.ph > 0
-                color: parent.hasPanel ? parent.targetPanel.panel.color : "transparent"
-                opacity: (parent.hasPanel ? parent.targetPanel.panel.opacity : 1.0) * parent.targetPanel.opacity
-                radius: Math.max(0, currentRadiusExtraLarge - currentSpacingSmall)
+                x: Math.round((parent.pos === "Right" || parent.pos === "Left") ? (parent.pos === "Right" ? parent.px + parent.pw - width : parent.px) : parent.px + parent.pw)
+                y: Math.round((parent.pos === "Right" || parent.pos === "Left") ? parent.py + parent.ph : (parent.pos === "Bottom" ? parent.py + parent.ph - height : parent.py))
+                side: parent.pos === "Right" ? "top-right" : (parent.pos === "Left" ? "top-left" : (parent.pos === "Bottom" ? "bottom-left" : "top-left"))
+                visible: Vars.panelStyle === "Attached" && opacity > 0 && parent.pw > 0 && parent.ph > 0
+                color: parent.targetPanel?.panel?.color ?? "transparent"
+                opacity: (parent.targetPanel?.panel?.opacity ?? 1.0) * (parent.targetPanel?.opacity ?? 1.0)
+                radius: Math.max(0, Math.min(currentRadiusExtraLarge, Math.min(parent.pw, parent.ph) / 2))
             }
         }
     }

@@ -54,6 +54,8 @@ Flickable {
     }
 
     // Process for running matugen and color scheme scripts
+    // NOTE: set-theme.sh already handles killing and restarting quickshell at the end,
+    // so we do NOT call reload.sh from onExited — that would race and leave QS dead.
     Process {
         id: execProc
         stdout: StdioCollector {
@@ -69,13 +71,10 @@ Flickable {
             }
         }
         onExited: (code, status) => {
-            if (code === 0) {
-                Quickshell.execDetached({
-                    command: ['bash', '-c', 'nohup bash ~/Dotfiles/scripts/reload.sh >/dev/null 2>&1 &']
-                });
-            } else {
+            if (code !== 0) {
                 console.error("[USER ACTION] Matugen exited with code: " + code);
             }
+            // set-theme.sh already restarts quickshell — no reload.sh needed here
         }
     }
 
@@ -156,6 +155,7 @@ Flickable {
                 clockShowTicks: Vars.clockShowTicks,
                 clockShowCenterDot: Vars.clockShowCenterDot,
                 panelStyle: Vars.panelStyle,
+                pillPosition: Vars.pillPosition,
                 mediaPlayerShape: Vars.mediaPlayerShape,
                 mediaPlayerArtScale: Vars.mediaPlayerArtScale,
                 gameMode: Vars.gameMode,
@@ -430,10 +430,10 @@ Flickable {
                             topRightRadius: isSelected ? 26 : 6
                             bottomRightRadius: isSelected ? 26 : 6
 
-                            Behavior on topLeftRadius { NumberAnimation { duration: 180; easing.type: Easing.InOutQuad } }
-                            Behavior on bottomLeftRadius { NumberAnimation { duration: 180; easing.type: Easing.InOutQuad } }
-                            Behavior on topRightRadius { NumberAnimation { duration: 180; easing.type: Easing.InOutQuad } }
-                            Behavior on bottomRightRadius { NumberAnimation { duration: 180; easing.type: Easing.InOutQuad } }
+                            Behavior on topLeftRadius { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
+                            Behavior on bottomLeftRadius { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
+                            Behavior on topRightRadius { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
+                            Behavior on bottomRightRadius { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
                             color: isSelected ? Theme.secondary_container : (lightHover.containsMouse ? Theme.surface_container_highest : Theme.surface_container_high)
                             border.width: 0
 
@@ -483,10 +483,10 @@ Flickable {
                             topRightRadius: 26
                             bottomRightRadius: 26
 
-                            Behavior on topLeftRadius { NumberAnimation { duration: 180; easing.type: Easing.InOutQuad } }
-                            Behavior on bottomLeftRadius { NumberAnimation { duration: 180; easing.type: Easing.InOutQuad } }
-                            Behavior on topRightRadius { NumberAnimation { duration: 180; easing.type: Easing.InOutQuad } }
-                            Behavior on bottomRightRadius { NumberAnimation { duration: 180; easing.type: Easing.InOutQuad } }
+                            Behavior on topLeftRadius { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
+                            Behavior on bottomLeftRadius { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
+                            Behavior on topRightRadius { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
+                            Behavior on bottomRightRadius { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
                             color: isSelected ? Theme.secondary_container : (darkHover.containsMouse ? Theme.surface_container_highest : Theme.surface_container_high)
                             border.width: 0
 
@@ -561,10 +561,10 @@ Flickable {
                                 bottomLeftRadius: isSelected ? 24 : ((!hasLeft && !hasBottom) ? 24 : 6)
                                 bottomRightRadius: isSelected ? 24 : ((!hasRight && !hasBottom) ? 24 : 6)
 
-                                Behavior on topLeftRadius { NumberAnimation { duration: 180; easing.type: Easing.InOutQuad } }
-                                Behavior on topRightRadius { NumberAnimation { duration: 180; easing.type: Easing.InOutQuad } }
-                                Behavior on bottomLeftRadius { NumberAnimation { duration: 180; easing.type: Easing.InOutQuad } }
-                                Behavior on bottomRightRadius { NumberAnimation { duration: 180; easing.type: Easing.InOutQuad } }
+                                Behavior on topLeftRadius { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
+                                Behavior on topRightRadius { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
+                                Behavior on bottomLeftRadius { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
+                                Behavior on bottomRightRadius { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
 
                                 color: isSelected ? (Vars.translucent ? Qt.rgba(Theme.secondary_container.r, Theme.secondary_container.g, Theme.secondary_container.b, 0.95) : Theme.secondary_container) : (schemeHover.containsMouse ? Theme.surface_container_highest : Theme.surface_container_high)
                                 border.width: 0
@@ -655,11 +655,11 @@ Flickable {
                         width: 50
                         height: 30
                         radius: 15
-                        color: Vars.translucent ? Theme.primary_container : Qt.rgba(Theme.surface_container_highest.r, Theme.surface_container_highest.g, Theme.surface_container_highest.b, 0.8)
+                        color: Vars.translucent ? Theme.primary_container : Theme.surface_container_highest
                         border.color: Vars.translucent ? "transparent" : Theme.outline_variant
                         border.width: Vars.translucent ? 0 : 1
 
-                        Behavior on color { ColorAnimation { duration: 150 } }
+                        Behavior on color { ColorAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
 
                         // Thumb Circle
                         Rectangle {
@@ -670,8 +670,8 @@ Flickable {
                             x: Vars.translucent ? parent.width - width - 4 : 5
                             color: Vars.translucent ? Theme.on_primary_container : Theme.on_surface_variant
 
-                            Behavior on x { NumberAnimation { duration: 150; easing.type: Easing.InOutQuad } }
-                            Behavior on width { NumberAnimation { duration: 150 } }
+                            Behavior on x { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
+                            Behavior on width { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
                         }
 
                         MouseArea {
@@ -713,11 +713,11 @@ Flickable {
                         width: 50
                         height: 30
                         radius: 15
-                        color: wallpaperSettings.automaticSync !== false ? Theme.primary_container : Qt.rgba(Theme.surface_container_highest.r, Theme.surface_container_highest.g, Theme.surface_container_highest.b, 0.8)
+                        color: wallpaperSettings.automaticSync !== false ? Theme.primary_container : Theme.surface_container_highest
                         border.color: wallpaperSettings.automaticSync !== false ? "transparent" : Theme.outline_variant
                         border.width: wallpaperSettings.automaticSync !== false ? 0 : 1
 
-                        Behavior on color { ColorAnimation { duration: 150 } }
+                        Behavior on color { ColorAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
 
                         // Thumb Circle
                         Rectangle {
@@ -728,8 +728,8 @@ Flickable {
                             x: wallpaperSettings.automaticSync !== false ? parent.width - width - 4 : 5
                             color: wallpaperSettings.automaticSync !== false ? Theme.on_primary_container : Theme.on_surface_variant
 
-                            Behavior on x { NumberAnimation { duration: 150; easing.type: Easing.InOutQuad } }
-                            Behavior on width { NumberAnimation { duration: 150 } }
+                            Behavior on x { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
+                            Behavior on width { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
                         }
 
                         MouseArea {
@@ -743,22 +743,48 @@ Flickable {
                 }
             }
 
-            // Pill Position Selection (Horizontally laid out below the translucent text)
-            ColumnLayout {
+            // Dot Separator
+            RowLayout {
+                Layout.fillWidth: true
+                Layout.topMargin: 4
+                Layout.bottomMargin: 0
+                Layout.alignment: Qt.AlignHCenter
+                spacing: 6
+
+                Repeater {
+                    model: 3
+                    Rectangle {
+                        width: 4
+                        height: 4
+                        radius: 2
+                        color: Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.15)
+                    }
+                }
+            }
+
+            // Side-by-side layout for Pill Position and Panel Style
+            RowLayout {
                 Layout.fillWidth: true
                 Layout.topMargin: 8
-                spacing: 10
+                spacing: 20
 
-                RowLayout {
+                // Pill Position Selection
+                ColumnLayout {
+                    Layout.fillWidth: true
+                    Layout.preferredWidth: 1
+                    Layout.alignment: Qt.AlignTop
+                    spacing: 10
+                    
+                    RowLayout {
                     spacing: 12
                     Text {
-                        text: "\ue250" // vertical alignment/docking icon
+                        text: "\ue250"
                         font.family: "Material Symbols Outlined"
                         font.pixelSize: 22
                         color: Theme.on_surface_variant
                     }
                     Text {
-                        text: "Pill Position"
+                        text: "Panel Position"
                         font.family: Vars.fontFamily
                         font.pixelSize: 15
                         font.weight: 500
@@ -768,9 +794,10 @@ Flickable {
 
                 RowLayout {
                     Layout.fillWidth: true
-                    spacing: 8
+                    spacing: 3
 
                     Repeater {
+                        id: posRepeater
                         model: [
                             { name: "Top", pos: "Top", icon: "\ue5ce" },
                             { name: "Right", pos: "Right", icon: "\ue5cc" },
@@ -779,31 +806,31 @@ Flickable {
                         ]
                         delegate: Rectangle {
                             Layout.fillWidth: true
-                            Layout.preferredHeight: 46
+                            Layout.preferredHeight: 38
                             property bool isSelected: (Vars.pillPosition || "Top") === modelData.pos
-                            radius: isSelected ? 23 : 12
+                            property bool hasLeft: index > 0
+                            property bool hasRight: index < posRepeater.count - 1
+
+                            topLeftRadius: isSelected ? 19 : (hasLeft ? 6 : 19)
+                            bottomLeftRadius: isSelected ? 19 : (hasLeft ? 6 : 19)
+                            topRightRadius: isSelected ? 19 : (hasRight ? 6 : 19)
+                            bottomRightRadius: isSelected ? 19 : (hasRight ? 6 : 19)
+
                             color: isSelected ? Theme.secondary_container : (posHover.containsMouse ? Theme.surface_container_highest : Theme.surface_container_high)
                             border.width: 0
 
-                            Behavior on radius { NumberAnimation { duration: 180; easing.type: Easing.InOutQuad } }
-                            Behavior on color { ColorAnimation { duration: 160 } }
+                            Behavior on topLeftRadius { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
+                            Behavior on bottomLeftRadius { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
+                            Behavior on topRightRadius { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
+                            Behavior on bottomRightRadius { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
+                            Behavior on color { ColorAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
 
-                            RowLayout {
+                            Text {
                                 anchors.centerIn: parent
-                                spacing: 8
-                                Text {
-                                    text: modelData.icon
-                                    font.family: parent.parent.isSelected ? filledIconFont.name : "Material Symbols Outlined"
-                                    font.pixelSize: 20
-                                    color: parent.parent.isSelected ? Theme.on_secondary_container : Theme.on_surface_variant
-                                }
-                                Text {
-                                    text: modelData.name
-                                    font.family: Vars.fontFamily
-                                    font.pixelSize: 13
-                                    font.weight: parent.parent.isSelected ? 700 : 500
-                                    color: parent.parent.isSelected ? Theme.on_secondary_container : Theme.on_surface
-                                }
+                                text: modelData.icon
+                                font.family: parent.isSelected ? filledIconFont.name : "Material Symbols Outlined"
+                                font.pixelSize: 20
+                                color: parent.isSelected ? Theme.on_secondary_container : Theme.on_surface_variant
                             }
 
                             MouseArea {
@@ -823,6 +850,90 @@ Flickable {
                         }
                     }
                 }
+            }
+
+                // Panel Style Selection
+                ColumnLayout {
+                    Layout.fillWidth: true
+                    Layout.preferredWidth: 1
+                    Layout.alignment: Qt.AlignTop
+                    spacing: 10
+
+                    RowLayout {
+                    spacing: 12
+                    Text {
+                        text: "\ue1bd"
+                        font.family: "Material Symbols Outlined"
+                        font.pixelSize: 22
+                        color: Theme.on_surface_variant
+                    }
+                    Text {
+                        text: "Panel Style"
+                        font.family: Vars.fontFamily
+                        font.pixelSize: 15
+                        font.weight: 500
+                        color: Theme.on_surface
+                    }
+                }
+
+                RowLayout {
+                    Layout.fillWidth: true
+                    spacing: 3
+
+                    Repeater {
+                        id: styleRepeater
+                        model: [
+                            { name: "Floating", style: "Floating", icon: "layers" },
+                            { name: "Attached", style: "Attached", icon: "vertical_align_top" },
+                            { name: "Framed", style: "Framed", icon: "filter_frames" }
+                        ]
+                        delegate: Rectangle {
+                            Layout.fillWidth: true
+                            Layout.preferredHeight: 38
+                            property bool isSelected: (Vars.panelStyle || "Floating") === modelData.style
+                            property bool hasLeft: index > 0
+                            property bool hasRight: index < styleRepeater.count - 1
+
+                            topLeftRadius: isSelected ? 19 : (hasLeft ? 6 : 19)
+                            bottomLeftRadius: isSelected ? 19 : (hasLeft ? 6 : 19)
+                            topRightRadius: isSelected ? 19 : (hasRight ? 6 : 19)
+                            bottomRightRadius: isSelected ? 19 : (hasRight ? 6 : 19)
+
+                            color: isSelected ? Theme.secondary_container : (styleHover.containsMouse ? Theme.surface_container_highest : Theme.surface_container_high)
+                            border.width: 0
+
+                            Behavior on topLeftRadius { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
+                            Behavior on bottomLeftRadius { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
+                            Behavior on topRightRadius { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
+                            Behavior on bottomRightRadius { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
+                            Behavior on color { ColorAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
+
+                            Text {
+                                anchors.centerIn: parent
+                                text: modelData.icon
+                                font.family: parent.isSelected ? filledIconFont.name : "Material Symbols Outlined"
+                                font.pixelSize: 20
+                                color: parent.isSelected ? Theme.on_secondary_container : Theme.on_surface_variant
+                            }
+
+                            MouseArea {
+                                id: styleHover
+                                anchors.fill: parent
+                                hoverEnabled: true
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: {
+                                    if (Vars.panelStyle !== modelData.style) {
+                                        Vars.panelStyle = modelData.style;
+                                        Quickshell.execDetached({
+                                            command: ["bash", "-c", "$HOME/.local/bin/omniformis qs set 'panelStyle' '" + Vars.panelStyle + "'; nohup bash ~/Dotfiles/scripts/reload.sh >/dev/null 2>&1 &"]
+                                        });
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
             }
         }
 
@@ -895,7 +1006,7 @@ Flickable {
                         id: morphAnim
                         running: false
                         NumberAnimation { to: 22; duration: 160; easing.type: Easing.OutBack } // morph into circle
-                        NumberAnimation { to: 14; duration: 220; easing.type: Easing.InOutQuad } // morph back to rounded square
+                        NumberAnimation { to: 14; duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } // morph back to rounded square
                     }
 
                     Text {
@@ -942,8 +1053,8 @@ Flickable {
                     model: presetsModel
 
                     delegate: Item {
-                        width: 320
-                        height: 235
+                        width: Math.max(280, Math.floor((parent.width - 16) / 2))
+                        height: Math.max(200, Math.floor(width * 0.56))
 
                         // Card background with clean clipping and rounded corners
                         Rectangle {
@@ -955,35 +1066,76 @@ Flickable {
                             border.width: 1
                             clip: true
 
-                            // Wallpaper Image with smooth hardware-accelerated rounding
+                            property var presetVars: {
+                                try { return JSON.parse(model.variablesJson || "{}"); } catch(e) { return {}; }
+                            }
+                            property bool wpMaskEnabled: presetVars.wallpaperMaskEnabled !== undefined ? presetVars.wallpaperMaskEnabled : true
+                            property string wpMaskShape: presetVars.wallpaperMaskShape || model.maskShape || "6SidedCookie"
+                            property real wpMaskScale: presetVars.wallpaperMaskScale !== undefined ? presetVars.wallpaperMaskScale : 0.7
+                            property string wpMaskColor: presetVars.wallpaperMaskColor || "transparent"
+                            property string panelPosition: presetVars.pillPosition || "Top"
+                            property string panelStyle: presetVars.panelStyle || "Floating"
+
+                            Rectangle {
+                                anchors.fill: parent
+                                visible: cardBase.wpMaskEnabled
+                                color: {
+                                    var c = cardBase.wpMaskColor;
+                                    if (c === "background" || c === "transparent" || c === undefined) return Theme.background;
+                                    if (c === "primary") return Theme.primary;
+                                    if (c === "secondary") return Theme.secondary;
+                                    if (c === "tertiary") return Theme.tertiary;
+                                    if (c === "surface_variant") return Theme.surface_variant;
+                                    if (c === "error") return Theme.error;
+                                    return Theme.background;
+                                }
+                            }
+
                             Image {
+                                id: presetWpImage
                                 anchors.fill: parent
                                 fillMode: Image.PreserveAspectCrop
                                 source: model.wallpaper !== "" ? (model.wallpaper.startsWith("file://") ? model.wallpaper : "file://" + model.wallpaper) : ""
                                 smooth: true
                                 antialiasing: true
                                 mipmap: true
-
-                                layer.enabled: true
-                                layer.smooth: true
-                                layer.effect: MultiEffect {
-                                    maskEnabled: true
-                                    maskSource: presetWpMask
-                                    maskThresholdMin: 0.5
-                                    maskSpreadAtMin: 1.0
-                                }
+                                visible: false
                             }
 
                             Item {
-                                id: presetWpMask
+                                id: shapeMaskCanvas
                                 anchors.fill: parent
                                 visible: false
                                 layer.enabled: true
                                 layer.smooth: true
+
+                                Image {
+                                    anchors.centerIn: parent
+                                    anchors.verticalCenterOffset: -12
+                                    width: Math.min(cardBase.width, cardBase.height) * cardBase.wpMaskScale
+                                    height: width
+                                    source: cardBase.wpMaskEnabled ? ("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><path d='" + m3Shapes.getPath(cardBase.wpMaskShape) + "' fill='white'/></svg>") : ""
+                                    smooth: true
+                                    antialiasing: true
+                                    mipmap: true
+                                    visible: cardBase.wpMaskEnabled
+                                }
+
                                 Rectangle {
                                     anchors.fill: parent
                                     radius: 24
+                                    color: "white"
+                                    visible: !cardBase.wpMaskEnabled
                                 }
+                            }
+
+                            MultiEffect {
+                                anchors.fill: parent
+                                source: presetWpImage
+                                maskEnabled: true
+                                maskSource: shapeMaskCanvas
+                                antialiasing: true
+                                smooth: true
                             }
 
                             // Bottom 1/4 Translucent Banner
@@ -1011,15 +1163,26 @@ Flickable {
                                     ColumnLayout {
                                         Layout.fillWidth: true
                                         spacing: 2
-                                        Text {
-                                            Layout.fillWidth: true
-                                            text: model.name
-                                            font.family: Vars.fontFamily
-                                            font.pixelSize: 14
-                                            font.weight: 700
-                                            color: Theme.on_surface
-                                            elide: Text.ElideRight
+
+                                        RowLayout {
+                                            spacing: 6
+                                            Text {
+                                                text: cardBase.panelStyle === "Attached" ? "vertical_align_top" : (cardBase.panelStyle === "Framed" ? "filter_frames" : "layers")
+                                                font.family: "Material Symbols Outlined"
+                                                font.pixelSize: 17
+                                                color: Theme.primary
+                                            }
+                                            Text {
+                                                Layout.fillWidth: true
+                                                text: cardBase.panelPosition + " Position"
+                                                font.family: Vars.fontFamily
+                                                font.pixelSize: 14
+                                                font.weight: 700
+                                                color: Theme.on_surface
+                                                elide: Text.ElideRight
+                                            }
                                         }
+
                                         Text {
                                             Layout.fillWidth: true
                                             text: model.colorMode + " mode • " + model.matugenScheme.replace("scheme-", "")
@@ -1031,59 +1194,71 @@ Flickable {
                                         }
                                     }
 
-                                    // Apply Button / Badge
-                                    Rectangle {
-                                        Layout.preferredWidth: 58
-                                        Layout.preferredHeight: 30
-                                        radius: 15
-                                        color: applyHover.containsMouse ? Theme.primary : Qt.rgba(Theme.primary.r, Theme.primary.g, Theme.primary.b, 0.2)
-                                        Behavior on color { ColorAnimation { duration: 150 } }
+                                    // Segmented Button Group (Apply & Delete)
+                                    Row {
+                                        Layout.alignment: Qt.AlignRight | Qt.AlignVCenter
+                                        spacing: 4
 
-                                        Text {
-                                            anchors.centerIn: parent
-                                            text: "Apply"
-                                            font.family: Vars.fontFamily
-                                            font.pixelSize: 12
-                                            font.weight: 600
-                                            color: applyHover.containsMouse ? Theme.on_primary : Theme.primary
+                                        // Apply Button (more round left, less round right)
+                                        Rectangle {
+                                            width: 80
+                                            height: 36
+                                            topLeftRadius: 18
+                                            bottomLeftRadius: 18
+                                            topRightRadius: 6
+                                            bottomRightRadius: 6
+                                            color: applyHover.containsMouse ? Theme.primary : Qt.rgba(Theme.primary.r, Theme.primary.g, Theme.primary.b, 0.2)
                                             Behavior on color { ColorAnimation { duration: 150 } }
-                                        }
 
-                                        MouseArea {
-                                            id: applyHover
-                                            anchors.fill: parent
-                                            hoverEnabled: true
-                                            cursorShape: Qt.PointingHandCursor
-                                            onClicked: {
-                                                applyPreset(index);
+                                            Text {
+                                                anchors.centerIn: parent
+                                                text: "Apply"
+                                                font.family: Vars.fontFamily
+                                                font.pixelSize: 13
+                                                font.weight: 600
+                                                color: applyHover.containsMouse ? Theme.on_primary : Theme.primary
+                                                Behavior on color { ColorAnimation { duration: 150 } }
+                                            }
+
+                                            MouseArea {
+                                                id: applyHover
+                                                anchors.fill: parent
+                                                hoverEnabled: true
+                                                cursorShape: Qt.PointingHandCursor
+                                                onClicked: {
+                                                    applyPreset(index);
+                                                }
                                             }
                                         }
-                                    }
 
-                                    // Delete Preset Button
-                                    Rectangle {
-                                        Layout.preferredWidth: 30
-                                        Layout.preferredHeight: 30
-                                        radius: 15
-                                        color: delHover.containsMouse ? Qt.rgba(Theme.error.r, Theme.error.g, Theme.error.b, 0.2) : "transparent"
-                                        Behavior on color { ColorAnimation { duration: 150 } }
-
-                                        Text {
-                                            anchors.centerIn: parent
-                                            text: "\ue872" // delete trash icon
-                                            font.family: "Material Symbols Outlined"
-                                            font.pixelSize: 18
-                                            color: delHover.containsMouse ? Theme.error : Theme.on_surface_variant
+                                        // Delete Preset Button (less round left, more round right)
+                                        Rectangle {
+                                            width: 42
+                                            height: 36
+                                            topLeftRadius: 6
+                                            bottomLeftRadius: 6
+                                            topRightRadius: 18
+                                            bottomRightRadius: 18
+                                            color: delHover.containsMouse ? Theme.error : Qt.rgba(Theme.error.r, Theme.error.g, Theme.error.b, 0.18)
                                             Behavior on color { ColorAnimation { duration: 150 } }
-                                        }
 
-                                        MouseArea {
-                                            id: delHover
-                                            anchors.fill: parent
-                                            hoverEnabled: true
-                                            cursorShape: Qt.PointingHandCursor
-                                            onClicked: {
-                                                deletePreset(index);
+                                            Text {
+                                                anchors.centerIn: parent
+                                                text: "\ue872" // delete trash icon
+                                                font.family: "Material Symbols Outlined"
+                                                font.pixelSize: 18
+                                                color: delHover.containsMouse ? Theme.on_error : Theme.error
+                                                Behavior on color { ColorAnimation { duration: 150 } }
+                                            }
+
+                                            MouseArea {
+                                                id: delHover
+                                                anchors.fill: parent
+                                                hoverEnabled: true
+                                                cursorShape: Qt.PointingHandCursor
+                                                onClicked: {
+                                                    deletePreset(index);
+                                                }
                                             }
                                         }
                                     }

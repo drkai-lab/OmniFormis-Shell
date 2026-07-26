@@ -17,7 +17,7 @@ local vars = {
     SysInfo = "btop",
     -- Enable game mode (disables animations and system resources taking things out of the shell UI)
     GameMode = false,
-    -- Select layout for hyprland
+    -- Select layout for hyprland ("Scrolling", "Dwindle", "Master", "Monocle")
     Layout = "Scrolling",
 
     -- Input
@@ -35,7 +35,7 @@ local vars = {
     -- Gestures
     -- Set the number of gesture fingers
     gesture_fingers = 3,
-    -- Set the gesture direction
+    -- Set the gesture direction ("vertical", "horizontal", "both", "all", "none")
     gesture_direction = "vertical",
 
     -- Enable vim keys for navigation
@@ -149,7 +149,7 @@ local vars = {
 
     -- Animation Style
     -- Select animation style for hyprland ("expressive", "spring", "jelly", "flyingcards", "snappy", "cinematic", "minimal", "fluid", "aggressive", "elegant", "playful", "elastic", "swift", "relaxed", "slipstream", "standard", "fluent", "custom", "none")
-    AnimateStyle = "flyingcards",
+    AnimateStyle = "slipstream",
     
     -- --- Custom Animation Profile ---
     

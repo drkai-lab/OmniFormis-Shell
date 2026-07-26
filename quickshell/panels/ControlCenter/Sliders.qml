@@ -119,7 +119,9 @@ ColumnLayout {
                     opacity: volRightTrack.width > sliders.leftRadiusLarge * 2.5 ? 0.6 : 0.0
                     Behavior on opacity {
                         NumberAnimation {
-                            duration: 150
+                            duration: Vars.animationDuration
+                            easing.type: Easing.BezierSpline
+                            easing.bezierCurve: Vars.customStandard
                         }
                     }
                 }
@@ -200,7 +202,9 @@ ColumnLayout {
                     opacity: brightRightTrack.width > sliders.leftRadiusLarge * 2.5 ? 0.6 : 0.0
                     Behavior on opacity {
                         NumberAnimation {
-                            duration: 150
+                            duration: Vars.animationDuration
+                            easing.type: Easing.BezierSpline
+                            easing.bezierCurve: Vars.customStandard
                         }
                     }
                 }

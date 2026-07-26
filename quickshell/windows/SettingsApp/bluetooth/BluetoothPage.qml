@@ -344,16 +344,19 @@ ColumnLayout {
                                 anchors.verticalCenter: parent.verticalCenter
                                 anchors.left: parent.left; anchors.leftMargin: parent.isDiscovering ? 24 : 4
                                 Behavior on anchors.leftMargin { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
-                                Text { 
-                                    id: rotIcon
-                                    anchors.centerIn: parent; font.family: "Material Symbols Outlined"; font.pixelSize: 16
-                                    color: parent.parent.isDiscovering ? Theme.primary : Theme.surface_variant
-                                    text: parent.parent.isDiscovering ? "\ue86a" : "\ue5cd" 
-                                    RotationAnimation {
-                                        target: rotIcon; property: "rotation"
-                                        loops: Animation.Infinite; from: 0; to: 360; duration: 2000; running: rotIcon.parent.parent.isDiscovering
-                                        onRunningChanged: if (!running) rotIcon.rotation = 0
+                                Item {
+                                    anchors.fill: parent
+                                    visible: parent.parent.isDiscovering
+                                    Primitives.LoadingIndicator {
+                                        anchors.fill: parent
+                                        running: parent.visible
                                     }
+                                }
+                                Text { 
+                                    anchors.centerIn: parent; font.family: "Material Symbols Outlined"; font.pixelSize: 16
+                                    color: Theme.surface_variant
+                                    text: "\ue5cd"
+                                    visible: !parent.parent.isDiscovering
                                 }
                             }
                             MouseArea {

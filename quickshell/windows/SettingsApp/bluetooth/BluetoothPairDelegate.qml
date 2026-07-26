@@ -80,9 +80,19 @@ Item {
         Item {
             width: 40; height: 40
             Layout.alignment: Qt.AlignVCenter
+            property bool isChangingState: false
+            
+            Timer {
+                id: stateTimeoutTimer
+                interval: 15000
+                repeat: false
+                onTriggered: parent.isChangingState = false
+            }
+
             Primitives.LoadingIndicator {
+                id: btPairLoadingIndicator
                 anchors.fill: parent
-                running: modelData.connecting !== undefined ? modelData.connecting : (modelData.stateChanging !== undefined ? modelData.stateChanging : false)
+                running: parent.isChangingState || (modelData.connecting !== undefined ? modelData.connecting : false) || (modelData.stateChanging !== undefined ? modelData.stateChanging : false)
             }
         }
     }
@@ -95,6 +105,9 @@ Item {
             if (mouse.button === Qt.RightButton) {
                 btPairDelegate.showForget = true;
             } else {
+                if (btPairLoadingIndicator.running) return;
+                btPairLoadingIndicator.parent.isChangingState = true;
+                stateTimeoutTimer.restart();
                 if (!modelData.paired) {
                     if (rootPage.adapter && !rootPage.adapter.pairable) {
                         rootPage.adapter.pairable = true;
@@ -114,7 +127,14 @@ Item {
             if (modelData.paired) {
                 modelData.trusted = true;
                 modelData.connect();
+            } else {
+                btPairLoadingIndicator.parent.isChangingState = false;
+                stateTimeoutTimer.stop();
             }
+        }
+        function onConnectedChanged() {
+            btPairLoadingIndicator.parent.isChangingState = false;
+            stateTimeoutTimer.stop();
         }
     }
     

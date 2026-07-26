@@ -16,8 +16,11 @@ Item {
         width: root.radius * 4
         height: root.radius * 4
         
-        x: (root.side === "left" || root.side === "top-right" || root.side === "bottom-right" || root.side === "bottom-left-attach" || root.side === "right-top" || root.side === "right-bottom") ? -root.radius * 2 : -root.radius
-        y: (root.side === "bottom-left" || root.side === "bottom-right" || root.side === "bottom-left-attach" || root.side === "bottom-right-attach" || root.side === "right-top" || root.side === "left-top") ? -root.radius * 2 : -root.radius
+        property bool isRightSolid: (root.side === "left" || root.side === "top-right" || root.side === "bottom-right" || root.side === "bottom-left-attach" || root.side === "right-top" || root.side === "right-bottom")
+        property bool isBottomSolid: (root.side === "bottom-left" || root.side === "bottom-right" || root.side === "bottom-left-attach" || root.side === "bottom-right-attach" || root.side === "right-top" || root.side === "left-top" || root.side === "left-bottom" || root.side === "right-bottom")
+
+        x: isRightSolid ? -root.radius * 2 : -root.radius
+        y: isBottomSolid ? -root.radius * 2 : -root.radius
         
         radius: root.radius * 2
         color: "transparent"

@@ -7,8 +7,10 @@ import "../../theme/variables.js" as Vars
 
 Item {
     id: root
-    width: contentRow.implicitWidth + 38 // Dynamic width to fit both time and date
-    height: 40
+    property bool isVertical: Vars.pillPosition === "Left" || Vars.pillPosition === "Right"
+    onIsVerticalChanged: { if (timeTimer) timeTimer.triggered(); }
+    width: isVertical ? Math.max(40, contentGrid.implicitWidth + 20) : (contentGrid.implicitWidth + 38)
+    height: isVertical ? (contentGrid.implicitHeight + 38) : 40
     signal clicked
     signal rightClicked
     signal scrolled(int delta)
@@ -42,11 +44,12 @@ Item {
         }
         width: parent.width
         height: parent.height
+        property real targetRad: Math.min(root.width, root.height) / 2
         color: Vars.translucent ? Qt.rgba(Theme.surface.r, Theme.surface.g, Theme.surface.b, 0.85) : Theme.surface
-        topLeftRadius: Vars.getTopLeftRadius(Vars.panelStyle, Vars.pillPosition, root.gameMode, height / 2)
-        topRightRadius: Vars.getTopRightRadius(Vars.panelStyle, Vars.pillPosition, root.gameMode, height / 2)
-        bottomLeftRadius: Vars.getBottomLeftRadius(Vars.panelStyle, Vars.pillPosition, root.gameMode, height / 2)
-        bottomRightRadius: Vars.getBottomRightRadius(Vars.panelStyle, Vars.pillPosition, root.gameMode, height / 2)
+        topLeftRadius: Vars.getTopLeftRadius(Vars.panelStyle, Vars.pillPosition, root.gameMode, targetRad)
+        topRightRadius: Vars.getTopRightRadius(Vars.panelStyle, Vars.pillPosition, root.gameMode, targetRad)
+        bottomLeftRadius: Vars.getBottomLeftRadius(Vars.panelStyle, Vars.pillPosition, root.gameMode, targetRad)
+        bottomRightRadius: Vars.getBottomRightRadius(Vars.panelStyle, Vars.pillPosition, root.gameMode, targetRad)
         z: 1
 
         Rectangle {
@@ -67,6 +70,7 @@ Item {
         }
 
         Timer {
+            id: timeTimer
             interval: 1000
             running: true
             repeat: true
@@ -83,27 +87,36 @@ Item {
                     h = "0" + h;
                 if (m < 10)
                     m = "0" + m;
-                root.timeString = h + ":" + m;
-
-                // Date Logic
+                
                 var months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-                root.dateString = months[d.getMonth()] + " " + d.getDate();
+                
+                if (root.isVertical) {
+                    root.timeString = h + "\n:\n" + m;
+                    root.dateString = months[d.getMonth()] + "\n" + d.getDate();
+                } else {
+                    root.timeString = h + ":" + m;
+                    root.dateString = months[d.getMonth()] + " " + d.getDate();
+                }
             }
             Component.onCompleted: triggered()
         }
 
-        Row {
-            id: contentRow
+        Grid {
+            id: contentGrid
             anchors.centerIn: parent
-            spacing: 8
+            spacing: root.isVertical ? 6 : 8
+            columns: root.isVertical ? 1 : 2
+            rows: root.isVertical ? 2 : 1
 
             Text {
                 id: clockText
                 font.family: Vars.fontFamily
                 font.pixelSize: 14
-                font.weight: 600 // Slightly bolder to match the new crisp aesthetic
+                font.weight: 600
                 color: Theme.on_surface
                 text: root.timeString
+                horizontalAlignment: Text.AlignHCenter
+                lineHeight: root.isVertical ? 0.9 : 1.0
             }
 
             Text {
@@ -112,8 +125,10 @@ Item {
                 font.pixelSize: 14
                 font.weight: 600
                 color: Theme.on_surface
-                opacity: 0.7 // Slightly faded to establish visual hierarchy
+                opacity: 0.7
                 text: root.dateString
+                horizontalAlignment: Text.AlignHCenter
+                lineHeight: root.isVertical ? 0.9 : 1.0
             }
         }
 

@@ -9,16 +9,28 @@ fn get_variables_path() -> std::path::PathBuf {
 }
 
 pub fn load_variables() -> String {
-    let path = get_variables_path();
-    fs::read_to_string(&path).unwrap_or_else(|_| {
-        eprintln!("Error: Could not find variables.js at {:?}", path);
+    let path_dotfiles = get_variables_path();
+    if let Ok(content) = fs::read_to_string(&path_dotfiles) {
+        if !content.trim().is_empty() {
+            return content;
+        }
+    }
+    let path_config = expand_tilde("~/.config/quickshell/theme/variables.js");
+    fs::read_to_string(&path_config).unwrap_or_else(|_| {
+        eprintln!("Error: Could not find valid variables.js at Dotfiles or config directory");
         exit(1);
     })
 }
 
 pub fn save_variables(content: &str) {
-    let path = get_variables_path();
-    fs::write(path, content).expect("Failed to write variables");
+    if content.trim().is_empty() {
+        eprintln!("Error: Attempted to write empty variables.js content; aborting save.");
+        return;
+    }
+    let path_dotfiles = get_variables_path();
+    let path_config = expand_tilde("~/.config/quickshell/theme/variables.js");
+    let _ = fs::write(&path_dotfiles, content);
+    let _ = fs::write(&path_config, content);
 }
 
 pub fn parse_all(content: &str) -> HashMap<String, String> {
@@ -80,8 +92,16 @@ pub fn update_var(content: &str, key: &str, value: &str) -> String {
         }
     }
 
-    let repl = format!("${{1}}{}${{3}}", new_value_str);
-    re_get.replace(content, repl).to_string()
+    let mut result = Vec::new();
+    let prefix = format!("var {} =", key);
+    for line in content.lines() {
+        if line.trim_start().starts_with(&prefix) {
+            result.push(format!("var {} = {};", key, new_value_str));
+        } else {
+            result.push(line.to_string());
+        }
+    }
+    result.join("\n") + "\n"
 }
 
 pub fn set(key: &str, value: &str) {

@@ -46,21 +46,29 @@ ColumnLayout {
     Repeater {
         model: [
             // Presets & Quick Settings
-            { id: "quick", name: "Quick & Presets", subtitle: "Presets, wallpaper, schemes", icon: "\ue41d", section: "Presets & Customization", isFirst: true, isLast: true, hue: 0.80, shape: "Sunny" },
+            { id: "quick", name: "Quick & Presets", subtitle: "Presets, wallpaper, panel style & position", icon: "\ue41d", section: "Presets & Customization", isFirst: true, isLast: true, hue: 0.80, shape: "Sunny" },
 
             // Connections
             { id: "wifi", name: "Wi-Fi", subtitle: "Wi-Fi, ethernet", icon: rootSidebar.wifiIcon, section: "Connections", isFirst: true, isLast: false, hue: 0.60, shape: "Circle" },
             { id: "bluetooth", name: "Connected devices", subtitle: "Bluetooth, devices, pairing", icon: "\ue337", section: "Connections", isFirst: false, isLast: true, hue: 0.65, shape: "Square" },
             
-            // General and Appearance
-            { id: "General", name: "General", subtitle: "System config, spacing, layout", icon: "\ue8b8", section: "General and Appearance", isFirst: true, isLast: false, hue: 0.70, shape: "4SidedCookie" },
-            { id: "Appearance", name: "Appearance", subtitle: "Theme, rounding, colors", icon: "\ue3b7", section: "General and Appearance", isFirst: false, isLast: false, hue: 0.85, shape: "Bun" },
-            { id: "Input", name: "Input", subtitle: "Keyboard, mouse, gestures", icon: "\ue312", section: "General and Appearance", isFirst: false, isLast: false, hue: 0.95, shape: "Pill" },
-            { id: "bezier", name: "Animation", subtitle: "Custom curve editor", icon: "\ue71c", section: "General and Appearance", isFirst: false, isLast: true, hue: 0.05, shape: "Oval" },
+            // System & Input
+            { id: "General", name: "System & Apps", subtitle: "Default apps, environment, gaming", icon: "\ue8b8", section: "System & Input", isFirst: true, isLast: false, hue: 0.70, shape: "4SidedCookie" },
+            { id: "Input", name: "Input Devices", subtitle: "Keyboard layout, mouse, gestures", icon: "\ue312", section: "System & Input", isFirst: false, isLast: false, hue: 0.75, shape: "Pill" },
+            { id: "Keybinds", name: "Shortcuts & Modifiers", subtitle: "System shortcuts, hotkeys, modifiers", icon: "\ue31c", section: "System & Input", isFirst: false, isLast: true, hue: 0.80, shape: "6SidedCookie" },
+
+            // Desktop & Windows
+            { id: "Desktop", name: "Desktop & Widgets", subtitle: "Clock, calendar, media widget, overview", icon: "\ue871", section: "Desktop & Windows", isFirst: true, isLast: false, hue: 0.85, shape: "Clamshell" },
+            { id: "Layout", name: "Window Gaps & Layout", subtitle: "Window gaps, border size, spacing, padding", icon: "\ue8f1", section: "Desktop & Windows", isFirst: false, isLast: true, hue: 0.90, shape: "Bun" },
+
+            // Appearance & Animations
+            { id: "Theme", name: "Visuals & Effects", subtitle: "Rounding, opacity, blur, shadow, font, mask", icon: "\ue3b7", section: "Appearance & Animations", isFirst: true, isLast: false, hue: 0.95, shape: "Flower" },
+            { id: "Animations", name: "Animation & Physics", subtitle: "Animation style, durations, scroll physics", icon: "\ue410", section: "Appearance & Animations", isFirst: false, isLast: false, hue: 0.00, shape: "VerySunny" },
+            { id: "bezier", name: "Curve Editor", subtitle: "Interactive custom bezier creator", icon: "\ue71c", section: "Appearance & Animations", isFirst: false, isLast: true, hue: 0.06, shape: "Oval" },
             
-            // System
-            { id: "taskmanager", name: "Task Manager", subtitle: "System resources, processes", icon: "\ue85c", section: "System", isFirst: true, isLast: false, hue: 0.12, shape: "6SidedCookie" },
-            { id: "about", name: "About", subtitle: "Omniformis Shell info", icon: "\ue88e", section: "System", isFirst: false, isLast: true, hue: 0.18, shape: "12SidedCookie" }
+            // System Monitor & Info
+            { id: "taskmanager", name: "Task Manager", subtitle: "System resources, processes", icon: "\ue85c", section: "System Info", isFirst: true, isLast: false, hue: 0.12, shape: "12SidedCookie" },
+            { id: "about", name: "About", subtitle: "Omniformis Shell info", icon: "\ue88e", section: "System Info", isFirst: false, isLast: true, hue: 0.18, shape: "8LeafClover" }
         ]
         delegate: ColumnLayout {
             Layout.fillWidth: true

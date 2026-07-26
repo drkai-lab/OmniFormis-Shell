@@ -19,7 +19,7 @@ Item {
 
     // Animate height changes for smooth insertions/removals
     Behavior on height {
-        NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.OutCubic }
+        NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard }
     }
 
     // A state flag to indicate if we are dismissing so we can trigger animations
@@ -95,10 +95,10 @@ Item {
         bottomLeftRadius: isEffectivelyLast ? Vars.radiusLarge : 4
         bottomRightRadius: isEffectivelyLast ? Vars.radiusLarge : 4
         
-        Behavior on topLeftRadius { NumberAnimation { duration: 250; easing.type: Easing.OutCubic } }
-        Behavior on topRightRadius { NumberAnimation { duration: 250; easing.type: Easing.OutCubic } }
-        Behavior on bottomLeftRadius { NumberAnimation { duration: 250; easing.type: Easing.OutCubic } }
-        Behavior on bottomRightRadius { NumberAnimation { duration: 250; easing.type: Easing.OutCubic } }
+        Behavior on topLeftRadius { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
+        Behavior on topRightRadius { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
+        Behavior on bottomLeftRadius { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
+        Behavior on bottomRightRadius { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
         
         color: isPopup ? (modelData.urgency === NotificationUrgency.Critical ? Theme.error : "transparent") : (modelData.urgency === NotificationUrgency.Critical ? Theme.error_container : (Vars.translucent ? Qt.rgba(Theme.surface_container_high.r, Theme.surface_container_high.g, Theme.surface_container_high.b, 0.6) : Theme.surface_container_high))
         border.width: 0
@@ -117,7 +117,7 @@ Item {
         // Opacity animation for entry/exit
         opacity: dismissing ? 0.0 : 1.0
         Behavior on opacity {
-            NumberAnimation { duration: dismissing ? Vars.animationDuration : Vars.animationDuration; easing.type: Easing.OutCubic }
+            NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard }
         }
 
         // Entry animation (opacity from 0)

@@ -69,9 +69,38 @@ Item {
         }
     }
 
+    property bool isChangingState: false
+    
+    Timer {
+        id: stateTimeoutTimer
+        interval: 15000 // 15-second safety timeout if connection attempt stalls
+        repeat: false
+        onTriggered: btDelegate.isChangingState = false
+    }
+
+    Connections {
+        target: modelData
+        function onConnectedChanged() {
+            btDelegate.isChangingState = false;
+            stateTimeoutTimer.stop();
+        }
+    }
+
+    function toggleConnection() {
+        if (btDelegate.isChangingState) return;
+        btDelegate.isChangingState = true;
+        stateTimeoutTimer.restart();
+        if (modelData.connected) {
+            modelData.disconnect();
+        } else {
+            modelData.trusted = true;
+            modelData.connect();
+        }
+    }
+
     activeFocusOnTab: true
-    Keys.onSpacePressed: { if (modelData.connected) modelData.disconnect(); else modelData.connect(); }
-    Keys.onReturnPressed: { if (modelData.connected) modelData.disconnect(); else modelData.connect(); }
+    Keys.onSpacePressed: toggleConnection()
+    Keys.onReturnPressed: toggleConnection()
     
     FontLoader {
         id: filledIconFont
@@ -95,7 +124,7 @@ Item {
             Layout.alignment: Qt.AlignVCenter
             Primitives.LoadingIndicator {
                 anchors.fill: parent
-                running: modelData.connecting !== undefined ? modelData.connecting : (modelData.stateChanging !== undefined ? modelData.stateChanging : false)
+                running: btDelegate.isChangingState || (modelData.connecting !== undefined ? modelData.connecting : false) || (modelData.stateChanging !== undefined ? modelData.stateChanging : false)
             }
         }
     }
@@ -108,12 +137,7 @@ Item {
             if (mouse.button === Qt.RightButton) {
                 btDelegate.showForget = true;
             } else {
-                if (modelData.connected) {
-                    modelData.disconnect();
-                } else {
-                    modelData.trusted = true;
-                    modelData.connect();
-                }
+                toggleConnection();
             }
         }
     }

@@ -1,28 +1,28 @@
 {
   "checksum": ":)",
-  "wallpaper": "/home/boing/Pictures/Wallpapers/Wallpapers-Bank/wallpapers/Orange-Balls.png",
+  "wallpaper": "/home/boing/Pictures/Wallpapers/Wallpapers-Bank/wallpapers/City-Rainy-Night.png",
   "alpha": "100",
   "special": {
-    "background": "#e8d6d3",
-    "foreground": "#231918",
-    "cursor": "#904b3e"
+    "background": "#dad9e5",
+    "foreground": "#1a1b23",
+    "cursor": "#00168d"
   },
   "colors": {
-    "color0": "#e8d6d3",
-    "color1": "#380803",
-    "color2": "#8b473d",
-    "color3": "#7b6122",
-    "color4": "#904b3e",
-    "color5": "#6f5c2e",
-    "color6": "#ffdad4",
-    "color7": "#534340",
-    "color8": "#f5ddd9",
-    "color9": "#9f402f",
-    "color10": "#ae594d",
-    "color11": "#a3802d",
-    "color12": "#b35e4e",
-    "color13": "#937a3d",
-    "color14": "#ffdad4",
-    "color15": "#231918"
+    "color0": "#dad9e5",
+    "color1": "#050a38",
+    "color2": "#3b48ac",
+    "color3": "#4e0061",
+    "color4": "#00168d",
+    "color5": "#4e0061",
+    "color6": "#b5bcff",
+    "color7": "#454655",
+    "color8": "#e1e1f4",
+    "color9": "#263fee",
+    "color10": "#5562c5",
+    "color11": "#770094",
+    "color12": "#001ec0",
+    "color13": "#770094",
+    "color14": "#0321ca",
+    "color15": "#1a1b23"
   }
 }

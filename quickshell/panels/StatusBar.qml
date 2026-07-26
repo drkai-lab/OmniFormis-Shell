@@ -10,23 +10,29 @@ import "../theme/variables.js" as Vars
 // Blanket Style: A single unified unibody pill to hold all tray icons
 Rectangle {
     id: systemTrayContainer
+
+    signal openTrayMenuRequested(var menu)
     layer.enabled: true
     layer.samples: 4
     layer.effect: MultiEffect { shadowEnabled: true; shadowBlur: 1.0; shadowColor: Qt.rgba(0,0,0,0.25); shadowVerticalOffset: 4; shadowHorizontalOffset: 0 }
     color: Theme.surface_container_high
-    radius: height / 2
+    property bool isVertical: Vars.pillPosition === "Left" || Vars.pillPosition === "Right"
+    radius: Math.min(width, height) / 2
     
     // THE FIX: Only show this pill if there is actually an app in the tray!
     visible: SystemTray.items.length > 0
     
-    // Auto-size based on the number of tray items
-    implicitWidth: trayLayout.implicitWidth + Vars.spacingLarge
-    implicitHeight: 40
+    // Auto-size based on the number of tray items and orientation
+    implicitWidth: isVertical ? 40 : (trayLayout.implicitWidth + Vars.spacingLarge)
+    implicitHeight: isVertical ? (trayLayout.implicitHeight + Vars.spacingLarge) : 40
 
-    RowLayout {
+    GridLayout {
         id: trayLayout
         anchors.centerIn: parent
-        spacing: Vars.spacingSmall
+        columns: systemTrayContainer.isVertical ? 1 : Math.max(1, SystemTray.items.length)
+        rows: systemTrayContainer.isVertical ? Math.max(1, SystemTray.items.length) : 1
+        rowSpacing: Vars.spacingSmall
+        columnSpacing: Vars.spacingSmall
 
         Repeater {
             model: SystemTray.items
@@ -46,11 +52,6 @@ Rectangle {
 
                 property var trayItem: modelData 
 
-                QsMenuAnchor {
-                    id: contextMenu
-                    menu: trayItem.menu 
-                }
-
                 MouseArea {
                     id: itemMouseArea
                     anchors.fill: parent
@@ -60,8 +61,8 @@ Rectangle {
 
                     onClicked: (mouse) => {
                         if (!trayItem) return;
-                        if (mouse.button === Qt.RightButton && trayItem.hasMenu) {
-                            contextMenu.open();
+                        if (mouse.button === Qt.RightButton && trayItem.menu) {
+                            systemTrayContainer.openTrayMenuRequested(trayItem.menu);
                         } else {
                             trayItem.activate();
                         }

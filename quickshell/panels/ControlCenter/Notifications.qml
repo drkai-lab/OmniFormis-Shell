@@ -57,6 +57,15 @@ Item {
             delegate: Item {
                 Layout.fillWidth: true
                 height: card.height
+                clip: true
+
+                Behavior on height {
+                    NumberAnimation {
+                        duration: Vars.animationDuration
+                        easing.type: Easing.BezierSpline
+                        easing.bezierCurve: Vars.customStandard
+                    }
+                }
                 
                 NotificationCard {
                     id: card

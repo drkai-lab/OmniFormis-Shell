@@ -124,7 +124,7 @@ Item {
         visible: opacity > 0
 
         color: Theme.surface_container_high
-        property real targetRad: root.expanded ? 32 : height / 2
+        property real targetRad: root.expanded ? Vars.radiusExtraLarge : height / 2
         topLeftRadius: Vars.getTopLeftRadius(Vars.panelStyle, Vars.pillPosition, root.gameMode, targetRad)
         topRightRadius: Vars.getTopRightRadius(Vars.panelStyle, Vars.pillPosition, root.gameMode, targetRad)
         bottomLeftRadius: Vars.getBottomLeftRadius(Vars.panelStyle, Vars.pillPosition, root.gameMode, targetRad)
@@ -205,7 +205,7 @@ Item {
                     id: passwordBox
                     Layout.fillWidth: true
                     Layout.preferredHeight: 44
-                    radius: 12
+                    radius: Vars.radiusMedium
                     color: root.authError
                         ? Qt.rgba(Theme.error.r, Theme.error.g, Theme.error.b, 0.15)
                         : Theme.primary_container

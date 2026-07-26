@@ -82,7 +82,7 @@ Item {
 
         color: Vars.translucent ? Qt.rgba((root.expanded ? root.expandedColor.r : Theme.primary.r), (root.expanded ? root.expandedColor.g : Theme.primary.g), (root.expanded ? root.expandedColor.b : Theme.primary.b), 0.85) : (root.expanded ? root.expandedColor : Theme.primary)
         Behavior on color { ColorAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customExpressiveSpatialSlow } }
-        radius: root.expanded ? 24 : height / 2
+        radius: root.expanded ? Vars.radiusLarge : height / 2
 
         opacity: root.expanded ? 1.0 : 0.0
         visible: true
@@ -113,7 +113,7 @@ Item {
             opacity: root.expanded ? 1.0 : 0.0
             visible: opacity > 0
             // REMOVED PauseAnimation so content appears instantly
-            Behavior on opacity { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.OutCubic } }
+            Behavior on opacity { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
 
             Item {
                 id: notifContainer
@@ -159,7 +159,8 @@ Item {
                             Behavior on opacity { 
                                 NumberAnimation { 
                                     duration: Vars.animationDuration; 
-                                    easing.type: Easing.OutCubic 
+                                    easing.type: Easing.BezierSpline;
+                                    easing.bezierCurve: Vars.customStandard
                                 } 
                             }
                         }

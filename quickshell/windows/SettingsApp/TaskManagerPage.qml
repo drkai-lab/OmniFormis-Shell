@@ -17,7 +17,7 @@ Item {
     property string gpuUsage: "0%"
     property string ramUsage: "0MB / 0MB"
     
-    // Task Managing State
+    // Task Manager State
     property var processModel: []
     property var autostartModel: []
     property string processFilter: "mem"
@@ -105,7 +105,7 @@ Item {
         }
     }
     
-    // --- Task Managing Processes ---
+    // --- Task Manager Processes ---
     Process {
         id: psProc
         command: ["sh", "-c", 
@@ -288,7 +288,7 @@ Item {
                     Behavior on color { ColorAnimation { duration: Vars.animationDuration } }
                     Text {
                         anchors.centerIn: parent
-                        text: "Task Managing"
+                        text: "Task Manager"
                         font.family: Vars.fontFamily
                         font.pixelSize: 14
                         font.weight: Font.Medium
@@ -333,17 +333,17 @@ Item {
                                 width: 64; height: 64
                                 Image {
                                     anchors.fill: parent; sourceSize: Qt.size(64, 64); smooth: true; antialiasing: true; mipmap: true
-                                    property color bg: Theme.primary_container
+                                    property color bg: Qt.hsla(0.60, 0.35, 0.82, 1.0)
                                     property string pathColor: "rgb(" + Math.round(bg.r * 255) + "," + Math.round(bg.g * 255) + "," + Math.round(bg.b * 255) + ")"
                                     property string currentPath: m3TaskManager.getPath("Pill")
                                     source: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><path d='" + currentPath + "' fill='" + pathColor + "'/></svg>"
                                 }
-                                Text { anchors.centerIn: parent; font.family: "Material Symbols Outlined"; font.pixelSize: 32; color: Theme.on_primary_container; text: "memory" } 
+                                Text { anchors.centerIn: parent; font.family: "Material Symbols Outlined"; font.pixelSize: 32; color: Qt.hsla(0.60, 0.40, 0.25, 1.0); text: "memory" } 
                             }
                             ColumnLayout {
                                 Layout.fillWidth: true; spacing: 4
                                 Text { Layout.fillWidth: true; horizontalAlignment: Text.AlignLeft; text: "CPU Usage"; font.family: Vars.fontFamily; font.pixelSize: 16; color: Theme.on_surface; font.weight: Font.Medium }
-                                Text { Layout.fillWidth: true; horizontalAlignment: Text.AlignLeft; text: rootTaskManager.cpuUsage; font.family: Vars.fontFamily; font.pixelSize: 24; color: Theme.primary; font.weight: Font.Bold }
+                                Text { Layout.fillWidth: true; horizontalAlignment: Text.AlignLeft; text: rootTaskManager.cpuUsage; font.family: Vars.fontFamily; font.pixelSize: 24; color: Qt.hsla(0.60, 0.60, 0.75, 1.0); font.weight: Font.Bold }
                             }
                         }
                     }
@@ -357,17 +357,17 @@ Item {
                                 width: 64; height: 64
                                 Image {
                                     anchors.fill: parent; sourceSize: Qt.size(64, 64); smooth: true; antialiasing: true; mipmap: true
-                                    property color bg: Theme.primary_container
+                                    property color bg: Qt.hsla(0.80, 0.35, 0.82, 1.0)
                                     property string pathColor: "rgb(" + Math.round(bg.r * 255) + "," + Math.round(bg.g * 255) + "," + Math.round(bg.b * 255) + ")"
                                     property string currentPath: m3TaskManager.getPath("Slanted")
                                     source: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><path d='" + currentPath + "' fill='" + pathColor + "'/></svg>"
                                 }
-                                Text { anchors.centerIn: parent; font.family: "Material Symbols Outlined"; font.pixelSize: 32; color: Theme.on_primary_container; text: "grid_view" } 
+                                Text { anchors.centerIn: parent; font.family: "Material Symbols Outlined"; font.pixelSize: 32; color: Qt.hsla(0.80, 0.40, 0.25, 1.0); text: "developer_board" } 
                             }
                             ColumnLayout {
                                 Layout.fillWidth: true; spacing: 4
                                 Text { Layout.fillWidth: true; horizontalAlignment: Text.AlignLeft; text: "GPU Usage"; font.family: Vars.fontFamily; font.pixelSize: 16; color: Theme.on_surface; font.weight: Font.Medium }
-                                Text { Layout.fillWidth: true; horizontalAlignment: Text.AlignLeft; text: rootTaskManager.gpuUsage; font.family: Vars.fontFamily; font.pixelSize: 24; color: Theme.primary; font.weight: Font.Bold }
+                                Text { Layout.fillWidth: true; horizontalAlignment: Text.AlignLeft; text: rootTaskManager.gpuUsage; font.family: Vars.fontFamily; font.pixelSize: 24; color: Qt.hsla(0.80, 0.60, 0.75, 1.0); font.weight: Font.Bold }
                             }
                         }
                     }
@@ -381,17 +381,17 @@ Item {
                                 width: 64; height: 64
                                 Image {
                                     anchors.fill: parent; sourceSize: Qt.size(64, 64); smooth: true; antialiasing: true; mipmap: true
-                                    property color bg: Theme.primary_container
+                                    property color bg: Qt.hsla(0.38, 0.35, 0.82, 1.0)
                                     property string pathColor: "rgb(" + Math.round(bg.r * 255) + "," + Math.round(bg.g * 255) + "," + Math.round(bg.b * 255) + ")"
                                     property string currentPath: m3TaskManager.getPath("Clamshell")
                                     source: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><path d='" + currentPath + "' fill='" + pathColor + "'/></svg>"
                                 }
-                                Text { anchors.centerIn: parent; font.family: "Material Symbols Outlined"; font.pixelSize: 32; color: Theme.on_primary_container; text: "data_usage" } 
+                                Text { anchors.centerIn: parent; font.family: "Material Symbols Outlined"; font.pixelSize: 32; color: Qt.hsla(0.38, 0.40, 0.25, 1.0); text: "storage" } 
                             }
                             ColumnLayout {
                                 Layout.fillWidth: true; spacing: 4
                                 Text { Layout.fillWidth: true; horizontalAlignment: Text.AlignLeft; text: "RAM Usage"; font.family: Vars.fontFamily; font.pixelSize: 16; color: Theme.on_surface; font.weight: Font.Medium }
-                                Text { Layout.fillWidth: true; horizontalAlignment: Text.AlignLeft; text: rootTaskManager.ramUsage; font.family: Vars.fontFamily; font.pixelSize: 24; color: Theme.primary; font.weight: Font.Bold }
+                                Text { Layout.fillWidth: true; horizontalAlignment: Text.AlignLeft; text: rootTaskManager.ramUsage; font.family: Vars.fontFamily; font.pixelSize: 24; color: Qt.hsla(0.38, 0.60, 0.75, 1.0); font.weight: Font.Bold }
                             }
                         }
                     }
@@ -400,7 +400,7 @@ Item {
                 }
             }
             
-            // Tab 1: Task Managing
+            // Tab 1: Task Manager
             Flickable {
                 Layout.fillWidth: true; Layout.fillHeight: true
                 contentHeight: managingLayout.implicitHeight

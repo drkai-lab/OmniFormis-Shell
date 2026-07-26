@@ -1,20 +1,52 @@
 .pragma library
 
-var radiusAmount = 0.5
-var radiusSmall = 8
-var radiusMedium = 16
-var radiusLarge = 24
-var radiusExtraLarge = 32
+var radiusAmount = 0.5;
+var radiusSmall = 8;
+var radiusMedium = 16;
+var radiusLarge = 24;
+var radiusExtraLarge = 38;
 
-var spacingSmall = 8
-var spacingMedium = 16
-var spacingLarge = 24
+var spacingSmall = 11;
+var spacingMedium = 16;
+var spacingLarge = 24;
 
-var paddingSmall = 8
-var paddingMedium = 16
-var paddingLarge = 24
+var paddingSmall = 8;
+var paddingMedium = 16;
+var paddingLarge = 24;
 
-var fontFamily = "Rubik"
+var fontFamily = "Rubik";
+var animationDuration = 240;
+var flickDeceleration = 1500;
+var maximumFlickVelocity = 3000;
+var translucent = true;
+var blurAmount = 30;
+
+var overviewGridRows = 2;
+var overviewGridColumns = 5;
+var overviewScale = 0.15;
+
+var wallpaperMaskEnabled = true;
+var wallpaperMaskScale = 0.7;
+var wallpaperMaskShape = "6SidedCookie";
+var wallpaperMaskColor = "transparent";
+var wallpaperMaskOffsetX = 0;
+var wallpaperMaskOffsetY = 0;
+
+var clockShape = "Sunny";
+var clockShowTicks = true;
+var clockShowCenterDot = true;
+
+var mediaPlayerShape = "12SidedCookie";
+var mediaPlayerArtScale = 1.0;
+
+var panelStyle = "Floating";
+var pillPosition = "Top";
+var gameMode = false;
+
+var desktopClockEnabled = true;
+var desktopCalenderEnabled = true;
+var desktopMediaPlayerEnabled = true;
+
 var m3Standard = [0.2, 0.0, 0.0, 1.0];
 var m3StandardDecelerate = [0.0, 0.0, 0.0, 1.0];
 var m3StandardAccelerate = [0.3, 0.0, 1.0, 1.0];
@@ -22,6 +54,42 @@ var m3EmphasizedDecelerate = [0.05, 0.7, 0.1, 1.0];
 var m3EmphasizedAccelerate = [0.3, 0.0, 0.8, 0.15];
 var m3ExpressiveSpatialFast = [0.42, 1.67, 0.21, 0.9];
 var m3ExpressiveSpatialSlow = [0.39, 1.29, 0.35, 0.98];
+
+var customStandard = [0.2, 0.0, 0.0, 1.0];
+var customStandardDecelerate = [0.0, 0.0, 0.0, 1.0];
+var customStandardAccelerate = [0.3, 0.0, 1.0, 1.0];
+var customEmphasizedDecelerate = [0.05, 0.7, 0.1, 1.0];
+var customEmphasizedAccelerate = [0.3, 0.0, 0.8, 0.15];
+var customExpressiveSpatialFast = [0.42, 1.67, 0.21, 0.9];
+var customExpressiveSpatialSlow = [0.39, 1.29, 0.35, 0.98];
+
+function getTopLeftRadius(style, pos, isGame, defRad) {
+    var rad = (defRad !== undefined && defRad !== null) ? defRad : 24;
+    if (isGame || !style || !pos) return rad;
+    if (style === "Attached" && (pos === "Top" || pos === "Left")) return 0;
+    return rad;
+}
+
+function getTopRightRadius(style, pos, isGame, defRad) {
+    var rad = (defRad !== undefined && defRad !== null) ? defRad : 24;
+    if (isGame || !style || !pos) return rad;
+    if (style === "Attached" && (pos === "Top" || pos === "Right")) return 0;
+    return rad;
+}
+
+function getBottomLeftRadius(style, pos, isGame, defRad) {
+    var rad = (defRad !== undefined && defRad !== null) ? defRad : 24;
+    if (isGame || !style || !pos) return rad;
+    if (style === "Attached" && (pos === "Bottom" || pos === "Left")) return 0;
+    return rad;
+}
+
+function getBottomRightRadius(style, pos, isGame, defRad) {
+    var rad = (defRad !== undefined && defRad !== null) ? defRad : 24;
+    if (isGame || !style || !pos) return rad;
+    if (style === "Attached" && (pos === "Bottom" || pos === "Right")) return 0;
+    return rad;
+}
 
 function fuzzyMatch(pattern, str) {
     if (!pattern) return true;
@@ -43,19 +111,12 @@ var notificationHistory = [];
 var historyUpdated = 0;
 
 function pushNotification(modelData) {
-    console.log("pushNotification called! modelData:", modelData);
-    if (!modelData) {
-        console.log("ERROR: modelData is null or undefined");
-        return;
-    }
+    if (!modelData) return;
     
-    // Fallback to id if seqId is undefined
     var uniqueId = modelData.seqId !== undefined ? modelData.seqId : (modelData.id !== undefined ? modelData.id : Math.random());
-    console.log("Notification uniqueId:", uniqueId);
 
     for (var i = 0; i < notificationHistory.length; i++) {
         if (notificationHistory[i].seqId === uniqueId) {
-            console.log("Duplicate notification prevented:", uniqueId);
             return;
         }
     }
@@ -92,7 +153,6 @@ function pushNotification(modelData) {
     
     notificationHistory.unshift(n);
     historyUpdated++;
-    console.log("Notification pushed successfully! History size:", notificationHistory.length);
 }
 
 function removeNotification(seqId) {

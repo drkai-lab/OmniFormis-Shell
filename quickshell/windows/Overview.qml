@@ -88,7 +88,7 @@ Item {
             color: "transparent"
 
             WlrLayershell.namespace: "quickshell"
-            WlrLayershell.layer: WlrLayer.Top
+            WlrLayershell.layer: WlrLayer.Overlay
             WlrLayershell.keyboardFocus: WlrKeyboardFocus.Exclusive
             exclusionMode: ExclusionMode.Ignore
             
@@ -167,9 +167,9 @@ Item {
                 property real targetHeight: workspaceGrid.implicitHeight + overviewPanel.bgPadding * 2
                 
                 property real innerMaxWidth: parent.width - (2 * Vars.spacingSmall)
-                property bool touchesEdges: Vars.panelStyle === "Framed" && targetWidth >= innerMaxWidth - 20
+                property bool touchesEdges: false
 
-                property real activeMargin: overviewContainer.gameMode || Vars.panelStyle === "Attached" || Vars.panelStyle === "Flat" ? 0 : Vars.spacingSmall
+                property real activeMargin: overviewContainer.gameMode || Vars.panelStyle === "Framed" || Vars.panelStyle === "Flat" ? 0 : Vars.spacingSmall
                 anchors.topMargin: (!Vars.pillPosition || Vars.pillPosition === "Top") ? activeMargin : 0
                 anchors.bottomMargin: Vars.pillPosition === "Bottom" ? activeMargin : 0
                 anchors.leftMargin: Vars.pillPosition === "Left" ? activeMargin : 0
@@ -283,40 +283,40 @@ Item {
                 anchors.top: panelBackground.top
                 anchors.right: panelBackground.left
                 side: "left"
-                visible: Vars.panelStyle === "Framed" && !panelBackground.touchesEdges && overviewContainer.visibleState
+                visible: Vars.panelStyle === "Attached" && panelBackground.opacity > 0 && (!Vars.pillPosition || Vars.pillPosition === "Top")
                 color: panelBackground.color
                 opacity: panelBackground.opacity
-                radius: panelBackground.innerFrameRadius
+                radius: Math.max(0, Math.min(Vars.radiusExtraLarge, Math.min(panelBackground.width, panelBackground.height) / 2))
             }
 
             InvertedCorner {
                 anchors.top: panelBackground.top
                 anchors.left: panelBackground.right
                 side: "right"
-                visible: Vars.panelStyle === "Framed" && !panelBackground.touchesEdges && overviewContainer.visibleState
+                visible: Vars.panelStyle === "Attached" && panelBackground.opacity > 0 && (!Vars.pillPosition || Vars.pillPosition === "Top")
                 color: panelBackground.color
                 opacity: panelBackground.opacity
-                radius: panelBackground.innerFrameRadius
+                radius: Math.max(0, Math.min(Vars.radiusExtraLarge, Math.min(panelBackground.width, panelBackground.height) / 2))
             }
 
             InvertedCorner {
                 anchors.top: panelBackground.bottom
                 anchors.left: panelBackground.left
                 side: "top-left"
-                visible: Vars.panelStyle === "Framed" && panelBackground.touchesEdges && overviewContainer.visibleState
+                visible: Vars.panelStyle === "Attached" && panelBackground.opacity > 0 && Vars.pillPosition === "Bottom"
                 color: panelBackground.color
                 opacity: panelBackground.opacity
-                radius: panelBackground.innerFrameRadius
+                radius: Math.max(0, Math.min(Vars.radiusExtraLarge, Math.min(panelBackground.width, panelBackground.height) / 2))
             }
 
             InvertedCorner {
                 anchors.top: panelBackground.bottom
                 anchors.right: panelBackground.right
                 side: "top-right"
-                visible: Vars.panelStyle === "Framed" && panelBackground.touchesEdges && overviewContainer.visibleState
+                visible: Vars.panelStyle === "Attached" && panelBackground.opacity > 0 && Vars.pillPosition === "Bottom"
                 color: panelBackground.color
                 opacity: panelBackground.opacity
-                radius: panelBackground.innerFrameRadius
+                radius: Math.max(0, Math.min(Vars.radiusExtraLarge, Math.min(panelBackground.width, panelBackground.height) / 2))
             }
 
             // === KEYBOARD NAVIGATION ===

@@ -62,18 +62,36 @@ ColumnLayout {
         Layout.fillWidth: true
         spacing: 2
         Text {
-            text: activeCategory
+            text: {
+                if (activeCategory === "Layout") return "Window Gaps & Layout";
+                if (activeCategory === "Keybinds") return "Shortcuts & Modifiers";
+                if (activeCategory === "Theme") return "Visuals & Effects";
+                if (activeCategory === "Animations") return "Animation & Physics";
+                if (activeCategory === "Desktop") return "Desktop & Widgets";
+                if (activeCategory === "Input") return "Input Devices";
+                if (activeCategory === "General") return "System & Apps";
+                return activeCategory;
+            }
             font.family: Vars.fontFamily
-            font.pixelSize: 16
-            font.weight: 500
+            font.pixelSize: 18
+            font.weight: 600
             color: Theme.on_surface
         }
         Text {
-            text: "Manage settings for " + activeCategory
+            text: {
+                if (activeCategory === "Layout") return "Configure window gaps, border sizing, tiling layout, and system spacing tokens";
+                if (activeCategory === "Keybinds") return "Manage system shortcuts, hotkeys, modifier key combinations, and launcher actions";
+                if (activeCategory === "Theme") return "Customize window corner rounding, opacity, drop shadows, blur effects, font family, and wallpaper masks";
+                if (activeCategory === "Animations") return "Adjust expressive Material 3 animation styles, transition durations, and scrolling physics";
+                if (activeCategory === "Desktop") return "Set up desktop widgets (clock, calendar, media player) and configure overview dimensions";
+                if (activeCategory === "Input") return "Tune mouse sensitivity, touchpad gestures, natural scrolling, and keyboard layout rules";
+                if (activeCategory === "General") return "Configure default terminal, browser, code editor, environment scale factors, and Game Mode";
+                return "Manage settings for " + activeCategory;
+            }
             font.family: Vars.fontFamily
-            font.pixelSize: 12
-            color: Theme.on_surface
-            opacity: 0.7
+            font.pixelSize: 13
+            color: Theme.on_surface_variant
+            opacity: 0.8
         }
     }
 
@@ -985,14 +1003,13 @@ ColumnLayout {
                         id: enumFlow
                         width: parent.width
                         anchors.right: parent.right
-                        layoutDirection: (delegateRoot.itemEnums.split("|||").length < 5) ? Qt.RightToLeft : Qt.LeftToRight
+                        layoutDirection: Qt.RightToLeft
                         spacing: 2
                         Repeater {
                         id: enumRepeater
                         model: {
                             if (!parent.visible) return [];
-                            let arr = delegateRoot.itemEnums.split("|||");
-                            return arr.length < 5 ? arr.reverse() : arr;
+                            return delegateRoot.itemEnums.split("|||").reverse();
                         }
                         delegate: Rectangle {
                             property bool isSelected: delegateRoot.itemVal === modelData
@@ -1244,7 +1261,7 @@ ColumnLayout {
 
     Process {
         id: hyprManagerProc
-        command: ["omniformis", "hypr", "list"]
+        command: ["/home/boing/.local/bin/omniformis", "hypr", "list"]
         stdout: StdioCollector {
             onStreamFinished: {
                 var lines = this.text.split("\n");
@@ -1273,18 +1290,25 @@ ColumnLayout {
                         helpPart = rawHelp.substring(pipeIdx + 3).trim();
                     }
 
-                    // Map hyprland categories to UI categories
-                    if (category === "Decoration" || category === "Shadows" || category === "Blur" || category === "Animation Style") {
-                        category = "Appearance";
-                    } else if (category === "Input" || category === "Gestures" || category === "Modifiers" || category === "Quickshell Keybinds") {
+                    var colonIdx = leftPart.indexOf(":");
+                    if (colonIdx === -1) continue;
+                    var key = leftPart.substring(0, colonIdx).trim();
+                    var typePart = leftPart.substring(colonIdx + 1).trim();
+
+                    // Map hyprland variables to specialized UI categories
+                    if (key === "gaps_in" || key === "gaps_out" || key === "singleWindowGapsOut" || key === "enableSingleWindowGaps" || key === "enableSpecialWorkspaceGaps" || key === "border_size" || key === "groupBar" || key === "Layout" || key === "resize_on_border") {
+                        category = "Layout";
+                    } else if (key === "rounding" || key === "rounding_power" || key === "active_opacity" || key === "inactive_opacity" || key === "windowOpacity" || category === "Shadows" || category === "Blur" || key.startsWith("shadow_") || key.startsWith("blur_")) {
+                        category = "Theme";
+                    } else if (category === "Animation Style" || key === "AnimateStyle" || key.startsWith("Custom")) {
+                        category = "Animations";
+                    } else if (category === "Modifiers" || category === "Quickshell Keybinds" || key === "MM" || key === "SM" || key === "TM" || key === "QM" || key.startsWith("Qs") || key === "QuickLauncherKey") {
+                        category = "Keybinds";
+                    } else if (category === "Input" || category === "Gestures" || key.startsWith("kb_") || key.startsWith("gesture_") || key === "follow_mouse" || key === "sensitivity" || key === "touchpad_natural_scroll" || key === "vimkeys") {
                         category = "Input";
                     } else {
                         category = "General";
                     }
-
-                    var colonIdx = leftPart.indexOf(":");
-                    var key = leftPart.substring(0, colonIdx).trim();
-                    var typePart = leftPart.substring(colonIdx + 1).trim();
 
                     var type = "string";
                     var enums = [];
@@ -1375,6 +1399,21 @@ ColumnLayout {
                         }
                     }
 
+                    // Ensure Hyprland enumerable properties use segmented selection chips in UI
+                    if (key === "Layout") {
+                        type = "enum";
+                        enums = ["Scrolling", "Dwindle", "Master", "Monocle"];
+                    } else if (key === "gesture_direction") {
+                        type = "enum";
+                        enums = ["vertical", "horizontal", "both", "all", "none"];
+                    } else if (key === "force_default_wallpaper") {
+                        type = "enum";
+                        enums = ["-1", "0", "1", "2", "3"];
+                    } else if (key === "AnimateStyle" && (enums.length === 0 || type !== "enum")) {
+                        type = "enum";
+                        enums = ["expressive", "spring", "jelly", "flyingcards", "snappy", "cinematic", "minimal", "fluid", "aggressive", "elegant", "playful", "elastic", "swift", "relaxed", "slipstream", "standard", "fluent", "custom", "none"];
+                    }
+
                     newVars.push({
                         key: key,
                         type: type,
@@ -1397,7 +1436,7 @@ ColumnLayout {
 
     Process {
         id: qsManagerProc
-        command: ["omniformis", "qs", "list"]
+        command: ["/home/boing/.local/bin/omniformis", "qs", "list"]
         stdout: StdioCollector {
             onStreamFinished: {
                 var lines = this.text.split("\n");
@@ -1412,7 +1451,7 @@ ColumnLayout {
                         continue;
 
                     var key = line.substring(0, colonIdx).trim();
-                    if (key === "notificationHistory" || key === "historyUpdated")
+                    if (key === "notificationHistory" || key === "historyUpdated" || key === "pillPosition" || key === "panelStyle" || key === "translucent")
                         continue;
 
                     var valPart = line.substring(colonIdx + 1).trim();
@@ -1427,14 +1466,19 @@ ColumnLayout {
                         type = "number";
                     }
 
-                    var category = "Appearance";
-                    if (key.startsWith("spacing") || key.startsWith("padding")) {
+                    // Map quickshell variables to specialized UI categories
+                    var category = "General";
+                    if (key.startsWith("desktop") || key.startsWith("clock") || key.startsWith("mediaPlayer") || key.startsWith("overview")) {
+                        category = "Desktop";
+                    } else if (key.startsWith("spacing") || key.startsWith("padding")) {
+                        category = "Layout";
+                    } else if (key.startsWith("radius") || key.startsWith("wallpaperMask") || key === "blurAmount" || key === "fontFamily") {
+                        category = "Theme";
+                    } else if (key === "animationDuration" || key === "flickDeceleration" || key === "maximumFlickVelocity" || key.startsWith("custom") || key.startsWith("m3")) {
+                        category = "Animations";
+                    } else if (key === "gameMode") {
                         category = "General";
-                    } else if (key === "animationDuration") {
-                        category = "Appearance";
-                    } else if (key.startsWith("radius")) {
-                        category = "Appearance";
-                    } else if (key === "overviewGridRows" || key === "overviewGridColumns" || key === "overviewScale" || key.startsWith("desktop") || key === "mediaPlayerShape" || key === "mediaPlayerArtScale" || key === "gameMode") {
+                    } else {
                         category = "General";
                     }
 

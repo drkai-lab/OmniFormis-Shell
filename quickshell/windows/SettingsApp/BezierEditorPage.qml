@@ -50,12 +50,12 @@ ColumnLayout {
     function applyCurve() {
         var arr = localEdits[targetCurve] || [p1x, p1y, p2x, p2y];
         var qsVal = getFormattedArrayStr(arr);
-        var qsProc = Qt.createQmlObject('import Quickshell.Io; Process { command: ["omniformis", "qs", "set", "' + targetCurve + '", "' + qsVal + '"]; onExited: destroy() }', rootPage);
+        var qsProc = Qt.createQmlObject('import Quickshell.Io; Process { command: ["/home/boing/.local/bin/omniformis", "qs", "set", "' + targetCurve + '", "' + qsVal + '"]; onExited: destroy() }', rootPage);
         qsProc.running = true;
         
         var hyprTarget = targetCurve.charAt(0).toUpperCase() + targetCurve.slice(1);
         var hyprVal = getFormattedStr(arr);
-        var hyprProc = Qt.createQmlObject('import Quickshell.Io; Process { command: ["omniformis", "hypr", "--' + hyprTarget + '", "' + hyprVal + '"]; onExited: destroy() }', rootPage);
+        var hyprProc = Qt.createQmlObject('import Quickshell.Io; Process { command: ["/home/boing/.local/bin/omniformis", "hypr", "set", "' + hyprTarget + '", "' + hyprVal + '"]; onExited: destroy() }', rootPage);
         hyprProc.running = true;
     }
     
@@ -67,12 +67,12 @@ ColumnLayout {
                 var qsVal = getFormattedArrayStr(localEdits[c]);
                 var hyprVal = getFormattedStr(localEdits[c]);
                 var hc = c.charAt(0).toUpperCase() + c.slice(1);
-                var p1 = Qt.createQmlObject('import Quickshell.Io; Process { command: ["omniformis", "qs", "set", "' + c + '", "' + qsVal + '"]; onExited: destroy() }', rootPage);
-                var p2 = Qt.createQmlObject('import Quickshell.Io; Process { command: ["omniformis", "hypr", "--' + hc + '", "' + hyprVal + '"]; onExited: destroy() }', rootPage);
+                var p1 = Qt.createQmlObject('import Quickshell.Io; Process { command: ["/home/boing/.local/bin/omniformis", "qs", "set", "' + c + '", "' + qsVal + '"]; onExited: destroy() }', rootPage);
+                var p2 = Qt.createQmlObject('import Quickshell.Io; Process { command: ["/home/boing/.local/bin/omniformis", "hypr", "set", "' + hc + '", "' + hyprVal + '"]; onExited: destroy() }', rootPage);
                 p1.running = true; p2.running = true;
             }
         }
-        var p3 = Qt.createQmlObject('import Quickshell.Io; Process { command: ["omniformis", "hypr", "--AnimateStyle", "Custom"]; onExited: destroy() }', rootPage);
+        var p3 = Qt.createQmlObject('import Quickshell.Io; Process { command: ["/home/boing/.local/bin/omniformis", "hypr", "set", "AnimateStyle", "Custom"]; onExited: destroy() }', rootPage);
         p3.running = true;
         
         rootPage.settingsChanged();
@@ -497,7 +497,7 @@ ColumnLayout {
                             }
                             var payloadStr = JSON.stringify(payloadObj);
                             
-                            var p = Qt.createQmlObject('import Quickshell.Io; Process { command: ["omniformis", "bezier", "save", "' + presetNameInput.text + '", "--payload", \'' + payloadStr + '\']; onExited: destroy() }', rootPage);
+                            var p = Qt.createQmlObject('import Quickshell.Io; Process { command: ["/home/boing/.local/bin/omniformis", "bezier", "save", "' + presetNameInput.text + '", "--payload", \'' + payloadStr + '\']; onExited: destroy() }', rootPage);
                             p.running = true;
                         }
                     }

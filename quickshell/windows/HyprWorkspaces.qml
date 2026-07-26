@@ -9,14 +9,24 @@ import "../theme/variables.js" as Vars
 Item {
     id: mainContainer
 
-    width: overlayVisible ? workspaceLayout.implicitWidth + Vars.spacingLarge : 100
-    height: 40
+    property bool isVertical: Vars.pillPosition === "Left" || Vars.pillPosition === "Right"
+    width: isVertical ? 40 : (overlayVisible ? workspaceLayout.implicitWidth + Vars.spacingLarge : 100)
+    height: isVertical ? (overlayVisible ? workspaceLayout.implicitHeight + Vars.spacingLarge : 100) : 40
 
     Behavior on width {
         enabled: !mainContainer.gameMode
         NumberAnimation {
             duration: Vars.animationDuration
-            easing.type: Easing.OutCubic
+            easing.type: Easing.BezierSpline
+            easing.bezierCurve: Vars.customExpressiveSpatialSlow
+        }
+    }
+    Behavior on height {
+        enabled: !mainContainer.gameMode
+        NumberAnimation {
+            duration: Vars.animationDuration
+            easing.type: Easing.BezierSpline
+            easing.bezierCurve: Vars.customExpressiveSpatialSlow
         }
     }
 
@@ -95,10 +105,11 @@ Item {
         }
         anchors.fill: parent
         color: Vars.translucent ? Qt.rgba(Theme.surface.r, Theme.surface.g, Theme.surface.b, 0.85) : Theme.surface
-        topLeftRadius: Vars.getTopLeftRadius(Vars.panelStyle, Vars.pillPosition, mainContainer.gameMode, height / 2)
-        topRightRadius: Vars.getTopRightRadius(Vars.panelStyle, Vars.pillPosition, mainContainer.gameMode, height / 2)
-        bottomLeftRadius: Vars.getBottomLeftRadius(Vars.panelStyle, Vars.pillPosition, mainContainer.gameMode, height / 2)
-        bottomRightRadius: Vars.getBottomRightRadius(Vars.panelStyle, Vars.pillPosition, mainContainer.gameMode, height / 2)
+        property real targetRad: Math.min(mainContainer.width, mainContainer.height) / 2
+        topLeftRadius: Vars.getTopLeftRadius(Vars.panelStyle, Vars.pillPosition, mainContainer.gameMode, targetRad)
+        topRightRadius: Vars.getTopRightRadius(Vars.panelStyle, Vars.pillPosition, mainContainer.gameMode, targetRad)
+        bottomLeftRadius: Vars.getBottomLeftRadius(Vars.panelStyle, Vars.pillPosition, mainContainer.gameMode, targetRad)
+        bottomRightRadius: Vars.getBottomRightRadius(Vars.panelStyle, Vars.pillPosition, mainContainer.gameMode, targetRad)
 
         opacity: (overlayVisible && !mainContainer.forceHidePill) ? (Vars.translucent ? 0.85 : 1.0) : 0.0
         visible: opacity > 0
@@ -106,22 +117,27 @@ Item {
             enabled: !mainContainer.gameMode
             NumberAnimation {
                 duration: Vars.animationDuration
-                easing.type: Easing.OutCubic
+                easing.type: Easing.BezierSpline
+                easing.bezierCurve: Vars.customStandard
             }
         }
     }
 
-    RowLayout {
+    GridLayout {
         id: workspaceLayout
         anchors.centerIn: bg
-        spacing: Vars.spacingSmall / 2
+        columns: mainContainer.isVertical ? 1 : 5
+        rows: mainContainer.isVertical ? 5 : 1
+        rowSpacing: Vars.spacingSmall / 2
+        columnSpacing: Vars.spacingSmall / 2
         opacity: (overlayVisible && !mainContainer.forceHidePill) ? 1.0 : 0.0
         visible: opacity > 0
         Behavior on opacity {
             enabled: !mainContainer.gameMode
             NumberAnimation {
                 duration: Vars.animationDuration
-                easing.type: Easing.OutCubic
+                easing.type: Easing.BezierSpline
+                easing.bezierCurve: Vars.customStandard
             }
         }
 
@@ -132,11 +148,19 @@ Item {
                 readonly property int wsId: (mainContainer.currentPage * 5) + index + 1
                 property bool isFocused: Hyprland.focusedWorkspace?.id === wsId
 
-                radius: height / 2
-                implicitWidth: isFocused ? 50 : 32
-                implicitHeight: 32
+                radius: Math.min(width, height) / 2
+                implicitWidth: mainContainer.isVertical ? 32 : (isFocused ? 50 : 32)
+                implicitHeight: mainContainer.isVertical ? (isFocused ? 50 : 32) : 32
 
                 Behavior on implicitWidth {
+                    enabled: !mainContainer.gameMode
+                    NumberAnimation {
+                        duration: Vars.animationDuration
+                        easing.type: Easing.BezierSpline
+                        easing.bezierCurve: Vars.customExpressiveSpatialSlow
+                    }
+                }
+                Behavior on implicitHeight {
                     enabled: !mainContainer.gameMode
                     NumberAnimation {
                         duration: Vars.animationDuration
@@ -151,7 +175,8 @@ Item {
                     enabled: !mainContainer.gameMode
                     ColorAnimation {
                         duration: Vars.animationDuration
-                        easing.type: Easing.OutCubic
+                        easing.type: Easing.BezierSpline
+                        easing.bezierCurve: Vars.customStandard
                     }
                 }
 
@@ -169,7 +194,8 @@ Item {
                         enabled: !mainContainer.gameMode
                         ColorAnimation {
                             duration: Vars.animationDuration
-                            easing.type: Easing.OutCubic
+                            easing.type: Easing.BezierSpline
+                            easing.bezierCurve: Vars.customStandard
                         }
                     }
                 }

@@ -211,7 +211,7 @@ Item {
                         if (root.currentSection === "bluetooth") return 4;
                         if (root.currentSection === "about") return 5;
                         if (root.currentSection === "taskmanager") return 6;
-                        return 1; // "General", "Appearance", "Input" map to UnifiedSettingsPage
+                        return 1; // "General", "Input", "Keybinds", "Desktop", "Layout", "Theme", "Animations" map to UnifiedSettingsPage
                     }
 
                     // 0: Quick Page & Presets
@@ -227,7 +227,7 @@ Item {
                     // 1: Unified Settings (Hyprland + Quickshell)
                     UnifiedSettingsPage {
                         id: unifiedPage
-                        activeCategory: root.currentSection === "bezier" || root.currentSection === "wifi" || root.currentSection === "bluetooth" ? "General" : root.currentSection
+                        activeCategory: (root.currentSection === "General" || root.currentSection === "Input" || root.currentSection === "Keybinds" || root.currentSection === "Desktop" || root.currentSection === "Layout" || root.currentSection === "Theme" || root.currentSection === "Animations") ? root.currentSection : "General"
                         Layout.fillWidth: true
                         Layout.fillHeight: true
                     }

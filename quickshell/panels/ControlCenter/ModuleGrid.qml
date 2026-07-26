@@ -477,8 +477,8 @@ ColumnLayout {
                     else if (moduleId === "bluetooth") { if (activeDelegateWrapper.gridRoot.adapter) activeDelegateWrapper.gridRoot.adapter.enabled = !activeDelegateWrapper.gridRoot.adapter.enabled }
                     else if (moduleId === "audio") { if (activeDelegateWrapper.gridRoot.audioNode) activeDelegateWrapper.gridRoot.audioNode.audio.muted = !activeDelegateWrapper.gridRoot.audioNode.audio.muted }
                     else if (moduleId === "peace") NotificationService.peaceMode = !NotificationService.peaceMode;
-                    else if (moduleId === "game_mode") Quickshell.execDetached({ command: ["omniformis", "hypr", "--GameMode", moduleGridRoot.gameMode ? "false" : "true"] });
-                    else if (moduleId === "system_mode") Quickshell.execDetached({ command: ["omniformis", "theme", "toggle"] });
+                    else if (moduleId === "game_mode") Quickshell.execDetached({ command: ["/home/boing/.local/bin/omniformis", "hypr", "set", "GameMode", moduleGridRoot.gameMode ? "false" : "true"] });
+                    else if (moduleId === "system_mode") Quickshell.execDetached({ command: ["/home/boing/.local/bin/omniformis", "theme", "toggle"] });
                     else doAction();
                 }
 

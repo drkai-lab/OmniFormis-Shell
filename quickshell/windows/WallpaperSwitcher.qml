@@ -201,7 +201,7 @@ Item {
             if (code === 0) {
                 // Delay slightly to ensure matugen has fully flushed to disk, then reload Hyprland and Quickshell
                 Quickshell.execDetached({
-                    command: ['bash', '-c', 'sleep 0.5; hyprctl reload; sleep 0.2; pkill quickshell; sleep 0.2; quickshell']
+                    command: ['bash', '-c', 'sleep 0.5; nohup bash ~/Dotfiles/scripts/reload.sh >/dev/null 2>&1 &']
                 });
             } else {
                 console.error("[USER ACTION] Matugen failed with exit code: " + code + ". Skipping color sync.");

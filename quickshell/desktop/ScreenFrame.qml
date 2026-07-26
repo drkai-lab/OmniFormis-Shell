@@ -16,46 +16,52 @@ PanelWindow {
     WlrLayershell.layer: WlrLayer.Top
     exclusionMode: ExclusionMode.Ignore
     color: "transparent"
-    visible: Vars.panelStyle === "Framed"
+    visible: Vars.panelStyle === "Attached" || Vars.panelStyle === "Framed"
     mask: Region {}
 
-    Rectangle {
+    Item {
         anchors.fill: parent
-        color: "transparent"
-        border.color: Vars.translucent ? Qt.rgba(Theme.surface.r, Theme.surface.g, Theme.surface.b, 0.85) : Theme.surface
-        border.width: Vars.spacingSmall
-        radius: Vars.radiusExtraLarge
-    }
+        layer.enabled: Vars.translucent
+        opacity: Vars.translucent ? 0.85 : 1.0
 
-    InvertedCorner {
-        anchors.top: parent.top
-        anchors.left: parent.left
-        side: "top-left"
-        radius: Vars.radiusExtraLarge
-        color: Vars.translucent ? Qt.rgba(Theme.surface.r, Theme.surface.g, Theme.surface.b, 0.85) : Theme.surface
-    }
+        Rectangle {
+            anchors.fill: parent
+            color: "transparent"
+            border.color: Theme.surface
+            border.width: Vars.spacingSmall
+            radius: Vars.radiusExtraLarge
+        }
 
-    InvertedCorner {
-        anchors.top: parent.top
-        anchors.right: parent.right
-        side: "top-right"
-        radius: Vars.radiusExtraLarge
-        color: Vars.translucent ? Qt.rgba(Theme.surface.r, Theme.surface.g, Theme.surface.b, 0.85) : Theme.surface
-    }
+        InvertedCorner {
+            anchors.top: parent.top
+            anchors.left: parent.left
+            side: "top-left"
+            radius: Vars.radiusExtraLarge
+            color: Theme.surface
+        }
 
-    InvertedCorner {
-        anchors.bottom: parent.bottom
-        anchors.left: parent.left
-        side: "bottom-left"
-        radius: Vars.radiusExtraLarge
-        color: Vars.translucent ? Qt.rgba(Theme.surface.r, Theme.surface.g, Theme.surface.b, 0.85) : Theme.surface
-    }
+        InvertedCorner {
+            anchors.top: parent.top
+            anchors.right: parent.right
+            side: "top-right"
+            radius: Vars.radiusExtraLarge
+            color: Theme.surface
+        }
 
-    InvertedCorner {
-        anchors.bottom: parent.bottom
-        anchors.right: parent.right
-        side: "bottom-right"
-        radius: Vars.radiusExtraLarge
-        color: Vars.translucent ? Qt.rgba(Theme.surface.r, Theme.surface.g, Theme.surface.b, 0.85) : Theme.surface
+        InvertedCorner {
+            anchors.bottom: parent.bottom
+            anchors.left: parent.left
+            side: "bottom-left"
+            radius: Vars.radiusExtraLarge
+            color: Theme.surface
+        }
+
+        InvertedCorner {
+            anchors.bottom: parent.bottom
+            anchors.right: parent.right
+            side: "bottom-right"
+            radius: Vars.radiusExtraLarge
+            color: Theme.surface
+        }
     }
 }

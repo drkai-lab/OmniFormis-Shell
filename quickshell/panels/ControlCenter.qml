@@ -9,6 +9,7 @@ import Quickshell.Networking
 import Quickshell.Bluetooth
 import Quickshell.Services.Pipewire
 import Quickshell.Services.Mpris
+import Quickshell.Services.SystemTray
 import Quickshell.Hyprland
 import QtCore
 import "../theme/variables.js" as Vars
@@ -40,6 +41,11 @@ Item {
     property string currentSubMenu: ""
     property bool isEditorMode: false
     property string systemUptime: ""
+
+    // Custom M3 System Tray Menu state & positioning
+    property var activeTrayMenu: null
+    property real trayMenuX: 0
+    property real trayMenuY: 0
 
     Process {
         id: uptimeProc
@@ -93,6 +99,7 @@ Item {
         } else {
             isEditorMode = false;
             currentSubMenu = "";
+            activeTrayMenu = null;
         }
     }
     Keys.onEscapePressed: {
@@ -164,6 +171,12 @@ Item {
                 contentHeight: mainDashboardView.implicitHeight
                 interactive: true
                 
+                onContentYChanged: {
+                    if (root.activeTrayMenu !== null) {
+                        root.activeTrayMenu = null;
+                    }
+                }
+                
                 opacity: root.currentSubMenu === "" ? 1.0 : 0.0
                 visible: opacity > 0
                 transform: Translate {
@@ -214,8 +227,9 @@ Item {
                                     visible: text !== ""
                                 }
                                 Rectangle {
-                                    width: 4
-                                    height: 4
+                                    Layout.preferredWidth: 4
+                                    Layout.preferredHeight: 4
+                                    Layout.alignment: Qt.AlignVCenter
                                     radius: 2
                                     color: Theme.primary
                                     visible: root.systemUptime !== ""
@@ -227,6 +241,84 @@ Item {
                                     font.weight: Font.Medium
                                     color: Theme.primary
                                     visible: root.systemUptime !== ""
+                                }
+                                Rectangle {
+                                    Layout.preferredWidth: 4
+                                    Layout.preferredHeight: 4
+                                    Layout.alignment: Qt.AlignVCenter
+                                    radius: 2
+                                    color: Theme.primary
+                                    visible: trayRepeater.count > 0
+                                }
+                                RowLayout {
+                                    id: trayLayout
+                                    spacing: 2
+                                    visible: trayRepeater.count > 0
+                                    Layout.preferredWidth: implicitWidth
+                                    Layout.preferredHeight: implicitHeight
+                                    Layout.alignment: Qt.AlignVCenter
+
+                                    Repeater {
+                                        id: trayRepeater
+                                        model: SystemTray.items
+
+                                        delegate: Rectangle {
+                                            id: trayPill
+                                            Layout.preferredWidth: 28
+                                            Layout.preferredHeight: 28
+                                            Layout.alignment: Qt.AlignVCenter
+                                            
+                                            color: itemMouseArea.pressed ? Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.12) : (itemMouseArea.containsMouse ? Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.08) : "transparent")
+                                            radius: height / 2
+
+                                            Behavior on color {
+                                                ColorAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard }
+                                            }
+
+                                            property var trayItem: modelData 
+
+                                            MouseArea {
+                                                id: itemMouseArea
+                                                anchors.fill: parent
+                                                acceptedButtons: Qt.LeftButton | Qt.RightButton | Qt.MiddleButton
+                                                hoverEnabled: true
+                                                cursorShape: Qt.PointingHandCursor
+
+                                                onClicked: (mouse) => {
+                                                    if (!trayItem) return;
+                                                    if (mouse.button === Qt.RightButton && trayItem.menu) {
+                                                        if (root.activeTrayMenu === trayItem.menu) {
+                                                            root.activeTrayMenu = null;
+                                                        } else {
+                                                            var pillCoords = trayPill.mapToItem(expandedUI, 0, trayPill.height);
+                                                            root.trayMenuX = pillCoords.x - 40;
+                                                            root.trayMenuY = pillCoords.y + 6;
+                                                            root.activeTrayMenu = trayItem.menu;
+                                                        }
+                                                    } else if (mouse.button === Qt.LeftButton) {
+                                                        root.activeTrayMenu = null;
+                                                        trayItem.activate();
+                                                        root.expanded = false;
+                                                    } else if (mouse.button === Qt.MiddleButton && typeof trayItem.secondaryActivate === "function") {
+                                                        root.activeTrayMenu = null;
+                                                        trayItem.secondaryActivate();
+                                                    }
+                                                }
+                                            }
+
+                                            Image {
+                                                id: itemIcon
+                                                width: 20
+                                                height: 20
+                                                anchors.centerIn: parent
+                                                source: trayItem && trayItem.icon ? trayItem.icon : "" 
+                                                fillMode: Image.PreserveAspectFit
+                                                
+                                                opacity: itemMouseArea.containsMouse ? 1.0 : 0.7
+                                                Behavior on opacity { NumberAnimation { duration: Vars.animationDuration } }
+                                            }
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -279,8 +371,7 @@ Item {
                                         id: refreshHover; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; 
                                         onClicked: {
                                             refreshAnim.restart();
-                                            Quickshell.execDetached({ command: ["hyprctl", "reload"] });
-                                            Quickshell.execDetached({ command: ["bash", "-c", "pkill quickshell; sleep 0.2; quickshell"] });
+                                            Quickshell.execDetached({ command: ["bash", "-c", "nohup bash ~/Dotfiles/scripts/reload.sh >/dev/null 2>&1 &"] });
                                         }
                                     }
                                     Behavior on color { ColorAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
@@ -374,6 +465,128 @@ Item {
                 anchors.left: parent.left
                 anchors.right: parent.right
                 anchors.top: parent.top
+            }
+
+            // ------------------------------------------
+            // CUSTOM M3 SYSTEM TRAY CONTEXT MENU
+            // ------------------------------------------
+            QsMenuOpener {
+                id: trayMenuOpener
+                menu: root.activeTrayMenu
+            }
+
+            // Backdrop area to cleanly dismiss menu when clicking anywhere outside
+            MouseArea {
+                anchors.fill: parent
+                enabled: root.activeTrayMenu !== null
+                visible: enabled
+                onClicked: {
+                    root.activeTrayMenu = null;
+                }
+            }
+
+            Rectangle {
+                id: trayMenuPopup
+                x: Math.max(10, Math.min(expandedUI.width - width - 10, root.trayMenuX))
+                y: Math.min(expandedUI.height - height - 10, root.trayMenuY)
+                width: Math.max(150, menuColumn.implicitWidth + 8)
+                height: menuColumn.implicitHeight + 8
+                
+                color: Theme.surface_container_highest
+                radius: Vars.radiusMedium
+                border.width: 1
+                border.color: Qt.rgba(Theme.outline.r, Theme.outline.g, Theme.outline.b, 0.2)
+                clip: true
+                
+                layer.enabled: !root.gameMode
+                layer.samples: 4
+                layer.effect: MultiEffect { shadowEnabled: true; shadowBlur: 1.0; shadowColor: Qt.rgba(0,0,0,0.35); shadowVerticalOffset: 6; shadowHorizontalOffset: 0 }
+
+                transformOrigin: Item.Top
+                opacity: root.activeTrayMenu !== null ? 1.0 : 0.0
+                visible: opacity > 0
+                scale: root.activeTrayMenu !== null ? 1.0 : 0.88
+
+                Behavior on opacity { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: root.activeTrayMenu !== null ? Vars.customEmphasizedDecelerate : Vars.customEmphasizedAccelerate } }
+                Behavior on scale { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customExpressiveSpatialSlow } }
+                Behavior on x { enabled: root.activeTrayMenu !== null && trayMenuPopup.opacity > 0.5; NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customExpressiveSpatialSlow } }
+                Behavior on y { enabled: root.activeTrayMenu !== null && trayMenuPopup.opacity > 0.5; NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customExpressiveSpatialSlow } }
+
+                ColumnLayout {
+                    id: menuColumn
+                    anchors.centerIn: parent
+                    spacing: 1
+                    width: trayMenuPopup.width - 8
+
+                    Repeater {
+                        model: trayMenuOpener.children
+
+                        delegate: Item {
+                            id: entryItem
+                            Layout.fillWidth: true
+                            Layout.preferredHeight: modelData && modelData.isSeparator ? 7 : 28
+                            property var entry: modelData
+
+                            Rectangle {
+                                anchors.centerIn: parent
+                                width: parent.width - 8
+                                height: 1
+                                color: Qt.rgba(Theme.outline.r, Theme.outline.g, Theme.outline.b, 0.15)
+                                visible: entry && entry.isSeparator
+                            }
+
+                            Rectangle {
+                                anchors.fill: parent
+                                visible: entry && !entry.isSeparator
+                                color: entryMouseArea.pressed ? Qt.rgba(Theme.primary.r, Theme.primary.g, Theme.primary.b, 0.18) : (entryMouseArea.containsMouse ? Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.08) : "transparent")
+                                radius: Vars.radiusSmall || 4
+                                Behavior on color { ColorAnimation { duration: 120 } }
+
+                                RowLayout {
+                                    anchors.fill: parent
+                                    anchors.leftMargin: 8
+                                    anchors.rightMargin: 8
+                                    spacing: 6
+
+                                    Image {
+                                        source: entry && entry.icon ? entry.icon : ""
+                                        Layout.preferredWidth: source.toString() !== "" ? 16 : 0
+                                        Layout.preferredHeight: 16
+                                        fillMode: Image.PreserveAspectFit
+                                        visible: source.toString() !== ""
+                                        smooth: true
+                                    }
+
+                                    Text {
+                                        Layout.fillWidth: true
+                                        text: entry && entry.text ? entry.text.replace(/&/g, "") : ""
+                                        font.family: Vars.fontFamily
+                                        font.pixelSize: 13
+                                        font.weight: Font.Medium
+                                        color: entry && entry.enabled !== false ? Theme.on_surface : Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.4)
+                                        elide: Text.ElideRight
+                                    }
+                                }
+
+                                MouseArea {
+                                    id: entryMouseArea
+                                    anchors.fill: parent
+                                    hoverEnabled: entry && entry.enabled !== false
+                                    cursorShape: entry && entry.enabled !== false ? Qt.PointingHandCursor : Qt.ArrowCursor
+                                    onClicked: {
+                                        if (!entry || entry.enabled === false) return;
+                                        if (typeof entry.triggered === "function") {
+                                            entry.triggered();
+                                        } else if (typeof entry.trigger === "function") {
+                                            entry.trigger();
+                                        }
+                                        root.activeTrayMenu = null;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
     }

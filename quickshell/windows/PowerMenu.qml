@@ -184,7 +184,7 @@ Item {
         
         Layout.preferredWidth: 72
         Layout.preferredHeight: 72
-        radius: isActive ? height / 2 : 24 
+        radius: isActive ? height / 2 : Vars.radiusLarge 
         
         Behavior on radius { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
         
@@ -192,7 +192,7 @@ Item {
         Behavior on color { ColorAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
         
         scale: ma.pressed ? 0.92 : 1.0
-        Behavior on scale { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.OutQuad } }
+        Behavior on scale { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
 
         ColumnLayout {
             anchors.centerIn: parent
