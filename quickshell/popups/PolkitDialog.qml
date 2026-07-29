@@ -163,7 +163,7 @@ Item {
                     Text {
                         font.family: "Material Symbols Outlined"
                         font.pixelSize: 22
-                        color: Theme.on_primary
+                        color: Theme.primary
                         text: "\ue897"
                     }
 
@@ -172,7 +172,7 @@ Item {
                         font.family: Vars.fontFamily
                         font.pixelSize: 18
                         font.weight: 700
-                        color: Theme.on_primary
+                        color: Theme.on_surface
                     }
                 }
 
@@ -183,7 +183,7 @@ Item {
                     font.family: Vars.fontFamily
                     font.pixelSize: 13
                     font.weight: 400
-                    color: Theme.on_primary
+                    color: Theme.on_surface
                     wrapMode: Text.WordWrap
                     lineHeight: 1.4
                 }
@@ -195,8 +195,8 @@ Item {
                     font.family: Vars.fontFamily
                     font.pixelSize: 11
                     font.weight: 400
-                    color: Theme.on_primary
-                    opacity: 0.7
+                    color: Theme.on_surface_variant
+                    opacity: 0.8
                     visible: root.flow && root.flow.actionId !== ""
                 }
 
@@ -207,10 +207,10 @@ Item {
                     Layout.preferredHeight: 44
                     radius: Vars.radiusMedium
                     color: root.authError
-                        ? Qt.rgba(Theme.error.r, Theme.error.g, Theme.error.b, 0.15)
-                        : Theme.primary_container
+                        ? Theme.error_container
+                        : (passwordInput.activeFocus ? Qt.rgba(Theme.primary.r, Theme.primary.g, Theme.primary.b, 0.12) : Theme.surface_container_highest)
                     border.color: passwordInput.activeFocus
-                        ? Theme.on_primary_container
+                        ? Theme.primary
                         : (root.authError ? Theme.error : "transparent")
                     border.width: passwordInput.activeFocus ? 2 : 1
 
@@ -235,7 +235,7 @@ Item {
                             verticalAlignment: TextInput.AlignVCenter
                             font.family: Vars.fontFamily
                             font.pixelSize: 13
-                            color: Theme.on_primary_container
+                            color: Theme.on_surface
                             echoMode: TextInput.Password
                             clip: true
                             focus: root.expanded
@@ -244,8 +244,8 @@ Item {
                                 anchors.fill: parent
                                 verticalAlignment: Text.AlignVCenter
                                 text: root.flow && root.flow.inputPrompt ? root.flow.inputPrompt : "Password:"
-                                color: Theme.on_primary_container
-                                opacity: 0.7
+                                color: Theme.on_surface_variant
+                                opacity: 0.8
                                 font.family: Vars.fontFamily
                                 font.pixelSize: 13
                                 visible: !passwordInput.text && !passwordInput.activeFocus
@@ -267,7 +267,7 @@ Item {
                     text: root.errorMessage
                     font.family: Vars.fontFamily
                     font.pixelSize: 11
-                    color: root.authError ? Theme.error : Theme.on_primary
+                    color: root.authError ? Theme.error : Theme.on_surface_variant
                     visible: root.errorMessage !== ""
                     opacity: visible ? 1.0 : 0.0
                     Behavior on opacity { NumberAnimation { duration: Vars.animationDuration } }
@@ -285,8 +285,8 @@ Item {
                         Layout.preferredHeight: 36
                         radius: 18
                         color: authenticateArea.containsMouse
-                            ? Qt.rgba(Theme.on_primary.r, Theme.on_primary.g, Theme.on_primary.b, 0.2)
-                            : Qt.rgba(Theme.on_primary.r, Theme.on_primary.g, Theme.on_primary.b, 0.1)
+                            ? Qt.lighter(Theme.primary, 1.08)
+                            : Theme.primary
 
                         Behavior on color { ColorAnimation { duration: Vars.animationDuration } }
 
@@ -320,7 +320,7 @@ Item {
                         Layout.preferredHeight: 36
                         radius: 18
                         color: cancelArea.containsMouse
-                            ? Qt.rgba(Theme.on_primary.r, Theme.on_primary.g, Theme.on_primary.b, 0.08)
+                            ? Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.08)
                             : "transparent"
 
                         Behavior on color { ColorAnimation { duration: Vars.animationDuration } }
@@ -332,7 +332,7 @@ Item {
                             font.family: Vars.fontFamily
                             font.pixelSize: 13
                             font.weight: 600
-                            color: Theme.on_primary
+                            color: Theme.on_surface_variant
                         }
 
                         MouseArea {

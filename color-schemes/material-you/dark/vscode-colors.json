@@ -1,28 +1,28 @@
 {
   "checksum": ":)",
-  "wallpaper": "/home/boing/Pictures/Wallpapers/Wallpapers-Bank/wallpapers/City-Rainy-Night.png",
+  "wallpaper": "/home/boing/Pictures/Wallpapers/Wallpapers-Bank/wallpapers/Fantasy-Snow-Valley.png",
   "alpha": "100",
   "special": {
-    "background": "#12131b",
-    "foreground": "#e3e1ed",
-    "cursor": "#bcc2ff"
+    "background": "#111318",
+    "foreground": "#e1e2e9",
+    "cursor": "#a6c8ff"
   },
   "colors": {
-    "color0": "#12131b",
-    "color1": "#d8d0fe",
-    "color2": "#bcc2ff",
-    "color3": "#f3aeff",
-    "color4": "#bcc2ff",
-    "color5": "#f3aeff",
-    "color6": "#28348e",
-    "color7": "#c5c5d7",
-    "color8": "#454655",
-    "color9": "#bcc2ff",
-    "color10": "#8994ff",
-    "color11": "#eb7bff",
-    "color12": "#8994ff",
-    "color13": "#eb7bff",
-    "color14": "#0321ca",
-    "color15": "#e3e1ed"
+    "color0": "#111318",
+    "color1": "#cfd4fb",
+    "color2": "#b3c3e6",
+    "color3": "#deb6e9",
+    "color4": "#a6c8ff",
+    "color5": "#dabde2",
+    "color6": "#2e4367",
+    "color7": "#c3c6cf",
+    "color8": "#43474e",
+    "color9": "#a6c8ff",
+    "color10": "#8ca5da",
+    "color11": "#cc8fdd",
+    "color12": "#73a8ff",
+    "color13": "#c69ad2",
+    "color14": "#1b467e",
+    "color15": "#e1e2e9"
   }
 }

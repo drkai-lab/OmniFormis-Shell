@@ -15,7 +15,7 @@ Item {
     height: osdBackground.height
 
     property int trackHeight: 38
-    property int gap: 2
+    property int gap: 4
     property int handleWidth: 4
 
     property bool isVisible: false
@@ -229,8 +229,8 @@ Item {
                 height: mainContainer.trackHeight
                 visible: !mainContainer.isVertical
 
-                property real leftRadiusLarge: 12
-                property real leftRadiusSmall: 4
+                property real leftRadiusLarge: 6
+                property real leftRadiusSmall: 2
                 property real handlePos: bg.visualPosition * (width - mainContainer.handleWidth)
 
                 Rectangle {
@@ -286,8 +286,8 @@ Item {
                 height: parent.height
                 visible: mainContainer.isVertical
 
-                property real leftRadiusLarge: 12
-                property real leftRadiusSmall: 4
+                property real leftRadiusLarge: 6
+                property real leftRadiusSmall: 2
                 property real handlePos: bg.visualPosition * (height - mainContainer.handleWidth)
 
                 Rectangle {

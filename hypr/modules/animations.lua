@@ -37,10 +37,31 @@ local style_map = {
 local style_lower = AnimateStyle and string.lower(AnimateStyle) or "expressive"
 local module_name = style_map[style_lower] or "Expressive"
 
+local is_vert = false
+local pill_dir = "top"
+local home_dir = os.getenv("HOME") or "/home/boing"
+local f = io.open(home_dir .. "/Dotfiles/quickshell/theme/variables.js", "r")
+if f then
+    local content = f:read("*a")
+    f:close()
+    if content then
+        if string.find(content, 'pillPosition%s*=%s*"Bottom"') or string.find(content, "pillPosition%s*=%s*'Bottom'") then
+            pill_dir = "bottom"
+        elseif string.find(content, 'pillPosition%s*=%s*"Left"') or string.find(content, "pillPosition%s*=%s*'Left'") then
+            is_vert = true
+            pill_dir = "left"
+        elseif string.find(content, 'pillPosition%s*=%s*"Right"') or string.find(content, "pillPosition%s*=%s*'Right'") then
+            is_vert = true
+            pill_dir = "right"
+        end
+    end
+end
+local suffix = is_vert and "Vert" or ""
+
 if style_lower == "custom" then
-    require("modules.animations.Custom")
+    require("modules.animations.Custom" .. suffix)
 else
-    require("modules.animations." .. module_name)
+    require("modules.animations." .. module_name .. suffix)
 end
 
 animations = {
@@ -73,6 +94,9 @@ local layer_styles = {
 }
 
 local current_layer_style = layer_styles[style_lower] or "fade"
+if current_layer_style == "slide" then
+    current_layer_style = "slide " .. pill_dir
+end
 
 local animated_layers = {
     "rofi", 

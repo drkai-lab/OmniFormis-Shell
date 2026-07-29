@@ -60,9 +60,9 @@ GridLayout {
                 radius: Vars.radiusSmall
                 clip: true
 
-                color: wsContainer.hoveredWhileDragging ? Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.15) : wsContainer.isFocused ? "#429be1" : Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.06)
+                color: wsContainer.hoveredWhileDragging ? Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.15) : wsContainer.isFocused ? (Vars.translucent ? Qt.rgba(Theme.primary.r, Theme.primary.g, Theme.primary.b, 0.85) : Theme.primary) : Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.06)
                 border.width: (wsContainer.isFocused || wsContainer.hoveredWhileDragging) ? 2 : 0
-                border.color: (wsContainer.isFocused || wsContainer.hoveredWhileDragging) ? "#429be1" : "transparent"
+                border.color: (wsContainer.isFocused || wsContainer.hoveredWhileDragging) ? Theme.primary : "transparent"
 
                 Behavior on color {
                     enabled: !root.gameMode
@@ -88,8 +88,8 @@ GridLayout {
                     font.family: Vars.fontFamily
                     font.pixelSize: Math.round(root.wsHeight * 0.6) | 0
                     font.weight: 600
-                    color: wsContainer.isFocused ? "#ffffff" : Theme.on_surface_variant
-                    opacity: wsContainer.isFocused ? 0.35 : 0.15
+                    color: wsContainer.isFocused ? Theme.on_primary : Theme.on_surface_variant
+                    opacity: wsContainer.isFocused ? 0.85 : 0.15
                 }
 
                 // Click workspace to switch

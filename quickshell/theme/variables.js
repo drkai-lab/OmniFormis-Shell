@@ -14,37 +14,37 @@ var paddingSmall = 8;
 var paddingMedium = 16;
 var paddingLarge = 24;
 
-var fontFamily = "Rubik";
+var fontFamily = "Google Sans Flex";
 var animationDuration = 240;
 var flickDeceleration = 1500;
 var maximumFlickVelocity = 3000;
-var translucent = true;
+var translucent = false;
 var blurAmount = 30;
 
 var overviewGridRows = 2;
 var overviewGridColumns = 5;
-var overviewScale = 0.15;
+var overviewScale = 0.7;
 
 var wallpaperMaskEnabled = true;
-var wallpaperMaskScale = 0.7;
-var wallpaperMaskShape = "6SidedCookie";
-var wallpaperMaskColor = "transparent";
+var wallpaperMaskScale = 1.1;
+var wallpaperMaskShape = "9SidedCookie";
+var wallpaperMaskColor = "surface_variant";
 var wallpaperMaskOffsetX = 0;
 var wallpaperMaskOffsetY = 0;
 
-var clockShape = "Sunny";
-var clockShowTicks = true;
+var clockShape = "12SidedCookie";
+var clockShowTicks = false;
 var clockShowCenterDot = true;
 
 var mediaPlayerShape = "12SidedCookie";
-var mediaPlayerArtScale = 1.0;
+var mediaPlayerArtScale = 1;
 
-var panelStyle = "Floating";
-var pillPosition = "Top";
-var gameMode = false;
+var panelStyle = "Attached";
+var pillPosition = "Left";
+var gameMode = true;
 
 var desktopClockEnabled = true;
-var desktopCalenderEnabled = true;
+var desktopCalenderEnabled = false;
 var desktopMediaPlayerEnabled = true;
 
 var m3Standard = [0.2, 0.0, 0.0, 1.0];

@@ -18,7 +18,7 @@ Item {
     property bool isSelected: modelData.connected
     property bool showForget: false
     
-    property color targetColor: isSelected ? Theme.secondary_container : (btMouse.containsMouse ? Qt.tint(Theme.surface_container, Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.08)) : Theme.surface_container)
+    property color targetColor: isSelected ? (Vars.translucent ? Qt.rgba(Theme.secondary_container.r, Theme.secondary_container.g, Theme.secondary_container.b, 0.7) : Theme.secondary_container) : (btMouse.containsMouse ? Qt.tint((Vars.translucent ? Qt.rgba(Theme.surface_container.r, Theme.surface_container.g, Theme.surface_container.b, 0.5) : Theme.surface_container), Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.08)) : (Vars.translucent ? Qt.rgba(Theme.surface_container.r, Theme.surface_container.g, Theme.surface_container.b, 0.5) : Theme.surface_container))
     Behavior on targetColor { ColorAnimation { duration: Vars.animationDuration } }
     
     property bool hasDeviceBelow: {
@@ -146,7 +146,7 @@ Item {
     Rectangle {
         anchors.fill: parent
         radius: parent.isSelected ? 36 : 16
-        color: Theme.surface_container_highest
+        color: Vars.translucent ? Qt.rgba(Theme.surface_container_highest.r, Theme.surface_container_highest.g, Theme.surface_container_highest.b, 0.85) : Theme.surface_container_highest
         visible: btDelegate.showForget
         opacity: btDelegate.showForget ? 1.0 : 0.0
         Behavior on opacity { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customExpressiveSpatialSlow } }

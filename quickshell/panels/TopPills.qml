@@ -14,7 +14,7 @@ PanelWindow {
     exclusionMode: ExclusionMode.Ignore
     exclusiveZone: 0
     WlrLayershell.namespace: "quickshell"
-    WlrLayershell.layer: WlrLayer.Overlay
+    WlrLayershell.layer: WlrLayer.Top
     anchors {
         top: true
         left: true
@@ -80,15 +80,21 @@ PanelWindow {
         }
     }
 
+    function closeAllExcept(item) {
+        if (item !== launcherItem) launcherItem.expanded = false;
+        if (item !== controlCenterItem) controlCenterItem.expanded = false;
+        if (item !== wallpaperSwitcherItem) wallpaperSwitcherItem.expanded = false;
+        if (item !== colorSchemeSwitcherItem) colorSchemeSwitcherItem.expanded = false;
+        if (item !== powerMenuItem) powerMenuItem.expanded = false;
+        if (item !== emojiPickerItem) emojiPickerItem.expanded = false;
+        if (item !== notificationPopupItem) notificationPopupItem.expanded = false;
+        if (item !== settingsAppItem) settingsAppItem.expanded = false;
+        if (item !== workspacesItem) workspacesItem.cancelOverlay();
+        if (item !== volumeOsdItem) volumeOsdItem.isVisible = false;
+    }
+
     function closeAll() {
-        launcherItem.expanded = false;
-        controlCenterItem.expanded = false;
-        wallpaperSwitcherItem.expanded = false;
-        colorSchemeSwitcherItem.expanded = false;
-        powerMenuItem.expanded = false;
-        emojiPickerItem.expanded = false;
-        notificationPopupItem.expanded = false;
-        settingsAppItem.expanded = false;
+        closeAllExcept(null);
     }
 
     // 1. The Mask Region Array
@@ -281,6 +287,11 @@ PanelWindow {
         anchors.leftMargin: topWindow.pillPos === "Left" ? topWindow.defaultEdgeMargin : 0
         anchors.rightMargin: topWindow.pillPos === "Right" ? topWindow.defaultEdgeMargin : 0
         forceHidePill: launcherItem.expanded || controlCenterItem.expanded || wallpaperSwitcherItem.expanded || colorSchemeSwitcherItem.expanded || powerMenuItem.expanded || polkitItem.expanded || notificationPopupItem.expanded || emojiPickerItem.expanded || settingsAppItem.expanded || volumeOsdItem.isVisible
+
+        onRequestCloseAll: {
+            // A workspace switch happened and the pill is visible — dismiss any open popups
+            closeAllExcept(workspacesItem);
+        }
     }
 
     Launcher {
@@ -303,12 +314,7 @@ PanelWindow {
         onExpandedChanged: {
             if (expanded) {
                 topWindow.popupOpened();
-                controlCenterItem.expanded = false;
-                wallpaperSwitcherItem.expanded = false;
-                colorSchemeSwitcherItem.expanded = false;
-                powerMenuItem.expanded = false;
-                emojiPickerItem.expanded = false;
-                settingsAppItem.expanded = false;
+                closeAllExcept(launcherItem);
             }
         }
         
@@ -325,12 +331,7 @@ PanelWindow {
                 topWindow.popupOpened();
                 launcherItem.expanded = true;
                 launcherItem.searchText = "";
-                controlCenterItem.expanded = false;
-                wallpaperSwitcherItem.expanded = false;
-                colorSchemeSwitcherItem.expanded = false;
-                powerMenuItem.expanded = false;
-                emojiPickerItem.expanded = false;
-                settingsAppItem.expanded = false;
+                closeAllExcept(launcherItem);
             }
         }
     }
@@ -340,12 +341,7 @@ PanelWindow {
             controlCenterItem.expanded = !controlCenterItem.expanded;
             if (controlCenterItem.expanded) {
                 topWindow.popupOpened();
-                launcherItem.expanded = false;
-                wallpaperSwitcherItem.expanded = false;
-                colorSchemeSwitcherItem.expanded = false;
-                powerMenuItem.expanded = false;
-                emojiPickerItem.expanded = false;
-                settingsAppItem.expanded = false;
+                closeAllExcept(controlCenterItem);
             }
         }
     }
@@ -355,12 +351,7 @@ PanelWindow {
             wallpaperSwitcherItem.expanded = !wallpaperSwitcherItem.expanded;
             if (wallpaperSwitcherItem.expanded) {
                 topWindow.popupOpened();
-                launcherItem.expanded = false;
-                controlCenterItem.expanded = false;
-                colorSchemeSwitcherItem.expanded = false;
-                powerMenuItem.expanded = false;
-                emojiPickerItem.expanded = false;
-                settingsAppItem.expanded = false;
+                closeAllExcept(wallpaperSwitcherItem);
             }
         }
     }
@@ -370,12 +361,7 @@ PanelWindow {
             colorSchemeSwitcherItem.expanded = !colorSchemeSwitcherItem.expanded;
             if (colorSchemeSwitcherItem.expanded) {
                 topWindow.popupOpened();
-                launcherItem.expanded = false;
-                controlCenterItem.expanded = false;
-                wallpaperSwitcherItem.expanded = false;
-                powerMenuItem.expanded = false;
-                emojiPickerItem.expanded = false;
-                settingsAppItem.expanded = false;
+                closeAllExcept(colorSchemeSwitcherItem);
             }
         }
     }
@@ -385,12 +371,7 @@ PanelWindow {
             powerMenuItem.expanded = !powerMenuItem.expanded;
             if (powerMenuItem.expanded) {
                 topWindow.popupOpened();
-                launcherItem.expanded = false;
-                controlCenterItem.expanded = false;
-                wallpaperSwitcherItem.expanded = false;
-                colorSchemeSwitcherItem.expanded = false;
-                emojiPickerItem.expanded = false;
-                settingsAppItem.expanded = false;
+                closeAllExcept(powerMenuItem);
             }
         }
     }
@@ -403,12 +384,7 @@ PanelWindow {
                 topWindow.popupOpened();
                 launcherItem.expanded = true;
                 launcherItem.searchText = "/emoji ";
-                controlCenterItem.expanded = false;
-                wallpaperSwitcherItem.expanded = false;
-                colorSchemeSwitcherItem.expanded = false;
-                powerMenuItem.expanded = false;
-                emojiPickerItem.expanded = false;
-                settingsAppItem.expanded = false;
+                closeAllExcept(launcherItem);
             }
         }
     }
@@ -421,12 +397,7 @@ PanelWindow {
                 topWindow.popupOpened();
                 launcherItem.expanded = true;
                 launcherItem.searchText = "/clipboard ";
-                controlCenterItem.expanded = false;
-                wallpaperSwitcherItem.expanded = false;
-                colorSchemeSwitcherItem.expanded = false;
-                powerMenuItem.expanded = false;
-                emojiPickerItem.expanded = false;
-                settingsAppItem.expanded = false;
+                closeAllExcept(launcherItem);
             }
         }
     }
@@ -436,12 +407,7 @@ PanelWindow {
             settingsAppItem.expanded = !settingsAppItem.expanded;
             if (settingsAppItem.expanded) {
                 topWindow.popupOpened();
-                launcherItem.expanded = false;
-                controlCenterItem.expanded = false;
-                wallpaperSwitcherItem.expanded = false;
-                colorSchemeSwitcherItem.expanded = false;
-                powerMenuItem.expanded = false;
-                emojiPickerItem.expanded = false;
+                closeAllExcept(settingsAppItem);
             }
         }
     }
@@ -466,12 +432,7 @@ PanelWindow {
         onExpandedChanged: {
             if (expanded) {
                 topWindow.popupOpened();
-                launcherItem.expanded = false;
-                controlCenterItem.expanded = false;
-                wallpaperSwitcherItem.expanded = false;
-                colorSchemeSwitcherItem.expanded = false;
-                emojiPickerItem.expanded = false;
-                settingsAppItem.expanded = false;
+                closeAllExcept(powerMenuItem);
             }
         }
     }
@@ -496,13 +457,7 @@ PanelWindow {
         onExpandedChanged: {
             if (expanded) {
                 topWindow.popupOpened();
-                launcherItem.expanded = false;
-                controlCenterItem.expanded = false;
-                wallpaperSwitcherItem.expanded = false;
-                colorSchemeSwitcherItem.expanded = false;
-                powerMenuItem.expanded = false;
-                emojiPickerItem.expanded = false;
-                settingsAppItem.expanded = false;
+                closeAllExcept(polkitItem);
             }
         }
     }
@@ -527,13 +482,7 @@ PanelWindow {
         onExpandedChanged: {
             if (expanded) {
                 topWindow.popupOpened();
-                launcherItem.expanded = false;
-                controlCenterItem.expanded = false;
-                wallpaperSwitcherItem.expanded = false;
-                colorSchemeSwitcherItem.expanded = false;
-                powerMenuItem.expanded = false;
-                emojiPickerItem.expanded = false;
-                settingsAppItem.expanded = false;
+                closeAllExcept(notificationPopupItem);
             }
         }
     }
@@ -559,12 +508,7 @@ PanelWindow {
         onExpandedChanged: {
             if (expanded) {
                 topWindow.popupOpened();
-                launcherItem.expanded = false;
-                wallpaperSwitcherItem.expanded = false;
-                colorSchemeSwitcherItem.expanded = false;
-                powerMenuItem.expanded = false;
-                emojiPickerItem.expanded = false;
-                settingsAppItem.expanded = false;
+                closeAllExcept(controlCenterItem);
             }
         }
 
@@ -585,6 +529,7 @@ PanelWindow {
         }
 
         onOpenOverviewRequested: {
+            closeAll();
             topWindow.openOverviewRequested();
         }
     }
@@ -624,11 +569,7 @@ PanelWindow {
         onExpandedChanged: {
             if (expanded) {
                 topWindow.popupOpened();
-                launcherItem.expanded = false;
-                controlCenterItem.expanded = false;
-                colorSchemeSwitcherItem.expanded = false;
-                powerMenuItem.expanded = false;
-                emojiPickerItem.expanded = false;
+                closeAllExcept(wallpaperSwitcherItem);
             }
         }
 
@@ -655,12 +596,7 @@ PanelWindow {
         onExpandedChanged: {
             if (expanded) {
                 topWindow.popupOpened();
-                launcherItem.expanded = false;
-                controlCenterItem.expanded = false;
-                wallpaperSwitcherItem.expanded = false;
-                colorSchemeSwitcherItem.expanded = false;
-                powerMenuItem.expanded = false;
-                settingsAppItem.expanded = false;
+                closeAllExcept(emojiPickerItem);
             }
         }
     }
@@ -718,12 +654,7 @@ PanelWindow {
         onExpandedChanged: {
             if (expanded) {
                 topWindow.popupOpened();
-                launcherItem.expanded = false;
-                controlCenterItem.expanded = false;
-                wallpaperSwitcherItem.expanded = false;
-                colorSchemeSwitcherItem.expanded = false;
-                powerMenuItem.expanded = false;
-                emojiPickerItem.expanded = false;
+                closeAllExcept(settingsAppItem);
             }
         }
 

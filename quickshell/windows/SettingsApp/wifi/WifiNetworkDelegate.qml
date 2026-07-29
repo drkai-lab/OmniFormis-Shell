@@ -28,10 +28,21 @@ Item {
     property bool isSelected: modelData.connected || isPasswordMode
     property bool showForget: false
 
-    property color targetColor: modelData.connected ? Theme.secondary_container : (isSelected ? Theme.surface_container_high : (wifiMouse.containsMouse ? Qt.tint(Theme.surface_container, Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.08)) : Theme.surface_container))
+    property color targetColor: modelData.connected ? (Vars.translucent ? Qt.rgba(Theme.secondary_container.r, Theme.secondary_container.g, Theme.secondary_container.b, 0.7) : Theme.secondary_container) : (isSelected ? (Vars.translucent ? Qt.rgba(Theme.surface_container_high.r, Theme.surface_container_high.g, Theme.surface_container_high.b, 0.6) : Theme.surface_container_high) : (wifiMouse.containsMouse ? Qt.tint((Vars.translucent ? Qt.rgba(Theme.surface_container.r, Theme.surface_container.g, Theme.surface_container.b, 0.5) : Theme.surface_container), Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.08)) : (Vars.translucent ? Qt.rgba(Theme.surface_container.r, Theme.surface_container.g, Theme.surface_container.b, 0.5) : Theme.surface_container)))
     Behavior on targetColor {
         ColorAnimation {
             duration: Vars.animationDuration
+        }
+    }
+
+    Process {
+        id: nmcliConnectProcess
+        command: []
+        onExited: code => {
+            console.log("[WifiNetworkDelegate] nmcli connect finished with code:", code);
+            if (code === 0 && modelData && typeof modelData.connect === "function") {
+                try { modelData.connect(); } catch (e) {}
+            }
         }
     }
 
@@ -39,11 +50,13 @@ Item {
         console.log("[WifiPage] Submitting password for:", modelData.name, "| Pwd length:", wifiPwdInput.text.length);
         try {
             if (wifiPwdInput.text.length > 0) {
-                modelData.connectWithPsk(wifiPwdInput.text);
+                nmcliConnectProcess.command = ["nmcli", "device", "wifi", "connect", modelData.name, "password", wifiPwdInput.text];
+                nmcliConnectProcess.running = true;
+                console.log("[WifiPage] nmcli connect command started for secured network.");
             } else {
                 modelData.connect();
+                console.log("[WifiPage] Native connect method invoked successfully.");
             }
-            console.log("[WifiPage] Native connect method invoked successfully.");
         } catch (e) {
             console.error("[WifiPage] Error invoking connect:", e);
         }
@@ -482,7 +495,7 @@ Item {
     Rectangle {
         anchors.fill: parent
         radius: parent.isSelected ? 36 : 16
-        color: Theme.surface_container_highest
+        color: Vars.translucent ? Qt.rgba(Theme.surface_container_highest.r, Theme.surface_container_highest.g, Theme.surface_container_highest.b, 0.85) : Theme.surface_container_highest
         visible: wifiDelegate.showForget
         opacity: wifiDelegate.showForget ? 1.0 : 0.0
         Behavior on opacity {

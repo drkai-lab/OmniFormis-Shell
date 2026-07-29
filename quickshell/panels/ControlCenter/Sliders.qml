@@ -13,10 +13,10 @@ ColumnLayout {
     spacing: 8
 
     property int trackHeight: 40
-    property int gap: 2
+    property int gap: 4
     property int handleWidth: 4
-    property real leftRadiusLarge: 12
-    property real leftRadiusSmall: 4
+    property real leftRadiusLarge: 6
+    property real leftRadiusSmall: 2
     property real dotSize: 6
 
     property var audioNode: Pipewire.defaultAudioSink

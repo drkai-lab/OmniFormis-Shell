@@ -142,10 +142,10 @@ Item {
             // Background behind preview
             Rectangle {
                 anchors.fill: parent
-                radius: Vars.radiusMedium
+                radius: Vars.radiusSmall
                 color: Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.12)
                 border.width: 1
-                border.color: winItem.winData?.floating ? Theme.tertiary_container : Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.2)
+                border.color: winItem.winData?.floating ? Theme.tertiary_container : Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.15)
             }
 
             // Live screen capture - FORCED ON for all workspaces
@@ -172,14 +172,14 @@ Item {
                 layer.smooth: true
                 Rectangle {
                     anchors.fill: parent
-                    radius: Vars.radiusMedium
+                    radius: Vars.radiusSmall
                 }
             }
 
             // Simple Hover interaction overlay (ICONS COMPLETELY REMOVED)
             Rectangle {
                 anchors.fill: parent
-                radius: Vars.radiusMedium
+                radius: Vars.radiusSmall
                 color: dragArea.containsMouse ? Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.12) : "transparent"
                 border.width: 1
                 border.color: Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.1)
@@ -255,7 +255,7 @@ Item {
         color: "transparent"
         radius: Vars.radiusSmall
         border.width: 2
-        border.color: Theme.on_primary_container
+        border.color: Theme.primary
 
         visible: activeWsId >= baseWorkspaceId && activeWsId < (baseWorkspaceId + (overviewPanel ? overviewPanel.totalWorkspaces : 10))
 

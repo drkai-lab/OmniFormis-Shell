@@ -300,10 +300,50 @@ Item {
             }
 
             InvertedCorner {
+                anchors.bottom: panelBackground.bottom
+                anchors.right: panelBackground.left
+                side: "bottom-right"
+                visible: Vars.panelStyle === "Attached" && panelBackground.opacity > 0 && Vars.pillPosition === "Bottom"
+                color: panelBackground.color
+                opacity: panelBackground.opacity
+                radius: Math.max(0, Math.min(Vars.radiusExtraLarge, Math.min(panelBackground.width, panelBackground.height) / 2))
+            }
+
+            InvertedCorner {
+                anchors.bottom: panelBackground.bottom
+                anchors.left: panelBackground.right
+                side: "bottom-left"
+                visible: Vars.panelStyle === "Attached" && panelBackground.opacity > 0 && Vars.pillPosition === "Bottom"
+                color: panelBackground.color
+                opacity: panelBackground.opacity
+                radius: Math.max(0, Math.min(Vars.radiusExtraLarge, Math.min(panelBackground.width, panelBackground.height) / 2))
+            }
+
+            InvertedCorner {
+                anchors.bottom: panelBackground.top
+                anchors.left: panelBackground.left
+                side: "bottom-left"
+                visible: Vars.panelStyle === "Attached" && panelBackground.opacity > 0 && Vars.pillPosition === "Left"
+                color: panelBackground.color
+                opacity: panelBackground.opacity
+                radius: Math.max(0, Math.min(Vars.radiusExtraLarge, Math.min(panelBackground.width, panelBackground.height) / 2))
+            }
+
+            InvertedCorner {
                 anchors.top: panelBackground.bottom
                 anchors.left: panelBackground.left
                 side: "top-left"
-                visible: Vars.panelStyle === "Attached" && panelBackground.opacity > 0 && Vars.pillPosition === "Bottom"
+                visible: Vars.panelStyle === "Attached" && panelBackground.opacity > 0 && Vars.pillPosition === "Left"
+                color: panelBackground.color
+                opacity: panelBackground.opacity
+                radius: Math.max(0, Math.min(Vars.radiusExtraLarge, Math.min(panelBackground.width, panelBackground.height) / 2))
+            }
+
+            InvertedCorner {
+                anchors.bottom: panelBackground.top
+                anchors.right: panelBackground.right
+                side: "bottom-right"
+                visible: Vars.panelStyle === "Attached" && panelBackground.opacity > 0 && Vars.pillPosition === "Right"
                 color: panelBackground.color
                 opacity: panelBackground.opacity
                 radius: Math.max(0, Math.min(Vars.radiusExtraLarge, Math.min(panelBackground.width, panelBackground.height) / 2))
@@ -313,7 +353,7 @@ Item {
                 anchors.top: panelBackground.bottom
                 anchors.right: panelBackground.right
                 side: "top-right"
-                visible: Vars.panelStyle === "Attached" && panelBackground.opacity > 0 && Vars.pillPosition === "Bottom"
+                visible: Vars.panelStyle === "Attached" && panelBackground.opacity > 0 && Vars.pillPosition === "Right"
                 color: panelBackground.color
                 opacity: panelBackground.opacity
                 radius: Math.max(0, Math.min(Vars.radiusExtraLarge, Math.min(panelBackground.width, panelBackground.height) / 2))

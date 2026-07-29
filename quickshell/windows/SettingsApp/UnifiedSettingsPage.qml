@@ -17,8 +17,94 @@ ColumnLayout {
 
     property var allVars: []
     property string activeCategory: "General"
-    property string copiedSliderValue: ""
     onActiveCategoryChanged: applyFilter()
+
+    function prettyTitle(key) {
+        var custom = {
+            "clockShowTicks": "Clock: Show Ticks",
+            "clockShowCenterDot": "Clock: Show Center Dot",
+            "clockShape": "Clock Widget Shape",
+            "wallpaperMaskShape": "Wallpaper Mask Shape",
+            "wallpaperMaskScale": "Wallpaper Mask Scale",
+            "wallpaperMaskColor": "Wallpaper Mask Color",
+            "wallpaperMaskEnabled": "Enable Wallpaper Mask",
+            "wallpaperMaskOffsetX": "Wallpaper Mask X Offset",
+            "wallpaperMaskOffsetY": "Wallpaper Mask Y Offset",
+            "mediaPlayerShape": "Media Player Widget Shape",
+            "mediaPlayerArtScale": "Media Player Art Scale",
+            "gameMode": "Game Mode Optimization",
+            "animationDuration": "Master Animation Duration",
+            "flickDeceleration": "Scroll Deceleration Rate",
+            "maximumFlickVelocity": "Max Scroll Velocity",
+            "blurAmount": "Window Blur Intensity",
+            "radiusAmount": "Window Corner Radius Scale",
+            "fontFamily": "Interface Font Family",
+            "pillPosition": "Panel Screen Position",
+            "panelStyle": "Panel Visual Style",
+            "gaps_in": "Inner Window Gaps",
+            "gaps_out": "Outer Window Gaps",
+            "border_size": "Window Border Size",
+            "rounding": "Window Corner Rounding",
+            "rounding_power": "Rounding Super-ellipse Power",
+            "active_opacity": "Active Window Opacity",
+            "inactive_opacity": "Inactive Window Opacity",
+            "windowOpacity": "Global Window Opacity",
+            "follow_mouse": "Follow Mouse Focus",
+            "sensitivity": "Cursor Sensitivity",
+            "touchpad_natural_scroll": "Touchpad Natural Scrolling",
+            "force_default_wallpaper": "Default Hyprland Wallpaper",
+            "gesture_direction": "Swipe Gesture Direction",
+            "AnimateStyle": "System Animation Style",
+            "Layout": "Window Tiling Layout"
+        };
+        if (custom[key]) return custom[key];
+        var str = key.replace(/_/g, " ").replace(/([A-Z])/g, " $1").replace(/\s+/g, " ").trim();
+        return str.charAt(0).toUpperCase() + str.slice(1);
+    }
+
+    function prettyHelp(key, rawHelp) {
+        var descriptions = {
+            "clockShowTicks": "Display hour dial tick marks around the perimeter of the analog clock widget.",
+            "clockShowCenterDot": "Render the prominent decorative center pin dot on the analog clock hands.",
+            "clockShape": "Select the Material 3 expressive silhouette shape for the desktop clock container.",
+            "wallpaperMaskShape": "Select the geometric clipping cutout shape applied to the wallpaper background.",
+            "wallpaperMaskScale": "Scale zoom factor for the wallpaper cutout mask geometry.",
+            "wallpaperMaskColor": "Solid tint background color visible around the perimeter of the masked wallpaper.",
+            "wallpaperMaskEnabled": "Toggle the expressive Material 3 clipping mask over the desktop wallpaper.",
+            "wallpaperMaskOffsetX": "Horizontal X-axis pixel shift for positioning the wallpaper clipping mask.",
+            "wallpaperMaskOffsetY": "Vertical Y-axis pixel shift for positioning the wallpaper clipping mask.",
+            "mediaPlayerShape": "Select the Material 3 cutout shape contour for the desktop audio player widget.",
+            "mediaPlayerArtScale": "Scale zoom factor for album artwork displayed inside the desktop audio player.",
+            "gameMode": "Suspend heavy decorative shell animations and blur effects for optimal gaming performance.",
+            "animationDuration": "Master transition duration in milliseconds for interface micro-animations.",
+            "flickDeceleration": "Friction rate applied when coasting through scrollable UI flick views.",
+            "maximumFlickVelocity": "Maximum speed velocity clamp for touch and mouse scroll swiping.",
+            "blurAmount": "Gaussian background blur radius applied behind translucent shell elements and windows.",
+            "radiusAmount": "Master multiplication ratio applied to window and container corner roundings.",
+            "fontFamily": "Primary typography font family used across Quickshell overlays and panels.",
+            "pillPosition": "Select the edge of the display monitor where the shell control bar is docked.",
+            "panelStyle": "Choose between Floating, Attached (flush), or Framed shell bar geometry.",
+            "gaps_in": "Spacing distance in pixels between adjacent tiled windows on the workspace.",
+            "gaps_out": "Spacing distance in pixels between tiled windows and the outer display monitor screen edge.",
+            "border_size": "Thickness in pixels of the colored focus outline ring surrounding windows.",
+            "rounding": "Radius in pixels for window frame corner curves.",
+            "rounding_power": "Super-ellipse curvature exponent controlling squished rounded corner smoothness.",
+            "active_opacity": "Translucency alpha level applied to currently focused active application windows.",
+            "inactive_opacity": "Translucency alpha level applied to background unfocused application windows.",
+            "follow_mouse": "Determine whether input focus automatically changes to the window directly beneath the pointer.",
+            "sensitivity": "Hardware input multiplier scaling pointer movement speed and sensitivity.",
+            "touchpad_natural_scroll": "Invert vertical scroll direction on touchpads to mimic direct touch dragging.",
+            "force_default_wallpaper": "Control display of standard anime backgrounds when starting the Hyprland compositor.",
+            "gesture_direction": "Direction axes monitored when swiping with multi-touch workspace transitions.",
+            "AnimateStyle": "Active motion choreography flavor defining easing mechanics and window transitions.",
+            "Layout": "Tiling layout algorithm arranging windows (Dwindle, Master, Scrolling, or Monocle)."
+        };
+        if (descriptions[key]) return descriptions[key];
+        if (!rawHelp || rawHelp === "Quickshell variable" || rawHelp === "Hyprland variable") {
+            return "Configure " + rootPage.prettyTitle(key) + " (" + key + ") settings for your environment.";
+        }
+        return rawHelp;
+    }
 
     function updateVariable(key, val, source) {
         var isQs = source === "Quickshell" || source === "quickshell";
@@ -81,9 +167,9 @@ ColumnLayout {
             text: {
                 if (activeCategory === "Layout") return "Configure window gaps, border sizing, tiling layout, and system spacing tokens";
                 if (activeCategory === "Keybinds") return "Manage system shortcuts, hotkeys, modifier key combinations, and launcher actions";
-                if (activeCategory === "Theme") return "Customize window corner rounding, opacity, drop shadows, blur effects, font family, and wallpaper masks";
+                if (activeCategory === "Theme") return "Customize window corner rounding, opacity, drop shadows, blur effects, and font family";
                 if (activeCategory === "Animations") return "Adjust expressive Material 3 animation styles, transition durations, and scrolling physics";
-                if (activeCategory === "Desktop") return "Set up desktop widgets (clock, calendar, media player) and configure overview dimensions";
+                if (activeCategory === "Desktop") return "Configure wallpaper mask & settings, desktop widgets (clock, calendar, media player), and overview dimensions";
                 if (activeCategory === "Input") return "Tune mouse sensitivity, touchpad gestures, natural scrolling, and keyboard layout rules";
                 if (activeCategory === "General") return "Configure default terminal, browser, code editor, environment scale factors, and Game Mode";
                 return "Manage settings for " + activeCategory;
@@ -340,14 +426,14 @@ ColumnLayout {
                     Layout.fillWidth: true
                     spacing: 4
                     Text {
-                        text: delegateRoot.itemKey
+                        text: rootPage.prettyTitle(delegateRoot.itemKey)
                         font.family: Vars.fontFamily
                         font.pixelSize: 16
                         font.weight: 600
                         color: Theme.on_surface
                     }
                     Text {
-                        text: (delegateRoot.itemType === "enum" || delegateRoot.itemType === "color") ? delegateRoot.itemHelp.replace(/\s*\(.*\)/, "") : delegateRoot.itemHelp
+                        text: rootPage.prettyHelp(delegateRoot.itemKey, (delegateRoot.itemType === "enum" || delegateRoot.itemType === "color") ? delegateRoot.itemHelp.replace(/\s*\(.*\)/, "") : delegateRoot.itemHelp)
                         font.family: Vars.fontFamily
                         font.pixelSize: 12
                         color: Theme.on_surface_variant
@@ -561,10 +647,10 @@ ColumnLayout {
                     property real handleWidth: 4
                     property real handleHeight: trackHeight + 8
                     property real handleMargin: 6
-                    property real leftRadiusLarge: 12
-                    property real leftRadiusSmall: 4
+                    property real leftRadiusLarge: 6
+                    property real leftRadiusSmall: 2
                     property real dotSize: 6
-                    property real gap: 2
+                    property real gap: 4
                     // Only show ticks if the total number of ticks is small (e.g. <= 25) to prevent dense lines
                     property bool showTicks: ((delegateRoot.itemMax - delegateRoot.itemMin) / delegateRoot.itemStep) <= 25
 
@@ -1295,8 +1381,11 @@ ColumnLayout {
                     var key = leftPart.substring(0, colonIdx).trim();
                     var typePart = leftPart.substring(colonIdx + 1).trim();
 
+                    // CRITICAL RULE: ALL wallpaper, wallpaper mask, clock, calendar, and desktop widgets MUST route to the "Desktop" category ("Desktop & Widgets"). NEVER place them in "Theme".
                     // Map hyprland variables to specialized UI categories
-                    if (key === "gaps_in" || key === "gaps_out" || key === "singleWindowGapsOut" || key === "enableSingleWindowGaps" || key === "enableSpecialWorkspaceGaps" || key === "border_size" || key === "groupBar" || key === "Layout" || key === "resize_on_border") {
+                    if (key.toLowerCase().includes("wallpaper") || key.toLowerCase().includes("mask") || key.startsWith("desktop")) {
+                        category = "Desktop";
+                    } else if (key === "gaps_in" || key === "gaps_out" || key === "singleWindowGapsOut" || key === "enableSingleWindowGaps" || key === "enableSpecialWorkspaceGaps" || key === "border_size" || key === "groupBar" || key === "Layout" || key === "resize_on_border") {
                         category = "Layout";
                     } else if (key === "rounding" || key === "rounding_power" || key === "active_opacity" || key === "inactive_opacity" || key === "windowOpacity" || category === "Shadows" || category === "Blur" || key.startsWith("shadow_") || key.startsWith("blur_")) {
                         category = "Theme";
@@ -1466,13 +1555,14 @@ ColumnLayout {
                         type = "number";
                     }
 
+                    // CRITICAL RULE: ALL wallpaper, wallpaper mask, clock, calendar, and desktop widgets MUST route to the "Desktop" category ("Desktop & Widgets"). NEVER place them in "Theme".
                     // Map quickshell variables to specialized UI categories
                     var category = "General";
-                    if (key.startsWith("desktop") || key.startsWith("clock") || key.startsWith("mediaPlayer") || key.startsWith("overview")) {
+                    if (key.startsWith("desktop") || key.startsWith("clock") || key.startsWith("mediaPlayer") || key.startsWith("overview") || key.toLowerCase().includes("wallpaper") || key.toLowerCase().includes("mask")) {
                         category = "Desktop";
                     } else if (key.startsWith("spacing") || key.startsWith("padding")) {
                         category = "Layout";
-                    } else if (key.startsWith("radius") || key.startsWith("wallpaperMask") || key === "blurAmount" || key === "fontFamily") {
+                    } else if (key.startsWith("radius") || key === "blurAmount" || key === "fontFamily") {
                         category = "Theme";
                     } else if (key === "animationDuration" || key === "flickDeceleration" || key === "maximumFlickVelocity" || key.startsWith("custom") || key.startsWith("m3")) {
                         category = "Animations";

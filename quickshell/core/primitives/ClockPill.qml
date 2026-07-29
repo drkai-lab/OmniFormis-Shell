@@ -91,7 +91,7 @@ Item {
                 var months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
                 
                 if (root.isVertical) {
-                    root.timeString = h + "\n:\n" + m;
+                    root.timeString = h + "\n" + m;
                     root.dateString = months[d.getMonth()] + "\n" + d.getDate();
                 } else {
                     root.timeString = h + ":" + m;

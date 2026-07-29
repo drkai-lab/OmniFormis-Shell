@@ -114,7 +114,7 @@ Item {
                         Layout.fillWidth: true
                         Layout.preferredHeight: 72
 
-                        property color targetColor: wifiHeaderMouse.containsMouse ? Qt.tint(Theme.surface_container, Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.08)) : Theme.surface_container
+                        property color targetColor: wifiHeaderMouse.containsMouse ? Qt.tint((Vars.translucent ? Qt.rgba(Theme.surface_container.r, Theme.surface_container.g, Theme.surface_container.b, 0.5) : Theme.surface_container), Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.08)) : (Vars.translucent ? Qt.rgba(Theme.surface_container.r, Theme.surface_container.g, Theme.surface_container.b, 0.5) : Theme.surface_container)
                         Behavior on targetColor {
                             ColorAnimation {
                                 duration: Vars.animationDuration
@@ -216,7 +216,7 @@ Item {
                         Layout.preferredHeight: 120
                         visible: Networking.wifiEnabled && (!rootWifiPage.wifiDevice || rootWifiPage.wifiDevice.networks.values.length === 0)
                         radius: 16
-                        color: Theme.surface_container
+                        color: Vars.translucent ? Qt.rgba(Theme.surface_container.r, Theme.surface_container.g, Theme.surface_container.b, 0.5) : Theme.surface_container
 
                         Rectangle {
                             width: 16
@@ -282,7 +282,7 @@ Item {
                         Layout.preferredHeight: 72
                         visible: Networking.wifiEnabled
 
-                        property color targetColor: scanMouse.containsMouse ? Qt.tint(Theme.surface_container, Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.08)) : Theme.surface_container
+                        property color targetColor: scanMouse.containsMouse ? Qt.tint((Vars.translucent ? Qt.rgba(Theme.surface_container.r, Theme.surface_container.g, Theme.surface_container.b, 0.5) : Theme.surface_container), Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.08)) : (Vars.translucent ? Qt.rgba(Theme.surface_container.r, Theme.surface_container.g, Theme.surface_container.b, 0.5) : Theme.surface_container)
                         Behavior on targetColor {
                             ColorAnimation {
                                 duration: Vars.animationDuration
@@ -393,7 +393,7 @@ Item {
     Rectangle {
         id: infoPageOverlay
         anchors.fill: parent
-        color: Theme.surface_container_low
+        color: Vars.translucent ? Qt.rgba(Theme.surface_container_low.r, Theme.surface_container_low.g, Theme.surface_container_low.b, 0.85) : Theme.surface_container_low
         visible: rootWifiPage.selectedNetworkForInfo !== ""
         opacity: visible ? 1.0 : 0.0
         Behavior on opacity {
@@ -463,7 +463,7 @@ Item {
                 Layout.fillWidth: true
                 Layout.preferredHeight: 100
                 radius: 16
-                color: Theme.surface_container
+                color: Vars.translucent ? Qt.rgba(Theme.surface_container.r, Theme.surface_container.g, Theme.surface_container.b, 0.5) : Theme.surface_container
 
                 ColumnLayout {
                     anchors.centerIn: parent
@@ -489,7 +489,7 @@ Item {
                 Layout.fillWidth: true
                 Layout.preferredHeight: 64
                 radius: 16
-                color: Theme.surface_container_highest
+                color: Vars.translucent ? Qt.rgba(Theme.surface_container_highest.r, Theme.surface_container_highest.g, Theme.surface_container_highest.b, 0.5) : Theme.surface_container_highest
 
                 RowLayout {
                     anchors.fill: parent
@@ -541,7 +541,7 @@ Item {
     Rectangle {
         id: authPageOverlay
         anchors.fill: parent
-        color: Theme.surface_container_low
+        color: Vars.translucent ? Qt.rgba(Theme.surface_container_low.r, Theme.surface_container_low.g, Theme.surface_container_low.b, 0.85) : Theme.surface_container_low
         visible: rootWifiPage.authOverlayVisible
         opacity: visible ? 1.0 : 0.0
         Behavior on opacity {
@@ -611,7 +611,7 @@ Item {
                 Layout.fillWidth: true
                 Layout.preferredHeight: 180
                 radius: 16
-                color: Theme.surface_container
+                color: Vars.translucent ? Qt.rgba(Theme.surface_container.r, Theme.surface_container.g, Theme.surface_container.b, 0.5) : Theme.surface_container
 
                 ColumnLayout {
                     anchors.centerIn: parent

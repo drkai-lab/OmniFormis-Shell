@@ -58,11 +58,11 @@ ColumnLayout {
             { id: "Keybinds", name: "Shortcuts & Modifiers", subtitle: "System shortcuts, hotkeys, modifiers", icon: "\ue31c", section: "System & Input", isFirst: false, isLast: true, hue: 0.80, shape: "6SidedCookie" },
 
             // Desktop & Windows
-            { id: "Desktop", name: "Desktop & Widgets", subtitle: "Clock, calendar, media widget, overview", icon: "\ue871", section: "Desktop & Windows", isFirst: true, isLast: false, hue: 0.85, shape: "Clamshell" },
+            { id: "Desktop", name: "Desktop & Widgets", subtitle: "Wallpaper mask, clock, calendar, overview", icon: "\ue871", section: "Desktop & Windows", isFirst: true, isLast: false, hue: 0.85, shape: "Clamshell" },
             { id: "Layout", name: "Window Gaps & Layout", subtitle: "Window gaps, border size, spacing, padding", icon: "\ue8f1", section: "Desktop & Windows", isFirst: false, isLast: true, hue: 0.90, shape: "Bun" },
 
-            // Appearance & Animations
-            { id: "Theme", name: "Visuals & Effects", subtitle: "Rounding, opacity, blur, shadow, font, mask", icon: "\ue3b7", section: "Appearance & Animations", isFirst: true, isLast: false, hue: 0.95, shape: "Flower" },
+            // Appearance & Animations (Note: Wallpaper & masks belong in Desktop & Widgets)
+            { id: "Theme", name: "Visuals & Effects", subtitle: "Rounding, opacity, blur, shadow, font family", icon: "\ue3b7", section: "Appearance & Animations", isFirst: true, isLast: false, hue: 0.95, shape: "Flower" },
             { id: "Animations", name: "Animation & Physics", subtitle: "Animation style, durations, scroll physics", icon: "\ue410", section: "Appearance & Animations", isFirst: false, isLast: false, hue: 0.00, shape: "VerySunny" },
             { id: "bezier", name: "Curve Editor", subtitle: "Interactive custom bezier creator", icon: "\ue71c", section: "Appearance & Animations", isFirst: false, isLast: true, hue: 0.06, shape: "Oval" },
             

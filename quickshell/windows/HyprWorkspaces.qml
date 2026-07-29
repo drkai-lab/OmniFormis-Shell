@@ -45,6 +45,9 @@ Item {
     property alias panel: bg
     property alias panelMask: panelMask
 
+    // Emitted when the workspace pill becomes visible so TopPills can close other panels
+    signal requestCloseAll
+
     Item {
         id: panelMask
         anchors.centerIn: bg
@@ -65,10 +68,20 @@ Item {
         onTriggered: overlayVisible = false
     }
 
+    // Dismiss the workspace overlay (called by TopPills.closeAll)
+    function cancelOverlay() {
+        overlayTimer.stop();
+        overlayVisible = false;
+    }
+
     // When the focused workspace changes, show overlay briefly
     onCurrentWorkspaceChanged: {
         overlayVisible = true;
         overlayTimer.restart();
+        // Only request other panels to close when the pill will actually be visible
+        if (!forceHidePill) {
+            requestCloseAll();
+        }
     }
 
     function handleScroll(delta) {

@@ -434,7 +434,7 @@ Flickable {
                             Behavior on bottomLeftRadius { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
                             Behavior on topRightRadius { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
                             Behavior on bottomRightRadius { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
-                            color: isSelected ? Theme.secondary_container : (lightHover.containsMouse ? Theme.surface_container_highest : Theme.surface_container_high)
+                            color: isSelected ? (Vars.translucent ? Qt.rgba(Theme.secondary_container.r, Theme.secondary_container.g, Theme.secondary_container.b, 0.7) : Theme.secondary_container) : (lightHover.containsMouse ? (Vars.translucent ? Qt.rgba(Theme.surface_container_highest.r, Theme.surface_container_highest.g, Theme.surface_container_highest.b, 0.6) : Theme.surface_container_highest) : (Vars.translucent ? Qt.rgba(Theme.surface_container_high.r, Theme.surface_container_high.g, Theme.surface_container_high.b, 0.4) : Theme.surface_container_high))
                             border.width: 0
 
                             Behavior on color { ColorAnimation { duration: 180 } }
@@ -487,7 +487,7 @@ Flickable {
                             Behavior on bottomLeftRadius { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
                             Behavior on topRightRadius { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
                             Behavior on bottomRightRadius { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
-                            color: isSelected ? Theme.secondary_container : (darkHover.containsMouse ? Theme.surface_container_highest : Theme.surface_container_high)
+                            color: isSelected ? (Vars.translucent ? Qt.rgba(Theme.secondary_container.r, Theme.secondary_container.g, Theme.secondary_container.b, 0.7) : Theme.secondary_container) : (darkHover.containsMouse ? (Vars.translucent ? Qt.rgba(Theme.surface_container_highest.r, Theme.surface_container_highest.g, Theme.surface_container_highest.b, 0.6) : Theme.surface_container_highest) : (Vars.translucent ? Qt.rgba(Theme.surface_container_high.r, Theme.surface_container_high.g, Theme.surface_container_high.b, 0.4) : Theme.surface_container_high))
                             border.width: 0
 
                             Behavior on color { ColorAnimation { duration: 180 } }
@@ -566,7 +566,7 @@ Flickable {
                                 Behavior on bottomLeftRadius { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
                                 Behavior on bottomRightRadius { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
 
-                                color: isSelected ? (Vars.translucent ? Qt.rgba(Theme.secondary_container.r, Theme.secondary_container.g, Theme.secondary_container.b, 0.95) : Theme.secondary_container) : (schemeHover.containsMouse ? Theme.surface_container_highest : Theme.surface_container_high)
+                                color: isSelected ? (Vars.translucent ? Qt.rgba(Theme.secondary_container.r, Theme.secondary_container.g, Theme.secondary_container.b, 0.7) : Theme.secondary_container) : (schemeHover.containsMouse ? (Vars.translucent ? Qt.rgba(Theme.surface_container_highest.r, Theme.surface_container_highest.g, Theme.surface_container_highest.b, 0.6) : Theme.surface_container_highest) : (Vars.translucent ? Qt.rgba(Theme.surface_container_high.r, Theme.surface_container_high.g, Theme.surface_container_high.b, 0.4) : Theme.surface_container_high))
                                 border.width: 0
 
                                 Behavior on color { ColorAnimation { duration: 160 } }
@@ -799,10 +799,10 @@ Flickable {
                     Repeater {
                         id: posRepeater
                         model: [
-                            { name: "Top", pos: "Top", icon: "\ue5ce" },
-                            { name: "Right", pos: "Right", icon: "\ue5cc" },
                             { name: "Left", pos: "Left", icon: "\ue5cb" },
-                            { name: "Bottom", pos: "Bottom", icon: "\ue5cf" }
+                            { name: "Top", pos: "Top", icon: "\ue5ce" },
+                            { name: "Bottom", pos: "Bottom", icon: "\ue5cf" },
+                            { name: "Right", pos: "Right", icon: "\ue5cc" }
                         ]
                         delegate: Rectangle {
                             Layout.fillWidth: true
@@ -816,7 +816,7 @@ Flickable {
                             topRightRadius: isSelected ? 19 : (hasRight ? 6 : 19)
                             bottomRightRadius: isSelected ? 19 : (hasRight ? 6 : 19)
 
-                            color: isSelected ? Theme.secondary_container : (posHover.containsMouse ? Theme.surface_container_highest : Theme.surface_container_high)
+                            color: isSelected ? (Vars.translucent ? Qt.rgba(Theme.secondary_container.r, Theme.secondary_container.g, Theme.secondary_container.b, 0.7) : Theme.secondary_container) : (posHover.containsMouse ? (Vars.translucent ? Qt.rgba(Theme.surface_container_highest.r, Theme.surface_container_highest.g, Theme.surface_container_highest.b, 0.6) : Theme.surface_container_highest) : (Vars.translucent ? Qt.rgba(Theme.surface_container_high.r, Theme.surface_container_high.g, Theme.surface_container_high.b, 0.4) : Theme.surface_container_high))
                             border.width: 0
 
                             Behavior on topLeftRadius { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
@@ -899,7 +899,7 @@ Flickable {
                             topRightRadius: isSelected ? 19 : (hasRight ? 6 : 19)
                             bottomRightRadius: isSelected ? 19 : (hasRight ? 6 : 19)
 
-                            color: isSelected ? Theme.secondary_container : (styleHover.containsMouse ? Theme.surface_container_highest : Theme.surface_container_high)
+                            color: isSelected ? (Vars.translucent ? Qt.rgba(Theme.secondary_container.r, Theme.secondary_container.g, Theme.secondary_container.b, 0.7) : Theme.secondary_container) : (styleHover.containsMouse ? (Vars.translucent ? Qt.rgba(Theme.surface_container_highest.r, Theme.surface_container_highest.g, Theme.surface_container_highest.b, 0.6) : Theme.surface_container_highest) : (Vars.translucent ? Qt.rgba(Theme.surface_container_high.r, Theme.surface_container_high.g, Theme.surface_container_high.b, 0.4) : Theme.surface_container_high))
                             border.width: 0
 
                             Behavior on topLeftRadius { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
@@ -1061,7 +1061,7 @@ Flickable {
                             id: cardBase
                             anchors.fill: parent
                             radius: 24
-                            color: Vars.translucent ? Qt.rgba(Theme.surface_container_low.r, Theme.surface_container_low.g, Theme.surface_container_low.b, 0.6) : Theme.surface_container_low
+                            color: Vars.translucent ? Qt.rgba(Theme.surface_container_low.r, Theme.surface_container_low.g, Theme.surface_container_low.b, 0.35) : Theme.surface_container_low
                             border.color: Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.08)
                             border.width: 1
                             clip: true
@@ -1145,7 +1145,7 @@ Flickable {
                                 height: 56
                                 bottomLeftRadius: 24
                                 bottomRightRadius: 24
-                                color: Vars.translucent ? Qt.rgba(Theme.surface_container_highest.r, Theme.surface_container_highest.g, Theme.surface_container_highest.b, 0.92) : Theme.surface_container_highest
+                                color: Vars.translucent ? Qt.rgba(Theme.surface_container_highest.r, Theme.surface_container_highest.g, Theme.surface_container_highest.b, 0.5) : Theme.surface_container_highest
                                 
                                 Rectangle {
                                     anchors.top: parent.top

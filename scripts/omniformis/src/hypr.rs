@@ -216,9 +216,13 @@ pub fn set(key: &str, value: &str) {
         content = update_var(&content, key, value, &info.val_type);
         write_file(&content);
         if key == "GameMode" {
+            let val_str = match value.to_lowercase().as_str() {
+                "true" | "1" | "yes" | "y" | "t" => "true",
+                _ => "false",
+            };
             let _ = Command::new("sh")
                 .arg("-c")
-                .arg("omniformis qs kill; sleep 0.1; omniformis qs start -d")
+                .arg(&format!("omniformis qs set gameMode {}; hyprctl reload; omniformis qs kill; sleep 0.1; omniformis qs start -d", val_str))
                 .spawn();
         }
     } else {
