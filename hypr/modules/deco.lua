@@ -1,17 +1,20 @@
 -----------------------
----- LOOK AND FEEL ----
------------------------
-
 local Utils = require("utils")
 local vars = require("modules.variables")
 local colors = Utils.colors
 
+local layer_rules = {
+    "blur, quickshell",
+    "blur_popups, quickshell",
+    "ignorealpha 0.5, quickshell",
+    "ignorezero, quickshell",
+    "blur, quickshell:bezel",
+    "ignorealpha 0.5, quickshell:bezel",
+    "ignorezero, quickshell:bezel"
+}
+
 hl.config({
-    layerrule = {
-        "blur, quickshell",
-        "blur_popups, quickshell",
-        "ignorealpha 0.1, quickshell"
-    },
+    layerrule = layer_rules,
     general = {
         gaps_in  = vars.GameMode and 0 or vars.gaps_in,
         gaps_out = vars.GameMode and 0 or vars.gaps_out,

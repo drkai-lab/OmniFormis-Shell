@@ -213,6 +213,33 @@ ColumnLayout {
                 }
             }
             Button {
+                visible: rootPage.activeCategory === "Input"
+                onClicked: {
+                    var proc = Qt.createQmlObject('import Quickshell.Io; Process { command: ["sh", "-c", "hyprctl devices -j | jq -r \\".keyboards[].name\\" | while read -r kb; do hyprctl switchxkblayout \\"$kb\\" next; done"]; onExited: destroy() }', rootPage);
+                    proc.running = true;
+                }
+                background: Rectangle {
+                    color: layoutBtnHover.containsMouse ? Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.1) : "transparent"
+                    radius: 16
+                }
+                contentItem: RowLayout {
+                    spacing: 8
+                    Text { text: "keyboard"; font.family: "Material Symbols Outlined"; color: Theme.on_surface; font.pixelSize: 20 }
+                    Text { text: "Switch Layout"; color: Theme.on_surface; font.family: Vars.fontFamily; font.bold: true }
+                }
+                MouseArea {
+                    id: layoutBtnHover
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: {
+                        var proc = Qt.createQmlObject('import Quickshell.Io; Process { command: ["sh", "-c", "hyprctl devices -j | jq -r \\".keyboards[].name\\" | while read -r kb; do hyprctl switchxkblayout \\"$kb\\" next; done"]; onExited: destroy() }', rootPage);
+                        proc.running = true;
+                    }
+                }
+            }
+
+            Button {
                 onClicked: loadSettings()
                 background: Rectangle {
                     color: refreshBtnHover.containsMouse ? Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.1) : "transparent"
@@ -259,9 +286,45 @@ ColumnLayout {
                 currentItem.triggerAction();
             }
         }
+        Keys.onSpacePressed: {
+            if (currentItem) {
+                currentItem.triggerAction();
+            }
+        }
         Keys.onRightPressed: {
             if (currentItem)
                 currentItem.triggerAction();
+        }
+        
+        property bool vimKeysEnabled: false
+        Process {
+            id: vimKeysChecker
+            command: ["bash", "-c", "grep -qi 'vimkeys[ \t]*=[ \t]*true' /home/boing/Dotfiles/hypr/modules/variables.lua && echo 'true' || echo 'false'"]
+            running: true
+            stdout: StdioCollector {
+                onStreamFinished: {
+                    settingsList.vimKeysEnabled = (this.text.trim() === 'true');
+                }
+            }
+        }
+
+        Keys.onPressed: (event) => {
+            if (settingsList.vimKeysEnabled) {
+                if (event.key === Qt.Key_J) {
+                    incrementCurrentIndex();
+                    event.accepted = true;
+                } else if (event.key === Qt.Key_K) {
+                    if (currentIndex > 0) {
+                        decrementCurrentIndex();
+                    } else {
+                        searchInput.forceActiveFocus();
+                    }
+                    event.accepted = true;
+                } else if (event.key === Qt.Key_L || event.key === Qt.Key_H) {
+                    if (currentItem) currentItem.triggerAction();
+                    event.accepted = true;
+                }
+            }
         }
 
         section.property: "source"
@@ -1540,7 +1603,7 @@ ColumnLayout {
                         continue;
 
                     var key = line.substring(0, colonIdx).trim();
-                    if (key === "notificationHistory" || key === "historyUpdated" || key === "pillPosition" || key === "panelStyle" || key === "translucent")
+                    if (key === "notificationHistory" || key === "historyUpdated" || key === "pillPosition" || key === "panelStyle" || key === "translucent" || key === "liquidGlass")
                         continue;
 
                     var valPart = line.substring(colonIdx + 1).trim();
@@ -1562,7 +1625,7 @@ ColumnLayout {
                         category = "Desktop";
                     } else if (key.startsWith("spacing") || key.startsWith("padding")) {
                         category = "Layout";
-                    } else if (key.startsWith("radius") || key === "blurAmount" || key === "fontFamily") {
+                    } else if (key.startsWith("radius") || key === "blurAmount" || key === "fontFamily" || key === "liquidGlassPreset") {
                         category = "Theme";
                     } else if (key === "animationDuration" || key === "flickDeceleration" || key === "maximumFlickVelocity" || key.startsWith("custom") || key.startsWith("m3")) {
                         category = "Animations";
@@ -1631,6 +1694,9 @@ ColumnLayout {
                     } else if (key === "panelStyle") {
                         type = "enum";
                         enumsStr = "Floating|||Attached|||Framed";
+                    } else if (key === "liquidGlassPreset") {
+                        type = "enum";
+                        enumsStr = "glass|||apple|||clear|||contrasted";
                     }
 
                     newVars.push({

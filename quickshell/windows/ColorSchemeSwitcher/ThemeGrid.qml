@@ -5,6 +5,7 @@ import "../.."
 import "../../theme"
 import "../.."
 import Quickshell
+import Quickshell.Io
 import "../../theme/variables.js" as Vars
 
 GridView {
@@ -24,7 +25,36 @@ GridView {
     focus: true
     keyNavigationEnabled: true
     highlightFollowsCurrentItem: false
-    onCurrentIndexChanged: positionViewAtIndex(currentIndex, GridView.Contain)
+    onCurrentIndexChanged: scrollToCurrentIndex()
+
+    function scrollToCurrentIndex() {
+        if (currentIndex < 0) return;
+        var cols = Math.floor(width / cellWidth);
+        var row = Math.floor(currentIndex / cols);
+        var itemY = row * cellHeight;
+        var itemBottom = itemY + cellHeight;
+        
+        var targetY = contentY;
+        if (itemY < contentY) {
+            targetY = itemY;
+        } else if (itemBottom > contentY + height) {
+            targetY = itemBottom - height;
+        }
+        
+        if (targetY !== contentY) {
+            scrollAnim.to = targetY;
+            scrollAnim.restart();
+        }
+    }
+
+    NumberAnimation {
+        id: scrollAnim
+        target: root
+        property: "contentY"
+        duration: Vars.animationDuration
+        easing.type: Easing.BezierSpline
+        easing.bezierCurve: Vars.customExpressiveSpatialSlow
+    }
     
     highlight: Item {
         x: root.currentItem ? root.currentItem.x : 0
@@ -72,6 +102,44 @@ GridView {
     Keys.onReturnPressed: (event) => {
         if (currentItem) currentItem.triggerSelection();
         event.accepted = true;
+    }
+    Keys.onSpacePressed: (event) => {
+        if (currentItem) currentItem.triggerSelection();
+        event.accepted = true;
+    }
+
+    property bool vimKeysEnabled: false
+    Process {
+        id: vimKeysChecker
+        command: ["bash", "-c", "grep -qi 'vimkeys[ \t]*=[ \t]*true' /home/boing/Dotfiles/hypr/modules/variables.lua && echo 'true' || echo 'false'"]
+        running: true
+        stdout: StdioCollector {
+            onStreamFinished: {
+                root.vimKeysEnabled = (this.text.trim() === 'true');
+            }
+        }
+    }
+
+    Keys.onPressed: (event) => {
+        if (root.vimKeysEnabled) {
+            if (event.key === Qt.Key_H) {
+                moveCurrentIndexLeft();
+                event.accepted = true;
+            } else if (event.key === Qt.Key_L) {
+                moveCurrentIndexRight();
+                event.accepted = true;
+            } else if (event.key === Qt.Key_K) {
+                if (currentIndex < 4) {
+                    if (searchInput) searchInput.forceActiveFocus();
+                } else {
+                    moveCurrentIndexUp();
+                }
+                event.accepted = true;
+            } else if (event.key === Qt.Key_J) {
+                moveCurrentIndexDown();
+                event.accepted = true;
+            }
+        }
     }
 
     delegate: Item {

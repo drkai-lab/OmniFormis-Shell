@@ -216,15 +216,14 @@ PanelWindow {
         gameMode: topWindow.gameMode
         anchors.top: topWindow.pillPos === "Bottom" || topWindow.pillPos === "Right" || topWindow.pillPos === "Left" ? undefined : parent.top
         anchors.bottom: topWindow.pillPos === "Bottom" ? parent.bottom : undefined
-        anchors.left: topWindow.pillPos === "Left" ? parent.left : (topWindow.gameMode ? parent.left : undefined)
-        anchors.right: topWindow.pillPos === "Right" ? parent.right : (topWindow.gameMode ? parent.right : undefined)
-        anchors.horizontalCenter: (topWindow.gameMode || topWindow.pillPos === "Left" || topWindow.pillPos === "Right") ? undefined : parent.horizontalCenter
+        anchors.left: topWindow.pillPos === "Left" ? parent.left : undefined
+        anchors.right: topWindow.pillPos === "Right" ? parent.right : undefined
+        anchors.horizontalCenter: (topWindow.pillPos === "Left" || topWindow.pillPos === "Right") ? undefined : parent.horizontalCenter
         anchors.verticalCenter: (topWindow.pillPos === "Left" || topWindow.pillPos === "Right") ? parent.verticalCenter : undefined
         
-        property bool isShown: (!topWindow.suppressHover && (topWindow.pillHoverGrace || clockHoverArea.containsMouse || clockPill.isHovered) && !(launcherItem.expanded || controlCenterItem.expanded || wallpaperSwitcherItem.expanded || colorSchemeSwitcherItem.expanded || powerMenuItem.expanded || polkitItem.expanded || notificationPopupItem.expanded || emojiPickerItem.expanded || settingsAppItem.expanded || volumeOsdItem.isVisible || workspacesItem.overlayVisible) && !topWindow.gameMode)
+        property bool isShown: (!topWindow.suppressHover && (topWindow.pillHoverGrace || clockHoverArea.containsMouse || clockPill.isHovered) && !(launcherItem.expanded || controlCenterItem.expanded || wallpaperSwitcherItem.expanded || colorSchemeSwitcherItem.expanded || powerMenuItem.expanded || polkitItem.expanded || notificationPopupItem.expanded || emojiPickerItem.expanded || settingsAppItem.expanded || volumeOsdItem.isVisible || workspacesItem.overlayVisible))
         
         property real targetMargin: {
-            if (topWindow.gameMode) return 0;
             if (!isShown) {
                 if (topWindow.pillPos === "Left" || topWindow.pillPos === "Right")
                     return -clockPill.width - 20;

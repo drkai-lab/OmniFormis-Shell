@@ -77,9 +77,9 @@ Item {
         layer.effect: MultiEffect { shadowEnabled: !root.gameMode; shadowBlur: 1.0; shadowColor: Qt.rgba(0,0,0,0.25); shadowVerticalOffset: 4; shadowHorizontalOffset: 0 }
         anchors.top: (!Vars.pillPosition || Vars.pillPosition === "Top") ? parent.top : undefined
         anchors.bottom: Vars.pillPosition === "Bottom" ? parent.bottom : undefined
-        anchors.left: Vars.pillPosition === "Left" ? parent.left : (root.gameMode ? parent.left : undefined)
-        anchors.right: Vars.pillPosition === "Right" ? parent.right : (root.gameMode ? parent.right : undefined)
-        anchors.horizontalCenter: (root.gameMode || Vars.pillPosition === "Left" || Vars.pillPosition === "Right") ? undefined : parent.horizontalCenter
+        anchors.left: Vars.pillPosition === "Left" ? parent.left : undefined
+        anchors.right: Vars.pillPosition === "Right" ? parent.right : undefined
+        anchors.horizontalCenter: (Vars.pillPosition === "Left" || Vars.pillPosition === "Right") ? undefined : parent.horizontalCenter
         anchors.verticalCenter: (Vars.pillPosition === "Left" || Vars.pillPosition === "Right") ? parent.verticalCenter : undefined
         
         width: root.expanded ? 500 : 100
@@ -134,7 +134,10 @@ Item {
                         appList.forceActiveFocus();
                     }
                     onEscapePressed: {
-                        root.expanded = false;
+                        if (appList.count > 0 && appList.currentIndex === -1) {
+                            appList.currentIndex = 0;
+                        }
+                        appList.forceActiveFocus();
                     }
                 }
 

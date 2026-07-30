@@ -7,6 +7,7 @@ local vars = require("modules.variables")
 hl.config({
     input = {
         kb_layout  = vars.kb_layout,
+        kb_variant = vars.kb_variant,
         kb_options = vars.kb_options,
 
         follow_mouse = vars.follow_mouse,

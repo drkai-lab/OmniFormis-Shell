@@ -38,6 +38,7 @@ ShellRoot {
     property bool screenshotVisible: false
     property bool powerMenuVisible: false
     property bool overviewVisible: false
+    property bool lensVisible: false
 
     onOverviewVisibleChanged: {
         if (overviewVisible) {
@@ -50,6 +51,15 @@ ShellRoot {
         if (screenshotVisible) {
             topPills.closeAll();
             overviewVisible = false;
+            lensVisible = false;
+        }
+    }
+
+    onLensVisibleChanged: {
+        if (lensVisible) {
+            topPills.closeAll();
+            overviewVisible = false;
+            screenshotVisible = false;
         }
     }
 
@@ -70,6 +80,12 @@ ShellRoot {
         name: "screenshot"
         description: "Toggle Screenshot"
         onPressed: root.screenshotVisible = !root.screenshotVisible
+    }
+
+    GlobalShortcut {
+        name: "lens"
+        description: "Circle to Search"
+        onPressed: root.lensVisible = !root.lensVisible
     }
 
     GlobalShortcut {
@@ -110,10 +126,12 @@ ShellRoot {
 
     ScreenShot {
         // Binding the internal visibility state to your root state variable
-        visibleState: root.screenshotVisible
+        visibleState: root.screenshotVisible || root.lensVisible
+        isLensMode: root.lensVisible
 
         onScreenshotClosed: {
             root.screenshotVisible = false;
+            root.lensVisible = false;
         }
     }
 
@@ -143,6 +161,7 @@ ShellRoot {
         onPopupOpened: {
             root.overviewVisible = false;
             root.screenshotVisible = false;
+            root.lensVisible = false;
         }
         onOpenOverviewRequested: {
             root.overviewVisible = true;

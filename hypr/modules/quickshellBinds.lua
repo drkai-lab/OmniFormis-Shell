@@ -12,10 +12,12 @@ local QsPowerMenuKey = vars.QsPowerMenuKey
 local QsOverviewKey = vars.QsOverviewKey
 local QsEmojiPickerKey = vars.QsEmojiPickerKey
 local QsClipboardKey = vars.QsClipboardKey
+local QsLensKey = vars.QsLensKey
 
 -- Bind the key to the specific global identifier
 hl.bind(MM .. " + " .. (QuickLauncherKey or "D"), hl.dsp.global("quickshell:launcher"), { description = "Launcher" })
 hl.bind(MM .. " + " .. TM .. " + " .. QsScreenshotKey, hl.dsp.global("quickshell:screenshot"), { description = "Screenshot" })
+hl.bind(MM .. " + " .. TM .. " + " .. QsLensKey, hl.dsp.global("quickshell:lens"), { description = "Circle to Search" })
 hl.bind(MM .. " + " .. SM .. " + " .. QsWallpaperKey, hl.dsp.global("quickshell:wallpaper"), { description = "Wallpaper" })
 hl.bind(MM .. " + " .. SM .. " + " .. QsColorSchemeKey, hl.dsp.global("quickshell:color_scheme"), { description = "Color Scheme" })
 hl.bind(MM .. " + " .. QsControlCenterKey, hl.dsp.global("quickshell:control_center"), { description = "Control Center" })

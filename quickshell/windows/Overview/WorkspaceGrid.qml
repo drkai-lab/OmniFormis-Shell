@@ -46,8 +46,17 @@ GridLayout {
 
         Item {
             id: wsContainer
-            // Adjusted wsId to apply the base offset (e.g. index 0 becomes Workspace 11 on Monitor 2)
-            readonly property int wsId: root.baseWorkspaceId + index
+            readonly property int visualCol: index % (overviewContainer ? overviewContainer.gridColumns : 5)
+            readonly property int visualRow: Math.floor(index / (overviewContainer ? overviewContainer.gridColumns : 5))
+            readonly property int wsId: {
+                if (!overviewContainer) return root.baseWorkspaceId + index;
+                if (!overviewContainer.isVertical) {
+                    let mappedRow = Vars.pillPosition === "Bottom" ? (overviewContainer.gridRows - 1 - visualRow) : visualRow;
+                    return root.baseWorkspaceId + (mappedRow * overviewContainer.gridColumns + visualCol);
+                }
+                let mappedCol = Vars.pillPosition === "Right" ? (overviewContainer.gridColumns - 1 - visualCol) : visualCol;
+                return root.baseWorkspaceId + (mappedCol * overviewContainer.gridRows + visualRow);
+            }
             readonly property bool isFocused: Hyprland.focusedWorkspace?.id === wsId
             property bool hoveredWhileDragging: false
 

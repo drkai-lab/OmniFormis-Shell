@@ -222,6 +222,11 @@ elif grep -qi "arch" /etc/os-release; then
         sudo chsh -s /usr/bin/fish "$USER"
     fi
     
+    echo "Setting up hyprglass plugin..."
+    hyprpm update || true
+    hyprpm add https://github.com/hyprnux/hyprglass || true
+    hyprpm enable hyprglass || true
+    
     echo "Installation complete! Please reboot your system."
 
 else

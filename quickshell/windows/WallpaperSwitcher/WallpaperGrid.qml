@@ -4,6 +4,7 @@ import QtQuick.Controls
 import QtQuick.Effects
 import "../.."
 import "../../theme/variables.js" as Vars
+import Quickshell.Io
 
 GridView {
     id: gridView
@@ -11,52 +12,153 @@ GridView {
     Layout.fillHeight: true
     clip: true
     cellWidth: Math.floor(parent.width / 3)
-    cellHeight: cellWidth * 0.5625 + 48
-    // boundsBehavior: Flickable.StopAtBounds
-    flickDeceleration: Vars.flickDeceleration
+    cellHeight: cellWidth * 0.5625 + Vars.spacingSmall
     maximumFlickVelocity: Vars.maximumFlickVelocity
 
 
     focus: true
-    // keyNavigationEnabled: true - removed to stop auto-scroll on hover
     highlightFollowsCurrentItem: false
-    // Removed onCurrentIndexChanged to prevent mouse hover fighting
+    highlight: Item {}
 
     property var rootRef: null
     property var pathInputRef: null
     signal wallpaperSelected(string path)
     signal requestFocusSearch
 
+    function scrollToCurrentIndex() {
+        if (currentIndex < 0) return;
+        var cols = Math.floor(width / cellWidth);
+        var row = Math.floor(currentIndex / cols);
+        var itemY = row * cellHeight;
+        var itemBottom = itemY + cellHeight;
+        
+        var targetY = contentY;
+        if (itemY < contentY) {
+            targetY = itemY;
+        } else if (itemBottom > contentY + height) {
+            targetY = itemBottom - height;
+        }
+        
+        if (targetY !== contentY) {
+            scrollAnim.to = targetY;
+            scrollAnim.restart();
+        }
+    }
+
+    NumberAnimation {
+        id: scrollAnim
+        target: gridView
+        property: "contentY"
+        duration: Vars.animationDuration
+        easing.type: Easing.BezierSpline
+        easing.bezierCurve: Vars.customExpressiveSpatialSlow
+    }
+
     Keys.onEscapePressed: if (rootRef)
         rootRef.expanded = false
     Keys.onUpPressed: event => {
-        if (currentIndex < 4) {
+        if (currentIndex < 3) {
             requestFocusSearch();
         } else {
             moveCurrentIndexUp();
-            positionViewAtIndex(currentIndex, GridView.Contain);
+            scrollToCurrentIndex();
         }
         event.accepted = true;
     }
     Keys.onDownPressed: event => {
         moveCurrentIndexDown();
-        positionViewAtIndex(currentIndex, GridView.Contain);
+        scrollToCurrentIndex();
         event.accepted = true;
     }
     Keys.onLeftPressed: event => {
         moveCurrentIndexLeft();
-        positionViewAtIndex(currentIndex, GridView.Contain);
+        scrollToCurrentIndex();
         event.accepted = true;
     }
     Keys.onRightPressed: event => {
         moveCurrentIndexRight();
-        positionViewAtIndex(currentIndex, GridView.Contain);
+        scrollToCurrentIndex();
         event.accepted = true;
     }
     Keys.onReturnPressed: event => {
         if (currentItem)
             currentItem.triggerSelection();
         event.accepted = true;
+    }
+    Keys.onSpacePressed: event => {
+        if (currentItem)
+            currentItem.triggerSelection();
+        event.accepted = true;
+    }
+
+    property bool vimKeysEnabled: false
+    Process {
+        id: vimKeysChecker
+        command: ["bash", "-c", "grep -qi 'vimkeys[ \t]*=[ \t]*true' /home/boing/Dotfiles/hypr/modules/variables.lua && echo 'true' || echo 'false'"]
+        running: true
+        stdout: StdioCollector {
+            onStreamFinished: {
+                gridView.vimKeysEnabled = (this.text.trim() === 'true');
+            }
+        }
+    }
+
+    Keys.onPressed: (event) => {
+        if (event.text === "s" || event.key === Qt.Key_S) {
+            moveCurrentIndexDown();
+            scrollToCurrentIndex();
+            event.accepted = true;
+            return;
+        }
+
+        if (event.text === "d" || event.key === Qt.Key_D) {
+            if (currentIndex < 3) {
+                requestFocusSearch();
+            } else {
+                moveCurrentIndexUp();
+                scrollToCurrentIndex();
+            }
+            event.accepted = true;
+            return;
+        }
+
+        if (event.text === "a" || event.key === Qt.Key_A) {
+            moveCurrentIndexLeft();
+            scrollToCurrentIndex();
+            event.accepted = true;
+            return;
+        }
+
+        if (event.text === "f" || event.key === Qt.Key_F) {
+            moveCurrentIndexRight();
+            scrollToCurrentIndex();
+            event.accepted = true;
+            return;
+        }
+
+        if (vimKeysEnabled) {
+            if (event.key === Qt.Key_H) {
+                moveCurrentIndexLeft();
+                scrollToCurrentIndex();
+                event.accepted = true;
+            } else if (event.key === Qt.Key_L) {
+                moveCurrentIndexRight();
+                positionViewAtIndex(currentIndex, GridView.Contain);
+                event.accepted = true;
+            } else if (event.key === Qt.Key_K) {
+                if (currentIndex < 3) {
+                    requestFocusSearch();
+                } else {
+                    moveCurrentIndexUp();
+                    positionViewAtIndex(currentIndex, GridView.Contain);
+                }
+                event.accepted = true;
+            } else if (event.key === Qt.Key_J) {
+                moveCurrentIndexDown();
+                positionViewAtIndex(currentIndex, GridView.Contain);
+                event.accepted = true;
+            }
+        }
     }
 
     delegate: Item {
@@ -72,13 +174,26 @@ GridView {
 
         Rectangle {
             anchors.fill: parent
-            anchors.margins: Vars.spacingSmall
-            radius: Vars.radiusMedium
+            anchors.margins: isCurrentFocus ? 0 : Vars.spacingSmall
+            radius: isCurrentFocus ? Vars.radiusLarge : Vars.radiusMedium
 
-            color: isCurrentFocus ? Qt.rgba(Theme.primary.r, Theme.primary.g, Theme.primary.b, 0.12) : Theme.surface_container_low
-            border.color: isCurrentFocus ? Theme.primary : (rootRef && rootRef.currentWallpaper === filePath ? Theme.primary : Theme.outline_variant)
-            border.width: isCurrentFocus || (rootRef && rootRef.currentWallpaper === filePath) ? 2 : 1
-            clip: true
+            color: isCurrentFocus ? Theme.primary_container : (tileMouseArea.containsMouse ? Theme.surface_container_highest : Theme.surface_container_low)
+
+            Rectangle {
+                id: tileMask
+                anchors.fill: parent
+                radius: parent.radius
+                color: "black"
+                visible: false
+                layer.enabled: true
+            }
+
+            layer.enabled: true
+            layer.effect: MultiEffect {
+                maskEnabled: true
+                maskSource: tileMask
+            }
+            Behavior on anchors.margins { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customExpressiveSpatialSlow } }
 
             Behavior on color {
                 ColorAnimation {
@@ -162,36 +277,20 @@ GridView {
                         }
                     }
                 }
-
-                Item {
-                    Layout.fillWidth: true
-                    Layout.preferredHeight: 52
-
-                    Text {
-                        anchors.fill: parent
-                        anchors.margins: 8
-                        text: fileName.replace(/^a_/, '').replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())
-                        font.family: Vars.fontFamily
-                        color: isCurrentFocus ? Theme.primary : Theme.on_surface
-                        font.pixelSize: 14
-                        font.weight: rootRef && rootRef.currentWallpaper === filePath ? Font.Bold : Font.Normal
-                        wrapMode: Text.Wrap
-                        maximumLineCount: 2
-                        elide: Text.ElideRight
-                        horizontalAlignment: Text.AlignHCenter
-                        verticalAlignment: Text.AlignVCenter
-                        lineHeight: 1.1
-
-                        Behavior on color {
-                            ColorAnimation {
-                                duration: Vars.animationDuration
-                                easing.type: Easing.BezierSpline
-                                easing.bezierCurve: Vars.customExpressiveSpatialSlow
-                            }
-                        }
-                    }
-                }
             }
+
+            Rectangle {
+                anchors.fill: parent
+                radius: parent.radius
+                color: "transparent"
+                border.color: isCurrentFocus ? Theme.primary : (rootRef && rootRef.currentWallpaper === filePath ? Theme.primary : Theme.outline_variant)
+                border.width: isCurrentFocus || (rootRef && rootRef.currentWallpaper === filePath) ? 2 : 1
+                
+                Behavior on border.color { ColorAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
+                Behavior on border.width { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customExpressiveSpatialSlow } }
+            }
+
+            Behavior on radius { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customExpressiveSpatialSlow } }
 
             MouseArea {
                 id: tileMouseArea

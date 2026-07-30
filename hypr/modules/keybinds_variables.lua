@@ -48,6 +48,7 @@ local kvars = {
     QsOverviewKey = vars.QsOverviewKey or "TAB", -- Set the key to open Quickshell overview --
     QsEmojiPickerKey = vars.QsEmojiPickerKey or "comma", -- Set the key to open Quickshell emoji picker --
     QsClipboardKey = vars.QsClipboardKey or "V", -- Set the key to open Quickshell clipboard --
+    QsLensKey = vars.QsLensKey or "L", -- Set the key to open Quickshell lens (circle to search) --
 
     -- Media / System Controls --
     ShellRestartKey = "R", -- Set the key to restart the shell --

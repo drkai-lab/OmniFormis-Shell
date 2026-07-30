@@ -87,9 +87,9 @@ Item {
         layer.effect: MultiEffect { shadowEnabled: !root.gameMode; shadowBlur: 1.0; shadowColor: Qt.rgba(0,0,0,0.25); shadowVerticalOffset: 4; shadowHorizontalOffset: 0 }
         anchors.top: (!Vars.pillPosition || Vars.pillPosition === "Top" || root.isFloatingInstance) ? parent.top : undefined
         anchors.bottom: (!root.isFloatingInstance && Vars.pillPosition === "Bottom") ? parent.bottom : undefined
-        anchors.left: (!root.isFloatingInstance && Vars.pillPosition === "Left") ? parent.left : ((root.gameMode && !root.isFloatingInstance) ? parent.left : undefined)
-        anchors.right: (!root.isFloatingInstance && Vars.pillPosition === "Right") ? parent.right : ((root.gameMode && !root.isFloatingInstance) ? parent.right : undefined)
-        anchors.horizontalCenter: ((root.gameMode && !root.isFloatingInstance) || (!root.isFloatingInstance && (Vars.pillPosition === "Left" || Vars.pillPosition === "Right"))) ? undefined : parent.horizontalCenter
+        anchors.left: (!root.isFloatingInstance && Vars.pillPosition === "Left") ? parent.left : undefined
+        anchors.right: (!root.isFloatingInstance && Vars.pillPosition === "Right") ? parent.right : undefined
+        anchors.horizontalCenter: (!root.isFloatingInstance && (Vars.pillPosition === "Left" || Vars.pillPosition === "Right")) ? undefined : parent.horizontalCenter
         anchors.verticalCenter: (!root.isFloatingInstance && (Vars.pillPosition === "Left" || Vars.pillPosition === "Right")) ? parent.verticalCenter : undefined
         
         width: root.expanded ? (root.isFloatingInstance ? root.width : 1320) : 100

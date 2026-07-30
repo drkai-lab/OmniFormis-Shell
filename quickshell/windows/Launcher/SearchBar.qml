@@ -19,10 +19,13 @@ Rectangle {
 
     Layout.fillWidth: true
     Layout.preferredHeight: 48
-    color: searchInput.activeFocus ? Qt.rgba(Theme.primary.r, Theme.primary.g, Theme.primary.b, 0.12) : Theme.surface_container_highest
-    border.color: Theme.primary
+    color: searchInput.activeFocus ? Theme.primary_container : Theme.surface_container_highest
+    border.color: searchInput.activeFocus ? Theme.primary : "transparent"
     border.width: searchInput.activeFocus ? 2 : 0
-    radius: Vars.radiusMedium
+    radius: searchInput.activeFocus ? Vars.radiusLarge : Vars.radiusExtraLarge
+
+    Behavior on color { ColorAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
+    Behavior on radius { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customExpressiveSpatialSlow } }
 
     function forceActiveFocus() {
         searchInput.forceActiveFocus();
@@ -37,8 +40,8 @@ Rectangle {
             id: searchInput
             Layout.fillWidth: true
             font.family: Vars.fontFamily
-            font.pixelSize: 14
-            color: Theme.on_surface
+            font.pixelSize: 16
+            color: searchInput.activeFocus ? Theme.on_primary_container : Theme.on_surface
             focus: root.expanded
             selectByMouse: true
 

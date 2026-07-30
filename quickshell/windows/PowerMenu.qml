@@ -9,10 +9,11 @@ import "../theme/variables.js" as Vars
 
 Item {
     id: root
+    readonly property bool isVertical: Vars.pillPosition === "Left" || Vars.pillPosition === "Right"
     
     // Fixed layout footprint - never animates, no parent relayout
-    Layout.preferredWidth: 100
-    Layout.preferredHeight: 40
+    Layout.preferredWidth: isVertical ? 40 : 100
+    Layout.preferredHeight: isVertical ? 100 : 40
 
     property bool expanded: false
     property var focusWindow: null
@@ -45,21 +46,94 @@ Item {
     
     onExpandedChanged: {
         if (expanded) {
+            vimKeysChecker.running = true;
             currentIndex = 0;
             root.forceActiveFocus();
+        }
+    }
+
+    property bool vimKeysEnabled: false
+    Process {
+        id: vimKeysChecker
+        command: ["bash", "-c", "grep -qi 'vimkeys[ \t]*=[ \t]*true' /home/boing/Dotfiles/hypr/modules/variables.lua && echo 'true' || echo 'false'"]
+        running: true
+        stdout: StdioCollector {
+            onStreamFinished: {
+                root.vimKeysEnabled = (this.text.trim() === 'true');
+            }
         }
     }
 
     property int currentIndex: 0
 
     Keys.onLeftPressed: {
-        currentIndex = (currentIndex - 1 + 5) % 5;
-        event.accepted = true;
+        if (!isVertical) {
+            if (Vars.pillPosition === "Right") {
+                currentIndex = (currentIndex + 1) % 5;
+            } else {
+                currentIndex = (currentIndex - 1 + 5) % 5;
+            }
+            event.accepted = true;
+        }
     }
     
     Keys.onRightPressed: {
-        currentIndex = (currentIndex + 1) % 5;
-        event.accepted = true;
+        if (!isVertical) {
+            if (Vars.pillPosition === "Right") {
+                currentIndex = (currentIndex - 1 + 5) % 5;
+            } else {
+                currentIndex = (currentIndex + 1) % 5;
+            }
+            event.accepted = true;
+        }
+    }
+
+    Keys.onUpPressed: {
+        if (isVertical) {
+            currentIndex = (currentIndex - 1 + 5) % 5;
+            event.accepted = true;
+        }
+    }
+
+    Keys.onDownPressed: {
+        if (isVertical) {
+            currentIndex = (currentIndex + 1) % 5;
+            event.accepted = true;
+        }
+    }
+    
+    Keys.onPressed: (event) => {
+        if (root.vimKeysEnabled) {
+            if (event.key === Qt.Key_H) {
+                if (!isVertical) {
+                    if (Vars.pillPosition === "Right") {
+                        currentIndex = (currentIndex + 1) % 5;
+                    } else {
+                        currentIndex = (currentIndex - 1 + 5) % 5;
+                    }
+                    event.accepted = true;
+                }
+            } else if (event.key === Qt.Key_L) {
+                if (!isVertical) {
+                    if (Vars.pillPosition === "Right") {
+                        currentIndex = (currentIndex - 1 + 5) % 5;
+                    } else {
+                        currentIndex = (currentIndex + 1) % 5;
+                    }
+                    event.accepted = true;
+                }
+            } else if (event.key === Qt.Key_K) {
+                if (isVertical) {
+                    currentIndex = (currentIndex - 1 + 5) % 5;
+                    event.accepted = true;
+                }
+            } else if (event.key === Qt.Key_J) {
+                if (isVertical) {
+                    currentIndex = (currentIndex + 1) % 5;
+                    event.accepted = true;
+                }
+            }
+        }
     }
     
     Keys.onReturnPressed: {
@@ -93,15 +167,15 @@ Item {
         layer.effect: MultiEffect { shadowEnabled: !root.gameMode; shadowBlur: 1.0; shadowColor: Qt.rgba(0,0,0,0.25); shadowVerticalOffset: 4; shadowHorizontalOffset: 0 }
         anchors.top: (!Vars.pillPosition || Vars.pillPosition === "Top") ? parent.top : undefined
         anchors.bottom: Vars.pillPosition === "Bottom" ? parent.bottom : undefined
-        anchors.left: Vars.pillPosition === "Left" ? parent.left : (root.gameMode ? parent.left : undefined)
-        anchors.right: Vars.pillPosition === "Right" ? parent.right : (root.gameMode ? parent.right : undefined)
-        anchors.horizontalCenter: (root.gameMode || Vars.pillPosition === "Left" || Vars.pillPosition === "Right") ? undefined : parent.horizontalCenter
+        anchors.left: Vars.pillPosition === "Left" ? parent.left : undefined
+        anchors.right: Vars.pillPosition === "Right" ? parent.right : undefined
+        anchors.horizontalCenter: (Vars.pillPosition === "Left" || Vars.pillPosition === "Right") ? undefined : parent.horizontalCenter
         anchors.verticalCenter: (Vars.pillPosition === "Left" || Vars.pillPosition === "Right") ? parent.verticalCenter : undefined
 
-        width: root.expanded ? 456 : 100
-        height: root.expanded ? 84 : 40
+        width: root.expanded ? (isVertical ? 96 : 432) : (isVertical ? 40 : 100)
+        height: root.expanded ? (isVertical ? 432 : 96) : (isVertical ? 100 : 40)
         
-        color: Theme.surface_container_high
+        color: Vars.translucent ? Qt.rgba(Theme.surface.r, Theme.surface.g, Theme.surface.b, 0.85) : Theme.surface
         property real targetRad: root.expanded ? Vars.radiusExtraLarge : height / 2
         topLeftRadius: Vars.getTopLeftRadius(Vars.panelStyle, Vars.pillPosition, root.gameMode, targetRad)
         topRightRadius: Vars.getTopRightRadius(Vars.panelStyle, Vars.pillPosition, root.gameMode, targetRad)
@@ -109,7 +183,7 @@ Item {
         bottomRightRadius: Vars.getBottomRightRadius(Vars.panelStyle, Vars.pillPosition, root.gameMode, targetRad)
         // clip removed for shadow
 
-        opacity: root.expanded || panel.width > 105 ? 1.0 : 0.0
+        opacity: root.expanded || (isVertical ? panel.height > 105 : panel.width > 105) ? 1.0 : 0.0
         visible: opacity > 0
 
         Behavior on topLeftRadius { enabled: !root.gameMode; NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customExpressiveSpatialSlow } }
@@ -118,15 +192,21 @@ Item {
         Behavior on bottomRightRadius { enabled: !root.gameMode; NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customExpressiveSpatialSlow } }
         Behavior on width { enabled: !root.gameMode; NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customExpressiveSpatialSlow } }
         Behavior on height { enabled: !root.gameMode; NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customExpressiveSpatialSlow } }
+        Behavior on color { enabled: !root.gameMode; ColorAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customExpressiveSpatialSlow } }
 
-        RowLayout {
+        GridLayout {
             id: rowLayout
+            layoutDirection: (!isVertical && Vars.pillPosition === "Right") ? Qt.RightToLeft : Qt.LeftToRight
             anchors.fill: parent
-            anchors.leftMargin: 24
-            anchors.rightMargin: 24
-            anchors.topMargin: 6
-            anchors.bottomMargin: 6
-            spacing: 12
+            anchors.leftMargin: 12
+            anchors.rightMargin: 12
+            anchors.topMargin: 12
+            anchors.bottomMargin: 12
+            rowSpacing: 12
+            columnSpacing: 12
+            columns: isVertical ? 1 : 5
+            rows: isVertical ? 5 : 1
+            flow: isVertical ? GridLayout.TopToBottom : GridLayout.LeftToRight
             
             opacity: root.expanded ? 1.0 : 0.0
             visible: opacity > 0
@@ -188,8 +268,12 @@ Item {
         
         Behavior on radius { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
         
-        color: isActive ? Theme.primary : Theme.surface_container_highest
+        color: isActive ? (Vars.translucent ? Qt.rgba(Theme.primary.r, Theme.primary.g, Theme.primary.b, 0.85) : Theme.primary) : Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.06)
+        border.width: isActive ? 2 : 0
+        border.color: isActive ? Theme.primary : "transparent"
+        
         Behavior on color { ColorAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
+        Behavior on border.color { ColorAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
         
         scale: ma.pressed ? 0.92 : 1.0
         Behavior on scale { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }

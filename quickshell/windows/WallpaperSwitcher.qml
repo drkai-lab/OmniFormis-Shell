@@ -83,9 +83,9 @@ Item {
         }
         anchors.top: (!Vars.pillPosition || Vars.pillPosition === "Top") ? parent.top : undefined
         anchors.bottom: Vars.pillPosition === "Bottom" ? parent.bottom : undefined
-        anchors.left: Vars.pillPosition === "Left" ? parent.left : (root.gameMode ? parent.left : undefined)
-        anchors.right: Vars.pillPosition === "Right" ? parent.right : (root.gameMode ? parent.right : undefined)
-        anchors.horizontalCenter: (root.gameMode || Vars.pillPosition === "Left" || Vars.pillPosition === "Right") ? undefined : parent.horizontalCenter
+        anchors.left: Vars.pillPosition === "Left" ? parent.left : undefined
+        anchors.right: Vars.pillPosition === "Right" ? parent.right : undefined
+        anchors.horizontalCenter: (Vars.pillPosition === "Left" || Vars.pillPosition === "Right") ? undefined : parent.horizontalCenter
         anchors.verticalCenter: (Vars.pillPosition === "Left" || Vars.pillPosition === "Right") ? parent.verticalCenter : undefined
 
         width: root.expanded ? 1100 : 100
@@ -166,7 +166,7 @@ Item {
                         executeWallpaperChange(path);
                     }
                     onRequestFocusSearch: {
-                        pathInput.forceActiveFocus();
+                        controls.focusSearch();
                     }
                 }
             }
@@ -244,15 +244,20 @@ Item {
             onStreamFinished: {
                 wallpaperModel.clear();
                 var lines = this.text.split("\n");
+                var items = [];
                 for (var i = 0; i < lines.length; i++) {
                     var path = lines[i].trim();
                     if (path.length > 0) {
                         var name = path.substring(path.lastIndexOf('/') + 1);
-                        wallpaperModel.append({
+                        items.push({
                             "filePath": path,
                             "fileName": name
                         });
                     }
+                }
+                items.sort((a, b) => a.fileName.toLowerCase().localeCompare(b.fileName.toLowerCase()));
+                for (var j = 0; j < items.length; j++) {
+                    wallpaperModel.append(items[j]);
                 }
                 sortFilterProxyModel.updateVisualGrid();
             }

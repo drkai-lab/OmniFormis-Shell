@@ -161,7 +161,9 @@ Flickable {
                 gameMode: Vars.gameMode,
                 desktopClockEnabled: Vars.desktopClockEnabled,
                 desktopCalenderEnabled: Vars.desktopCalenderEnabled,
-                desktopMediaPlayerEnabled: Vars.desktopMediaPlayerEnabled
+                desktopMediaPlayerEnabled: Vars.desktopMediaPlayerEnabled,
+                liquidGlass: Vars.liquidGlass,
+                liquidGlassPreset: Vars.liquidGlassPreset
             };
 
             var count = existingList.length + 1;
@@ -291,6 +293,59 @@ Flickable {
                     font.weight: 600
                     color: Theme.on_surface
                     elide: Text.ElideRight
+                }
+            }
+
+            // Folder Selection for Wallpapers
+            RowLayout {
+                Layout.fillWidth: true
+                spacing: 12
+
+                Text {
+                    text: "folder"
+                    font.family: "Material Symbols Outlined"
+                    font.pixelSize: 24
+                    color: Theme.on_surface_variant
+                }
+
+                Rectangle {
+                    id: pathInputContainer
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: 44
+                    color: pathInput.activeFocus ? Theme.primary_container : (Vars.translucent ? Qt.rgba(Theme.surface_container_highest.r, Theme.surface_container_highest.g, Theme.surface_container_highest.b, 0.6) : Theme.surface_container_highest)
+                    border.color: pathInput.activeFocus ? Theme.primary : "transparent"
+                    border.width: pathInput.activeFocus ? 2 : 0
+                    radius: 22
+
+                    Behavior on color { ColorAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
+
+                    TextInput {
+                        id: pathInput
+                        anchors.fill: parent
+                        anchors.leftMargin: 16
+                        anchors.rightMargin: 16
+                        font.family: Vars.fontFamily
+                        font.pixelSize: 14
+                        color: Theme.on_surface
+                        verticalAlignment: Text.AlignVCenter
+                        text: wallpaperSettings.wallpaperDir
+                        selectByMouse: true
+                        
+                        Text {
+                            text: "Wallpaper Folder Path..."
+                            font.family: Vars.fontFamily
+                            font.pixelSize: 14
+                            color: Theme.on_surface
+                            opacity: 0.6
+                            visible: !pathInput.text && !pathInput.activeFocus
+                            anchors.verticalCenter: parent.verticalCenter
+                        }
+
+                        onAccepted: {
+                            wallpaperSettings.wallpaperDir = text;
+                            pathInput.focus = false;
+                        }
+                    }
                 }
             }
 
@@ -687,6 +742,75 @@ Flickable {
                     }
                 }
 
+                // Liquid Glass Toggle Item
+                RowLayout {
+                    Layout.fillWidth: true
+                    spacing: 12
+
+                    Text {
+                        text: "\ue1a6" // water drop or similar icon (blur/glass) - let's use lens
+                        font.family: "Material Symbols Outlined"
+                        font.pixelSize: 22
+                        color: Theme.on_surface_variant
+                    }
+
+                    Text {
+                        Layout.fillWidth: true
+                        text: "Liquid Glass"
+                        font.family: Vars.fontFamily
+                        font.pixelSize: 15
+                        font.weight: 500
+                        color: Theme.on_surface
+
+                        MouseArea {
+                            anchors.fill: parent
+                            cursorShape: Qt.PointingHandCursor
+                            onClicked: {
+                                Vars.liquidGlass = !Vars.liquidGlass;
+                                Quickshell.execDetached({
+                                    command: ["bash", "-c", "$HOME/.local/bin/omniformis qs set 'liquidGlass' '" + Vars.liquidGlass + "'; $HOME/.local/bin/omniformis hypr set 'liquidGlass' '" + Vars.liquidGlass + "'; nohup bash ~/Dotfiles/scripts/reload.sh >/dev/null 2>&1 &"]
+                                });
+                            }
+                        }
+                    }
+
+                    // M3 Toggle Pill Switch
+                    Rectangle {
+                        width: 50
+                        height: 30
+                        radius: 15
+                        color: Vars.liquidGlass ? Theme.primary_container : Theme.surface_container_highest
+                        border.color: Vars.liquidGlass ? "transparent" : Theme.outline_variant
+                        border.width: Vars.liquidGlass ? 0 : 1
+
+                        Behavior on color { ColorAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
+
+                        // Thumb Circle
+                        Rectangle {
+                            width: Vars.liquidGlass ? 22 : 18
+                            height: width
+                            radius: width / 2
+                            y: (parent.height - height) / 2
+                            x: Vars.liquidGlass ? parent.width - width - 4 : 5
+                            color: Vars.liquidGlass ? Theme.on_primary_container : Theme.on_surface_variant
+
+                            Behavior on x { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
+                            Behavior on width { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
+                        }
+
+                        MouseArea {
+                            anchors.fill: parent
+                            cursorShape: Qt.PointingHandCursor
+                            onClicked: {
+                                Vars.liquidGlass = !Vars.liquidGlass;
+                                Quickshell.execDetached({
+                                    command: ["bash", "-c", "$HOME/.local/bin/omniformis qs set 'liquidGlass' '" + Vars.liquidGlass + "'; $HOME/.local/bin/omniformis hypr set 'liquidGlass' '" + Vars.liquidGlass + "'; nohup bash ~/Dotfiles/scripts/reload.sh >/dev/null 2>&1 &"]
+                                });
+                            }
+                        }
+                    }
+                }
+
                 // Automatic Sync Toggle Item
                 RowLayout {
                     Layout.fillWidth: true
@@ -934,6 +1058,107 @@ Flickable {
                     }
                 }
             }
+            }
+
+            // Row for Liquid Glass Preset
+            RowLayout {
+                Layout.fillWidth: true
+                Layout.topMargin: 8
+                spacing: 20
+
+                // Liquid Glass Preset Selection
+                ColumnLayout {
+                    Layout.fillWidth: true
+                    Layout.preferredWidth: 1
+                    Layout.alignment: Qt.AlignTop
+                    spacing: 10
+
+                    RowLayout {
+                        spacing: 12
+                        Text {
+                            text: "\ue1a6"
+                            font.family: "Material Symbols Outlined"
+                            font.pixelSize: 22
+                            color: Theme.on_surface_variant
+                        }
+                        Text {
+                            text: "Liquid Glass Preset"
+                            font.family: Vars.fontFamily
+                            font.pixelSize: 15
+                            font.weight: 500
+                            color: Theme.on_surface
+                        }
+                    }
+
+                    RowLayout {
+                        Layout.fillWidth: true
+                        spacing: 3
+
+                        Repeater {
+                            id: presetRepeater
+                            model: [
+                                { name: "Glass", preset: "glass", icon: "\uea08" },
+                                { name: "Apple", preset: "apple", icon: "\ue52d" },
+                                { name: "Clear", preset: "clear", icon: "\ue8d4" },
+                                { name: "Contrasted", preset: "contrasted", icon: "\ue3b9" }
+                            ]
+                            delegate: Rectangle {
+                                Layout.fillWidth: true
+                                Layout.preferredHeight: 38
+                                property bool isSelected: (Vars.liquidGlassPreset || "glass") === modelData.preset
+                                property bool hasLeft: index > 0
+                                property bool hasRight: index < presetRepeater.count - 1
+
+                                topLeftRadius: isSelected ? 19 : (hasLeft ? 6 : 19)
+                                bottomLeftRadius: isSelected ? 19 : (hasLeft ? 6 : 19)
+                                topRightRadius: isSelected ? 19 : (hasRight ? 6 : 19)
+                                bottomRightRadius: isSelected ? 19 : (hasRight ? 6 : 19)
+
+                                color: isSelected ? (Vars.translucent ? Qt.rgba(Theme.secondary_container.r, Theme.secondary_container.g, Theme.secondary_container.b, 0.7) : Theme.secondary_container) : (presetHover.containsMouse ? (Vars.translucent ? Qt.rgba(Theme.surface_container_highest.r, Theme.surface_container_highest.g, Theme.surface_container_highest.b, 0.6) : Theme.surface_container_highest) : (Vars.translucent ? Qt.rgba(Theme.surface_container_high.r, Theme.surface_container_high.g, Theme.surface_container_high.b, 0.4) : Theme.surface_container_high))
+                                border.width: 0
+
+                                Behavior on topLeftRadius { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
+                                Behavior on bottomLeftRadius { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
+                                Behavior on topRightRadius { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
+                                Behavior on bottomRightRadius { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
+                                Behavior on color { ColorAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
+
+                                RowLayout {
+                                    anchors.centerIn: parent
+                                    spacing: 4
+                                    Text {
+                                        text: modelData.icon
+                                        font.family: parent.parent.isSelected ? filledIconFont.name : "Material Symbols Outlined"
+                                        font.pixelSize: 18
+                                        color: parent.parent.isSelected ? Theme.on_secondary_container : Theme.on_surface_variant
+                                    }
+                                    Text {
+                                        text: modelData.name
+                                        font.family: Vars.fontFamily
+                                        font.pixelSize: 13
+                                        font.weight: parent.parent.isSelected ? 700 : 500
+                                        color: parent.parent.isSelected ? Theme.on_secondary_container : Theme.on_surface_variant
+                                    }
+                                }
+
+                                MouseArea {
+                                    id: presetHover
+                                    anchors.fill: parent
+                                    hoverEnabled: true
+                                    cursorShape: Qt.PointingHandCursor
+                                    onClicked: {
+                                        if (Vars.liquidGlassPreset !== modelData.preset) {
+                                            Vars.liquidGlassPreset = modelData.preset;
+                                            Quickshell.execDetached({
+                                                command: ["bash", "-c", "$HOME/.local/bin/omniformis qs set 'liquidGlassPreset' '" + Vars.liquidGlassPreset + "'; $HOME/.local/bin/omniformis hypr set 'liquidGlassPreset' '" + Vars.liquidGlassPreset + "'; nohup bash ~/Dotfiles/scripts/reload.sh >/dev/null 2>&1 &"]
+                                            });
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
 

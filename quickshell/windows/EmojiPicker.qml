@@ -71,6 +71,18 @@ Item {
         emojiFetcher.running = true;
     }
 
+    property bool vimKeysEnabled: false
+    Process {
+        id: vimKeysChecker
+        command: ["bash", "-c", "grep -qi 'vimkeys[ \t]*=[ \t]*true' /home/boing/Dotfiles/hypr/modules/variables.lua && echo 'true' || echo 'false'"]
+        running: true
+        stdout: StdioCollector {
+            onStreamFinished: {
+                root.vimKeysEnabled = (this.text.trim() === 'true');
+            }
+        }
+    }
+
     property var filteredModel: {
         var filterText = searchInput.text.toLowerCase().trim();
         if (filterText === "") return root.emojiModel;
@@ -104,9 +116,9 @@ Item {
         layer.effect: MultiEffect { shadowEnabled: !root.gameMode; shadowBlur: 1.0; shadowColor: Qt.rgba(0,0,0,0.25); shadowVerticalOffset: 4; shadowHorizontalOffset: 0 }
         anchors.top: (!Vars.pillPosition || Vars.pillPosition === "Top") ? parent.top : undefined
         anchors.bottom: Vars.pillPosition === "Bottom" ? parent.bottom : undefined
-        anchors.left: Vars.pillPosition === "Left" ? parent.left : (root.gameMode ? parent.left : undefined)
-        anchors.right: Vars.pillPosition === "Right" ? parent.right : (root.gameMode ? parent.right : undefined)
-        anchors.horizontalCenter: (root.gameMode || Vars.pillPosition === "Left" || Vars.pillPosition === "Right") ? undefined : parent.horizontalCenter
+        anchors.left: Vars.pillPosition === "Left" ? parent.left : undefined
+        anchors.right: Vars.pillPosition === "Right" ? parent.right : undefined
+        anchors.horizontalCenter: (Vars.pillPosition === "Left" || Vars.pillPosition === "Right") ? undefined : parent.horizontalCenter
         anchors.verticalCenter: (Vars.pillPosition === "Left" || Vars.pillPosition === "Right") ? parent.verticalCenter : undefined
         
         width: root.expanded ? 500 : 100
@@ -238,6 +250,28 @@ Item {
                             moveCurrentIndexUp();
                         }
                         event.accepted = true;
+                    }
+                    
+                    Keys.onPressed: (event) => {
+                        if (root.vimKeysEnabled) {
+                            if (event.key === Qt.Key_H) {
+                                moveCurrentIndexLeft();
+                                event.accepted = true;
+                            } else if (event.key === Qt.Key_L) {
+                                moveCurrentIndexRight();
+                                event.accepted = true;
+                            } else if (event.key === Qt.Key_K) {
+                                if (currentIndex < Math.floor(width / cellWidth)) {
+                                    searchInput.forceActiveFocus();
+                                } else {
+                                    moveCurrentIndexUp();
+                                }
+                                event.accepted = true;
+                            } else if (event.key === Qt.Key_J) {
+                                moveCurrentIndexDown();
+                                event.accepted = true;
+                            }
+                        }
                     }
                     
                     onModelChanged: {

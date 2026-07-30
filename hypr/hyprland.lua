@@ -5,9 +5,9 @@ require("modules.deco")
 require("modules.winrules")
 require("modules.input")
 require("modules.env")
-require("modules.autostart")
 require("modules.binds")
 require("modules.general")
+require("modules.plugins")
 local variables = require("modules.variables")
 
 if variables.Layout == "Scrolling" or variables.Layout == "scrolling" then

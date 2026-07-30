@@ -38,6 +38,18 @@ Item {
         }
     }
 
+    property bool vimKeysEnabled: false
+    Process {
+        id: vimKeysChecker
+        command: ["bash", "-c", "grep -qi 'vimkeys[ \t]*=[ \t]*true' ~/.config/hypr/modules/variables.lua && echo 'true' || echo 'false'"]
+        running: true
+        stdout: StdioCollector {
+            onStreamFinished: {
+                overviewContainer.vimKeysEnabled = (this.text.trim() === 'true');
+            }
+        }
+    }
+
     function resolveIcon(appId) {
         if (!appId) return "application-x-executable";
         
@@ -68,9 +80,44 @@ Item {
     }
 
     // Overview config
-    readonly property int gridRows: Vars.overviewGridRows !== undefined ? Vars.overviewGridRows : 2
-    readonly property int gridColumns: Vars.overviewGridColumns !== undefined ? Vars.overviewGridColumns : 5
+    readonly property bool isVertical: Vars.pillPosition === "Left" || Vars.pillPosition === "Right"
+    readonly property int gridRows: isVertical ? (Vars.overviewGridColumns !== undefined ? Vars.overviewGridColumns : 5) : (Vars.overviewGridRows !== undefined ? Vars.overviewGridRows : 2)
+    readonly property int gridColumns: isVertical ? (Vars.overviewGridRows !== undefined ? Vars.overviewGridRows : 2) : (Vars.overviewGridColumns !== undefined ? Vars.overviewGridColumns : 5)
     readonly property real overviewScale: Vars.overviewScale !== undefined ? Vars.overviewScale : 0.15
+
+    function wsIdFromIndex(index, baseId) {
+        const total = gridRows * gridColumns;
+        if (index >= total) return baseId + index;
+        
+        let row = Math.floor(index / gridColumns);
+        let col = index % gridColumns;
+        
+        if (!isVertical) {
+            let mappedRow = Vars.pillPosition === "Bottom" ? (gridRows - 1 - row) : row;
+            return baseId + (mappedRow * gridColumns + col);
+        }
+        
+        let mappedCol = Vars.pillPosition === "Right" ? (gridColumns - 1 - col) : col;
+        return baseId + (mappedCol * gridRows + row);
+    }
+
+    function indexFromWsId(wsId, baseId) {
+        const localWs = wsId - baseId;
+        const total = gridRows * gridColumns;
+        if (localWs < 0 || localWs >= total) return localWs;
+        
+        if (!isVertical) {
+            let logicalRow = Math.floor(localWs / gridColumns);
+            let logicalCol = localWs % gridColumns;
+            let visualRow = Vars.pillPosition === "Bottom" ? (gridRows - 1 - logicalRow) : logicalRow;
+            return visualRow * gridColumns + logicalCol;
+        }
+        
+        let logicalCol = Math.floor(localWs / gridRows);
+        let row = localWs % gridRows;
+        let visualCol = Vars.pillPosition === "Right" ? (gridColumns - 1 - logicalCol) : logicalCol;
+        return row * gridColumns + visualCol;
+    }
 
     Component.onCompleted: {
         console.log("OVERVIEW CONFIG LOADED:", gridRows, gridColumns, overviewScale, Vars.overviewGridRows);
@@ -158,9 +205,9 @@ Item {
 
                 anchors.top: (!Vars.pillPosition || Vars.pillPosition === "Top") ? parent.top : undefined
                 anchors.bottom: Vars.pillPosition === "Bottom" ? parent.bottom : undefined
-                anchors.left: Vars.pillPosition === "Left" ? parent.left : (overviewContainer.gameMode ? parent.left : undefined)
-                anchors.right: Vars.pillPosition === "Right" ? parent.right : (overviewContainer.gameMode ? parent.right : undefined)
-                anchors.horizontalCenter: (overviewContainer.gameMode || Vars.pillPosition === "Left" || Vars.pillPosition === "Right") ? undefined : parent.horizontalCenter
+                anchors.left: Vars.pillPosition === "Left" ? parent.left : undefined
+                anchors.right: Vars.pillPosition === "Right" ? parent.right : undefined
+                anchors.horizontalCenter: (Vars.pillPosition === "Left" || Vars.pillPosition === "Right") ? undefined : parent.horizontalCenter
                 anchors.verticalCenter: (Vars.pillPosition === "Left" || Vars.pillPosition === "Right") ? parent.verticalCenter : undefined
 
                 property real targetWidth: workspaceGrid.implicitWidth + overviewPanel.bgPadding * 2
@@ -269,7 +316,6 @@ Item {
                     OC.WindowLayer {
                         id: windowLayer
                         anchors.fill: parent
-                        overviewContainer: overviewContainer
                         overviewPanel: overviewPanel
                         gameMode: overviewContainer ? overviewContainer.gameMode : false
                         onCloseRequested: overviewContainer.closeRequested()
@@ -388,25 +434,27 @@ Item {
                         event.accepted = true;
                     } else
                     // Arrow/vim navigation
-                    if (event.key === Qt.Key_Left || event.key === Qt.Key_H) {
-                        const current = Hyprland.focusedWorkspace?.id ?? 1;
-                        Hyprland.dispatch(`hl.dsp.focus({workspace = '${Math.max(1, current - 1)}'})`);
-                        event.accepted = true;
-                    } else if (event.key === Qt.Key_Right || event.key === Qt.Key_L) {
-                        const current = Hyprland.focusedWorkspace?.id ?? 1;
-                        Hyprland.dispatch(`hl.dsp.focus({workspace = '${Math.min(total, current + 1)}'})`);
-                        event.accepted = true;
-                    } else if (event.key === Qt.Key_Up || event.key === Qt.Key_K) {
-                        const current = Hyprland.focusedWorkspace?.id ?? 1;
-                        const target = current - cols;
-                        if (target >= 1)
-                            Hyprland.dispatch(`hl.dsp.focus({workspace = '${target}'})`);
-                        event.accepted = true;
-                    } else if (event.key === Qt.Key_Down || event.key === Qt.Key_J) {
-                        const current = Hyprland.focusedWorkspace?.id ?? 1;
-                        const target = current + cols;
-                        if (target <= total)
-                            Hyprland.dispatch(`hl.dsp.focus({workspace = '${target}'})`);
+                    if (event.key === Qt.Key_Left || (overviewContainer.vimKeysEnabled && event.key === Qt.Key_H) ||
+                        event.key === Qt.Key_Right || (overviewContainer.vimKeysEnabled && event.key === Qt.Key_L) ||
+                        event.key === Qt.Key_Up || (overviewContainer.vimKeysEnabled && event.key === Qt.Key_K) ||
+                        event.key === Qt.Key_Down || (overviewContainer.vimKeysEnabled && event.key === Qt.Key_J)) {
+                        
+                        const currentId = Hyprland.focusedWorkspace?.id ?? 1;
+                        const baseId = Math.floor((currentId - 1) / total) * total + 1;
+                        let currentIndex = overviewContainer.indexFromWsId(currentId, baseId);
+                        
+                        if (event.key === Qt.Key_Left || (overviewContainer.vimKeysEnabled && event.key === Qt.Key_H)) {
+                            currentIndex = Math.max(0, currentIndex - 1);
+                        } else if (event.key === Qt.Key_Right || (overviewContainer.vimKeysEnabled && event.key === Qt.Key_L)) {
+                            currentIndex = Math.min(total - 1, currentIndex + 1);
+                        } else if (event.key === Qt.Key_Up || (overviewContainer.vimKeysEnabled && event.key === Qt.Key_K)) {
+                            currentIndex = Math.max(0, currentIndex - cols);
+                        } else if (event.key === Qt.Key_Down || (overviewContainer.vimKeysEnabled && event.key === Qt.Key_J)) {
+                            currentIndex = Math.min(total - 1, currentIndex + cols);
+                        }
+                        
+                        const targetWs = overviewContainer.wsIdFromIndex(currentIndex, baseId);
+                        Hyprland.dispatch(`hl.dsp.focus({workspace = '${targetWs}'})`);
                         event.accepted = true;
                     }
                 }

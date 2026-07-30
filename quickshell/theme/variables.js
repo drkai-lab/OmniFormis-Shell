@@ -19,6 +19,8 @@ var animationDuration = 240;
 var flickDeceleration = 1500;
 var maximumFlickVelocity = 3000;
 var translucent = false;
+var liquidGlass = true;
+var liquidGlassPreset = "apple";
 var blurAmount = 30;
 
 var overviewGridRows = 2;
@@ -41,7 +43,7 @@ var mediaPlayerArtScale = 1;
 
 var panelStyle = "Attached";
 var pillPosition = "Left";
-var gameMode = true;
+var gameMode = false;
 
 var desktopClockEnabled = true;
 var desktopCalenderEnabled = false;

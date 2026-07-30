@@ -13,7 +13,6 @@ import "../../theme/variables.js" as Vars
 Item {
     id: root
 
-    property var overviewContainer
     property var overviewPanel
     property bool gameMode: Vars.gameMode !== undefined ? Vars.gameMode : false
     Timer {
@@ -99,7 +98,24 @@ Item {
             }
 
             property int safeCols: (overviewContainer && overviewContainer.gridColumns > 0) ? overviewContainer.gridColumns : 5
-            property int localWsIndex: Math.max(0, (wsId - 1) % (overviewPanel ? overviewPanel.totalWorkspaces : 10))
+            property int safeRows: (overviewContainer && overviewContainer.gridRows > 0) ? overviewContainer.gridRows : 2
+            property int localWsIndex: {
+                let localWs = Math.max(0, wsId - baseWorkspaceId);
+                let total = overviewPanel ? overviewPanel.totalWorkspaces : 10;
+                if (!overviewContainer || localWs >= total) return localWs;
+                
+                if (!overviewContainer.isVertical) {
+                    let logicalRow = Math.floor(localWs / safeCols);
+                    let logicalCol = localWs % safeCols;
+                    let visualRow = Vars.pillPosition === "Bottom" ? (safeRows - 1 - logicalRow) : logicalRow;
+                    return visualRow * safeCols + logicalCol;
+                }
+                
+                let logicalCol = Math.floor(localWs / safeRows);
+                let logicalRow = localWs % safeRows;
+                let visualCol = Vars.pillPosition === "Right" ? (safeCols - 1 - logicalCol) : logicalCol;
+                return logicalRow * safeCols + visualCol;
+            }
             property int wsRow: Math.floor(localWsIndex / safeCols)
             property int wsCol: localWsIndex % safeCols
 
@@ -243,7 +259,25 @@ Item {
     Rectangle {
         id: focusedIndicator
         readonly property int activeWsId: Hyprland.focusedWorkspace?.id ?? 1
-        readonly property int localActiveIndex: Math.max(0, (activeWsId - 1) % (overviewPanel ? overviewPanel.totalWorkspaces : 10))
+        readonly property int safeCols: (overviewContainer && overviewContainer.gridColumns > 0) ? overviewContainer.gridColumns : 5
+        readonly property int safeRows: (overviewContainer && overviewContainer.gridRows > 0) ? overviewContainer.gridRows : 2
+        readonly property int localActiveIndex: {
+            let localWs = Math.max(0, activeWsId - baseWorkspaceId);
+            let total = overviewPanel ? overviewPanel.totalWorkspaces : 10;
+            if (!overviewContainer || localWs >= total) return localWs;
+            
+            if (!overviewContainer.isVertical) {
+                let logicalRow = Math.floor(localWs / safeCols);
+                let logicalCol = localWs % safeCols;
+                let visualRow = Vars.pillPosition === "Bottom" ? (safeRows - 1 - logicalRow) : logicalRow;
+                return visualRow * safeCols + logicalCol;
+            }
+            
+            let logicalCol = Math.floor(localWs / safeRows);
+            let logicalRow = localWs % safeRows;
+            let visualCol = Vars.pillPosition === "Right" ? (safeCols - 1 - logicalCol) : logicalCol;
+            return logicalRow * safeCols + visualCol;
+        }
         readonly property int activeRow: overviewContainer ? Math.floor(localActiveIndex / overviewContainer.gridColumns) : 0
         readonly property int activeCol: overviewContainer ? localActiveIndex % overviewContainer.gridColumns : 0
 

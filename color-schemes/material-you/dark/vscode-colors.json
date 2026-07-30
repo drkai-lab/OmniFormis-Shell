@@ -1,28 +1,28 @@
 {
   "checksum": ":)",
-  "wallpaper": "/home/boing/Pictures/Wallpapers/Wallpapers-Bank/wallpapers/Fantasy-Snow-Valley.png",
+  "wallpaper": "/home/boing/Pictures/Wallpapers/Wallpapers-Bank/wallpapers/rain-house-tree.jpg",
   "alpha": "100",
   "special": {
-    "background": "#111318",
-    "foreground": "#e1e2e9",
-    "cursor": "#a6c8ff"
+    "background": "#1a1111",
+    "foreground": "#f0dedd",
+    "cursor": "#ffb3b0"
   },
   "colors": {
-    "color0": "#111318",
-    "color1": "#cfd4fb",
-    "color2": "#b3c3e6",
-    "color3": "#deb6e9",
-    "color4": "#a6c8ff",
-    "color5": "#dabde2",
-    "color6": "#2e4367",
-    "color7": "#c3c6cf",
-    "color8": "#43474e",
-    "color9": "#a6c8ff",
-    "color10": "#8ca5da",
-    "color11": "#cc8fdd",
-    "color12": "#73a8ff",
-    "color13": "#c69ad2",
-    "color14": "#1b467e",
-    "color15": "#e1e2e9"
+    "color0": "#1a1111",
+    "color1": "#ffd1ce",
+    "color2": "#efb5b2",
+    "color3": "#eec581",
+    "color4": "#ffb3b0",
+    "color5": "#e3c28c",
+    "color6": "#6d302e",
+    "color7": "#d7c1c0",
+    "color8": "#524342",
+    "color9": "#ffb3b0",
+    "color10": "#e78c87",
+    "color11": "#e8b054",
+    "color12": "#ff827d",
+    "color13": "#d9ac63",
+    "color14": "#7b2b2b",
+    "color15": "#f0dedd"
   }
 }

@@ -17,14 +17,16 @@ local vars = {
     SysInfo = "btop",
     -- Enable game mode (disables animations and system resources taking things out of the shell UI)
     GameMode = false,
-    -- Select layout for hyprland ("Scrolling", "Dwindle", "Master", "Monocle")
+    -- Select layout for hyprland
     Layout = "Scrolling",
 
     -- Input
     -- Set keyboard layout
-    kb_layout = "us",
+    kb_layout = "us,us",
+    -- Set keyboard variant
+    kb_variant = ",colemak",
     -- Set keyboard options
-    kb_options = "caps:escape",
+    kb_options = "grp:alt_shift_toggle,caps:escape",
     -- Set follow mouse mode
     follow_mouse = 1,
     -- Set mouse sensitivity
@@ -35,7 +37,7 @@ local vars = {
     -- Gestures
     -- Set the number of gesture fingers
     gesture_fingers = 3,
-    -- Set the gesture direction ("vertical", "horizontal", "both", "all", "none")
+    -- Set the gesture direction
     gesture_direction = "vertical",
 
     -- Enable vim keys for navigation
@@ -70,6 +72,8 @@ local vars = {
     QsEmojiPickerKey = "comma",
     -- Set the key to open clipboard
     QsClipboardKey = "V",
+    -- Set the key to open lens (circle to search)
+    QsLensKey = "X",
 
     -- Decoration
     -- Set the gap size between windows (inner)
@@ -105,13 +109,17 @@ local vars = {
 
     -- Blur
     -- Enable blur
-    blur_enabled = true,
+    blur_enabled = false,
     -- Set blur size
     blur_size = 4,
     -- Set number of blur passes
     blur_passes = 4,
     -- Set blur vibrancy
     blur_vibrancy = 0.1696,
+
+    -- Liquid Glass
+    liquidGlass = true,
+    liquidGlassPreset = "apple",
 
     -- Groupbar
     -- Enable group bar
