@@ -1,15 +1,8 @@
 import QtQuick
-import Quickshell
-import Quickshell.Wayland
-
+import "./theme/variables.js" as Vars
 Item {
-    IdleMonitor {
-        id: monitor
-        Component.onCompleted: {
-            for (var prop in monitor) {
-                console.log(prop);
-            }
-            Qt.quit();
-        }
+    Component.onCompleted: {
+        console.log("radiusSmall:", Vars.radiusSmall);
+        Qt.quit();
     }
 }

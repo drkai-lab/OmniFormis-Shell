@@ -14,6 +14,13 @@ import Quickshell.Io
 Item {
     id: overviewContainer
     property bool visibleState: false
+    onVisibleStateChanged: {
+        if (visibleState) {
+            MorphState.notifyOpened(panelBackground.targetWidth, panelBackground.targetHeight);
+        } else {
+            MorphState.notifyClosed();
+        }
+    }
     property bool gameMode: Vars.gameMode !== undefined ? Vars.gameMode : false
     Timer {
         interval: 100
@@ -131,13 +138,16 @@ Item {
             required property var modelData
 
             property bool isAnimating: wAnim.running || hAnim.running
-            visible: overviewContainer.visibleState || isAnimating
+            visible: true
             color: "transparent"
 
             WlrLayershell.namespace: "quickshell"
             WlrLayershell.layer: WlrLayer.Overlay
-            WlrLayershell.keyboardFocus: WlrKeyboardFocus.Exclusive
             exclusionMode: ExclusionMode.Ignore
+            
+            mask: Region {
+                item: (overviewContainer.visibleState || isAnimating) ? panelBackground : null
+            }
             
 
 
@@ -216,22 +226,22 @@ Item {
                 property real innerMaxWidth: parent.width - (2 * Vars.spacingSmall)
                 property bool touchesEdges: false
 
-                property real activeMargin: overviewContainer.gameMode || Vars.panelStyle === "Framed" || Vars.panelStyle === "Flat" ? 0 : Vars.spacingSmall
+                property real activeMargin: (Vars.panelStyle === "Framed" || Vars.panelStyle === "Flat" || (Vars.panelStyle === "Attached" && overviewContainer.gameMode)) ? 0 : Vars.spacingSmall
                 anchors.topMargin: (!Vars.pillPosition || Vars.pillPosition === "Top") ? activeMargin : 0
                 anchors.bottomMargin: Vars.pillPosition === "Bottom" ? activeMargin : 0
                 anchors.leftMargin: Vars.pillPosition === "Left" ? activeMargin : 0
                 anchors.rightMargin: Vars.pillPosition === "Right" ? activeMargin : 0
 
-                width: overviewContainer.visibleState ? (touchesEdges ? innerMaxWidth : targetWidth) : 100
-                height: overviewContainer.visibleState ? targetHeight : 40
+                width: overviewContainer.visibleState ? (touchesEdges ? innerMaxWidth : targetWidth) : (MorphState.anyExpanded ? MorphState.targetWidth : 100)
+                height: overviewContainer.visibleState ? targetHeight : (MorphState.anyExpanded ? MorphState.targetHeight : 40)
 
-                property real defaultRadius: overviewContainer.gameMode ? 0 : (overviewContainer.visibleState ? Vars.radiusExtraLarge : height / 2)
+                property real defaultRadius: overviewContainer.visibleState ? Vars.radiusExtraLarge : height / 2
                 property real innerFrameRadius: Math.max(0, Vars.radiusExtraLarge - Vars.spacingSmall)
 
-                topLeftRadius: touchesEdges ? innerFrameRadius : Vars.getTopLeftRadius(Vars.panelStyle, Vars.pillPosition, overviewContainer.gameMode, defaultRadius)
-                topRightRadius: touchesEdges ? innerFrameRadius : Vars.getTopRightRadius(Vars.panelStyle, Vars.pillPosition, overviewContainer.gameMode, defaultRadius)
-                bottomLeftRadius: touchesEdges ? 0 : Vars.getBottomLeftRadius(Vars.panelStyle, Vars.pillPosition, overviewContainer.gameMode, defaultRadius)
-                bottomRightRadius: touchesEdges ? 0 : Vars.getBottomRightRadius(Vars.panelStyle, Vars.pillPosition, overviewContainer.gameMode, defaultRadius)
+                topLeftRadius: touchesEdges ? innerFrameRadius : Vars.getTopLeftRadius(Vars.panelStyle, Vars.pillPosition, false, defaultRadius)
+                topRightRadius: touchesEdges ? innerFrameRadius : Vars.getTopRightRadius(Vars.panelStyle, Vars.pillPosition, false, defaultRadius)
+                bottomLeftRadius: touchesEdges ? 0 : Vars.getBottomLeftRadius(Vars.panelStyle, Vars.pillPosition, false, defaultRadius)
+                bottomRightRadius: touchesEdges ? 0 : Vars.getBottomRightRadius(Vars.panelStyle, Vars.pillPosition, false, defaultRadius)
 
                 color: Vars.translucent ? Qt.rgba(Theme.surface.r, Theme.surface.g, Theme.surface.b, 0.85) : Theme.surface
                 
@@ -273,9 +283,7 @@ Item {
 
                 Item {
                     id: expandedUI
-                    anchors.centerIn: parent
-                    width: workspaceGrid.implicitWidth
-                    height: workspaceGrid.implicitHeight
+                    anchors.fill: parent
 
                     opacity: overviewContainer.visibleState ? 1.0 : 0.0
                     visible: opacity > 0
@@ -292,27 +300,45 @@ Item {
                         }
                     }
 
-                    // === WORKSPACE GRID (background tiles only) ===
-                    OC.WorkspaceGrid {
-                        id: workspaceGrid
-                        anchors.centerIn: parent
-                        columns: overviewContainer.gridColumns
-                        rows: overviewContainer.gridRows
-                        totalWorkspaces: overviewPanel.totalWorkspaces
-                        wsWidth: overviewPanel.wsWidth
-                        wsHeight: overviewPanel.wsHeight
-                        gameMode: overviewContainer.gameMode
-                        overviewPanel: overviewPanel
-                        onCloseRequested: overviewContainer.closeRequested()
-                    }
+                    Item {
+                        id: innerContainer
+                        width: workspaceGrid.implicitWidth
+                        height: workspaceGrid.implicitHeight
 
-                    // === WINDOW LAYER (overlaid on top of workspace grid) ===
-                    OC.WindowLayer {
-                        id: windowLayer
-                        anchors.fill: parent
-                        overviewPanel: overviewPanel
-                        gameMode: overviewContainer ? overviewContainer.gameMode : false
-                        onCloseRequested: overviewContainer.closeRequested()
+                        anchors.top: (!Vars.pillPosition || Vars.pillPosition === "Top") ? parent.top : undefined
+                        anchors.bottom: Vars.pillPosition === "Bottom" ? parent.bottom : undefined
+                        anchors.left: Vars.pillPosition === "Left" ? parent.left : undefined
+                        anchors.right: Vars.pillPosition === "Right" ? parent.right : undefined
+                        anchors.horizontalCenter: (Vars.pillPosition === "Left" || Vars.pillPosition === "Right") ? undefined : parent.horizontalCenter
+                        anchors.verticalCenter: (Vars.pillPosition === "Left" || Vars.pillPosition === "Right") ? parent.verticalCenter : undefined
+
+                        anchors.topMargin: (!Vars.pillPosition || Vars.pillPosition === "Top") ? overviewPanel.bgPadding : 0
+                        anchors.bottomMargin: Vars.pillPosition === "Bottom" ? overviewPanel.bgPadding : 0
+                        anchors.leftMargin: Vars.pillPosition === "Left" ? overviewPanel.bgPadding : 0
+                        anchors.rightMargin: Vars.pillPosition === "Right" ? overviewPanel.bgPadding : 0
+
+                        // === WORKSPACE GRID (background tiles only) ===
+                        OC.WorkspaceGrid {
+                            id: workspaceGrid
+                            anchors.fill: parent
+                            columns: overviewContainer.gridColumns
+                            rows: overviewContainer.gridRows
+                            totalWorkspaces: overviewPanel.totalWorkspaces
+                            wsWidth: overviewPanel.wsWidth
+                            wsHeight: overviewPanel.wsHeight
+                            gameMode: overviewContainer.gameMode
+                            overviewPanel: overviewPanel
+                            onCloseRequested: overviewContainer.closeRequested()
+                        }
+
+                        // === WINDOW LAYER (overlaid on top of workspace grid) ===
+                        OC.WindowLayer {
+                            id: windowLayer
+                            anchors.fill: parent
+                            overviewPanel: overviewPanel
+                            gameMode: overviewContainer ? overviewContainer.gameMode : false
+                            onCloseRequested: overviewContainer.closeRequested()
+                        }
                     }
 
                 } // End of expandedUI

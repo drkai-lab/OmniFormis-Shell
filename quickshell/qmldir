@@ -1,4 +1,5 @@
 singleton NotificationService 1.0 daemons/NotificationService.qml
+singleton MorphState 1.0 core/MorphState.qml
 TopPills 1.0 panels/TopPills.qml
 NotificationDaemon 1.0 daemons/NotificationDaemon.qml
 NotificationData 1.0 daemons/NotificationData.qml

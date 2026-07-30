@@ -97,8 +97,10 @@ Item {
     
     onExpandedChanged: {
         if (!expanded) {
+            MorphState.notifyClosed();
             searchInput.text = "";
         } else {
+            MorphState.notifyOpened(500, 450);
             searchInput.forceActiveFocus();
         }
     }
@@ -121,18 +123,18 @@ Item {
         anchors.horizontalCenter: (Vars.pillPosition === "Left" || Vars.pillPosition === "Right") ? undefined : parent.horizontalCenter
         anchors.verticalCenter: (Vars.pillPosition === "Left" || Vars.pillPosition === "Right") ? parent.verticalCenter : undefined
         
-        width: root.expanded ? 500 : 100
-        height: root.expanded ? 450 : 40
+        width: root.expanded ? 500 : (MorphState.anyExpanded ? MorphState.targetWidth : 100)
+        height: root.expanded ? 450 : (MorphState.anyExpanded ? MorphState.targetHeight : 40)
         
         opacity: root.expanded || panel.width > 105 ? 1.0 : 0.0
         visible: opacity > 0
         
         color: Theme.surface_container_high
         property real targetRad: root.expanded ? Vars.radiusExtraLarge : height / 2
-        topLeftRadius: Vars.getTopLeftRadius(Vars.panelStyle, Vars.pillPosition, root.gameMode, targetRad)
-        topRightRadius: Vars.getTopRightRadius(Vars.panelStyle, Vars.pillPosition, root.gameMode, targetRad)
-        bottomLeftRadius: Vars.getBottomLeftRadius(Vars.panelStyle, Vars.pillPosition, root.gameMode, targetRad)
-        bottomRightRadius: Vars.getBottomRightRadius(Vars.panelStyle, Vars.pillPosition, root.gameMode, targetRad)
+        topLeftRadius: Vars.getTopLeftRadius(Vars.panelStyle, Vars.pillPosition, false, targetRad)
+        topRightRadius: Vars.getTopRightRadius(Vars.panelStyle, Vars.pillPosition, false, targetRad)
+        bottomLeftRadius: Vars.getBottomLeftRadius(Vars.panelStyle, Vars.pillPosition, false, targetRad)
+        bottomRightRadius: Vars.getBottomRightRadius(Vars.panelStyle, Vars.pillPosition, false, targetRad)
         // clip removed for shadow
 
         Behavior on radius { enabled: !root.gameMode; NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customExpressiveSpatialSlow } }

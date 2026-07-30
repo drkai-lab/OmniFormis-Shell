@@ -43,6 +43,11 @@ Item {
         }
     }
 
+    onExpandedChanged: {
+        if (expanded) MorphState.notifyOpened(380, contentColumn.implicitHeight + 24);
+        else MorphState.notifyClosed();
+    }
+
     // Safety timer: collapse if notifications were dismissed externally
     Timer {
         interval: 500
@@ -80,15 +85,15 @@ Item {
         anchors.horizontalCenter: (Vars.pillPosition === "Left" || Vars.pillPosition === "Right") ? undefined : parent.horizontalCenter
         anchors.verticalCenter: (Vars.pillPosition === "Left" || Vars.pillPosition === "Right") ? parent.verticalCenter : undefined
 
-        width: root.expanded ? 380 : 100
-        height: root.expanded ? contentColumn.implicitHeight + 24 : 40
+        width: root.expanded ? 380 : (MorphState.anyExpanded ? MorphState.targetWidth : 100)
+        height: root.expanded ? contentColumn.implicitHeight + 24 : (MorphState.anyExpanded ? MorphState.targetHeight : 40)
 
         color: Vars.translucent ? Qt.rgba(Theme.surface.r, Theme.surface.g, Theme.surface.b, 0.85) : Theme.surface
         property real targetRad: root.expanded ? Vars.radiusExtraLarge : height / 2
-        topLeftRadius: Vars.getTopLeftRadius(Vars.panelStyle, Vars.pillPosition, root.gameMode, targetRad)
-        topRightRadius: Vars.getTopRightRadius(Vars.panelStyle, Vars.pillPosition, root.gameMode, targetRad)
-        bottomLeftRadius: Vars.getBottomLeftRadius(Vars.panelStyle, Vars.pillPosition, root.gameMode, targetRad)
-        bottomRightRadius: Vars.getBottomRightRadius(Vars.panelStyle, Vars.pillPosition, root.gameMode, targetRad)
+        topLeftRadius: Vars.getTopLeftRadius(Vars.panelStyle, Vars.pillPosition, false, targetRad)
+        topRightRadius: Vars.getTopRightRadius(Vars.panelStyle, Vars.pillPosition, false, targetRad)
+        bottomLeftRadius: Vars.getBottomLeftRadius(Vars.panelStyle, Vars.pillPosition, false, targetRad)
+        bottomRightRadius: Vars.getBottomRightRadius(Vars.panelStyle, Vars.pillPosition, false, targetRad)
 
         opacity: root.expanded || panel.width > 105 ? 1.0 : 0.0
         visible: opacity > 0

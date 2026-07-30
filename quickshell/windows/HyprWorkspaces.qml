@@ -119,10 +119,10 @@ Item {
         anchors.fill: parent
         color: Vars.translucent ? Qt.rgba(Theme.surface.r, Theme.surface.g, Theme.surface.b, 0.85) : Theme.surface
         property real targetRad: Math.min(mainContainer.width, mainContainer.height) / 2
-        topLeftRadius: Vars.getTopLeftRadius(Vars.panelStyle, Vars.pillPosition, mainContainer.gameMode, targetRad)
-        topRightRadius: Vars.getTopRightRadius(Vars.panelStyle, Vars.pillPosition, mainContainer.gameMode, targetRad)
-        bottomLeftRadius: Vars.getBottomLeftRadius(Vars.panelStyle, Vars.pillPosition, mainContainer.gameMode, targetRad)
-        bottomRightRadius: Vars.getBottomRightRadius(Vars.panelStyle, Vars.pillPosition, mainContainer.gameMode, targetRad)
+        topLeftRadius: Vars.getTopLeftRadius(Vars.panelStyle, Vars.pillPosition, false, targetRad)
+        topRightRadius: Vars.getTopRightRadius(Vars.panelStyle, Vars.pillPosition, false, targetRad)
+        bottomLeftRadius: Vars.getBottomLeftRadius(Vars.panelStyle, Vars.pillPosition, false, targetRad)
+        bottomRightRadius: Vars.getBottomRightRadius(Vars.panelStyle, Vars.pillPosition, false, targetRad)
 
         opacity: (overlayVisible && !mainContainer.forceHidePill) ? (Vars.translucent ? 0.85 : 1.0) : 0.0
         visible: opacity > 0

@@ -16,7 +16,19 @@ PanelWindow {
     WlrLayershell.layer: WlrLayer.Top
     exclusionMode: ExclusionMode.Ignore
     color: "transparent"
-    visible: Vars.panelStyle === "Attached" || Vars.panelStyle === "Framed"
+    property bool gameMode: Vars.gameMode !== undefined ? Vars.gameMode : false
+    Timer {
+        interval: 100
+        running: true
+        repeat: true
+        onTriggered: {
+            if (Vars.gameMode !== undefined && parent.gameMode !== Vars.gameMode) {
+                parent.gameMode = Vars.gameMode;
+            }
+        }
+    }
+
+    visible: Vars.panelStyle === "Attached" && !gameMode
     mask: Region {}
 
     Item {

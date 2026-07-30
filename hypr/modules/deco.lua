@@ -3,6 +3,18 @@ local Utils = require("utils")
 local vars = require("modules.variables")
 local colors = Utils.colors
 
+local function isFramed()
+    local f = io.open(os.getenv("HOME") .. "/Dotfiles/quickshell/theme/variables.js", "r")
+    if f then
+        local content = f:read("*a")
+        f:close()
+        if content:match('var%s+panelStyle%s*=%s*["\']Framed["\']') then
+            return true
+        end
+    end
+    return false
+end
+
 local layer_rules = {
     "blur, quickshell",
     "blur_popups, quickshell",
@@ -27,7 +39,7 @@ hl.config({
         },
     },
     decoration = {
-        rounding       = vars.GameMode and 0 or vars.rounding,
+        rounding       = (vars.GameMode or isFramed()) and 0 or vars.rounding,
         rounding_power = vars.rounding_power,
 
         -- Change transparency of focused and unfocused windows

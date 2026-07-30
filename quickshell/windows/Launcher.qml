@@ -55,9 +55,10 @@ Item {
     // Clear search when closed, focus when opened
     onExpandedChanged: {
         if (!expanded) {
+            MorphState.notifyClosed();
             searchBar.text = "";
         } else {
-            // Refresh clipboard history when opened
+            MorphState.notifyOpened(500, Math.max(80, Math.min(450, mainLayout.implicitHeight + (Vars.spacingLarge * 2))));
             launcherModel.refreshClipboard();
             searchBar.forceActiveFocus();
         }
@@ -82,18 +83,19 @@ Item {
         anchors.horizontalCenter: (Vars.pillPosition === "Left" || Vars.pillPosition === "Right") ? undefined : parent.horizontalCenter
         anchors.verticalCenter: (Vars.pillPosition === "Left" || Vars.pillPosition === "Right") ? parent.verticalCenter : undefined
         
-        width: root.expanded ? 500 : 100
-        height: root.expanded ? Math.max(80, Math.min(450, mainLayout.implicitHeight + (Vars.spacingLarge * 2))) : 40
+        property real targetHeight: root.expanded ? Math.max(80, Math.min(450, mainLayout.implicitHeight + (Vars.spacingLarge * 2))) : (MorphState.anyExpanded ? MorphState.targetHeight : 40)
+        width: root.expanded ? 500 : (MorphState.anyExpanded ? MorphState.targetWidth : 100)
+        height: targetHeight
         
         opacity: root.expanded || panel.width > 105 ? 1.0 : 0.0
         visible: opacity > 0
         
         color: Vars.translucent ? Qt.rgba(Theme.surface.r, Theme.surface.g, Theme.surface.b, 0.85) : Theme.surface
         property real targetRad: root.expanded ? Vars.radiusExtraLarge : height / 2
-        topLeftRadius: Vars.getTopLeftRadius(Vars.panelStyle, Vars.pillPosition, root.gameMode, targetRad)
-        topRightRadius: Vars.getTopRightRadius(Vars.panelStyle, Vars.pillPosition, root.gameMode, targetRad)
-        bottomLeftRadius: Vars.getBottomLeftRadius(Vars.panelStyle, Vars.pillPosition, root.gameMode, targetRad)
-        bottomRightRadius: Vars.getBottomRightRadius(Vars.panelStyle, Vars.pillPosition, root.gameMode, targetRad)
+        topLeftRadius: Vars.getTopLeftRadius(Vars.panelStyle, Vars.pillPosition, false, targetRad)
+        topRightRadius: Vars.getTopRightRadius(Vars.panelStyle, Vars.pillPosition, false, targetRad)
+        bottomLeftRadius: Vars.getBottomLeftRadius(Vars.panelStyle, Vars.pillPosition, false, targetRad)
+        bottomRightRadius: Vars.getBottomRightRadius(Vars.panelStyle, Vars.pillPosition, false, targetRad)
 
         Behavior on radius { enabled: !root.gameMode; NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customExpressiveSpatialSlow } }
         Behavior on width { enabled: !root.gameMode; NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customExpressiveSpatialSlow } }

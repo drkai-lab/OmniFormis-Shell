@@ -28,7 +28,7 @@ PanelWindow {
 
 
     property string pillPos: Vars.pillPosition || "Top"
-    property int defaultEdgeMargin: (gameMode || Vars.panelStyle === "Framed" || Vars.panelStyle === "Flat") ? 0 : currentSpacingSmall
+    property int defaultEdgeMargin: (Vars.panelStyle === "Framed" || Vars.panelStyle === "Flat" || (Vars.panelStyle === "Attached" && topWindow.gameMode)) ? 0 : currentSpacingSmall
 
 
     signal popupOpened
@@ -530,10 +530,10 @@ PanelWindow {
         anchors.right: topWindow.pillPos === "Right" ? parent.right : undefined
         anchors.horizontalCenter: (topWindow.pillPos === "Left" || topWindow.pillPos === "Right") ? undefined : parent.horizontalCenter
         anchors.verticalCenter: (topWindow.pillPos === "Left" || topWindow.pillPos === "Right") ? parent.verticalCenter : undefined
-        anchors.topMargin: topWindow.pillPos === "Bottom" || topWindow.pillPos === "Right" || topWindow.pillPos === "Left" ? 0 : (topWindow.gameMode ? 55 : topWindow.defaultEdgeMargin)
-        anchors.bottomMargin: topWindow.pillPos === "Bottom" ? (topWindow.gameMode ? 55 : topWindow.defaultEdgeMargin) : 0
-        anchors.leftMargin: topWindow.pillPos === "Left" ? (topWindow.gameMode ? 55 : topWindow.defaultEdgeMargin) : 0
-        anchors.rightMargin: topWindow.pillPos === "Right" ? (topWindow.gameMode ? 55 : topWindow.defaultEdgeMargin) : 0
+        anchors.topMargin: topWindow.pillPos === "Bottom" || topWindow.pillPos === "Right" || topWindow.pillPos === "Left" ? 0 : topWindow.defaultEdgeMargin
+        anchors.bottomMargin: topWindow.pillPos === "Bottom" ? topWindow.defaultEdgeMargin : 0
+        anchors.leftMargin: topWindow.pillPos === "Left" ? topWindow.defaultEdgeMargin : 0
+        anchors.rightMargin: topWindow.pillPos === "Right" ? topWindow.defaultEdgeMargin : 0
         preventShow: launcherItem.expanded || controlCenterItem.expanded || wallpaperSwitcherItem.expanded || colorSchemeSwitcherItem.expanded || powerMenuItem.expanded || polkitItem.expanded || notificationPopupItem.expanded || emojiPickerItem.expanded || settingsAppItem.expanded || launcherItem.panel.width > 105 || controlCenterItem.panel.width > 105 || powerMenuItem.panel.width > 105 || polkitItem.panel.width > 105 || notificationPopupItem.panel.width > 105 || emojiPickerItem.panel.width > 105 || wallpaperSwitcherItem.panel.width > 105 || colorSchemeSwitcherItem.panel.width > 105 || settingsAppItem.panel.width > 105
     }
 

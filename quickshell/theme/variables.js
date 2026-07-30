@@ -14,6 +14,34 @@ var paddingSmall = 8;
 var paddingMedium = 16;
 var paddingLarge = 24;
 
+var _radiusAmount = radiusAmount;
+var _radiusSmall = radiusSmall;
+var _radiusMedium = radiusMedium;
+var _radiusLarge = radiusLarge;
+var _radiusExtraLarge = radiusExtraLarge;
+
+Object.defineProperty(this, 'radiusAmount', { get: function() { return panelStyle === "Framed" ? 0 : _radiusAmount; }, set: function(v) { _radiusAmount = v; } });
+Object.defineProperty(this, 'radiusSmall', { get: function() { return panelStyle === "Framed" ? 0 : _radiusSmall; }, set: function(v) { _radiusSmall = v; } });
+Object.defineProperty(this, 'radiusMedium', { get: function() { return panelStyle === "Framed" ? 0 : _radiusMedium; }, set: function(v) { _radiusMedium = v; } });
+Object.defineProperty(this, 'radiusLarge', { get: function() { return panelStyle === "Framed" ? 0 : _radiusLarge; }, set: function(v) { _radiusLarge = v; } });
+Object.defineProperty(this, 'radiusExtraLarge', { get: function() { return panelStyle === "Framed" ? 0 : _radiusExtraLarge; }, set: function(v) { _radiusExtraLarge = v; } });
+
+var _spacingSmall = spacingSmall;
+var _spacingMedium = spacingMedium;
+var _spacingLarge = spacingLarge;
+
+Object.defineProperty(this, 'spacingSmall', { get: function() { return panelStyle === "Framed" ? 0 : _spacingSmall; }, set: function(v) { _spacingSmall = v; } });
+Object.defineProperty(this, 'spacingMedium', { get: function() { return panelStyle === "Framed" ? 0 : _spacingMedium; }, set: function(v) { _spacingMedium = v; } });
+Object.defineProperty(this, 'spacingLarge', { get: function() { return panelStyle === "Framed" ? 0 : _spacingLarge; }, set: function(v) { _spacingLarge = v; } });
+
+var _paddingSmall = paddingSmall;
+var _paddingMedium = paddingMedium;
+var _paddingLarge = paddingLarge;
+
+Object.defineProperty(this, 'paddingSmall', { get: function() { return panelStyle === "Framed" ? 0 : _paddingSmall; }, set: function(v) { _paddingSmall = v; } });
+Object.defineProperty(this, 'paddingMedium', { get: function() { return panelStyle === "Framed" ? 0 : _paddingMedium; }, set: function(v) { _paddingMedium = v; } });
+Object.defineProperty(this, 'paddingLarge', { get: function() { return panelStyle === "Framed" ? 0 : _paddingLarge; }, set: function(v) { _paddingLarge = v; } });
+
 var fontFamily = "Google Sans Flex";
 var animationDuration = 240;
 var flickDeceleration = 1500;
@@ -68,6 +96,7 @@ var customExpressiveSpatialSlow = [0.39, 1.29, 0.35, 0.98];
 function getTopLeftRadius(style, pos, isGame, defRad) {
     var rad = (defRad !== undefined && defRad !== null) ? defRad : 24;
     if (isGame || !style || !pos) return rad;
+    if (style === "Framed") return 0;
     if (style === "Attached" && (pos === "Top" || pos === "Left")) return 0;
     return rad;
 }
@@ -75,6 +104,7 @@ function getTopLeftRadius(style, pos, isGame, defRad) {
 function getTopRightRadius(style, pos, isGame, defRad) {
     var rad = (defRad !== undefined && defRad !== null) ? defRad : 24;
     if (isGame || !style || !pos) return rad;
+    if (style === "Framed") return 0;
     if (style === "Attached" && (pos === "Top" || pos === "Right")) return 0;
     return rad;
 }
@@ -82,6 +112,7 @@ function getTopRightRadius(style, pos, isGame, defRad) {
 function getBottomLeftRadius(style, pos, isGame, defRad) {
     var rad = (defRad !== undefined && defRad !== null) ? defRad : 24;
     if (isGame || !style || !pos) return rad;
+    if (style === "Framed") return 0;
     if (style === "Attached" && (pos === "Bottom" || pos === "Left")) return 0;
     return rad;
 }
@@ -89,6 +120,7 @@ function getBottomLeftRadius(style, pos, isGame, defRad) {
 function getBottomRightRadius(style, pos, isGame, defRad) {
     var rad = (defRad !== undefined && defRad !== null) ? defRad : 24;
     if (isGame || !style || !pos) return rad;
+    if (style === "Framed") return 0;
     if (style === "Attached" && (pos === "Bottom" || pos === "Right")) return 0;
     return rad;
 }

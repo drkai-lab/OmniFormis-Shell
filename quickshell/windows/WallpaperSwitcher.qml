@@ -57,10 +57,17 @@ Item {
     }
 
     onExpandedChanged: {
-        if (!expanded) {
-            controls.clearSearch();
+        if (contentLoader.item && contentLoader.item.controls) {
+            if (!expanded) {
+                MorphState.notifyClosed();
+                contentLoader.item.controls.clearSearch();
+            } else {
+                MorphState.notifyOpened(1100, 650);
+                contentLoader.item.controls.focusSearch();
+            }
         } else {
-            controls.focusSearch();
+            if (!expanded) MorphState.notifyClosed();
+            else MorphState.notifyOpened(1100, 650);
         }
     }
 
@@ -88,15 +95,15 @@ Item {
         anchors.horizontalCenter: (Vars.pillPosition === "Left" || Vars.pillPosition === "Right") ? undefined : parent.horizontalCenter
         anchors.verticalCenter: (Vars.pillPosition === "Left" || Vars.pillPosition === "Right") ? parent.verticalCenter : undefined
 
-        width: root.expanded ? 1100 : 100
-        height: root.expanded ? 650 : 40
+        width: root.expanded ? 1100 : (MorphState.anyExpanded ? MorphState.targetWidth : 100)
+        height: root.expanded ? 650 : (MorphState.anyExpanded ? MorphState.targetHeight : 40)
 
         color: Vars.translucent ? Qt.rgba(Theme.surface.r, Theme.surface.g, Theme.surface.b, 0.85) : Theme.surface
         property real targetRad: root.expanded ? Vars.radiusExtraLarge : height / 2
-        topLeftRadius: Vars.getTopLeftRadius(Vars.panelStyle, Vars.pillPosition, root.gameMode, targetRad)
-        topRightRadius: Vars.getTopRightRadius(Vars.panelStyle, Vars.pillPosition, root.gameMode, targetRad)
-        bottomLeftRadius: Vars.getBottomLeftRadius(Vars.panelStyle, Vars.pillPosition, root.gameMode, targetRad)
-        bottomRightRadius: Vars.getBottomRightRadius(Vars.panelStyle, Vars.pillPosition, root.gameMode, targetRad)
+        topLeftRadius: Vars.getTopLeftRadius(Vars.panelStyle, Vars.pillPosition, false, targetRad)
+        topRightRadius: Vars.getTopRightRadius(Vars.panelStyle, Vars.pillPosition, false, targetRad)
+        bottomLeftRadius: Vars.getBottomLeftRadius(Vars.panelStyle, Vars.pillPosition, false, targetRad)
+        bottomRightRadius: Vars.getBottomRightRadius(Vars.panelStyle, Vars.pillPosition, false, targetRad)
 
         opacity: root.expanded || panel.width > 105 ? 1.0 : 0.0
         visible: opacity > 0
@@ -143,30 +150,113 @@ Item {
                 }
             }
 
-            ColumnLayout {
+            Loader {
+                id: contentLoader
                 anchors.fill: parent
-                spacing: Vars.spacingMedium
+                active: root.expanded || parent.opacity > 0
+                asynchronous: true
+                sourceComponent: Component {
+                    Item {
+                        property alias controls: controls
+                        anchors.fill: parent
 
-                WallpaperControls {
-                    id: controls
-                    rootRef: root
-                    settingsRef: settings
-                    loadWallpapersProcRef: loadWallpapersProc
-                    gridViewRef: gridView
-                    autocompleteProcRef: autocompleteProc
-                    autocompleteModelRef: autocompleteModel
-                }
+                        ColumnLayout {
+                            anchors.fill: parent
+                            spacing: Vars.spacingMedium
 
-                WallpaperGrid {
-                    id: gridView
-                    model: sortFilterProxyModel.proxyModel
-                    rootRef: root
+                            WallpaperControls {
+                                id: controls
+                                rootRef: root
+                                settingsRef: settings
+                                loadWallpapersProcRef: loadWallpapersProc
+                                gridViewRef: gridView
+                                autocompleteProcRef: autocompleteProc
+                                autocompleteModelRef: autocompleteModel
+                            }
 
-                    onWallpaperSelected: path => {
-                        executeWallpaperChange(path);
-                    }
-                    onRequestFocusSearch: {
-                        controls.focusSearch();
+                            WallpaperGrid {
+                                id: gridView
+                                model: sortFilterProxyModel.proxyModel
+                                rootRef: root
+
+                                onWallpaperSelected: path => {
+                                    executeWallpaperChange(path);
+                                }
+                                onRequestFocusSearch: {
+                                    controls.focusSearch();
+                                }
+                            }
+                        }
+
+                        ListModel { id: wallpaperModel }
+                        ListModel { id: proxyModelObj }
+
+                        QtObject {
+                            id: sortFilterProxyModel
+                            property string filterText: controls.filterText
+                            onFilterTextChanged: updateVisualGrid()
+                            function updateVisualGrid() {
+                                proxyModelObj.clear();
+                                for (var i = 0; i < wallpaperModel.count; i++) {
+                                    var item = wallpaperModel.get(i);
+                                    if (Vars.fuzzyMatch(filterText, item.fileName)) {
+                                        proxyModelObj.append({
+                                            "filePath": item.filePath,
+                                            "fileName": item.fileName
+                                        });
+                                    }
+                                }
+                            }
+                            property var proxyModel: proxyModelObj
+                        }
+
+                        Process {
+                            id: loadWallpapersProc
+                            command: ["find", root.wallpaperDir.replace(/^~/, Quickshell.env("HOME")), "-maxdepth", "2", "-type", "f", "-regextype", "posix-extended", "-regex", ".*\\.(jpg|jpeg|png|gif)$"]
+                            running: true
+                            stdout: StdioCollector {
+                                onStreamFinished: {
+                                    wallpaperModel.clear();
+                                    var lines = this.text.split("\n");
+                                    var items = [];
+                                    for (var i = 0; i < lines.length; i++) {
+                                        var path = lines[i].trim();
+                                        if (path.length > 0) {
+                                            var name = path.substring(path.lastIndexOf('/') + 1);
+                                            items.push({
+                                                "filePath": path,
+                                                "fileName": name
+                                            });
+                                        }
+                                    }
+                                    items.sort((a, b) => a.fileName.toLowerCase().localeCompare(b.fileName.toLowerCase()));
+                                    for (var j = 0; j < items.length; j++) {
+                                        wallpaperModel.append(items[j]);
+                                    }
+                                    sortFilterProxyModel.updateVisualGrid();
+                                }
+                            }
+                        }
+
+                        ListModel { id: autocompleteModel }
+
+                        Process {
+                            id: autocompleteProc
+                            stdout: StdioCollector {
+                                onStreamFinished: {
+                                    autocompleteModel.clear();
+                                    var lines = this.text.split("\n");
+                                    for (var i = 0; i < lines.length; i++) {
+                                        var path = lines[i].trim();
+                                        if (path.length > 0) {
+                                            autocompleteModel.append({
+                                                "path": path
+                                            });
+                                        }
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -209,80 +299,4 @@ Item {
         }
     }
 
-    ListModel {
-        id: wallpaperModel
-    }
-
-    ListModel {
-        id: proxyModelObj
-    }
-
-    QtObject {
-        id: sortFilterProxyModel
-        property string filterText: controls.filterText
-        onFilterTextChanged: updateVisualGrid()
-        function updateVisualGrid() {
-            proxyModelObj.clear();
-            for (var i = 0; i < wallpaperModel.count; i++) {
-                var item = wallpaperModel.get(i);
-                if (Vars.fuzzyMatch(filterText, item.fileName)) {
-                    proxyModelObj.append({
-                        "filePath": item.filePath,
-                        "fileName": item.fileName
-                    });
-                }
-            }
-        }
-        property var proxyModel: proxyModelObj
-    }
-
-    Process {
-        id: loadWallpapersProc
-        command: ["find", root.wallpaperDir.replace(/^~/, Quickshell.env("HOME")), "-maxdepth", "2", "-type", "f", "-regextype", "posix-extended", "-regex", ".*\\.(jpg|jpeg|png|gif)$"]
-        running: true
-        stdout: StdioCollector {
-            onStreamFinished: {
-                wallpaperModel.clear();
-                var lines = this.text.split("\n");
-                var items = [];
-                for (var i = 0; i < lines.length; i++) {
-                    var path = lines[i].trim();
-                    if (path.length > 0) {
-                        var name = path.substring(path.lastIndexOf('/') + 1);
-                        items.push({
-                            "filePath": path,
-                            "fileName": name
-                        });
-                    }
-                }
-                items.sort((a, b) => a.fileName.toLowerCase().localeCompare(b.fileName.toLowerCase()));
-                for (var j = 0; j < items.length; j++) {
-                    wallpaperModel.append(items[j]);
-                }
-                sortFilterProxyModel.updateVisualGrid();
-            }
-        }
-    }
-
-    ListModel {
-        id: autocompleteModel
-    }
-
-    Process {
-        id: autocompleteProc
-        stdout: StdioCollector {
-            onStreamFinished: {
-                autocompleteModel.clear();
-                var lines = this.text.split("\n");
-                for (var i = 0; i < lines.length; i++) {
-                    var path = lines[i].trim();
-                    if (path.length > 0) {
-                        autocompleteModel.append({
-                            "path": path
-                        });
-                    }
-                }
-            }
-        }
-    }
 }

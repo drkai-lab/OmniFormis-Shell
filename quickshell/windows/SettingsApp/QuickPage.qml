@@ -673,139 +673,97 @@ Flickable {
                 Layout.topMargin: 4
                 spacing: 28
 
-                // Transparency Toggle Item
-                RowLayout {
+                // Global Style Selection
+                ColumnLayout {
                     Layout.fillWidth: true
-                    spacing: 12
+                    Layout.preferredWidth: 2
+                    Layout.alignment: Qt.AlignTop
+                    spacing: 10
 
-                    Text {
-                        text: "\ue38b" // layers / transparency icon
-                        font.family: "Material Symbols Outlined"
-                        font.pixelSize: 22
-                        color: Theme.on_surface_variant
+                    RowLayout {
+                        spacing: 12
+                        Text {
+                            text: "palette" // palette icon
+                            font.family: "Material Symbols Outlined"
+                            font.pixelSize: 22
+                            color: Theme.on_surface_variant
+                        }
+                        Text {
+                            text: "Global Style"
+                            font.family: Vars.fontFamily
+                            font.pixelSize: 15
+                            font.weight: 500
+                            color: Theme.on_surface
+                        }
                     }
 
-                    Text {
+                    RowLayout {
                         Layout.fillWidth: true
-                        text: "Translucent"
-                        font.family: Vars.fontFamily
-                        font.pixelSize: 15
-                        font.weight: 500
-                        color: Theme.on_surface
+                        spacing: 3
 
-                        MouseArea {
-                            anchors.fill: parent
-                            cursorShape: Qt.PointingHandCursor
-                            onClicked: {
-                                Vars.translucent = !Vars.translucent;
-                                Quickshell.execDetached({
-                                    command: ["bash", "-c", "$HOME/.local/bin/omniformis qs set 'translucent' '" + Vars.translucent + "'; nohup bash ~/Dotfiles/scripts/reload.sh >/dev/null 2>&1 &"]
-                                });
-                            }
-                        }
-                    }
+                        Repeater {
+                            id: styleModeRepeater
+                            model: [
+                                { mode: "solid", icon: "layers_clear" },
+                                { mode: "translucent", icon: "layers" },
+                                { mode: "liquid", icon: "water_drop" }
+                            ]
+                            delegate: Rectangle {
+                                Layout.fillWidth: true
+                                Layout.preferredHeight: 38
+                                property bool isSelected: modelData.mode === "solid" ? (!Vars.translucent && !Vars.liquidGlass) : (modelData.mode === "translucent" ? Vars.translucent : Vars.liquidGlass)
+                                property bool hasLeft: index > 0
+                                property bool hasRight: index < styleModeRepeater.count - 1
 
-                    // M3 Toggle Pill Switch
-                    Rectangle {
-                        width: 50
-                        height: 30
-                        radius: 15
-                        color: Vars.translucent ? Theme.primary_container : Theme.surface_container_highest
-                        border.color: Vars.translucent ? "transparent" : Theme.outline_variant
-                        border.width: Vars.translucent ? 0 : 1
+                                topLeftRadius: isSelected ? 19 : (hasLeft ? 6 : 19)
+                                bottomLeftRadius: isSelected ? 19 : (hasLeft ? 6 : 19)
+                                topRightRadius: isSelected ? 19 : (hasRight ? 6 : 19)
+                                bottomRightRadius: isSelected ? 19 : (hasRight ? 6 : 19)
 
-                        Behavior on color { ColorAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
+                                color: isSelected ? (Vars.translucent ? Qt.rgba(Theme.secondary_container.r, Theme.secondary_container.g, Theme.secondary_container.b, 0.7) : Theme.secondary_container) : (styleModeHover.containsMouse ? (Vars.translucent ? Qt.rgba(Theme.surface_container_highest.r, Theme.surface_container_highest.g, Theme.surface_container_highest.b, 0.6) : Theme.surface_container_highest) : (Vars.translucent ? Qt.rgba(Theme.surface_container_high.r, Theme.surface_container_high.g, Theme.surface_container_high.b, 0.4) : Theme.surface_container_high))
+                                border.width: 0
 
-                        // Thumb Circle
-                        Rectangle {
-                            width: Vars.translucent ? 22 : 18
-                            height: width
-                            radius: width / 2
-                            y: (parent.height - height) / 2
-                            x: Vars.translucent ? parent.width - width - 4 : 5
-                            color: Vars.translucent ? Theme.on_primary_container : Theme.on_surface_variant
+                                Behavior on topLeftRadius { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
+                                Behavior on bottomLeftRadius { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
+                                Behavior on topRightRadius { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
+                                Behavior on bottomRightRadius { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
+                                Behavior on color { ColorAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
 
-                            Behavior on x { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
-                            Behavior on width { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
-                        }
+                                Text {
+                                    anchors.centerIn: parent
+                                    text: modelData.icon
+                                    font.family: parent.isSelected ? filledIconFont.name : "Material Symbols Outlined"
+                                    font.pixelSize: 20
+                                    color: parent.isSelected ? Theme.on_secondary_container : Theme.on_surface_variant
+                                }
 
-                        MouseArea {
-                            anchors.fill: parent
-                            cursorShape: Qt.PointingHandCursor
-                            onClicked: {
-                                Vars.translucent = !Vars.translucent;
-                                Quickshell.execDetached({
-                                    command: ["bash", "-c", "$HOME/.local/bin/omniformis qs set 'translucent' '" + Vars.translucent + "'; nohup bash ~/Dotfiles/scripts/reload.sh >/dev/null 2>&1 &"]
-                                });
-                            }
-                        }
-                    }
-                }
-
-                // Liquid Glass Toggle Item
-                RowLayout {
-                    Layout.fillWidth: true
-                    spacing: 12
-
-                    Text {
-                        text: "\ue1a6" // water drop or similar icon (blur/glass) - let's use lens
-                        font.family: "Material Symbols Outlined"
-                        font.pixelSize: 22
-                        color: Theme.on_surface_variant
-                    }
-
-                    Text {
-                        Layout.fillWidth: true
-                        text: "Liquid Glass"
-                        font.family: Vars.fontFamily
-                        font.pixelSize: 15
-                        font.weight: 500
-                        color: Theme.on_surface
-
-                        MouseArea {
-                            anchors.fill: parent
-                            cursorShape: Qt.PointingHandCursor
-                            onClicked: {
-                                Vars.liquidGlass = !Vars.liquidGlass;
-                                Quickshell.execDetached({
-                                    command: ["bash", "-c", "$HOME/.local/bin/omniformis qs set 'liquidGlass' '" + Vars.liquidGlass + "'; $HOME/.local/bin/omniformis hypr set 'liquidGlass' '" + Vars.liquidGlass + "'; nohup bash ~/Dotfiles/scripts/reload.sh >/dev/null 2>&1 &"]
-                                });
-                            }
-                        }
-                    }
-
-                    // M3 Toggle Pill Switch
-                    Rectangle {
-                        width: 50
-                        height: 30
-                        radius: 15
-                        color: Vars.liquidGlass ? Theme.primary_container : Theme.surface_container_highest
-                        border.color: Vars.liquidGlass ? "transparent" : Theme.outline_variant
-                        border.width: Vars.liquidGlass ? 0 : 1
-
-                        Behavior on color { ColorAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
-
-                        // Thumb Circle
-                        Rectangle {
-                            width: Vars.liquidGlass ? 22 : 18
-                            height: width
-                            radius: width / 2
-                            y: (parent.height - height) / 2
-                            x: Vars.liquidGlass ? parent.width - width - 4 : 5
-                            color: Vars.liquidGlass ? Theme.on_primary_container : Theme.on_surface_variant
-
-                            Behavior on x { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
-                            Behavior on width { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
-                        }
-
-                        MouseArea {
-                            anchors.fill: parent
-                            cursorShape: Qt.PointingHandCursor
-                            onClicked: {
-                                Vars.liquidGlass = !Vars.liquidGlass;
-                                Quickshell.execDetached({
-                                    command: ["bash", "-c", "$HOME/.local/bin/omniformis qs set 'liquidGlass' '" + Vars.liquidGlass + "'; $HOME/.local/bin/omniformis hypr set 'liquidGlass' '" + Vars.liquidGlass + "'; nohup bash ~/Dotfiles/scripts/reload.sh >/dev/null 2>&1 &"]
-                                });
+                                MouseArea {
+                                    id: styleModeHover
+                                    anchors.fill: parent
+                                    hoverEnabled: true
+                                    cursorShape: Qt.PointingHandCursor
+                                    onClicked: {
+                                        if (modelData.mode === "solid" && (Vars.translucent || Vars.liquidGlass)) {
+                                            Vars.translucent = false;
+                                            Vars.liquidGlass = false;
+                                            Quickshell.execDetached({
+                                                command: ["bash", "-c", "$HOME/.local/bin/omniformis qs set 'translucent' 'false'; $HOME/.local/bin/omniformis qs set 'liquidGlass' 'false'; $HOME/.local/bin/omniformis hypr set 'liquidGlass' 'false'; $HOME/.local/bin/omniformis hypr set 'blur_enabled' 'false'; nohup bash ~/Dotfiles/scripts/reload.sh >/dev/null 2>&1 &"]
+                                            });
+                                        } else if (modelData.mode === "translucent" && !Vars.translucent) {
+                                            Vars.translucent = true;
+                                            Vars.liquidGlass = false;
+                                            Quickshell.execDetached({
+                                                command: ["bash", "-c", "$HOME/.local/bin/omniformis qs set 'translucent' 'true'; $HOME/.local/bin/omniformis qs set 'liquidGlass' 'false'; $HOME/.local/bin/omniformis hypr set 'liquidGlass' 'false'; $HOME/.local/bin/omniformis hypr set 'blur_enabled' 'true'; nohup bash ~/Dotfiles/scripts/reload.sh >/dev/null 2>&1 &"]
+                                            });
+                                        } else if (modelData.mode === "liquid" && !Vars.liquidGlass) {
+                                            Vars.liquidGlass = true;
+                                            Vars.translucent = false;
+                                            Quickshell.execDetached({
+                                                command: ["bash", "-c", "$HOME/.local/bin/omniformis qs set 'liquidGlass' 'true'; $HOME/.local/bin/omniformis qs set 'translucent' 'false'; $HOME/.local/bin/omniformis hypr set 'liquidGlass' 'true'; $HOME/.local/bin/omniformis hypr set 'blur_enabled' 'false'; nohup bash ~/Dotfiles/scripts/reload.sh >/dev/null 2>&1 &"]
+                                            });
+                                        }
+                                    }
+                                }
                             }
                         }
                     }

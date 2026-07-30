@@ -51,9 +51,12 @@ Item {
     
     onExpandedChanged: {
         if (expanded) {
+            MorphState.notifyOpened(isVertical ? 96 : 432, isVertical ? 432 : 96);
             vimKeysChecker.running = true;
             currentIndex = 0;
             root.forceActiveFocus();
+        } else {
+            MorphState.notifyClosed();
         }
     }
 
@@ -177,15 +180,15 @@ Item {
         anchors.horizontalCenter: (Vars.pillPosition === "Left" || Vars.pillPosition === "Right") ? undefined : parent.horizontalCenter
         anchors.verticalCenter: (Vars.pillPosition === "Left" || Vars.pillPosition === "Right") ? parent.verticalCenter : undefined
 
-        width: root.expanded ? (isVertical ? 96 : 432) : (isVertical ? 40 : 100)
-        height: root.expanded ? (isVertical ? 432 : 96) : (isVertical ? 100 : 40)
+        width: root.expanded ? (isVertical ? 96 : 432) : (MorphState.anyExpanded ? MorphState.targetWidth : (isVertical ? 40 : 100))
+        height: root.expanded ? (isVertical ? 432 : 96) : (MorphState.anyExpanded ? MorphState.targetHeight : (isVertical ? 100 : 40))
         
         color: Vars.translucent ? Qt.rgba(Theme.surface.r, Theme.surface.g, Theme.surface.b, 0.85) : Theme.surface
         property real targetRad: root.expanded ? Vars.radiusExtraLarge : height / 2
-        topLeftRadius: Vars.getTopLeftRadius(Vars.panelStyle, Vars.pillPosition, root.gameMode, targetRad)
-        topRightRadius: Vars.getTopRightRadius(Vars.panelStyle, Vars.pillPosition, root.gameMode, targetRad)
-        bottomLeftRadius: Vars.getBottomLeftRadius(Vars.panelStyle, Vars.pillPosition, root.gameMode, targetRad)
-        bottomRightRadius: Vars.getBottomRightRadius(Vars.panelStyle, Vars.pillPosition, root.gameMode, targetRad)
+        topLeftRadius: Vars.getTopLeftRadius(Vars.panelStyle, Vars.pillPosition, false, targetRad)
+        topRightRadius: Vars.getTopRightRadius(Vars.panelStyle, Vars.pillPosition, false, targetRad)
+        bottomLeftRadius: Vars.getBottomLeftRadius(Vars.panelStyle, Vars.pillPosition, false, targetRad)
+        bottomRightRadius: Vars.getBottomRightRadius(Vars.panelStyle, Vars.pillPosition, false, targetRad)
         // clip removed for shadow
 
         opacity: root.expanded || (isVertical ? panel.height > 105 : panel.width > 105) ? 1.0 : 0.0

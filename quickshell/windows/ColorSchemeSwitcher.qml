@@ -50,8 +50,10 @@ Item {
     
     onExpandedChanged: {
         if (!expanded) {
+            MorphState.notifyClosed();
             controlBar.searchText = "";
         } else {
+            MorphState.notifyOpened(900, 550);
             controlBar.forceSearchFocus();
             loadThemesProc.running = true;
         }
@@ -75,15 +77,15 @@ Item {
         anchors.horizontalCenter: (Vars.pillPosition === "Left" || Vars.pillPosition === "Right") ? undefined : parent.horizontalCenter
         anchors.verticalCenter: (Vars.pillPosition === "Left" || Vars.pillPosition === "Right") ? parent.verticalCenter : undefined
         
-        width: root.expanded ? 900 : 100
-        height: root.expanded ? 550 : 40
+        width: root.expanded ? 900 : (MorphState.anyExpanded ? MorphState.targetWidth : 100)
+        height: root.expanded ? 550 : (MorphState.anyExpanded ? MorphState.targetHeight : 40)
         
         color: Vars.translucent ? Qt.rgba(Theme.surface.r, Theme.surface.g, Theme.surface.b, 0.85) : Theme.surface
         property real targetRad: root.expanded ? Vars.radiusExtraLarge : height / 2
-        topLeftRadius: Vars.getTopLeftRadius(Vars.panelStyle, Vars.pillPosition, root.gameMode, targetRad)
-        topRightRadius: Vars.getTopRightRadius(Vars.panelStyle, Vars.pillPosition, root.gameMode, targetRad)
-        bottomLeftRadius: Vars.getBottomLeftRadius(Vars.panelStyle, Vars.pillPosition, root.gameMode, targetRad)
-        bottomRightRadius: Vars.getBottomRightRadius(Vars.panelStyle, Vars.pillPosition, root.gameMode, targetRad)
+        topLeftRadius: Vars.getTopLeftRadius(Vars.panelStyle, Vars.pillPosition, false, targetRad)
+        topRightRadius: Vars.getTopRightRadius(Vars.panelStyle, Vars.pillPosition, false, targetRad)
+        bottomLeftRadius: Vars.getBottomLeftRadius(Vars.panelStyle, Vars.pillPosition, false, targetRad)
+        bottomRightRadius: Vars.getBottomRightRadius(Vars.panelStyle, Vars.pillPosition, false, targetRad)
         
         opacity: root.expanded || panel.width > 105 ? 1.0 : 0.0
         visible: opacity > 0

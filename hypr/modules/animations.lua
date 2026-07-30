@@ -114,6 +114,7 @@ local layer_rules = {}
 for _, layer in ipairs(animated_layers) do
     table.insert(layer_rules, "animation " .. current_layer_style .. ", " .. layer)
 end
+table.insert(layer_rules, "noanim, quickshell")
 
 hl.config({
     layerrule = layer_rules

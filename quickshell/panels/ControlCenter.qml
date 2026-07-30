@@ -94,9 +94,11 @@ Item {
     focus: root.expanded
     onExpandedChanged: {
         if (expanded) {
+            MorphState.notifyOpened(600, panel.targetHeight);
             forceActiveFocus();
             uptimeProc.running = true;
         } else {
+            MorphState.notifyClosed();
             isEditorMode = false;
             currentSubMenu = "";
             activeTrayMenu = null;
@@ -127,22 +129,22 @@ Item {
         anchors.verticalCenter: (Vars.pillPosition === "Left" || Vars.pillPosition === "Right") ? parent.verticalCenter : undefined
         
         property real targetHeight: {
-            if (!root.expanded) return 40;
+            if (!root.expanded) return MorphState.anyExpanded ? MorphState.targetHeight : 40;
             if (root.currentSubMenu === "wifi") return Math.min(800, wifiMenuObj.implicitHeight + (Vars.spacingLarge * 2));
             if (root.currentSubMenu === "bluetooth") return Math.min(800, bluetoothMenuObj.implicitHeight + (Vars.spacingLarge * 2));
             if (root.currentSubMenu === "display") return Math.min(800, displayMenuObj.implicitHeight + (Vars.spacingLarge * 2));
             return 660; // Main dashboard
         }
         
-        width: root.expanded ? 600 : 100
+        width: root.expanded ? 600 : (MorphState.anyExpanded ? MorphState.targetWidth : 100)
         height: targetHeight
         
         color: Vars.translucent ? Qt.rgba(Theme.surface.r, Theme.surface.g, Theme.surface.b, 0.85) : Theme.surface
         property real targetRad: root.expanded ? Vars.radiusExtraLarge : height / 2
-        topLeftRadius: Vars.getTopLeftRadius(Vars.panelStyle, Vars.pillPosition, root.gameMode, targetRad)
-        topRightRadius: Vars.getTopRightRadius(Vars.panelStyle, Vars.pillPosition, root.gameMode, targetRad)
-        bottomLeftRadius: Vars.getBottomLeftRadius(Vars.panelStyle, Vars.pillPosition, root.gameMode, targetRad)
-        bottomRightRadius: Vars.getBottomRightRadius(Vars.panelStyle, Vars.pillPosition, root.gameMode, targetRad)
+        topLeftRadius: Vars.getTopLeftRadius(Vars.panelStyle, Vars.pillPosition, false, targetRad)
+        topRightRadius: Vars.getTopRightRadius(Vars.panelStyle, Vars.pillPosition, false, targetRad)
+        bottomLeftRadius: Vars.getBottomLeftRadius(Vars.panelStyle, Vars.pillPosition, false, targetRad)
+        bottomRightRadius: Vars.getBottomRightRadius(Vars.panelStyle, Vars.pillPosition, false, targetRad)
         
         opacity: root.expanded || panel.width > 105 ? 1.0 : 0.0
         visible: opacity > 0

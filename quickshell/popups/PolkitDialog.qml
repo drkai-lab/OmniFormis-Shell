@@ -34,6 +34,11 @@ Item {
         windows: root.focusWindow ? [root.focusWindow] : []
     }
 
+    onExpandedChanged: {
+        if (expanded) MorphState.notifyOpened(420, contentColumn.implicitHeight + 32);
+        else MorphState.notifyClosed();
+    }
+
     PolkitAgent {
         id: polkitAgent
     }
@@ -117,18 +122,18 @@ Item {
         anchors.horizontalCenter: (Vars.pillPosition === "Left" || Vars.pillPosition === "Right") ? undefined : parent.horizontalCenter
         anchors.verticalCenter: (Vars.pillPosition === "Left" || Vars.pillPosition === "Right") ? parent.verticalCenter : undefined
 
-        width: root.expanded ? 420 : 100
-        height: root.expanded ? contentColumn.implicitHeight + 32 : 40
+        width: root.expanded ? 420 : (MorphState.anyExpanded ? MorphState.targetWidth : 100)
+        height: root.expanded ? contentColumn.implicitHeight + 32 : (MorphState.anyExpanded ? MorphState.targetHeight : 40)
 
         opacity: root.expanded || panel.width > 105 ? 1.0 : 0.0
         visible: opacity > 0
 
         color: Vars.translucent ? Qt.rgba(Theme.surface.r, Theme.surface.g, Theme.surface.b, 0.85) : Theme.surface
         property real targetRad: root.expanded ? Vars.radiusExtraLarge : height / 2
-        topLeftRadius: Vars.getTopLeftRadius(Vars.panelStyle, Vars.pillPosition, root.gameMode, targetRad)
-        topRightRadius: Vars.getTopRightRadius(Vars.panelStyle, Vars.pillPosition, root.gameMode, targetRad)
-        bottomLeftRadius: Vars.getBottomLeftRadius(Vars.panelStyle, Vars.pillPosition, root.gameMode, targetRad)
-        bottomRightRadius: Vars.getBottomRightRadius(Vars.panelStyle, Vars.pillPosition, root.gameMode, targetRad)
+        topLeftRadius: Vars.getTopLeftRadius(Vars.panelStyle, Vars.pillPosition, false, targetRad)
+        topRightRadius: Vars.getTopRightRadius(Vars.panelStyle, Vars.pillPosition, false, targetRad)
+        bottomLeftRadius: Vars.getBottomLeftRadius(Vars.panelStyle, Vars.pillPosition, false, targetRad)
+        bottomRightRadius: Vars.getBottomRightRadius(Vars.panelStyle, Vars.pillPosition, false, targetRad)
 
         Behavior on topLeftRadius { enabled: !root.gameMode; NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customExpressiveSpatialSlow } }
         Behavior on topRightRadius { enabled: !root.gameMode; NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customExpressiveSpatialSlow } }

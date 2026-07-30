@@ -39,8 +39,8 @@ if hl.plugin.hyprglass then
     })
 
     hg.preset("apple", {
-        blur_strength          = 0.1,
-        blur_iterations        = 1,
+        blur_strength          = 0.8,
+        blur_iterations        = 2,
         refraction_strength    = 0.8,
         chromatic_aberration   = 0.6,
         fresnel_strength       = 1.0,
@@ -58,7 +58,7 @@ if hl.plugin.hyprglass then
     })
 
     hg.config({
-        enabled = vars.liquidGlass,
+        enabled = (not vars.GameMode) and vars.liquidGlass,
         default_theme = "dark",
         default_preset = vars.liquidGlassPreset or "glass",
         tint_color = tint_color,

@@ -68,6 +68,10 @@ Item {
     opacity: forceHidePill ? 0.0 : 1.0
     visible: opacity > 0
     signal closeRequested()
+    onExpandedChanged: {
+        if (expanded) MorphState.notifyOpened(root.isFloatingInstance ? root.width : 1320, root.isFloatingInstance ? root.height : 740);
+        else MorphState.notifyClosed();
+    }
 
     HyprlandFocusGrab {
         active: root.expanded && root.focusWindow !== null
@@ -92,15 +96,15 @@ Item {
         anchors.horizontalCenter: (!root.isFloatingInstance && (Vars.pillPosition === "Left" || Vars.pillPosition === "Right")) ? undefined : parent.horizontalCenter
         anchors.verticalCenter: (!root.isFloatingInstance && (Vars.pillPosition === "Left" || Vars.pillPosition === "Right")) ? parent.verticalCenter : undefined
         
-        width: root.expanded ? (root.isFloatingInstance ? root.width : 1320) : 100
-        height: root.expanded ? (root.isFloatingInstance ? root.height : 740) : 40
+        width: root.expanded ? (root.isFloatingInstance ? root.width : 1320) : (MorphState.anyExpanded ? MorphState.targetWidth : 100)
+        height: root.expanded ? (root.isFloatingInstance ? root.height : 740) : (MorphState.anyExpanded ? MorphState.targetHeight : 40)
         
         color: Vars.translucent ? Qt.rgba(Theme.surface_container_low.r, Theme.surface_container_low.g, Theme.surface_container_low.b, 0.85) : Theme.surface_container_low
         property real targetRad: root.expanded ? Vars.radiusExtraLarge : height / 2
-        topLeftRadius: root.isFloatingInstance ? Vars.radiusExtraLarge : Vars.getTopLeftRadius(Vars.panelStyle, Vars.pillPosition, root.gameMode, targetRad)
-        topRightRadius: root.isFloatingInstance ? Vars.radiusExtraLarge : Vars.getTopRightRadius(Vars.panelStyle, Vars.pillPosition, root.gameMode, targetRad)
-        bottomLeftRadius: root.isFloatingInstance ? Vars.radiusExtraLarge : Vars.getBottomLeftRadius(Vars.panelStyle, Vars.pillPosition, root.gameMode, targetRad)
-        bottomRightRadius: root.isFloatingInstance ? Vars.radiusExtraLarge : Vars.getBottomRightRadius(Vars.panelStyle, Vars.pillPosition, root.gameMode, targetRad)
+        topLeftRadius: root.isFloatingInstance ? Vars.radiusExtraLarge : Vars.getTopLeftRadius(Vars.panelStyle, Vars.pillPosition, false, targetRad)
+        topRightRadius: root.isFloatingInstance ? Vars.radiusExtraLarge : Vars.getTopRightRadius(Vars.panelStyle, Vars.pillPosition, false, targetRad)
+        bottomLeftRadius: root.isFloatingInstance ? Vars.radiusExtraLarge : Vars.getBottomLeftRadius(Vars.panelStyle, Vars.pillPosition, false, targetRad)
+        bottomRightRadius: root.isFloatingInstance ? Vars.radiusExtraLarge : Vars.getBottomRightRadius(Vars.panelStyle, Vars.pillPosition, false, targetRad)
         
         opacity: root.expanded || panel.width > 105 ? 1.0 : 0.0
         visible: opacity > 0
@@ -120,7 +124,11 @@ Item {
             visible: opacity > 0
             Behavior on opacity { enabled: !root.gameMode; SequentialAnimation { PauseAnimation { duration: root.expanded ? Vars.animationDuration : 0 } NumberAnimation { duration: root.expanded ? Vars.animationDuration : Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: root.expanded ? Vars.customEmphasizedDecelerate : Vars.customEmphasizedAccelerate } } }
 
-            RowLayout {
+            Loader {
+                anchors.fill: parent
+                active: root.expanded || parent.opacity > 0
+                asynchronous: true
+                sourceComponent: RowLayout {
                 anchors.fill: parent
                 spacing: Vars.spacingLarge
 
@@ -272,6 +280,7 @@ Item {
                         Layout.fillWidth: true
                         Layout.fillHeight: true
                     }
+                }
                 }
             }
         }
