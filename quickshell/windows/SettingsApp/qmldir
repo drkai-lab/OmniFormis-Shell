@@ -5,6 +5,7 @@ WifiPage 1.0 wifi/WifiPage.qml
 BluetoothPage 1.0 bluetooth/BluetoothPage.qml
 BezierEditorPage 1.0 BezierEditorPage.qml
 UnifiedSettingsPage 1.0 UnifiedSettingsPage.qml
+UnifiedSettingsDelegate 1.0 UnifiedSettingsDelegate.qml
 AboutPage 1.0 AboutPage.qml
 TaskManagerPage 1.0 TaskManagerPage.qml
 WifiNetworkDelegate 1.0 wifi/WifiNetworkDelegate.qml

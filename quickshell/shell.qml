@@ -17,6 +17,7 @@ ShellRoot {
     }
 
     property string globalOsIconPath: ""
+    property var _forceInitLockScreen: LockScreen
 
     Process {
         id: osCheckProcess

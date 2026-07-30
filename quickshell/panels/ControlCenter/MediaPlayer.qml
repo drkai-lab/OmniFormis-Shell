@@ -76,6 +76,13 @@ Rectangle {
         layer.enabled: true
         visible: false
 
+        // Base solid color to prevent transparency when translucent is disabled
+        Rectangle {
+            anchors.fill: parent
+            color: Theme.surface_container_highest
+            visible: !Vars.translucent
+        }
+
         // Stage 1: Blur the background image
         Item {
             id: blurredBgLayer
@@ -101,7 +108,7 @@ Rectangle {
         Rectangle {
             anchors.fill: parent
             color: Theme.surface_container_highest
-            opacity: bgArt.source !== "" ? (Vars.translucent ? 0.75 : 0.90) : 1.0
+            opacity: bgArt.source !== "" ? (Vars.translucent ? 0.75 : 0.90) : (Vars.translucent ? 0.60 : 1.0)
         }
     }
 

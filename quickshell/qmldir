@@ -35,3 +35,4 @@ DesktopMediaPlayer 1.0 desktop/Widgets/DesktopMediaPlayer.qml
 DesktopWidgetsLayer 1.0 desktop/DesktopWidgetsLayer.qml
 ScreenFrame 1.0 desktop/ScreenFrame.qml
 InvertedCorner 1.0 core/primitives/InvertedCorner.qml
+singleton LockScreen 1.0 LockScreen.qml

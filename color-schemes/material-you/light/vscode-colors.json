@@ -1,28 +1,28 @@
 {
   "checksum": ":)",
-  "wallpaper": "/home/boing/Pictures/Wallpapers/Wallpapers-Bank/wallpapers/rain-house-tree.jpg",
+  "wallpaper": "/home/boing/Pictures/Wallpapers/Wallpapers-Bank/wallpapers/Concept-Japanese house.png",
   "alpha": "100",
   "special": {
-    "background": "#e8d6d5",
-    "foreground": "#231919",
-    "cursor": "#904a49"
+    "background": "#dadbcf",
+    "foreground": "#1a1c15",
+    "cursor": "#4f6629"
   },
   "colors": {
-    "color0": "#e8d6d5",
-    "color1": "#380404",
-    "color2": "#8b4341",
-    "color3": "#805d22",
-    "color4": "#904a49",
-    "color5": "#745a2e",
-    "color6": "#ffdad8",
-    "color7": "#524342",
-    "color8": "#f4dddc",
-    "color9": "#a03a39",
-    "color10": "#ae5451",
-    "color11": "#a87a2d",
-    "color12": "#ae605e",
-    "color13": "#99763c",
-    "color14": "#ffdad8",
-    "color15": "#231919"
+    "color0": "#dadbcf",
+    "color1": "#212d04",
+    "color2": "#5e7337",
+    "color3": "#2d726a",
+    "color4": "#4f6629",
+    "color5": "#396661",
+    "color6": "#e1eebe",
+    "color7": "#45483d",
+    "color8": "#e2e4d4",
+    "color9": "#52711e",
+    "color10": "#7b9648",
+    "color11": "#3c968c",
+    "color12": "#6b8a38",
+    "color13": "#4b8780",
+    "color14": "#d3f29a",
+    "color15": "#1a1c15"
   }
 }

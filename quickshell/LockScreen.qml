@@ -1,3 +1,4 @@
+pragma Singleton
 import QtQuick
 import QtQuick.Layouts
 import QtQuick.Effects
@@ -5,12 +6,12 @@ import Quickshell
 import Quickshell.Wayland
 import Quickshell.Services.Pam
 import Quickshell.Widgets
-import "../theme/variables.js" as Vars
-import "../"
-import "../desktop/Widgets" as Widgets
-import "../core/primitives" as Primitives
+import "theme/variables.js" as Vars
+import "."
+import "desktop/Widgets" as Widgets
+import "core/primitives" as Primitives
 
-ShellRoot {
+Item {
     id: root
 
     property string activeUser: "boing"
@@ -18,9 +19,10 @@ ShellRoot {
     property bool authError: false
 
     IdleMonitor {
+        id: idleMonitor
         timeout: 300000 
-        onIdle: {
-            sessionLock.locked = true;
+        onIsIdleChanged: {
+            if (isIdle) sessionLock.locked = true;
         }
     }
 
@@ -33,41 +35,70 @@ ShellRoot {
         }
     }
 
+    property string _bufferedPassword: ""
+
     PamContext {
         id: pamContext
-        service: "system-auth" 
-        
-        onAuthenticated: {
-            sessionLock.locked = false;
-            Qt.quit();
+        config: "system-auth" 
+        user: root.activeUser
+
+        onPamMessage: {
+            if (pamContext.messageIsError) {
+                root.statusMessage = pamContext.message || "Authentication failed";
+                root.authError = true;
+                root.shakeActive();
+                errorResetTimer.start();
+            } else if (pamContext.responseRequired && root._bufferedPassword !== "") {
+                pamContext.respond(root._bufferedPassword);
+                root._bufferedPassword = "";
+            }
         }
+        
+        onCompleted: (result) => {
+            if (result === PamResult.Success) {
+                sessionLock.locked = false;
+                root._bufferedPassword = "";
+                root.authError = false;
+                root.statusMessage = "";
+            } else {
+                root.statusMessage = "Authentication failed";
+                root.authError = true;
+                root.shakeActive();
+                errorResetTimer.start();
+                
+                pamContext.abort();
+            }
+        }
+
         onError: (error) => {
-            root.statusMessage = error || "Authentication failed";
+            root.statusMessage = "PAM error: " + error;
             root.authError = true;
-            root.shakeActive();
-            errorResetTimer.start();
         }
     }
 
     signal shakeActive()
 
+    function lockScreen() {
+        sessionLock.locked = true;
+    }
+
     WlSessionLock {
         id: sessionLock
-        locked: true 
+        locked: false 
 
         onLockedChanged: {
             if (locked && !pamContext.active) {
                 pamContext.start();
-            } else if (!locked && pamContext.active) {
-                pamContext.abort();
             }
         }
 
-        Instantiator {
-            model: Quickshell.screens
-            delegate: WlSessionLockSurface {
-                screen: modelData
+        surface: Component {
+            WlSessionLockSurface {
                 color: Theme.surface_container_lowest 
+
+                Component.onCompleted: {
+                    card.passwordInput.forceActiveFocus();
+                }
 
                 MouseArea {
                     anchors.fill: parent
@@ -153,11 +184,15 @@ ShellRoot {
                                 echoMode: TextInput.Normal
                                 onAccepted: {
                                     if (text.length > 0) {
-                                        if (typeof pamContext.authenticate === "function") {
-                                            pamContext.authenticate(root.activeUser, text);
-                                        } else if (typeof pamContext.respond === "function") {
+                                        if (pamContext.active && pamContext.responseRequired) {
                                             pamContext.respond(text);
+                                        } else {
+                                            root._bufferedPassword = text;
+                                            if (!pamContext.active) {
+                                                pamContext.start();
+                                            }
                                         }
+                                        text = "";
                                     }
                                 }
                             }

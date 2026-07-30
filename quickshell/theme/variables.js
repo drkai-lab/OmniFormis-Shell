@@ -42,7 +42,7 @@ var mediaPlayerShape = "12SidedCookie";
 var mediaPlayerArtScale = 1;
 
 var panelStyle = "Attached";
-var pillPosition = "Left";
+var pillPosition = "Bottom";
 var gameMode = false;
 
 var desktopClockEnabled = true;

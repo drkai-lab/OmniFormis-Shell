@@ -66,7 +66,7 @@ Item {
 
     property int currentIndex: 0
 
-    Keys.onLeftPressed: {
+    Keys.onLeftPressed: (event) => {
         if (!isVertical) {
             if (Vars.pillPosition === "Right") {
                 currentIndex = (currentIndex + 1) % 5;
@@ -77,7 +77,7 @@ Item {
         }
     }
     
-    Keys.onRightPressed: {
+    Keys.onRightPressed: (event) => {
         if (!isVertical) {
             if (Vars.pillPosition === "Right") {
                 currentIndex = (currentIndex - 1 + 5) % 5;
@@ -88,14 +88,14 @@ Item {
         }
     }
 
-    Keys.onUpPressed: {
+    Keys.onUpPressed: (event) => {
         if (isVertical) {
             currentIndex = (currentIndex - 1 + 5) % 5;
             event.accepted = true;
         }
     }
 
-    Keys.onDownPressed: {
+    Keys.onDownPressed: (event) => {
         if (isVertical) {
             currentIndex = (currentIndex + 1) % 5;
             event.accepted = true;
@@ -136,18 +136,18 @@ Item {
         }
     }
     
-    Keys.onReturnPressed: {
+    Keys.onReturnPressed: (event) => {
         triggerAction();
         event.accepted = true;
     }
     
-    Keys.onSpacePressed: {
+    Keys.onSpacePressed: (event) => {
         triggerAction();
         event.accepted = true;
     }
 
     function triggerAction() {
-        if (currentIndex === 0) { lockProcess.running = true; root.expanded = false; }
+        if (currentIndex === 0) { LockScreen.lockScreen(); root.expanded = false; }
         else if (currentIndex === 1) { suspendProcess.running = true; root.expanded = false; }
         else if (currentIndex === 2) { logoutProcess.running = true; root.expanded = false; }
         else if (currentIndex === 3) { rebootProcess.running = true; root.expanded = false; }
@@ -217,7 +217,7 @@ Item {
                 iconText: "\ue897" // lock
                 labelText: "Lock"
                 index: 0
-                onClicked: { lockProcess.running = true; root.expanded = false; }
+                onClicked: { LockScreen.lockScreen(); root.expanded = false; }
             }
             
             PowerMenuButton {
@@ -311,7 +311,6 @@ Item {
         }
     }
 
-    Process { id: lockProcess; command: ["sh", "/home/boing/Dotfiles/quickshell/scripts/lock.sh"] }
     Process { id: shutdownProcess; command: ["systemctl", "poweroff"] }
     Process { id: rebootProcess; command: ["systemctl", "reboot"] }
     Process { id: suspendProcess; command: ["systemctl", "suspend"] }

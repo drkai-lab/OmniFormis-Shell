@@ -136,7 +136,14 @@ ColumnLayout {
                         Layout.preferredWidth: 48
                         Layout.preferredHeight: 48
                         
-                        property color containerColor: Qt.hsla(modelData.hue, 0.35, 0.82, 1.0)
+                        property color containerColor: {
+                            var colors = [
+                                Theme.primary,
+                                Theme.secondary,
+                                Theme.tertiary
+                            ];
+                            return colors[index % colors.length];
+                        }
                         property color onContainerColor: Qt.hsla(modelData.hue, 0.40, 0.25, 1.0)
                         
                         Image {
@@ -189,6 +196,7 @@ ColumnLayout {
                             color: parent.parent.isSelected ? Theme.on_secondary_container : Theme.on_surface
                             Layout.fillWidth: true
                             horizontalAlignment: Text.AlignLeft
+                            elide: Text.ElideRight
                         }
                         Text {
                             text: modelData.subtitle
@@ -198,6 +206,7 @@ ColumnLayout {
                             Layout.fillWidth: true
                             horizontalAlignment: Text.AlignLeft
                             opacity: 0.9
+                            elide: Text.ElideRight
                         }
                     }
                 }
