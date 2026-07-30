@@ -39,16 +39,22 @@ if hl.plugin.hyprglass then
     })
 
     hg.preset("apple", {
-        blur_strength          = 2.2,
-        blur_iterations        = 3,
-        refraction_strength    = 0.55,
-        chromatic_aberration   = 0.3,
-        fresnel_strength       = 0.5,
-        specular_strength      = 0.75,
-        edge_thickness         = 0.05,
-        lens_distortion        = 0.3,
-        dark  = { brightness = 0.82, contrast = 0.90, saturation = 0.80, vibrancy = 0.15, adaptive_dim = 0.4 },
-        light = { brightness = 1.12, contrast = 0.92, saturation = 0.85, vibrancy = 0.12, adaptive_boost = 0.4 },
+        blur_strength          = 0.1,
+        blur_iterations        = 1,
+        refraction_strength    = 0.8,
+        chromatic_aberration   = 0.6,
+        fresnel_strength       = 1.0,
+        specular_strength      = 1.0,
+        glass_opacity          = 1.0,
+        edge_thickness         = 0.1,
+        lens_distortion        = 0.5,
+        brightness             = 1.1,
+        contrast               = 1.0,
+        saturation             = 1.0,
+        vibrancy               = 0.2,
+        vibrancy_darkness      = 0.0,
+        adaptive_dim           = 0.0,
+        adaptive_boost         = 0.2,
     })
 
     hg.config({

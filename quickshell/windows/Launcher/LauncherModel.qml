@@ -161,7 +161,88 @@ Item {
         }
     }
 
-    property var filteredModel: {
+    property alias filteredModel: dynamicModel
+
+    ListModel { id: dynamicModel }
+
+    Timer {
+        id: syncTimer
+        interval: 10
+        running: false
+        onTriggered: {
+            var targetArray = computeTargetArray();
+            var keyProp = "name";
+            
+            // 1. Remove items not in targetArray
+            for (var i = dynamicModel.count - 1; i >= 0; i--) {
+                var item = dynamicModel.get(i);
+                var found = false;
+                for (var j = 0; j < targetArray.length; j++) {
+                    if (targetArray[j][keyProp] === item[keyProp]) {
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found) {
+                    dynamicModel.remove(i, 1);
+                }
+            }
+            
+            // 2. Add items
+            for (var i = 0; i < targetArray.length; i++) {
+                var targetItem = targetArray[i];
+                var found = false;
+                for (var j = 0; j < dynamicModel.count; j++) {
+                    if (dynamicModel.get(j)[keyProp] === targetItem[keyProp]) {
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found) {
+                    var toAdd = {
+                        name: targetItem.name || "",
+                        command: targetItem.command || [],
+                        workingDirectory: targetItem.workingDirectory || "",
+                        icon: targetItem.icon || "",
+                        isFile: targetItem.isFile || false,
+                        isDir: targetItem.isDir || false,
+                        isSetting: targetItem.isSetting || false,
+                        isClearAll: targetItem.isClearAll || false,
+                        isClipboard: targetItem.isClipboard || false,
+                        isMath: targetItem.isMath || false,
+                        iconName: targetItem.iconName || "",
+                        clipId: targetItem.clipId || "",
+                        fullLine: targetItem.fullLine || "",
+                        clipImagePath: targetItem.clipImagePath || ""
+                    };
+                    dynamicModel.append(toAdd);
+                }
+            }
+            
+            // 3. Move items
+            for (var i = 0; i < targetArray.length; i++) {
+                var targetItem = targetArray[i];
+                var currentIndex = -1;
+                for (var j = i; j < dynamicModel.count; j++) {
+                    if (dynamicModel.get(j)[keyProp] === targetItem[keyProp]) {
+                        currentIndex = j;
+                        break;
+                    }
+                }
+                if (currentIndex !== -1 && currentIndex !== i) {
+                    dynamicModel.move(currentIndex, i, 1);
+                }
+            }
+        }
+    }
+
+    onFilterTextChanged: syncTimer.restart()
+    onEmojiModelChanged: syncTimer.restart()
+    onFileModelChanged: syncTimer.restart()
+    onClipboardModelChanged: syncTimer.restart()
+    Component.onCompleted: syncTimer.restart()
+
+    function computeTargetArray() {
         var text = rootModel.filterText.toLowerCase();
         
         if (text.startsWith("=")) {
@@ -325,8 +406,19 @@ Item {
             return allApps;
         }
         
-        var matchedApps = allApps.filter(app => Vars.fuzzyMatch(text, app.name));
+        var matchedApps = [];
+        for (var l = 0; l < allApps.length; l++) {
+            var score = Vars.fuzzyMatchScore(text, allApps[l].name);
+            if (score > 0) {
+                var appWithScore = Object.assign({}, allApps[l]);
+                appWithScore.score = score;
+                matchedApps.push(appWithScore);
+            }
+        }
         
+        matchedApps.sort(function(a, b) {
+            return b.score - a.score;
+        });
         if (text.indexOf("./") !== -1) {
             var fileQuery = text.replace(/\.\//g, "").trim();
             var matchedFiles = fileQuery === "" ? rootModel.fileModel.slice(0, 50) : rootModel.fileModel.filter(file => Vars.fuzzyMatch(fileQuery, file.name));

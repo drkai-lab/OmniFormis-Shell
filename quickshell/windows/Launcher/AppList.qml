@@ -44,7 +44,60 @@ ListView {
     Keys.onReturnPressed: (event) => { if (currentItem) currentItem.triggerSelection(); event.accepted = true; }
     Keys.onSpacePressed: (event) => { if (currentItem) currentItem.triggerSelection(); event.accepted = true; }
     Keys.onEscapePressed: (event) => { root.escapePressed(); event.accepted = true; }
-    
+
+    add: Transition {
+        ParallelAnimation {
+            NumberAnimation { property: "opacity"; from: 0; to: 1; duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customEmphasizedDecelerate }
+            NumberAnimation { property: "x"; from: 30; to: 0; duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customEmphasizedDecelerate }
+        }
+    }
+    remove: Transition {
+        ParallelAnimation {
+            NumberAnimation { property: "opacity"; to: 0; duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customEmphasizedAccelerate }
+            NumberAnimation { property: "x"; to: -30; duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customEmphasizedAccelerate }
+        }
+    }
+    displaced: Transition {
+        PropertyAction { property: "z"; value: 0 }
+        ParallelAnimation {
+            NumberAnimation { properties: "x,y"; duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customExpressiveSpatialSlow }
+            SequentialAnimation {
+                NumberAnimation { property: "opacity"; to: 0.2; duration: Vars.animationDuration * 0.3 }
+                NumberAnimation { property: "opacity"; to: 1.0; duration: Vars.animationDuration * 0.7 }
+            }
+        }
+    }
+    removeDisplaced: Transition {
+        PropertyAction { property: "z"; value: 0 }
+        ParallelAnimation {
+            NumberAnimation { properties: "x,y"; duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customExpressiveSpatialSlow }
+            SequentialAnimation {
+                NumberAnimation { property: "opacity"; to: 0.2; duration: Vars.animationDuration * 0.3 }
+                NumberAnimation { property: "opacity"; to: 1.0; duration: Vars.animationDuration * 0.7 }
+            }
+        }
+    }
+    move: Transition {
+        PropertyAction { property: "z"; value: 100 }
+        NumberAnimation { properties: "x,y"; duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customExpressiveSpatialSlow }
+        PropertyAction { property: "z"; value: 0 }
+    }
+    moveDisplaced: Transition {
+        PropertyAction { property: "z"; value: 0 }
+        ParallelAnimation {
+            NumberAnimation { properties: "x,y"; duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customExpressiveSpatialSlow }
+            SequentialAnimation {
+                NumberAnimation { property: "opacity"; to: 0.2; duration: Vars.animationDuration * 0.3 }
+                NumberAnimation { property: "opacity"; to: 1.0; duration: Vars.animationDuration * 0.7 }
+            }
+        }
+    }
+    populate: Transition {
+        ParallelAnimation {
+            NumberAnimation { property: "opacity"; from: 0; to: 1; duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customEmphasizedDecelerate }
+            NumberAnimation { property: "x"; from: 30; to: 0; duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customEmphasizedDecelerate }
+        }
+    }    
     property bool vimKeysEnabled: false
     Process {
         id: vimKeysChecker
@@ -166,33 +219,35 @@ ListView {
         width: root.width
         height: 48
 
+        property var itemData: typeof modelData !== 'undefined' ? modelData : model
+
         function triggerSelection() {
-            if (modelData.command[0] === "INTERNAL:SETTINGS") {
+            if (itemData.command[0] === "INTERNAL:SETTINGS") {
                 root.openSettingsRequested();
                 root.escapePressed();
                 return;
             }
-            if (modelData.command[0] === "INTERNAL:CLIPBOARD") {
+            if (itemData.command[0] === "INTERNAL:CLIPBOARD") {
                 root.searchText = "/clipboard ";
                 root.focusSearchBar();
                 return;
             }
-            if (modelData.command[0] === "INTERNAL:EMOJI") {
+            if (itemData.command[0] === "INTERNAL:EMOJI") {
                 root.searchText = "/emoji ";
                 root.focusSearchBar();
                 return;
             }
-            if (modelData.command[0] === "INTERNAL:CALCULATOR") {
+            if (itemData.command[0] === "INTERNAL:CALCULATOR") {
                 root.searchText = "=";
                 root.focusSearchBar();
                 return;
             }
-            if (modelData.command[0] === "INTERNAL:WEB_SEARCH") {
+            if (itemData.command[0] === "INTERNAL:WEB_SEARCH") {
                 root.searchText = "/web ";
                 root.focusSearchBar();
                 return;
             }
-            if (modelData.command[0] === "INTERNAL:CLEAR_CLIPBOARD") {
+            if (itemData.command[0] === "INTERNAL:CLEAR_CLIPBOARD") {
                 if (root.launcherModel) {
                     root.launcherModel.clearClipboard();
                     var oldText = root.searchText;
@@ -203,8 +258,8 @@ ListView {
             }
             
             Quickshell.execDetached({
-                command: modelData.command,
-                workingDirectory: modelData.workingDirectory
+                command: typeof itemData.command === 'object' && typeof itemData.command.length !== 'undefined' ? Array.from(itemData.command) : itemData.command,
+                workingDirectory: itemData.workingDirectory
             });
             root.appLaunched();
             root.escapePressed();
@@ -226,8 +281,8 @@ ListView {
         }
 
         function deleteClipboardItem() {
-            if (modelData.isClipboard && root.launcherModel) {
-                root.launcherModel.deleteClipboardItem(modelData.clipId, modelData.fullLine);
+            if (itemData.isClipboard && root.launcherModel) {
+                root.launcherModel.deleteClipboardItem(itemData.clipId, itemData.fullLine);
                 var oldText = root.searchText;
                 root.searchText = "";
                 root.searchText = oldText;
@@ -250,7 +305,7 @@ ListView {
 
             onClicked: (mouse) => {
                 root.currentIndex = index;
-                if (mouse.button === Qt.RightButton && modelData.isClipboard) {
+                if (mouse.button === Qt.RightButton && itemData.isClipboard) {
                     delegateItem.deleteClipboardItem();
                 } else {
                     delegateItem.triggerSelection();
@@ -277,10 +332,10 @@ ListView {
 
                 Image {
                     anchors.fill: parent
-                    source: (modelData.clipImagePath !== undefined && modelData.clipImagePath !== "") ? "file://" + modelData.clipImagePath : (modelData.icon ? "image://icon/" + modelData.icon : "image://icon/application-x-executable")
+                    source: (itemData.clipImagePath !== undefined && itemData.clipImagePath !== "") ? "file://" + itemData.clipImagePath : (itemData.icon ? "image://icon/" + itemData.icon : "image://icon/application-x-executable")
                     fillMode: Image.PreserveAspectCrop
                     asynchronous: false
-                    visible: (modelData.isFile !== true && modelData.isMath !== true && modelData.isSetting !== true && modelData.isClipboard !== true && modelData.isClearAll !== true) || (modelData.isClipboard === true && modelData.clipImagePath !== undefined && modelData.clipImagePath !== "")
+                    visible: (itemData.isFile !== true && itemData.isMath !== true && itemData.isSetting !== true && itemData.isClipboard !== true && itemData.isClearAll !== true) || (itemData.isClipboard === true && itemData.clipImagePath !== undefined && itemData.clipImagePath !== "")
                     
                     opacity: isCurrent ? 1.0 : (itemMouseArea.containsMouse ? 0.9 : 0.7)
                     Behavior on opacity { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customExpressiveSpatialSlow } }
@@ -290,13 +345,13 @@ ListView {
                     anchors.centerIn: parent
                     font.family: "Material Symbols Outlined"
                     font.pixelSize: 24
-                    text: modelData.isMath ? "calculate" : 
-                          (modelData.isClipboard ? "content_copy" : 
-                          (modelData.isSetting ? modelData.iconName : 
-                          (modelData.isClearAll ? "delete" :
-                          (modelData.isFile ? (modelData.isDir ? "folder" : "description") : ""))))
-                    color: modelData.isClearAll ? Theme.error : (isCurrent ? Theme.on_primary_container : Theme.on_surface)
-                    visible: (modelData.isFile === true || modelData.isMath === true || modelData.isSetting === true || modelData.isClipboard === true || modelData.isClearAll === true) && !(modelData.isClipboard && modelData.clipImagePath !== undefined && modelData.clipImagePath !== "")
+                    text: itemData.isMath ? "calculate" : 
+                          (itemData.isClipboard ? "content_copy" : 
+                          (itemData.isSetting ? itemData.iconName : 
+                          (itemData.isClearAll ? "delete" :
+                          (itemData.isFile ? (itemData.isDir ? "folder" : "description") : ""))))
+                    color: itemData.isClearAll ? Theme.error : (isCurrent ? Theme.on_primary_container : Theme.on_surface)
+                    visible: (itemData.isFile === true || itemData.isMath === true || itemData.isSetting === true || itemData.isClipboard === true || itemData.isClearAll === true) && !(itemData.isClipboard && itemData.clipImagePath !== undefined && itemData.clipImagePath !== "")
                     
                     opacity: isCurrent ? 1.0 : (itemMouseArea.containsMouse ? 0.9 : 0.7)
                     Behavior on opacity { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customExpressiveSpatialSlow } }
@@ -309,9 +364,9 @@ ListView {
                 font.family: Vars.fontFamily
                 font.pixelSize: 14
                 font.weight: isCurrent ? Font.DemiBold : Font.Medium
-                text: modelData.name
+                text: itemData.name
                 
-                color: modelData.isClearAll ? Theme.error : (isCurrent ? Theme.on_primary_container : Theme.on_surface)
+                color: itemData.isClearAll ? Theme.error : (isCurrent ? Theme.on_primary_container : Theme.on_surface)
                 opacity: isCurrent ? 1.0 : (itemMouseArea.containsMouse ? 0.8 : 0.6)
                 
                 maximumLineCount: 1

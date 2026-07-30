@@ -11,6 +11,11 @@ Item {
     id: root
     readonly property bool isVertical: Vars.pillPosition === "Left" || Vars.pillPosition === "Right"
     
+    FontLoader {
+        id: filledIconFont
+        source: "../theme/assets/MaterialSymbolsRounded-Filled.ttf"
+    }
+
     // Fixed layout footprint - never animates, no parent relayout
     Layout.preferredWidth: isVertical ? 40 : 100
     Layout.preferredHeight: isVertical ? 100 : 40
@@ -278,26 +283,37 @@ Item {
         scale: ma.pressed ? 0.92 : 1.0
         Behavior on scale { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
 
-        ColumnLayout {
-            anchors.centerIn: parent
-            spacing: 2
-            
+        Item {
+            anchors.fill: parent
+
+            // Outlined Icon
             Text {
+                anchors.centerIn: parent
                 text: btn.iconText
                 font.family: "Material Symbols Outlined"
-                font.pixelSize: 24
+                font.pixelSize: 36
                 color: btn.isActive ? Theme.on_primary : Theme.on_surface
+                opacity: btn.isActive ? 0.0 : 1.0
+                scale: btn.isActive ? 0.8 : 1.0
+                
                 Behavior on color { ColorAnimation { duration: Vars.animationDuration } }
-                Layout.alignment: Qt.AlignHCenter
+                Behavior on opacity { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.InOutQuad } }
+                Behavior on scale { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.OutBack } }
             }
+
+            // Filled Icon
             Text {
-                text: btn.labelText
-                font.family: Vars.fontFamily
-                font.pixelSize: 11
-                font.weight: 600
+                anchors.centerIn: parent
+                text: btn.iconText
+                font.family: filledIconFont.name
+                font.pixelSize: 36
                 color: btn.isActive ? Theme.on_primary : Theme.on_surface
+                opacity: btn.isActive ? 1.0 : 0.0
+                scale: btn.isActive ? 1.0 : 0.5
+                
                 Behavior on color { ColorAnimation { duration: Vars.animationDuration } }
-                Layout.alignment: Qt.AlignHCenter
+                Behavior on opacity { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.InOutQuad } }
+                Behavior on scale { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.OutBack } }
             }
         }
 

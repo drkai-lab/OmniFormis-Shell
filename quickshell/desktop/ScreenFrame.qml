@@ -20,6 +20,20 @@ PanelWindow {
     mask: Region {}
 
     Item {
+        id: rootContainer
+        anchors.fill: parent
+        opacity: 0.0
+        Component.onCompleted: layerEntranceAnim.start()
+        NumberAnimation {
+            id: layerEntranceAnim
+            target: rootContainer
+            property: "opacity"
+            to: 1.0
+            duration: 800
+            easing.type: Easing.OutCubic
+        }
+
+    Item {
         anchors.fill: parent
         layer.enabled: Vars.translucent
         opacity: Vars.translucent ? 0.85 : 1.0
@@ -63,5 +77,6 @@ PanelWindow {
             radius: Vars.radiusExtraLarge
             color: Theme.surface
         }
+    }
     }
 }

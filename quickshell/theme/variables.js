@@ -34,7 +34,7 @@ var wallpaperMaskColor = "surface_variant";
 var wallpaperMaskOffsetX = 0;
 var wallpaperMaskOffsetY = 0;
 
-var clockShape = "12SidedCookie";
+var clockShape = "6SidedCookie";
 var clockShowTicks = false;
 var clockShowCenterDot = true;
 
@@ -94,19 +94,31 @@ function getBottomRightRadius(style, pos, isGame, defRad) {
 }
 
 function fuzzyMatch(pattern, str) {
-    if (!pattern) return true;
-    if (!str) return false;
+    return fuzzyMatchScore(pattern, str) > 0;
+}
+
+function fuzzyMatchScore(pattern, str) {
+    if (!pattern) return 1;
+    if (!str) return 0;
     pattern = pattern.toLowerCase();
     str = str.toLowerCase();
     
     var patternIdx = 0;
+    var score = 0;
+    var firstMatchIndex = -1;
     for (var i = 0; i < str.length; i++) {
         if (str[i] === pattern[patternIdx]) {
+            if (firstMatchIndex === -1) firstMatchIndex = i;
+            score += (100 - i); // higher score for earlier matches
             patternIdx++;
-            if (patternIdx === pattern.length) return true;
+            if (patternIdx === pattern.length) {
+                // Bonus for matching at the beginning of the word
+                if (firstMatchIndex === 0) score += 500;
+                return score;
+            }
         }
     }
-    return false;
+    return 0;
 }
 
 var notificationHistory = [];

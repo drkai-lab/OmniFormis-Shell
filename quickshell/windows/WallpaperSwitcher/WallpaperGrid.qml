@@ -91,6 +91,25 @@ GridView {
         event.accepted = true;
     }
 
+    add: Transition {
+        ParallelAnimation {
+            NumberAnimation { property: "opacity"; from: 0; to: 1; duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customEmphasizedDecelerate }
+            NumberAnimation { property: "scale"; from: 0.8; to: 1; duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customEmphasizedDecelerate }
+        }
+    }
+    remove: Transition {
+        ParallelAnimation {
+            NumberAnimation { property: "opacity"; to: 0; duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customEmphasizedAccelerate }
+            NumberAnimation { property: "scale"; to: 0.8; duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customEmphasizedAccelerate }
+        }
+    }
+    displaced: Transition {
+        NumberAnimation { properties: "x,y"; duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customExpressiveSpatialSlow }
+    }
+    removeDisplaced: Transition {
+        NumberAnimation { properties: "x,y"; duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customExpressiveSpatialSlow }
+    }
+
     property bool vimKeysEnabled: false
     Process {
         id: vimKeysChecker

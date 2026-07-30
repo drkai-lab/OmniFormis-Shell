@@ -25,6 +25,8 @@ PanelWindow {
     implicitHeight: 750
     color: "transparent"
 
+
+
     property string pillPos: Vars.pillPosition || "Top"
     property int defaultEdgeMargin: (gameMode || Vars.panelStyle === "Framed" || Vars.panelStyle === "Flat") ? 0 : currentSpacingSmall
 
@@ -223,33 +225,19 @@ PanelWindow {
         
         property bool isShown: (!topWindow.suppressHover && (topWindow.pillHoverGrace || clockHoverArea.containsMouse || clockPill.isHovered) && !(launcherItem.expanded || controlCenterItem.expanded || wallpaperSwitcherItem.expanded || colorSchemeSwitcherItem.expanded || powerMenuItem.expanded || polkitItem.expanded || notificationPopupItem.expanded || emojiPickerItem.expanded || settingsAppItem.expanded || volumeOsdItem.isVisible || workspacesItem.overlayVisible))
         
-        property real targetMargin: {
-            if (!isShown) {
-                if (topWindow.pillPos === "Left" || topWindow.pillPos === "Right")
-                    return -clockPill.width - 20;
-                return -clockPill.height - 20;
-            }
-            return (Vars.panelStyle === "Framed" || Vars.panelStyle === "Flat") ? 0 : currentSpacingSmall;
-        }
-        
-        anchors.topMargin: (topWindow.pillPos === "Bottom" || topWindow.pillPos === "Right" || topWindow.pillPos === "Left") ? 0 : targetMargin
-        anchors.bottomMargin: topWindow.pillPos === "Bottom" ? targetMargin : 0
-        anchors.leftMargin: topWindow.pillPos === "Left" ? targetMargin : 0
-        anchors.rightMargin: topWindow.pillPos === "Right" ? targetMargin : 0
+        anchors.topMargin: (topWindow.pillPos === "Bottom" || topWindow.pillPos === "Right" || topWindow.pillPos === "Left") ? 0 : topWindow.defaultEdgeMargin
+        anchors.bottomMargin: topWindow.pillPos === "Bottom" ? topWindow.defaultEdgeMargin : 0
+        anchors.leftMargin: topWindow.pillPos === "Left" ? topWindow.defaultEdgeMargin : 0
+        anchors.rightMargin: topWindow.pillPos === "Right" ? topWindow.defaultEdgeMargin : 0
         
         opacity: isShown ? 1.0 : 0.0
         
-        Behavior on anchors.topMargin { enabled: !topWindow.gameMode; NumberAnimation { duration: currentAnimationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customExpressiveSpatialSlow } }
-        Behavior on anchors.bottomMargin { enabled: !topWindow.gameMode; NumberAnimation { duration: currentAnimationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customExpressiveSpatialSlow } }
-        Behavior on anchors.leftMargin { enabled: !topWindow.gameMode; NumberAnimation { duration: currentAnimationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customExpressiveSpatialSlow } }
-        Behavior on anchors.rightMargin { enabled: !topWindow.gameMode; NumberAnimation { duration: currentAnimationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customExpressiveSpatialSlow } }
-
         Behavior on opacity {
             enabled: !topWindow.gameMode
             NumberAnimation {
                 duration: currentAnimationDuration
                 easing.type: Easing.BezierSpline
-                easing.bezierCurve: Vars.customStandard
+                easing.bezierCurve: clockPill.isShown ? Vars.customEmphasizedDecelerate : Vars.customEmphasizedAccelerate
             }
         }
 

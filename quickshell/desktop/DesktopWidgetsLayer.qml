@@ -33,7 +33,18 @@ PanelWindow {
     }
 
     Item {
+        id: bgContainer
         anchors.fill: parent
+        opacity: 0.0
+        Component.onCompleted: layerEntranceAnim.start()
+        NumberAnimation {
+            id: layerEntranceAnim
+            target: bgContainer
+            property: "opacity"
+            to: 1.0
+            duration: 800
+            easing.type: Easing.OutCubic
+        }
 
         DesktopClock {
             id: clockWidget

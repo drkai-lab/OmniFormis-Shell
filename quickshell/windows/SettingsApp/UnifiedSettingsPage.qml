@@ -125,13 +125,15 @@ ColumnLayout {
         if (isQs && isLive) {
             try {
                 if (val === "true" || val === "false") {
-                    eval("Vars." + key + " = " + val + ";");
+                    Vars[key] = (val === "true");
                 } else if (!isNaN(Number(val)) && val !== "") {
-                    eval("Vars." + key + " = " + Number(val) + ";");
+                    Vars[key] = Number(val);
                 } else {
-                    eval("Vars." + key + " = '" + val + "';");
+                    Vars[key] = val;
                 }
-            } catch (e) {}
+            } catch (e) {
+                console.warn("SettingsApp: Failed to update live variable: " + key + " = " + val + ". Error: " + e);
+            }
         }
     }
 
@@ -265,6 +267,18 @@ ColumnLayout {
 
     ListModel {
         id: settingsModel
+        ListElement {
+            key: ""
+            type: ""
+            help: ""
+            enums: ""
+            val: ""
+            category: ""
+            source: ""
+            min: 0.0
+            max: 0.0
+            step: 0.0
+        }
     }
 
     ListView {
@@ -348,9 +362,6 @@ ColumnLayout {
         }
 
         delegate: UnifiedSettingsDelegate {
-            settingsList: settingsList
-            settingsModel: settingsModel
-            rootPage: rootPage
         }
     }
 

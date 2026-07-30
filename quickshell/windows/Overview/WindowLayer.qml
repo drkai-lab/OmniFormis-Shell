@@ -145,8 +145,19 @@ Item {
             y: initY
             width: Math.max(10, Math.round(Math.min(winW * scaleX, safeWsWidth)))
             height: Math.max(10, Math.round(Math.min(winH * scaleY, overviewPanel ? overviewPanel.wsHeight : 100)))
-            z: dragArea.drag.active ? 99999 : index
+            
+            property bool isAnimatingPos: xAnim.running || yAnim.running
+            z: (dragArea.drag.active || isAnimatingPos) ? 99999 : index
             clip: true
+
+            Behavior on x {
+                enabled: !root.gameMode && !dragArea.drag.active
+                NumberAnimation { id: xAnim; duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customExpressiveSpatialSlow }
+            }
+            Behavior on y {
+                enabled: !root.gameMode && !dragArea.drag.active
+                NumberAnimation { id: yAnim; duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customExpressiveSpatialSlow }
+            }
 
             property string windowAddress: address
 

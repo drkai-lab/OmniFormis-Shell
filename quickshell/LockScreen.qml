@@ -56,10 +56,10 @@ Item {
         
         onCompleted: (result) => {
             if (result === PamResult.Success) {
-                sessionLock.locked = false;
                 root._bufferedPassword = "";
                 root.authError = false;
-                root.statusMessage = "";
+                root.statusMessage = "Welcome back!";
+                root.successActive();
             } else {
                 root.statusMessage = "Authentication failed";
                 root.authError = true;
@@ -77,6 +77,7 @@ Item {
     }
 
     signal shakeActive()
+    signal successActive()
 
     function lockScreen() {
         sessionLock.locked = true;
@@ -94,7 +95,16 @@ Item {
 
         surface: Component {
             WlSessionLockSurface {
-                color: Theme.surface_container_lowest 
+                color: {
+                    var c = Vars.wallpaperMaskColor;
+                    if (c === "background") return Theme.background;
+                    if (c === "primary") return Theme.primary;
+                    if (c === "secondary") return Theme.secondary;
+                    if (c === "tertiary") return Theme.tertiary;
+                    if (c === "surface_variant") return Theme.surface_variant;
+                    if (c === "error") return Theme.error;
+                    return Theme.surface_container_lowest;
+                }
 
                 Component.onCompleted: {
                     card.passwordInput.forceActiveFocus();
@@ -112,15 +122,26 @@ Item {
                     height: 600
                     
                     property alias passwordInput: passwordInput
-                    property real entranceOffset: -100
                     property real entranceOpacity: 0
+                    property real entranceScale: 0.95
+                    property real shakeOffset: 0
+                    
+                    opacity: entranceOpacity
+                    scale: entranceScale
                     
                     Component.onCompleted: entranceAnim.start()
                     
                     ParallelAnimation {
                         id: entranceAnim
-                        NumberAnimation { target: card; property: "entranceOffset"; to: 0; duration: 1000; easing.type: Easing.OutBack; easing.overshoot: 1.2 }
-                        NumberAnimation { target: card; property: "entranceOpacity"; to: 1; duration: 800; easing.type: Easing.InOutQuad }
+                        NumberAnimation { target: card; property: "entranceOpacity"; to: 1; duration: Vars.animationDuration * 1.5; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customEmphasizedDecelerate }
+                        NumberAnimation { target: card; property: "entranceScale"; to: 1; duration: Vars.animationDuration * 1.5; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customEmphasizedDecelerate }
+                    }
+
+                    ParallelAnimation {
+                        id: exitAnim
+                        NumberAnimation { target: card; property: "entranceOpacity"; to: 0; duration: Vars.animationDuration * 1.5; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customEmphasizedAccelerate }
+                        NumberAnimation { target: card; property: "entranceScale"; to: 0.95; duration: Vars.animationDuration * 1.5; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customEmphasizedAccelerate }
+                        onFinished: sessionLock.locked = false;
                     }
 
                     Connections {
@@ -129,15 +150,20 @@ Item {
                             shakeAnim.start();
                             passwordInput.text = "";
                         }
+                        function onSuccessActive() {
+                            exitAnim.start();
+                        }
                     }
                     
                     SequentialAnimation {
                         id: shakeAnim
-                        NumberAnimation { target: passwordBox; property: "anchors.horizontalCenterOffset"; to: -12; duration: Vars.animationDuration }
-                        NumberAnimation { target: passwordBox; property: "anchors.horizontalCenterOffset"; to: 12; duration: Vars.animationDuration }
-                        NumberAnimation { target: passwordBox; property: "anchors.horizontalCenterOffset"; to: -8; duration: Vars.animationDuration }
-                        NumberAnimation { target: passwordBox; property: "anchors.horizontalCenterOffset"; to: 8; duration: Vars.animationDuration }
-                        NumberAnimation { target: passwordBox; property: "anchors.horizontalCenterOffset"; to: 0; duration: Vars.animationDuration }
+                        NumberAnimation { target: card; property: "shakeOffset"; to: -24; duration: 50; easing.type: Easing.OutSine }
+                        NumberAnimation { target: card; property: "shakeOffset"; to: 24; duration: 100; easing.type: Easing.InOutSine }
+                        NumberAnimation { target: card; property: "shakeOffset"; to: -20; duration: 100; easing.type: Easing.InOutSine }
+                        NumberAnimation { target: card; property: "shakeOffset"; to: 20; duration: 100; easing.type: Easing.InOutSine }
+                        NumberAnimation { target: card; property: "shakeOffset"; to: -12; duration: 100; easing.type: Easing.InOutSine }
+                        NumberAnimation { target: card; property: "shakeOffset"; to: 12; duration: 100; easing.type: Easing.InOutSine }
+                        NumberAnimation { target: card; property: "shakeOffset"; to: 0; duration: 50; easing.type: Easing.OutSine }
                     }
 
                     ColumnLayout {
@@ -150,8 +176,6 @@ Item {
                             Layout.alignment: Qt.AlignHCenter
                             Layout.preferredWidth: 300
                             Layout.preferredHeight: 300
-                            transform: Translate { y: card.entranceOffset }
-                            opacity: card.entranceOpacity
 
                             Widgets.AnalogClock {
                                 anchors.centerIn: parent
@@ -170,11 +194,12 @@ Item {
                             border.color: passwordInput.activeFocus ? Theme.primary : "transparent"
                             border.width: 2
                             clip: true
-                            transform: Translate { y: card.entranceOffset * 0.5 }
-                            opacity: card.entranceOpacity
+                            transform: Translate { x: card.shakeOffset }
+                            scale: passwordInput.activeFocus ? 1.04 : 1.0
 
-                            Behavior on color { ColorAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.m3Standard } }
-                            Behavior on border.color { ColorAnimation { duration: Vars.animationDuration } }
+                            Behavior on color { ColorAnimation { duration: 250; easing.type: Easing.OutCubic } }
+                            Behavior on border.color { ColorAnimation { duration: 250 } }
+                            Behavior on scale { NumberAnimation { duration: 300; easing.type: Easing.OutBack; easing.overshoot: 1.5 } }
 
                             TextInput {
                                 id: passwordInput
@@ -182,8 +207,25 @@ Item {
                                 opacity: 0
                                 focus: true
                                 echoMode: TextInput.Normal
+                                onTextChanged: {
+                                    if (text.length > 0 && root.authError) {
+                                        root.authError = false;
+                                        if (root.statusMessage === "Authentication failed" || root.statusMessage.startsWith("PAM error")) {
+                                            root.statusMessage = "";
+                                        }
+                                    }
+                                    let len = text.length;
+                                    while (shapeModel.count < len) {
+                                        shapeModel.append({});
+                                    }
+                                    while (shapeModel.count > len) {
+                                        shapeModel.remove(shapeModel.count - 1);
+                                    }
+                                }
                                 onAccepted: {
                                     if (text.length > 0) {
+                                        root.authError = false;
+                                        root.statusMessage = "Authenticating...";
                                         if (pamContext.active && pamContext.responseRequired) {
                                             pamContext.respond(text);
                                         } else {
@@ -208,6 +250,10 @@ Item {
                                 visible: passwordInput.text.length === 0 && !passwordInput.activeFocus
                             }
                             
+                            ListModel {
+                                id: shapeModel
+                            }
+                            
                             ListView {
                                 id: shapeList
                                 anchors.fill: parent
@@ -218,7 +264,25 @@ Item {
                                 
                                 onCountChanged: positionViewAtEnd()
                                 
-                                model: passwordInput.text.length
+                                model: shapeModel
+                                
+                                add: Transition {
+                                    ParallelAnimation {
+                                        NumberAnimation { property: "scale"; from: 0; to: 1; duration: 400; easing.type: Easing.OutBack; easing.overshoot: 2.5 }
+                                        NumberAnimation { property: "opacity"; from: 0; to: 1; duration: 300 }
+                                        NumberAnimation { property: "rotation"; from: -90; to: 0; duration: 400; easing.type: Easing.OutBack }
+                                    }
+                                }
+                                remove: Transition {
+                                    ParallelAnimation {
+                                        NumberAnimation { property: "scale"; to: 0; duration: 200; easing.type: Easing.InBack }
+                                        NumberAnimation { property: "opacity"; to: 0; duration: 200 }
+                                    }
+                                }
+                                displaced: Transition {
+                                    NumberAnimation { properties: "x,y"; duration: 300; easing.type: Easing.OutBack }
+                                }
+                                
                                 delegate: Item {
                                     width: 24
                                     height: 24
@@ -229,18 +293,10 @@ Item {
                                     property color c: root.authError ? Theme.error : Theme.primary
                                     
                                     Image {
+                                        id: shapeImage
                                         anchors.fill: parent
                                         sourceSize: Qt.size(48, 48)
                                         source: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><path d='" + m3.getPath(parent.shapeName) + "' fill='" + parent.c + "'/></svg>"
-                                        
-                                        scale: 0.01
-                                        Component.onCompleted: popAnim.start()
-                                        NumberAnimation on scale {
-                                            id: popAnim
-                                            to: 1.0
-                                            duration: 350
-                                            easing.type: Easing.OutBack
-                                        }
                                     }
                                 }
                             }

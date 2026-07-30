@@ -11,10 +11,8 @@ import "../../theme/variables.js" as Vars
 Item {
     id: delegateRoot
 
-    required property var settingsList
-    required property var settingsModel
-    required property var rootPage
-
+    property var settingsList: ListView.view
+    property var settingsModel: ListView.view.model
     required property int index
     required property var model
 
@@ -338,8 +336,10 @@ Item {
                 settingsModel.setProperty(delegateRoot.delegateIndex, "val", rounded.toString());
                 if (delegateRoot.itemSource === "Quickshell" || delegateRoot.itemSource === "quickshell") {
                     try {
-                        eval("Vars." + delegateRoot.itemKey + " = " + rounded + ";");
-                    } catch (e) {}
+                        Vars[delegateRoot.itemKey] = rounded;
+                    } catch (e) {
+                        console.warn("SettingsApp: Failed to update live slider variable: " + delegateRoot.itemKey + " = " + rounded + ". Error: " + e);
+                    }
                 }
             }
 

@@ -74,7 +74,18 @@ PanelWindow {
     property string currentWallpaper: wpSettings.currentWallpaper !== "" ? "file://" + wpSettings.currentWallpaper : ""
 
     Item {
+        id: bgContainer
         anchors.fill: parent
+        opacity: 0.0
+        Component.onCompleted: layerEntranceAnim.start()
+        NumberAnimation {
+            id: layerEntranceAnim
+            target: bgContainer
+            property: "opacity"
+            to: 1.0
+            duration: 800
+            easing.type: Easing.OutCubic
+        }
 
         M3Shapes {
             id: m3
@@ -347,5 +358,5 @@ PanelWindow {
                 }
             }
         }
-    } // Close Item parent
-} // Close PanelWindow
+    }
+}

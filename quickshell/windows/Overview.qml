@@ -130,7 +130,7 @@ Item {
             id: overviewPanel
             required property var modelData
 
-            property bool isAnimating: oAnim.running || wAnim.running || hAnim.running
+            property bool isAnimating: wAnim.running || hAnim.running
             visible: overviewContainer.visibleState || isAnimating
             color: "transparent"
 
@@ -235,7 +235,8 @@ Item {
 
                 color: Vars.translucent ? Qt.rgba(Theme.surface.r, Theme.surface.g, Theme.surface.b, 0.85) : Theme.surface
                 
-                opacity: overviewContainer.visibleState ? 1.0 : 0.0
+                opacity: overviewContainer.visibleState || panelBackground.width > 105 ? 1.0 : 0.0
+                visible: opacity > 0
                 
                 Behavior on topLeftRadius { enabled: !overviewContainer.gameMode; NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customExpressiveSpatialSlow } }
                 Behavior on topRightRadius { enabled: !overviewContainer.gameMode; NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customExpressiveSpatialSlow } }
@@ -260,15 +261,6 @@ Item {
                         easing.bezierCurve: Vars.customExpressiveSpatialSlow
                     }
                 }
-                Behavior on opacity {
-                    enabled: !overviewContainer.gameMode
-                    NumberAnimation {
-                        id: oAnim
-                        duration: Vars.animationDuration
-                        easing.type: Easing.BezierSpline
-                        easing.bezierCurve: overviewContainer.visibleState ? Vars.customEmphasizedDecelerate : Vars.customEmphasizedAccelerate
-                    }
-                }
 
                 Behavior on color {
                     enabled: !overviewContainer.gameMode
@@ -284,17 +276,19 @@ Item {
                     anchors.centerIn: parent
                     width: workspaceGrid.implicitWidth
                     height: workspaceGrid.implicitHeight
-                    
-                    scale: Math.min(panelBackground.width / panelBackground.targetWidth, panelBackground.height / panelBackground.targetHeight)
 
                     opacity: overviewContainer.visibleState ? 1.0 : 0.0
                     visible: opacity > 0
+                    clip: true
                     Behavior on opacity {
                         enabled: !overviewContainer.gameMode
-                        NumberAnimation {
-                            duration: Vars.animationDuration
-                            easing.type: Easing.BezierSpline
-                            easing.bezierCurve: overviewContainer.visibleState ? Vars.customEmphasizedDecelerate : Vars.customEmphasizedAccelerate
+                        SequentialAnimation {
+                            PauseAnimation { duration: overviewContainer.visibleState ? Vars.animationDuration : 0 }
+                            NumberAnimation {
+                                duration: Vars.animationDuration
+                                easing.type: Easing.BezierSpline
+                                easing.bezierCurve: overviewContainer.visibleState ? Vars.customEmphasizedDecelerate : Vars.customEmphasizedAccelerate
+                            }
                         }
                     }
 
