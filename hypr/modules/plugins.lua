@@ -18,8 +18,9 @@ local colors = Utils.colors
 local bg_hex = colors.background:sub(5) -- Extract RRGGBB from 0xAARRGGBB
 local tint_color = tonumber("0x1f" .. bg_hex, 16)
 
-if hl.plugin.hyprglass then
-    os.execute("notify-send 'Liquid Glass' 'Plugin API loaded successfully!'")
+local function configure_hyprglass()
+    if not hl.plugin.hyprglass then return false end
+    
     local hg = hl.plugin.hyprglass
 
     hg.preset("glass", {
@@ -57,9 +58,19 @@ if hl.plugin.hyprglass then
         adaptive_boost         = 0.2,
     })
 
+    local system_theme = "dark"
+    local handle = io.popen("gsettings get org.gnome.desktop.interface color-scheme 2>/dev/null")
+    if handle then
+        local result = handle:read("*a")
+        handle:close()
+        if result and result:match("prefer%-light") then
+            system_theme = "light"
+        end
+    end
+
     hg.config({
         enabled = (not vars.GameMode) and vars.liquidGlass,
-        default_theme = "dark",
+        default_theme = system_theme,
         default_preset = vars.liquidGlassPreset or "glass",
         tint_color = tint_color,
 
@@ -83,14 +94,22 @@ if hl.plugin.hyprglass then
         light = { brightness = 1.2 },
     })
 
-
-
     hg.preset("contrasted", {
         inherits = "high_contrast",
         contrast = 1.2,
         adaptive_dim = 1.5,
         dark = { tint_color = 0x02142aa9 },
     })
-else
-    os.execute("notify-send 'Liquid Glass Error' 'Plugin API NOT found in hl.plugin. Script bypassed configuration!'")
+    return true
+end
+
+if not configure_hyprglass() then
+    local retries = 0
+    local t
+    t = hl.timer(function()
+        if configure_hyprglass() or retries >= 50 then
+            t:set_enabled(false)
+        end
+        retries = retries + 1
+    end, { timeout = 100, type = "repeat" })
 end

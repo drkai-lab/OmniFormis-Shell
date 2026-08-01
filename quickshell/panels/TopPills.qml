@@ -3,6 +3,7 @@ import ".."
 import QtQuick.Layouts
 import Quickshell
 import Quickshell.Wayland
+import Quickshell.Hyprland
 import Quickshell.Io
 import "../theme/variables.js" as Vars
 
@@ -15,6 +16,7 @@ PanelWindow {
     exclusiveZone: 0
     WlrLayershell.namespace: "quickshell"
     WlrLayershell.layer: WlrLayer.Top
+    WlrLayershell.keyboardFocus: globalFocusGrab.active ? WlrKeyboardFocus.OnDemand : WlrKeyboardFocus.None
     anchors {
         top: true
         left: true
@@ -25,7 +27,24 @@ PanelWindow {
     implicitHeight: 750
     color: "transparent"
 
-
+    HyprlandFocusGrab {
+        id: globalFocusGrab
+        windows: [topWindow]
+        active: launcherItem.expanded || controlCenterItem.expanded || wallpaperSwitcherItem.expanded || colorSchemeSwitcherItem.expanded || powerMenuItem.expanded || polkitItem.expanded || emojiPickerItem.expanded || settingsAppItem.expanded
+        onCleared: {
+            if (active) {
+                Qt.callLater(() => {
+                    if (globalFocusGrab.active) {
+                        globalFocusGrab.active = false;
+                        globalFocusGrab.active = true;
+                        if (launcherItem.expanded) {
+                            launcherItem.forceSearchFocus();
+                        }
+                    }
+                });
+            }
+        }
+    }
 
     property string pillPos: Vars.pillPosition || "Top"
     property int defaultEdgeMargin: (Vars.panelStyle === "Framed" || Vars.panelStyle === "Flat" || (Vars.panelStyle === "Attached" && topWindow.gameMode)) ? 0 : currentSpacingSmall
@@ -120,7 +139,7 @@ PanelWindow {
             item: powerMenuItem.panelMask
         }
         Region {
-            item: polkitItem.panelMask
+            item: polkitItem.expanded ? polkitScrim : polkitItem.panelMask
         }
         Region {
             item: wallpaperSwitcherItem.panelMask
@@ -141,6 +160,9 @@ PanelWindow {
             item: volumeOsdItem.panelMask
         }
     }
+
+    // popupScrim removed — clicking outside a popup passes through to underlying windows
+    // and HyprlandFocusGrab.onCleared handles closing the popup automatically
 
     property bool suppressHover: false
     property bool pillHoverGrace: false
@@ -424,6 +446,25 @@ PanelWindow {
         }
     }
 
+    Rectangle {
+        id: polkitScrim
+        anchors.fill: parent
+        color: Qt.rgba(0, 0, 0, 0.5)
+        opacity: polkitItem.expanded ? 1.0 : 0.0
+        visible: opacity > 0
+        Behavior on opacity { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
+        
+        MouseArea {
+            anchors.fill: parent
+            acceptedButtons: Qt.AllButtons
+            onClicked: {
+                if (polkitItem.flow) {
+                    polkitItem.flow.cancelAuthenticationRequest();
+                }
+            }
+        }
+    }
+
     PolkitDialog {
         id: polkitItem
         gameMode: topWindow.gameMode
@@ -437,8 +478,8 @@ PanelWindow {
         anchors.bottomMargin: topWindow.pillPos === "Bottom" ? topWindow.defaultEdgeMargin : 0
         anchors.leftMargin: topWindow.pillPos === "Left" ? topWindow.defaultEdgeMargin : 0
         anchors.rightMargin: topWindow.pillPos === "Right" ? topWindow.defaultEdgeMargin : 0
-        width: 100
-        height: 40
+        width: polkitItem.panel.width
+        height: polkitItem.panel.height
         focusWindow: topWindow
 
         onExpandedChanged: {

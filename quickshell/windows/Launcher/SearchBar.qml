@@ -45,6 +45,19 @@ Rectangle {
             focus: root.expanded
             selectByMouse: true
 
+            property bool _deliberateFocusLoss: false
+
+            onActiveFocusChanged: {
+                if (!activeFocus && root.expanded && !_deliberateFocusLoss) {
+                    Qt.callLater(() => {
+                        if (root.expanded && !searchInput.activeFocus) {
+                            searchInput.forceActiveFocus();
+                        }
+                    });
+                }
+                if (activeFocus) _deliberateFocusLoss = false;
+            }
+
             Text {
                 text: "Search apps..."
                 font.family: Vars.fontFamily
@@ -54,14 +67,17 @@ Rectangle {
             }
 
             Keys.onDownPressed: (event) => {
+                searchInput._deliberateFocusLoss = true;
                 root.downPressed();
                 event.accepted = true;
             }
             Keys.onReturnPressed: (event) => {
+                searchInput._deliberateFocusLoss = true;
                 root.returnPressed();
                 event.accepted = true;
             }
             Keys.onEscapePressed: (event) => {
+                searchInput._deliberateFocusLoss = true;
                 root.escapePressed();
                 event.accepted = true;
             }

@@ -14,13 +14,6 @@ import Quickshell.Io
 Item {
     id: overviewContainer
     property bool visibleState: false
-    onVisibleStateChanged: {
-        if (visibleState) {
-            MorphState.notifyOpened(panelBackground.targetWidth, panelBackground.targetHeight);
-        } else {
-            MorphState.notifyClosed();
-        }
-    }
     property bool gameMode: Vars.gameMode !== undefined ? Vars.gameMode : false
     Timer {
         interval: 100
@@ -138,6 +131,18 @@ Item {
             required property var modelData
 
             property bool isAnimating: wAnim.running || hAnim.running
+            
+            Connections {
+                target: overviewContainer
+                function onVisibleStateChanged() {
+                    if (overviewContainer.visibleState) {
+                        MorphState.notifyOpened(panelBackground.targetWidth, panelBackground.targetHeight, panelBackground.defaultRadius, panelBackground);
+                    } else {
+                        MorphState.notifyClosed();
+                    }
+                }
+            }
+            
             visible: true
             color: "transparent"
 
@@ -204,9 +209,10 @@ Item {
             // === OVERVIEW PANEL ===
             Rectangle {
                 id: panelBackground
+                property bool isBackgroundActive: overviewContainer.visibleState || (MorphState.openCount === 0 && MorphState.activeItem === panelBackground && panelBackground.width > 105)
                 layer.enabled: true
                 layer.effect: MultiEffect {
-                    shadowEnabled: !overviewContainer.gameMode
+                    shadowEnabled: !overviewContainer.gameMode && panelBackground.isBackgroundActive
                     shadowBlur: 1.0
                     shadowColor: Qt.rgba(0, 0, 0, 0.25)
                     shadowVerticalOffset: 4
@@ -234,8 +240,16 @@ Item {
 
                 width: overviewContainer.visibleState ? (touchesEdges ? innerMaxWidth : targetWidth) : (MorphState.anyExpanded ? MorphState.targetWidth : 100)
                 height: overviewContainer.visibleState ? targetHeight : (MorphState.anyExpanded ? MorphState.targetHeight : 40)
+                
+                onTargetHeightChanged: {
+                    if (overviewContainer.visibleState) MorphState.updateDimensions(panelBackground.targetWidth, panelBackground.targetHeight, panelBackground.defaultRadius);
+                }
+                
+                onTargetWidthChanged: {
+                    if (overviewContainer.visibleState) MorphState.updateDimensions(panelBackground.targetWidth, panelBackground.targetHeight, panelBackground.defaultRadius);
+                }
 
-                property real defaultRadius: overviewContainer.visibleState ? Vars.radiusExtraLarge : height / 2
+                property real defaultRadius: overviewContainer.visibleState ? Vars.radiusExtraLarge : (MorphState.anyExpanded ? MorphState.targetRadius : height / 2)
                 property real innerFrameRadius: Math.max(0, Vars.radiusExtraLarge - Vars.spacingSmall)
 
                 topLeftRadius: touchesEdges ? innerFrameRadius : Vars.getTopLeftRadius(Vars.panelStyle, Vars.pillPosition, false, defaultRadius)
@@ -243,10 +257,10 @@ Item {
                 bottomLeftRadius: touchesEdges ? 0 : Vars.getBottomLeftRadius(Vars.panelStyle, Vars.pillPosition, false, defaultRadius)
                 bottomRightRadius: touchesEdges ? 0 : Vars.getBottomRightRadius(Vars.panelStyle, Vars.pillPosition, false, defaultRadius)
 
-                color: Vars.translucent ? Qt.rgba(Theme.surface.r, Theme.surface.g, Theme.surface.b, 0.85) : Theme.surface
+                color: isBackgroundActive ? (Vars.translucent ? Qt.rgba(Theme.surface.r, Theme.surface.g, Theme.surface.b, 0.85) : Theme.surface) : "transparent"
                 
-                opacity: overviewContainer.visibleState || panelBackground.width > 105 ? 1.0 : 0.0
-                visible: opacity > 0
+                opacity: isBackgroundActive || expandedUI.opacity > 0 ? 1.0 : 0.0
+                // visible: opacity > 0 // Removed to preserve Behavior when hidden
                 
                 Behavior on topLeftRadius { enabled: !overviewContainer.gameMode; NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customExpressiveSpatialSlow } }
                 Behavior on topRightRadius { enabled: !overviewContainer.gameMode; NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customExpressiveSpatialSlow } }
@@ -290,13 +304,10 @@ Item {
                     clip: true
                     Behavior on opacity {
                         enabled: !overviewContainer.gameMode
-                        SequentialAnimation {
-                            PauseAnimation { duration: overviewContainer.visibleState ? Vars.animationDuration : 0 }
-                            NumberAnimation {
-                                duration: Vars.animationDuration
-                                easing.type: Easing.BezierSpline
-                                easing.bezierCurve: overviewContainer.visibleState ? Vars.customEmphasizedDecelerate : Vars.customEmphasizedAccelerate
-                            }
+                        NumberAnimation {
+                            duration: Vars.animationDuration
+                            easing.type: Easing.BezierSpline
+                            easing.bezierCurve: overviewContainer.visibleState ? Vars.customEmphasizedDecelerate : Vars.customEmphasizedAccelerate
                         }
                     }
 

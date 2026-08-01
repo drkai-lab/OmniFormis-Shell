@@ -56,11 +56,9 @@ Singleton {
                 isPeaceMode: root.peaceMode
             });
 
-            if (root.peaceMode) {
-                // In peace mode, push directly to history, but don't add to root.notifications
-                // so no popup is shown.
-                Vars.pushNotification(data);
-            } else {
+            Vars.pushNotification(data);
+            
+            if (!root.peaceMode) {
                 root.notifications = [data, ...root.notifications];
             }
         }
@@ -86,5 +84,9 @@ Singleton {
                 n.destroy();
             }
         }
+    }
+
+    function clearPopups(): void {
+        root.notifications = [];
     }
 }

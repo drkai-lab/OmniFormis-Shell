@@ -3,7 +3,12 @@ LOG_FILE="/tmp/qs_lens_debug.log"
 echo "======================================" >> "$LOG_FILE"
 echo "$(date '+%Y-%m-%d %H:%M:%S') - Starting HTML Injection Google Lens script" >> "$LOG_FILE"
 
-IMAGE="/tmp/qs_lens.png"
+SCR_NAME=$1
+IMAGE="/tmp/qs_lens_${SCR_NAME}.png"
+if [ ! -f "$IMAGE" ]; then
+    # Fallback in case screen name wasn't passed or fallback logic
+    IMAGE="/tmp/qs_lens.png"
+fi
 if [ ! -f "$IMAGE" ]; then
     echo "ERROR: Image $IMAGE does not exist!" >> "$LOG_FILE"
     exit 1

@@ -26,6 +26,20 @@ end
 
 -- See https://wiki.hypr.land/Configuring/Basics/Monitors/
 hl.monitor({
+    output   = "HEADLESS-1",
+    mode     = "2388x1668@60",
+    position = "auto",
+    scale    = "1",
+})
+
+hl.monitor({
+    output   = "FALLBACK",
+    mode     = "1920x1080@60",
+    position = "auto",
+    scale    = "1",
+})
+
+hl.monitor({
     output   = "",
     mode     = "preferred",
     position = "auto",

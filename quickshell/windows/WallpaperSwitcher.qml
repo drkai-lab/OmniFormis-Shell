@@ -38,7 +38,7 @@ Item {
     visible: opacity > 0
 
     property string wallpaperDir: settings.wallpaperDir || (Quickshell.env("HOME") + "/Pictures/Wallpapers")
-    property string currentWallpaper: ""
+    property string currentWallpaper: settings.currentWallpaper
 
     Settings {
         id: settings
@@ -46,15 +46,14 @@ Item {
         property string matugenScheme: "scheme-tonal-spot"
         property string wallpaperDir: ""
         property string currentWallpaper: ""
+        property string awwwTransitionType: "wipe"
+        property string awwwTransitionStep: "90"
+        property string awwwTransitionAngle: "30"
     }
 
     signal closeRequested
 
-    HyprlandFocusGrab {
-        active: root.expanded && root.focusWindow !== null
-        windows: root.focusWindow ? [root.focusWindow] : []
-        onCleared: root.expanded = false
-    }
+
 
     onExpandedChanged: {
         if (contentLoader.item && contentLoader.item.controls) {
@@ -62,12 +61,12 @@ Item {
                 MorphState.notifyClosed();
                 contentLoader.item.controls.clearSearch();
             } else {
-                MorphState.notifyOpened(1100, 650);
+                MorphState.notifyOpened(1100, 650, panel.targetRad, panel);
                 contentLoader.item.controls.focusSearch();
             }
         } else {
             if (!expanded) MorphState.notifyClosed();
-            else MorphState.notifyOpened(1100, 650);
+            else MorphState.notifyOpened(1100, 650, panel.targetRad, panel);
         }
     }
 
@@ -80,9 +79,10 @@ Item {
 
     Rectangle {
         id: panel
+        property bool isBackgroundActive: root.expanded || (MorphState.openCount === 0 && MorphState.activeItem === panel && panel.width > 105)
         layer.enabled: true
         layer.effect: MultiEffect {
-            shadowEnabled: !root.gameMode
+            shadowEnabled: !root.gameMode && panel.isBackgroundActive
             shadowBlur: 1.0
             shadowColor: Qt.rgba(0, 0, 0, 0.25)
             shadowVerticalOffset: 4
@@ -98,14 +98,14 @@ Item {
         width: root.expanded ? 1100 : (MorphState.anyExpanded ? MorphState.targetWidth : 100)
         height: root.expanded ? 650 : (MorphState.anyExpanded ? MorphState.targetHeight : 40)
 
-        color: Vars.translucent ? Qt.rgba(Theme.surface.r, Theme.surface.g, Theme.surface.b, 0.85) : Theme.surface
-        property real targetRad: root.expanded ? Vars.radiusExtraLarge : height / 2
+        color: isBackgroundActive ? (Vars.translucent ? Qt.rgba(Theme.surface.r, Theme.surface.g, Theme.surface.b, 0.85) : Theme.surface) : "transparent"
+        property real targetRad: root.expanded ? Vars.radiusExtraLarge : (MorphState.anyExpanded ? MorphState.targetRadius : height / 2)
         topLeftRadius: Vars.getTopLeftRadius(Vars.panelStyle, Vars.pillPosition, false, targetRad)
         topRightRadius: Vars.getTopRightRadius(Vars.panelStyle, Vars.pillPosition, false, targetRad)
         bottomLeftRadius: Vars.getBottomLeftRadius(Vars.panelStyle, Vars.pillPosition, false, targetRad)
         bottomRightRadius: Vars.getBottomRightRadius(Vars.panelStyle, Vars.pillPosition, false, targetRad)
 
-        opacity: root.expanded || panel.width > 105 ? 1.0 : 0.0
+        opacity: isBackgroundActive || innerUI.opacity > 0 ? 1.0 : 0.0
         visible: opacity > 0
 
         Behavior on topLeftRadius { enabled: !root.gameMode; NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customExpressiveSpatialSlow } }
@@ -131,22 +131,20 @@ Item {
         }
 
         Item {
-            anchors.fill: parent
-            anchors.margins: Vars.spacingLarge
+            id: innerUI
+            anchors.centerIn: parent
+            width: Math.max(1, parent.width - Vars.spacingLarge * 2)
+            height: Math.max(1, parent.height - Vars.spacingLarge * 2)
 
             opacity: root.expanded ? 1.0 : 0.0
             visible: opacity > 0
+            clip: true
             Behavior on opacity {
                 enabled: !root.gameMode
-                SequentialAnimation {
-                    PauseAnimation {
-                        duration: root.expanded ? Vars.animationDuration : 0
-                    }
-                    NumberAnimation {
-                        duration: root.expanded ? Vars.animationDuration : Vars.animationDuration
-                        easing.type: Easing.BezierSpline
-                        easing.bezierCurve: root.expanded ? Vars.customEmphasizedDecelerate : Vars.customEmphasizedAccelerate
-                    }
+                NumberAnimation {
+                    duration: Vars.animationDuration
+                    easing.type: Easing.BezierSpline
+                    easing.bezierCurve: root.expanded ? Vars.customEmphasizedDecelerate : Vars.customEmphasizedAccelerate
                 }
             }
 
@@ -154,11 +152,14 @@ Item {
                 id: contentLoader
                 anchors.fill: parent
                 active: root.expanded || parent.opacity > 0
-                asynchronous: true
+                asynchronous: false
                 sourceComponent: Component {
                     Item {
                         property alias controls: controls
-                        anchors.fill: parent
+                        width: 1052
+                        height: parent.height
+                        anchors.left: parent.left
+                        anchors.top: parent.top
 
                         ColumnLayout {
                             anchors.fill: parent
@@ -212,7 +213,14 @@ Item {
 
                         Process {
                             id: loadWallpapersProc
-                            command: ["find", root.wallpaperDir.replace(/^~/, Quickshell.env("HOME")), "-maxdepth", "2", "-type", "f", "-regextype", "posix-extended", "-regex", ".*\\.(jpg|jpeg|png|gif)$"]
+                            property string defaultDir: Quickshell.env("HOME") + "/Pictures/Wallpapers"
+                            property string resolvedDir: root.wallpaperDir.replace(/^~/, Quickshell.env("HOME"))
+                            // Validate dir with -d, fall back to default if it doesn't exist
+                            command: ["bash", "-c",
+                                "DIR='" + resolvedDir.replace(/'/g, "'\\''") + "'; " +
+                                "if [ ! -d \"$DIR\" ]; then DIR='" + defaultDir + "'; fi; " +
+                                "find \"$DIR\" -maxdepth 4 -type f | grep -iE '\\.(jpg|jpeg|png|gif)$'"
+                            ]
                             running: true
                             stdout: StdioCollector {
                                 onStreamFinished: {
@@ -229,11 +237,29 @@ Item {
                                             });
                                         }
                                     }
+
+                                    // If 0 wallpapers found and we had a stale stored dir, clear it
+                                    if (items.length === 0 && settings.wallpaperDir !== "") {
+                                        settings.wallpaperDir = "";
+                                    }
+                                    // Also clear stale currentWallpaper if it references a missing path
+                                    if (settings.currentWallpaper !== "" && settings.currentWallpaper.indexOf("/wallpapers/") !== -1) {
+                                        settings.currentWallpaper = "";
+                                    }
+
                                     items.sort((a, b) => a.fileName.toLowerCase().localeCompare(b.fileName.toLowerCase()));
                                     for (var j = 0; j < items.length; j++) {
                                         wallpaperModel.append(items[j]);
                                     }
                                     sortFilterProxyModel.updateVisualGrid();
+                                }
+                            }
+                            stderr: StdioCollector {
+                                onStreamFinished: {
+                                    var errText = this.text.trim();
+                                    if (errText.length > 0) {
+                                        console.log("WallpaperSwitcher find stderr: " + errText);
+                                    }
                                 }
                             }
                         }
@@ -265,11 +291,23 @@ Item {
 
     function executeWallpaperChange(filePath) {
         console.log("[USER ACTION] Wallpaper selected: " + filePath);
-        root.currentWallpaper = filePath;
         settings.currentWallpaper = filePath;
 
         var matugenSchemeArg = (settings.matugenScheme === "scheme-auto" || settings.matugenScheme === "auto") ? "scheme-tonal-spot" : (settings.matugenScheme || "scheme-tonal-spot");
-        matugenProc.command = ["matugen", "image", filePath, "-m", "light", "-t", matugenSchemeArg, "--source-color-index", "0"];
+        
+        // Execute awww immediately via detached process
+        var safePath = filePath.replace(/'/g, "'\\''");
+        var trans = settings.awwwTransitionType || "wipe";
+        var step = settings.awwwTransitionStep || "90";
+        var angle = settings.awwwTransitionAngle || "30";
+        Quickshell.execDetached({
+            command: ["bash", "-c", "awww img '" + safePath + "' --transition-type " + trans + " --transition-angle " + angle + " --transition-step " + step]
+        });
+
+        // Run matugen via the Process component
+        var cmd = "matugen image '" + safePath + "' -m light -t " + matugenSchemeArg + " --source-color-index 0";
+                  
+        matugenProc.command = ["bash", "-c", cmd];
         matugenProc.running = true;
     }
 

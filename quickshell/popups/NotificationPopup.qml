@@ -44,7 +44,7 @@ Item {
     }
 
     onExpandedChanged: {
-        if (expanded) MorphState.notifyOpened(380, contentColumn.implicitHeight + 24);
+        if (expanded) MorphState.notifyOpened(380, panel.targetHeight, panel.targetRad, panel);
         else MorphState.notifyClosed();
     }
 
@@ -70,9 +70,10 @@ Item {
     // The visual panel that morphs from clock pill
     Rectangle {
         id: panel
+        property bool isBackgroundActive: root.expanded || (MorphState.openCount === 0 && MorphState.activeItem === panel && panel.width > 105)
         layer.enabled: true
         layer.effect: MultiEffect {
-            shadowEnabled: !root.gameMode
+            shadowEnabled: !root.gameMode && panel.isBackgroundActive
             shadowBlur: 1.0
             shadowColor: Qt.rgba(0, 0, 0, 0.25)
             shadowVerticalOffset: 4
@@ -85,18 +86,23 @@ Item {
         anchors.horizontalCenter: (Vars.pillPosition === "Left" || Vars.pillPosition === "Right") ? undefined : parent.horizontalCenter
         anchors.verticalCenter: (Vars.pillPosition === "Left" || Vars.pillPosition === "Right") ? parent.verticalCenter : undefined
 
+        property real targetHeight: root.expanded ? contentColumn.implicitHeight + 24 : (MorphState.anyExpanded ? MorphState.targetHeight : 40)
         width: root.expanded ? 380 : (MorphState.anyExpanded ? MorphState.targetWidth : 100)
-        height: root.expanded ? contentColumn.implicitHeight + 24 : (MorphState.anyExpanded ? MorphState.targetHeight : 40)
+        height: targetHeight
 
-        color: Vars.translucent ? Qt.rgba(Theme.surface.r, Theme.surface.g, Theme.surface.b, 0.85) : Theme.surface
-        property real targetRad: root.expanded ? Vars.radiusExtraLarge : height / 2
+        onTargetHeightChanged: {
+            if (root.expanded) MorphState.updateDimensions(380, targetHeight, targetRad);
+        }
+
+        color: isBackgroundActive ? (Vars.translucent ? Qt.rgba(Theme.surface.r, Theme.surface.g, Theme.surface.b, 0.85) : Theme.surface) : "transparent"
+        property real targetRad: root.expanded ? Vars.radiusExtraLarge : (MorphState.anyExpanded ? MorphState.targetRadius : height / 2)
         topLeftRadius: Vars.getTopLeftRadius(Vars.panelStyle, Vars.pillPosition, false, targetRad)
         topRightRadius: Vars.getTopRightRadius(Vars.panelStyle, Vars.pillPosition, false, targetRad)
         bottomLeftRadius: Vars.getBottomLeftRadius(Vars.panelStyle, Vars.pillPosition, false, targetRad)
         bottomRightRadius: Vars.getBottomRightRadius(Vars.panelStyle, Vars.pillPosition, false, targetRad)
 
-        opacity: root.expanded || panel.width > 105 ? 1.0 : 0.0
-        visible: opacity > 0
+        opacity: isBackgroundActive || innerUI.opacity > 0 ? 1.0 : 0.0
+        // visible: opacity > 0 // Removed to preserve Behavior when hidden
 
         Behavior on topLeftRadius {
             enabled: !root.gameMode
@@ -149,21 +155,17 @@ Item {
 
         // EXPANDED UI
         Item {
+            id: innerUI
             anchors.fill: parent
             anchors.margins: 12
 
             opacity: root.expanded ? 1.0 : 0.0
             visible: opacity > 0
             Behavior on opacity {
-                SequentialAnimation {
-                    PauseAnimation {
-                        duration: root.expanded ? Vars.animationDuration : 0
-                    }
-                    NumberAnimation {
-                        duration: root.expanded ? Vars.animationDuration : Vars.animationDuration
-                        easing.type: Easing.BezierSpline
-                        easing.bezierCurve: root.expanded ? Vars.customEmphasizedDecelerate : Vars.customEmphasizedAccelerate
-                    }
+                NumberAnimation {
+                    duration: Vars.animationDuration
+                    easing.type: Easing.BezierSpline
+                    easing.bezierCurve: root.expanded ? Vars.customEmphasizedDecelerate : Vars.customEmphasizedAccelerate
                 }
             }
 
@@ -176,12 +178,13 @@ Item {
 
                 // Show only the latest notification
                 Repeater {
-                    model: root.hasNotifications ? [root.notifications[0]] : []
+                    model: root.hasNotifications ? 1 : 0
 
                     NotificationCard {
                         Layout.fillWidth: true
                         isPopup: true
                         fontName: Vars.fontFamily
+                        modelData: root.hasNotifications ? root.notifications[0] : null
                         onPopupRightClicked: {
                             root.expanded = false;
                         }

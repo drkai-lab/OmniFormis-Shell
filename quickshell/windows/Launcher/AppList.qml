@@ -26,6 +26,7 @@ ListView {
     signal escapePressed()
     signal focusSearchBar()
     signal openSettingsRequested()
+    signal requestSearchText(string text)
 
     clip: true
     spacing: 4
@@ -35,7 +36,7 @@ ListView {
     maximumFlickVelocity: Vars.maximumFlickVelocity
 
 
-    focus: true
+    focus: false
     // keyNavigationEnabled: true - removed to stop auto-scroll on hover
     highlightFollowsCurrentItem: false
     // Removed onCurrentIndexChanged: positionViewAtIndex(...) to avoid fighting mouse flicking
@@ -222,43 +223,51 @@ ListView {
         property var itemData: typeof modelData !== 'undefined' ? modelData : model
 
         function triggerSelection() {
-            if (itemData.command[0] === "INTERNAL:SETTINGS") {
+            var cmdArray = [];
+            try {
+                cmdArray = JSON.parse(itemData.commandStr);
+            } catch(e) {
+                console.log("Failed to parse commandStr: " + itemData.commandStr);
+                return;
+            }
+
+            if (cmdArray[0] === "INTERNAL:SETTINGS") {
                 root.openSettingsRequested();
                 root.escapePressed();
                 return;
             }
-            if (itemData.command[0] === "INTERNAL:CLIPBOARD") {
-                root.searchText = "/clipboard ";
+            if (cmdArray[0] === "INTERNAL:CLIPBOARD") {
+                root.requestSearchText("/clipboard ");
                 root.focusSearchBar();
                 return;
             }
-            if (itemData.command[0] === "INTERNAL:EMOJI") {
-                root.searchText = "/emoji ";
+            if (cmdArray[0] === "INTERNAL:EMOJI") {
+                root.requestSearchText("/emoji ");
                 root.focusSearchBar();
                 return;
             }
-            if (itemData.command[0] === "INTERNAL:CALCULATOR") {
-                root.searchText = "=";
+            if (cmdArray[0] === "INTERNAL:CALCULATOR") {
+                root.requestSearchText("=");
                 root.focusSearchBar();
                 return;
             }
-            if (itemData.command[0] === "INTERNAL:WEB_SEARCH") {
-                root.searchText = "/web ";
+            if (cmdArray[0] === "INTERNAL:WEB_SEARCH") {
+                root.requestSearchText("/web ");
                 root.focusSearchBar();
                 return;
             }
-            if (itemData.command[0] === "INTERNAL:CLEAR_CLIPBOARD") {
+            if (cmdArray[0] === "INTERNAL:CLEAR_CLIPBOARD") {
                 if (root.launcherModel) {
                     root.launcherModel.clearClipboard();
                     var oldText = root.searchText;
-                    root.searchText = "";
-                    root.searchText = oldText;
+                    root.requestSearchText("");
+                    root.requestSearchText(oldText);
                 }
                 return;
             }
             
             Quickshell.execDetached({
-                command: typeof itemData.command === 'object' && typeof itemData.command.length !== 'undefined' ? Array.from(itemData.command) : itemData.command,
+                command: cmdArray,
                 workingDirectory: itemData.workingDirectory
             });
             root.appLaunched();
@@ -284,8 +293,8 @@ ListView {
             if (itemData.isClipboard && root.launcherModel) {
                 root.launcherModel.deleteClipboardItem(itemData.clipId, itemData.fullLine);
                 var oldText = root.searchText;
-                root.searchText = "";
-                root.searchText = oldText;
+                root.requestSearchText("");
+                root.requestSearchText(oldText);
             }
         }
 

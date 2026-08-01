@@ -20,22 +20,7 @@ Item {
         cliphistProc.running = true;
     }
 
-    function clearClipboard() {
-        Quickshell.execDetached({ command: ["cliphist", "wipe"] });
-        clipboardModel = [];
-    }
 
-    function deleteClipboardItem(clipId, fullLine) {
-        Quickshell.execDetached({
-            command: ["bash", "-c", "echo -e '" + fullLine.replace(/'/g, "'\\''") + "' | cliphist delete"]
-        });
-        var newModel = clipboardModel.slice();
-        var idx = newModel.findIndex(x => x.clipId === clipId);
-        if (idx !== -1) {
-            newModel.splice(idx, 1);
-            clipboardModel = newModel;
-        }
-    }
 
     Process {
         id: emojiLoader
@@ -60,6 +45,7 @@ Item {
                             arr.push({
                                 name: line,
                                 command: ["wl-copy", glyph],
+                                commandStr: JSON.stringify(["wl-copy", glyph]),
                                 workingDirectory: Quickshell.env("HOME"),
                                 icon: "",
                                 isFile: false,
@@ -90,6 +76,7 @@ Item {
                         arr.push({
                             name: name,
                             command: ["xdg-open", path],
+                            commandStr: JSON.stringify(["xdg-open", path]),
                             workingDirectory: Quickshell.env("HOME"),
                             icon: "",
                             isFile: true,
@@ -144,7 +131,8 @@ Item {
                                 name: dispName,
                                 clipId: id,
                                 fullLine: line,
-                                command: ["bash", "-c", "cliphist decode " + id + " | wl-copy"],
+                                command: ["bash", "-c", "cliphist decode <<< " + JSON.stringify(line) + " | wl-copy"],
+                                commandStr: JSON.stringify(["bash", "-c", "cliphist decode <<< " + JSON.stringify(line) + " | wl-copy"]),
                                 workingDirectory: Quickshell.env("HOME"),
                                 icon: "",
                                 isFile: false,
@@ -157,6 +145,39 @@ Item {
                     }
                 }
                 rootModel.clipboardModel = arr;
+            }
+        }
+    }
+
+    function clearClipboard() {
+        cliphistWipeProc.running = true;
+    }
+
+    function deleteClipboardItem(id, fullLine) {
+        cliphistDeleteProc.command = ["bash", "-c", "cliphist delete <<< " + JSON.stringify(fullLine)];
+        cliphistDeleteProc.running = true;
+    }
+
+    Process {
+        id: cliphistWipeProc
+        command: ["cliphist", "wipe"]
+        running: false
+        onRunningChanged: {
+            if (!running) {
+                // Refresh clipboard
+                cliphistProc.running = true;
+            }
+        }
+    }
+
+    Process {
+        id: cliphistDeleteProc
+        command: []
+        running: false
+        onRunningChanged: {
+            if (!running) {
+                // Refresh clipboard
+                cliphistProc.running = true;
             }
         }
     }
@@ -202,6 +223,7 @@ Item {
                     var toAdd = {
                         name: targetItem.name || "",
                         command: targetItem.command || [],
+                        commandStr: targetItem.commandStr || "",
                         workingDirectory: targetItem.workingDirectory || "",
                         icon: targetItem.icon || "",
                         isFile: targetItem.isFile || false,
@@ -256,6 +278,7 @@ Item {
                             return [{
                                 name: result.toString(),
                                 command: ["wl-copy", result.toString()],
+                                commandStr: JSON.stringify(["wl-copy", result.toString()]),
                                 workingDirectory: Quickshell.env("HOME"),
                                 icon: "",
                                 isFile: false,
@@ -273,6 +296,7 @@ Item {
             {
                 name: "Settings",
                 command: ["INTERNAL:SETTINGS"],
+                commandStr: JSON.stringify(["INTERNAL:SETTINGS"]),
                 workingDirectory: Quickshell.env("HOME"),
                 icon: "",
                 isFile: false,
@@ -282,6 +306,7 @@ Item {
             {
                 name: "Clipboard Manager",
                 command: ["INTERNAL:CLIPBOARD"],
+                commandStr: JSON.stringify(["INTERNAL:CLIPBOARD"]),
                 workingDirectory: Quickshell.env("HOME"),
                 icon: "",
                 isFile: false,
@@ -291,6 +316,7 @@ Item {
             {
                 name: "Emoji Picker",
                 command: ["INTERNAL:EMOJI"],
+                commandStr: JSON.stringify(["INTERNAL:EMOJI"]),
                 workingDirectory: Quickshell.env("HOME"),
                 icon: "",
                 isFile: false,
@@ -300,6 +326,7 @@ Item {
             {
                 name: "Calculator",
                 command: ["INTERNAL:CALCULATOR"],
+                commandStr: JSON.stringify(["INTERNAL:CALCULATOR"]),
                 workingDirectory: Quickshell.env("HOME"),
                 icon: "",
                 isFile: false,
@@ -309,6 +336,7 @@ Item {
             {
                 name: "Search the Web",
                 command: ["INTERNAL:WEB_SEARCH"],
+                commandStr: JSON.stringify(["INTERNAL:WEB_SEARCH"]),
                 workingDirectory: Quickshell.env("HOME"),
                 icon: "",
                 isFile: false,
@@ -352,6 +380,7 @@ Item {
                 finalResults.unshift({
                     name: "Clear Clipboard History",
                     command: ["INTERNAL:CLEAR_CLIPBOARD"],
+                    commandStr: JSON.stringify(["INTERNAL:CLEAR_CLIPBOARD"]),
                     workingDirectory: Quickshell.env("HOME"),
                     icon: "",
                     isFile: false,
@@ -390,6 +419,7 @@ Item {
                         name: rApp.name || "Unknown",
                         icon: iconStr,
                         command: finalCommand,
+                        commandStr: JSON.stringify(finalCommand),
                         workingDirectory: rApp.workingDirectory || Quickshell.env("HOME"),
                         isFile: false,
                         isDir: false,

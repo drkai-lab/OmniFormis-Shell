@@ -62,7 +62,8 @@ PanelWindow {
         right: true
     }
 
-    color: Theme.background
+    color: "transparent"
+    Behavior on color { ColorAnimation { duration: 500; easing.type: Easing.InOutQuad } }
 
     Settings {
         id: wpSettings
@@ -71,7 +72,13 @@ PanelWindow {
     }
 
     // Automatically load the wallpaper path set by the user in the Settings App
-    property string currentWallpaper: wpSettings.currentWallpaper !== "" ? "file://" + wpSettings.currentWallpaper : ""
+    // Handle both raw paths and already-prefixed file:// URLs
+    property string currentWallpaper: {
+        var stored = wpSettings.currentWallpaper;
+        if (!stored || stored === "") return "";
+        if (stored.startsWith("file://")) return stored;
+        return "file://" + stored;
+    }
 
     Item {
         id: bgContainer
@@ -117,102 +124,122 @@ PanelWindow {
                 NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard }
             }
 
-            property real calculatedSize: Math.min(root.width, root.height) * root.currentMaskScale
-            width: calculatedSize
-            height: calculatedSize
+            width: Math.min(root.width, root.height) * root.currentMaskScale
+            height: width
 
-            Behavior on calculatedSize {
+            Behavior on width {
                 NumberAnimation {
                     duration: Vars.animationDuration
                     easing.type: Easing.BezierSpline
                     easing.bezierCurve: Vars.customStandard
                 }
             }
-            visible: false
-        }
-
-        // 3. Cropped section of the fullscreen wallpaper perfectly matching the mask bounds
-        Item {
-            id: croppedWallpaper
-            anchors.fill: maskBounds
-            layer.enabled: true
-            visible: false
-            clip: true
-
-            Image {
-                width: wallpaperImage.width
-                height: wallpaperImage.height
-                x: -maskBounds.x
-                y: -maskBounds.y
-                source: root.currentWallpaper
-                fillMode: Image.PreserveAspectCrop
-                smooth: true
-                antialiasing: true
-                mipmap: true
+            Behavior on height {
+                NumberAnimation {
+                    duration: Vars.animationDuration
+                    easing.type: Easing.BezierSpline
+                    easing.bezierCurve: Vars.customStandard
+                }
             }
+
+            property string previousPathName: root.currentMaskShape
+            property string currentPathName: root.currentMaskShape
+            property real morphProgress: 1.0
+            property real shapeRotation: 0
+
+            ParallelAnimation {
+                id: shapeTransitionAnim
+                NumberAnimation {
+                    id: rotationAnim
+                    target: maskBounds
+                    property: "shapeRotation"
+                    duration: 600
+                    easing.type: Easing.InOutCubic
+                }
+                NumberAnimation {
+                    id: morphAnim
+                    target: maskBounds
+                    property: "morphProgress"
+                    from: 0.0
+                    to: 1.0
+                    duration: 600
+                    easing.type: Easing.InOutCubic
+                }
+            }
+            
+            Connections {
+                target: root
+                function onCurrentMaskShapeChanged() {
+                    maskBounds.previousPathName = maskBounds.currentPathName
+                    maskBounds.currentPathName = root.currentMaskShape
+                    rotationAnim.from = 0
+                    rotationAnim.to = 180
+                    morphAnim.from = 0.0
+                    morphAnim.to = 1.0
+                    shapeTransitionAnim.restart()
+                }
+            }
+
+            visible: false
         }
 
         // 4. The 1:1 FBO mask perfectly matching the mask bounds (Same as MediaPlayer!)
         Item {
             id: maskContainer
-            anchors.fill: maskBounds
+            anchors.fill: parent
             layer.enabled: true
+            layer.smooth: true
             visible: false
 
             Item {
-                anchors.centerIn: parent
-                property real scaleFactor: Math.min(4, 4096 / Math.max(parent.width, parent.height, 1))
-                width: parent.width * scaleFactor
-                height: parent.height * scaleFactor
-                scale: 1.0 / scaleFactor
+                x: maskBounds.x
+                y: maskBounds.y
+                width: maskBounds.width
+                height: maskBounds.height
 
-                Image {
-                    id: maskCanvas
-                    anchors.fill: parent
+                Item {
+                    anchors.centerIn: parent
+                    property real scaleFactor: Math.min(4, 4096 / Math.max(parent.width, parent.height, 1))
+                    width: parent.width * scaleFactor
+                    height: parent.height * scaleFactor
+                    scale: 1.0 / scaleFactor
 
-                    sourceSize.width: width
-                    sourceSize.height: height
-                    smooth: true
-                    antialiasing: true
-                    mipmap: true
-
-                    property string currentPathName: root.currentMaskShape
-                    property string currentPath: m3.getPath(currentPathName)
-
-                    source: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><path d='" + currentPath + "' fill='white'/></svg>"
-
-                    onCurrentPathNameChanged: {
-                        if (maskCanvas.status === Image.Ready) {
-                            shapeAnim.restart();
-                        }
+                    Image {
+                        anchors.fill: parent
+                        sourceSize.width: width
+                        sourceSize.height: height
+                        smooth: true
+                        antialiasing: true
+                        mipmap: true
+                        asynchronous: true
+                        property string path: m3.getPath(maskBounds.previousPathName)
+                        source: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><path d='" + path + "' fill='white'/></svg>"
+                        opacity: 1.0 - maskBounds.morphProgress
+                        rotation: maskBounds.shapeRotation
                     }
-
-                    SequentialAnimation {
-                        id: shapeAnim
-                        NumberAnimation {
-                            target: maskCanvas
-                            property: "scale"
-                            to: 0.01
-                            duration: 250
-                            easing.type: Easing.InBack
-                        }
-                        NumberAnimation {
-                            target: maskCanvas
-                            property: "scale"
-                            to: 1.0
-                            duration: 550
-                            easing.type: Easing.OutElastic
-                        }
+                    Image {
+                        anchors.fill: parent
+                        sourceSize.width: width
+                        sourceSize.height: height
+                        smooth: true
+                        antialiasing: true
+                        mipmap: true
+                        asynchronous: true
+                        property string path: m3.getPath(maskBounds.currentPathName)
+                        source: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><path d='" + path + "' fill='white'/></svg>"
+                        opacity: maskBounds.morphProgress
                     }
                 }
             }
         }
 
         Rectangle {
+            id: bgRect
             anchors.fill: parent
+            layer.enabled: true
+            visible: false
             antialiasing: true
             opacity: root.currentMaskEnabled ? 1.0 : 0.0
-            visible: opacity > 0
             Behavior on opacity {
                 NumberAnimation {
                     duration: 500
@@ -244,29 +271,130 @@ PanelWindow {
             }
         }
 
-        Image {
-            id: fallbackWallpaper
+        // Fallback wallpaper removed to allow awww to render underneath
+
+        // 5. Final MultiEffect mapping 1:1 on the exact bounds
+        MultiEffect {
+            id: holePunchedBackground
             anchors.fill: parent
-            source: root.currentWallpaper
-            fillMode: Image.PreserveAspectCrop
-            smooth: true
-            antialiasing: true
-            mipmap: true
-            opacity: root.currentMaskEnabled ? 0.0 : 1.0
-            visible: opacity > 0
-            Behavior on opacity {
-                NumberAnimation {
-                    duration: 500
-                    easing.type: Easing.InOutQuad
+            source: bgRect
+            maskEnabled: true
+            maskInverted: true
+            maskSource: maskContainer
+        }
+
+        // 6. Inner Shadow SVG
+        Item {
+            id: shadowStrokeContainer
+            anchors.fill: parent
+            layer.enabled: true
+            visible: false
+
+            Item {
+                x: maskBounds.x
+                y: maskBounds.y
+                width: maskBounds.width
+                height: maskBounds.height
+
+                Item {
+                    anchors.centerIn: parent
+                    property real scaleFactor: Math.min(4, 4096 / Math.max(parent.width, parent.height, 1))
+                    width: parent.width * scaleFactor
+                    height: parent.height * scaleFactor
+                    scale: 1.0 / scaleFactor
+
+                    Image {
+                        anchors.fill: parent
+                        sourceSize.width: width
+                        sourceSize.height: height
+                        smooth: true
+                        antialiasing: true
+                        mipmap: true
+                        asynchronous: true
+                        property string path: m3.getPath(maskBounds.previousPathName)
+                        source: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><path d='M -50 -50 L 150 -50 L 150 150 L -50 150 Z " + path + "' fill='white' fill-rule='evenodd'/></svg>"
+                        opacity: 1.0 - maskBounds.morphProgress
+                        rotation: maskBounds.shapeRotation
+                    }
+                    Image {
+                        anchors.fill: parent
+                        sourceSize.width: width
+                        sourceSize.height: height
+                        smooth: true
+                        antialiasing: true
+                        mipmap: true
+                        asynchronous: true
+                        property string path: m3.getPath(maskBounds.currentPathName)
+                        source: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><path d='M -50 -50 L 150 -50 L 150 150 L -50 150 Z " + path + "' fill='white' fill-rule='evenodd'/></svg>"
+                        opacity: maskBounds.morphProgress
+                    }
                 }
             }
         }
 
-        // 5. Final MultiEffect mapping 1:1 on the exact bounds
+        // 4.5 Clone mask for shadow to prevent Qt shader sharing bugs
+        Item {
+            id: maskContainer2
+            anchors.fill: parent
+            layer.enabled: true
+            layer.smooth: true
+            visible: false
+
+            Item {
+                x: maskBounds.x
+                y: maskBounds.y
+                width: maskBounds.width
+                height: maskBounds.height
+
+                Item {
+                    anchors.centerIn: parent
+                    property real scaleFactor: Math.min(4, 4096 / Math.max(parent.width, parent.height, 1))
+                    width: parent.width * scaleFactor
+                    height: parent.height * scaleFactor
+                    scale: 1.0 / scaleFactor
+
+                    Image {
+                        anchors.fill: parent
+                        sourceSize.width: width
+                        sourceSize.height: height
+                        smooth: true
+                        antialiasing: true
+                        mipmap: true
+                        asynchronous: true
+                        property string path: m3.getPath(maskBounds.previousPathName)
+                        source: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><path d='" + path + "' fill='white'/></svg>"
+                        opacity: 1.0
+                        rotation: maskBounds.shapeRotation
+                    }
+                    Image {
+                        anchors.fill: parent
+                        sourceSize.width: width
+                        sourceSize.height: height
+                        smooth: true
+                        antialiasing: true
+                        mipmap: true
+                        asynchronous: true
+                        property string path: m3.getPath(maskBounds.currentPathName)
+                        source: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><path d='" + path + "' fill='white'/></svg>"
+                        opacity: 1.0
+                    }
+                }
+            }
+        }
+
+        // 7. Inner Shadow Blended
         MultiEffect {
-            id: maskedWallpaperEffect
-            anchors.fill: maskBounds
-            source: croppedWallpaper
+            z: 100
+            anchors.fill: parent
+            source: shadowStrokeContainer
+            blurEnabled: true
+            blurMax: Vars.blurAmount
+            blur: 1.0
+            autoPaddingEnabled: false
+            colorizationColor: bgRect.color
+            colorization: 1.0
+            maskEnabled: true
+            maskSource: maskContainer2
             opacity: root.currentMaskEnabled ? 1.0 : 0.0
             visible: opacity > 0
             Behavior on opacity {
@@ -275,81 +403,65 @@ PanelWindow {
                     easing.type: Easing.InOutQuad
                 }
             }
-            maskEnabled: true
-            maskSource: maskContainer
-            antialiasing: true
-            smooth: true
         }
 
-        // 6. Inner Shadow SVG
+        // 8. Solid Border SVG
         Item {
-            id: shadowStrokeContainer
-            anchors.fill: maskBounds
+            id: borderStrokeContainer
+            anchors.fill: parent
             layer.enabled: true
-            layer.effect: MultiEffect {
-                blurEnabled: true
-                blurMax: Vars.blurAmount
-                blur: 1.0
-                autoPaddingEnabled: false
-            }
             visible: false
 
             Item {
-                anchors.centerIn: parent
-                property real scaleFactor: Math.min(4, 4096 / Math.max(parent.width, parent.height, 1))
-                width: parent.width * scaleFactor
-                height: parent.height * scaleFactor
-                scale: 1.0 / scaleFactor
+                x: maskBounds.x
+                y: maskBounds.y
+                width: maskBounds.width
+                height: maskBounds.height
 
-                Image {
-                    id: shadowCanvas
-                    anchors.fill: parent
-                    sourceSize.width: width
-                    sourceSize.height: height
-                    smooth: true
-                    antialiasing: true
-                    mipmap: true
+                Item {
+                    anchors.centerIn: parent
+                    property real scaleFactor: Math.min(4, 4096 / Math.max(parent.width, parent.height, 1))
+                    width: parent.width * scaleFactor
+                    height: parent.height * scaleFactor
+                    scale: 1.0 / scaleFactor
 
-                    property string currentPathName: root.currentMaskShape
-                    property string currentPath: m3.getPath(currentPathName)
-
-                    // Inverted path: draws black outside the shape, casting a directional drop shadow inwards!
-                    source: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><path d='M -50 -50 L 150 -50 L 150 150 L -50 150 Z " + currentPath + "' fill='black' fill-rule='evenodd'/></svg>"
-
-                    onCurrentPathNameChanged: {
-                        if (shadowCanvas.status === Image.Ready) {
-                            shadowAnim.restart();
-                        }
+                    Image {
+                        anchors.fill: parent
+                        sourceSize.width: width
+                        sourceSize.height: height
+                        smooth: true
+                        antialiasing: true
+                        mipmap: true
+                        asynchronous: true
+                        property string path: m3.getPath(maskBounds.previousPathName)
+                        source: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><path d='" + path + "' fill='none' stroke='white' stroke-width='2'/></svg>"
+                        opacity: 1.0 - maskBounds.morphProgress
+                        rotation: maskBounds.shapeRotation
                     }
-
-                    SequentialAnimation {
-                        id: shadowAnim
-                        NumberAnimation {
-                            target: shadowCanvas
-                            property: "scale"
-                            to: 0.01
-                            duration: 250
-                            easing.type: Easing.InBack
-                        }
-                        NumberAnimation {
-                            target: shadowCanvas
-                            property: "scale"
-                            to: 1.0
-                            duration: 550
-                            easing.type: Easing.OutElastic
-                        }
+                    Image {
+                        anchors.fill: parent
+                        sourceSize.width: width
+                        sourceSize.height: height
+                        smooth: true
+                        antialiasing: true
+                        mipmap: true
+                        asynchronous: true
+                        property string path: m3.getPath(maskBounds.currentPathName)
+                        source: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><path d='" + path + "' fill='none' stroke='white' stroke-width='2'/></svg>"
+                        opacity: maskBounds.morphProgress
                     }
                 }
             }
         }
 
-        // 7. Inner Shadow Blended
+        // 9. Solid Border Blended
         MultiEffect {
-            anchors.fill: maskBounds
-            source: shadowStrokeContainer
-            maskEnabled: true
-            maskSource: maskContainer
-            opacity: root.currentMaskEnabled ? 0.8 : 0.0
+            z: 101
+            anchors.fill: parent
+            source: borderStrokeContainer
+            colorizationColor: bgRect.color
+            colorization: 1.0
+            opacity: root.currentMaskEnabled ? 1.0 : 0.0
             visible: opacity > 0
             Behavior on opacity {
                 NumberAnimation {

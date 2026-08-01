@@ -9,11 +9,13 @@ import Quickshell.Hyprland
 ShellRoot {
     id: root
 
-    property bool _initApp: {
+    property bool appInitialized: false
+
+    Component.onCompleted: {
         Qt.application.name = "quickshell";
         Qt.application.organization = "boing";
         Qt.application.domain = "boing.quickshell";
-        return true;
+        appInitialized = true;
     }
 
     property string globalOsIconPath: ""
@@ -41,16 +43,25 @@ ShellRoot {
     property bool overviewVisible: false
     property bool lensVisible: false
 
+    function callOnAllPills(methodName) {
+        for (let i = 0; i < topPillsInstantiator.count; i++) {
+            let obj = topPillsInstantiator.objectAt(i);
+            if (obj && typeof obj[methodName] === "function") {
+                obj[methodName]();
+            }
+        }
+    }
+
     onOverviewVisibleChanged: {
         if (overviewVisible) {
-            topPills.closeAll();
+            callOnAllPills("closeAll");
             screenshotVisible = false;
         }
     }
 
     onScreenshotVisibleChanged: {
         if (screenshotVisible) {
-            topPills.closeAll();
+            callOnAllPills("closeAll");
             overviewVisible = false;
             lensVisible = false;
         }
@@ -58,7 +69,7 @@ ShellRoot {
 
     onLensVisibleChanged: {
         if (lensVisible) {
-            topPills.closeAll();
+            callOnAllPills("closeAll");
             overviewVisible = false;
             screenshotVisible = false;
         }
@@ -68,13 +79,13 @@ ShellRoot {
     GlobalShortcut {
         name: "launcher"
         description: "Toggle Launcher"
-        onPressed: topPills.toggleLauncher()
+        onPressed: callOnAllPills("toggleLauncher")
     }
 
     GlobalShortcut {
         name: "control_center"
         description: "Toggle Control Center"
-        onPressed: topPills.toggleControlCenter()
+        onPressed: callOnAllPills("toggleControlCenter")
     }
 
     GlobalShortcut {
@@ -92,19 +103,19 @@ ShellRoot {
     GlobalShortcut {
         name: "power_menu"
         description: "Toggle Power Menu"
-        onPressed: topPills.togglePowerMenu()
+        onPressed: callOnAllPills("togglePowerMenu")
     }
 
     GlobalShortcut {
         name: "wallpaper"
         description: "Toggle Wallpaper Switcher"
-        onPressed: topPills.toggleWallpaper()
+        onPressed: callOnAllPills("toggleWallpaper")
     }
 
     GlobalShortcut {
         name: "color_scheme"
         description: "Toggle Color Scheme Switcher"
-        onPressed: topPills.toggleColorScheme()
+        onPressed: callOnAllPills("toggleColorScheme")
     }
 
     GlobalShortcut {
@@ -116,39 +127,80 @@ ShellRoot {
     GlobalShortcut {
         name: "emoji_picker"
         description: "Toggle Emoji Picker"
-        onPressed: topPills.toggleEmojiPicker()
+        onPressed: callOnAllPills("toggleEmojiPicker")
     }
 
     GlobalShortcut {
         name: "clipboard"
         description: "Toggle Clipboard"
-        onPressed: topPills.toggleClipboard()
+        onPressed: callOnAllPills("toggleClipboard")
     }
 
-    ScreenShot {
-        // Binding the internal visibility state to your root state variable
-        visibleState: root.screenshotVisible || root.lensVisible
-        isLensMode: root.lensVisible
+    Variants {
+        model: root.appInitialized ? Quickshell.screens : []
+        delegate: Component {
+            ScreenShot {
+                required property var modelData
+                screen: modelData
+                visibleState: root.screenshotVisible || root.lensVisible
+                isLensMode: root.lensVisible
 
-        onScreenshotClosed: {
-            root.screenshotVisible = false;
-            root.lensVisible = false;
+                onScreenshotClosed: {
+                    root.screenshotVisible = false;
+                    root.lensVisible = false;
+                }
+            }
         }
     }
 
-    ScreenFrame {
-        id: screenFrame
+    Variants {
+        model: root.appInitialized ? Quickshell.screens : []
+        delegate: Component {
+            ScreenFrame {
+                required property var modelData
+                screen: modelData
+            }
+        }
     }
 
-    WallpaperOverlay {
-        // This will sit on the WlrLayer.Background
+    Variants {
+        model: root.appInitialized ? Quickshell.screens : []
+        delegate: Component {
+            WallpaperOverlay {
+                required property var modelData
+                screen: modelData
+            }
+        }
     }
 
-    DesktopClock {
+    Variants {
+        model: root.appInitialized ? Quickshell.screens : []
+        delegate: Component {
+            DesktopClock {
+                required property var modelData
+                screen: modelData
+            }
+        }
     }
-    DesktopCalender {
+
+    Variants {
+        model: root.appInitialized ? Quickshell.screens : []
+        delegate: Component {
+            DesktopCalender {
+                required property var modelData
+                screen: modelData
+            }
+        }
     }
-    DesktopMediaPlayer {
+
+    Variants {
+        model: root.appInitialized ? Quickshell.screens : []
+        delegate: Component {
+            DesktopMediaPlayer {
+                required property var modelData
+                screen: modelData
+            }
+        }
     }
 
     // Launcher is now inside TopPills.qml
@@ -156,22 +208,32 @@ ShellRoot {
         id: notifDaemon
     }
 
-    TopPills {
-        id: topPills
-        onToggleFloatingSettings: floatingSettings.toggle()
-        onPopupOpened: {
-            root.overviewVisible = false;
-            root.screenshotVisible = false;
-            root.lensVisible = false;
-        }
-        onOpenOverviewRequested: {
-            root.overviewVisible = true;
+    Instantiator {
+        id: topPillsInstantiator
+        model: root.appInitialized ? Quickshell.screens : []
+        delegate: TopPills {
+            required property var modelData
+            screen: modelData
+            onToggleFloatingSettings: if (floatingSettingsLoader.item) floatingSettingsLoader.item.toggle()
+            onPopupOpened: {
+                root.overviewVisible = false;
+                root.screenshotVisible = false;
+                root.lensVisible = false;
+            }
+            onOpenOverviewRequested: {
+                root.overviewVisible = true;
+            }
         }
     }
 
-    SettingsWindow {
-        id: floatingSettings
-        onRequestWidgetToggle: topPills.toggleSettings()
+    Loader {
+        id: floatingSettingsLoader
+        active: root.appInitialized
+        sourceComponent: Component {
+            SettingsWindow {
+                onRequestWidgetToggle: callOnAllPills("toggleSettings")
+            }
+        }
     }
 
     Overview {

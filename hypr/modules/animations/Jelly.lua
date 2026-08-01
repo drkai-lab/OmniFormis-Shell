@@ -18,8 +18,8 @@ hl.animation({ leaf = "fade",          enabled = true,  speed = 3.03, bezier = "
 
 -- Layers
 hl.animation({ leaf = "layers",        enabled = true,  speed = 4,    spring = "jelly" })
-hl.animation({ leaf = "layersIn",      enabled = true,  speed = 4,    spring = "jelly", style = "slide" })
-hl.animation({ leaf = "layersOut",     enabled = true,  speed = 3,    spring = "jelly", style = "slide" })
+hl.animation({ leaf = "layersIn",      enabled = true,  speed = 4,    spring = "jelly", style = "popin 80%" })
+hl.animation({ leaf = "layersOut",     enabled = true,  speed = 3,    spring = "jelly", style = "popin 80%" })
 hl.animation({ leaf = "fadeLayersIn",  enabled = true,  speed = 1.79, bezier = "m3Standard" })
 hl.animation({ leaf = "fadeLayersOut", enabled = true,  speed = 1.39, bezier = "m3Standard" })
 

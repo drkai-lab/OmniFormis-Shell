@@ -54,8 +54,9 @@ Item {
                 nmcliConnectProcess.running = true;
                 console.log("[WifiPage] nmcli connect command started for secured network.");
             } else {
-                modelData.connect();
-                console.log("[WifiPage] Native connect method invoked successfully.");
+                nmcliConnectProcess.command = ["nmcli", "device", "wifi", "connect", modelData.name];
+                nmcliConnectProcess.running = true;
+                console.log("[WifiPage] nmcli connect command started for known network.");
             }
         } catch (e) {
             console.error("[WifiPage] Error invoking connect:", e);
@@ -276,7 +277,9 @@ Item {
                                 console.log("[WifiPage] Network live data:", details.join(" | "));
 
                                 try {
-                                    modelData.connect();
+                                    nmcliConnectProcess.command = ["nmcli", "device", "wifi", "connect", modelData.name];
+                                    nmcliConnectProcess.running = true;
+                                    console.log("[WifiPage] nmcli connect command started for known network via click.");
                                 } catch (e) {
                                     console.error("[WifiPage] Error connecting to known network:", e);
                                 }

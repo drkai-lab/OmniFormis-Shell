@@ -8,11 +8,12 @@ import Quickshell.Io
 
 GridView {
     id: gridView
-    Layout.fillWidth: true
+    Layout.preferredWidth: 1052
+    Layout.minimumWidth: 1052
     Layout.fillHeight: true
     clip: true
-    cellWidth: Math.floor(parent.width / 3)
-    cellHeight: cellWidth * 0.5625 + Vars.spacingSmall
+    cellWidth: Math.floor(1052 / 3)
+    cellHeight: cellWidth * 0.5625 + (Vars.spacingSmall !== undefined ? Vars.spacingSmall : 8)
     maximumFlickVelocity: Vars.maximumFlickVelocity
 
 

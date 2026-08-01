@@ -85,16 +85,12 @@ Item {
     property alias panel: panel
     property alias panelMask: panelMask
 
-    HyprlandFocusGrab {
-        active: root.expanded && root.focusWindow !== null
-        windows: root.focusWindow ? [root.focusWindow] : []
-        onCleared: root.expanded = false
-    }
+
     
     focus: root.expanded
     onExpandedChanged: {
         if (expanded) {
-            MorphState.notifyOpened(600, panel.targetHeight);
+            MorphState.notifyOpened(600, panel.targetHeight, panel.targetRad, panel);
             forceActiveFocus();
             uptimeProc.running = true;
         } else {
@@ -115,12 +111,12 @@ Item {
         height: panel.height + 40
     }
 
-    // The visual panel that animates independently of the layout
     Rectangle {
         id: panel
+        property bool isBackgroundActive: root.expanded || (MorphState.openCount === 0 && MorphState.activeItem === panel && panel.width > 105)
         layer.enabled: true
         layer.samples: 4
-        layer.effect: MultiEffect { shadowEnabled: !root.gameMode; shadowBlur: 1.0; shadowColor: Qt.rgba(0,0,0,0.25); shadowVerticalOffset: 4; shadowHorizontalOffset: 0 }
+        layer.effect: MultiEffect { shadowEnabled: !root.gameMode && panel.isBackgroundActive; shadowBlur: 1.0; shadowColor: Qt.rgba(0,0,0,0.25); shadowVerticalOffset: 4; shadowHorizontalOffset: 0 }
         anchors.top: (!Vars.pillPosition || Vars.pillPosition === "Top") ? parent.top : undefined
         anchors.bottom: Vars.pillPosition === "Bottom" ? parent.bottom : undefined
         anchors.left: Vars.pillPosition === "Left" ? parent.left : undefined
@@ -139,15 +135,19 @@ Item {
         width: root.expanded ? 600 : (MorphState.anyExpanded ? MorphState.targetWidth : 100)
         height: targetHeight
         
-        color: Vars.translucent ? Qt.rgba(Theme.surface.r, Theme.surface.g, Theme.surface.b, 0.85) : Theme.surface
-        property real targetRad: root.expanded ? Vars.radiusExtraLarge : height / 2
+        onTargetHeightChanged: {
+            if (root.expanded) MorphState.updateDimensions(600, targetHeight, targetRad);
+        }
+        
+        color: isBackgroundActive ? (Vars.translucent ? Qt.rgba(Theme.surface.r, Theme.surface.g, Theme.surface.b, 0.85) : Theme.surface) : "transparent"
+        property real targetRad: root.expanded ? Vars.radiusExtraLarge : (MorphState.anyExpanded ? MorphState.targetRadius : height / 2)
         topLeftRadius: Vars.getTopLeftRadius(Vars.panelStyle, Vars.pillPosition, false, targetRad)
         topRightRadius: Vars.getTopRightRadius(Vars.panelStyle, Vars.pillPosition, false, targetRad)
         bottomLeftRadius: Vars.getBottomLeftRadius(Vars.panelStyle, Vars.pillPosition, false, targetRad)
         bottomRightRadius: Vars.getBottomRightRadius(Vars.panelStyle, Vars.pillPosition, false, targetRad)
         
-        opacity: root.expanded || panel.width > 105 ? 1.0 : 0.0
-        visible: opacity > 0
+        opacity: isBackgroundActive || expandedUI.opacity > 0 ? 1.0 : 0.0
+        // visible: opacity > 0 // Removed to preserve Behavior when hidden
 
         Behavior on radius { enabled: !root.gameMode; NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customExpressiveSpatialSlow } }
         Behavior on width { enabled: !root.gameMode; NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customExpressiveSpatialSlow } }
@@ -161,7 +161,7 @@ Item {
             opacity: root.expanded ? 1.0 : 0.0
             visible: opacity > 0
             clip: true
-            Behavior on opacity { enabled: !root.gameMode; SequentialAnimation { PauseAnimation { duration: root.expanded ? Vars.animationDuration : 0 } NumberAnimation { duration: root.expanded ? Vars.animationDuration : Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: root.expanded ? Vars.customEmphasizedDecelerate : Vars.customEmphasizedAccelerate } } }
+            Behavior on opacity { enabled: !root.gameMode; NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: root.expanded ? Vars.customEmphasizedDecelerate : Vars.customEmphasizedAccelerate } }
 
             // ------------------------------------------
             // VIEW 1: MAIN DASHBOARD MENU
@@ -400,7 +400,6 @@ Item {
                                         id: settingsHover; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; 
                                         onClicked: { 
                                             settingsAnim.restart();
-                                            root.expanded = false; 
                                             root.openSettingsRequested();
                                         } 
                                     }
@@ -414,7 +413,7 @@ Item {
                                     Text { anchors.centerIn: parent; font.family: "Material Symbols Outlined"; font.pixelSize: 18; color: Theme.on_surface; text: "power_settings_new" }
                                     MouseArea { 
                                         id: powerHover; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; 
-                                        onClicked: { root.expanded = false; root.openPowerMenuRequested() } 
+                                        onClicked: { root.openPowerMenuRequested() } 
                                     }
                                     Behavior on color { ColorAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
                                 }
@@ -427,10 +426,10 @@ Item {
                         isEditorMode: root.isEditorMode
                         gameMode: root.gameMode
                         onSubMenuRequested: (menuName) => { root.currentSubMenu = menuName; }
-                        onOpenColorSchemeRequested: { root.expanded = false; root.openColorSchemeRequested() }
-                        onOpenSettingsRequested: { root.expanded = false; root.openSettingsRequested() }
-                        onOpenWallpaperRequested: { root.expanded = false; root.openWallpaperRequested() }
-                        onOpenOverviewRequested: { root.expanded = false; root.openOverviewRequested() }
+                        onOpenColorSchemeRequested: { root.openColorSchemeRequested() }
+                        onOpenSettingsRequested: { root.openSettingsRequested() }
+                        onOpenWallpaperRequested: { root.openWallpaperRequested() }
+                        onOpenOverviewRequested: { root.openOverviewRequested() }
                     }
 
                     CC.Sliders { }

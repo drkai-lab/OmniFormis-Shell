@@ -39,6 +39,9 @@ Flickable {
         property string wallpaperDir: ""
         property string currentWallpaper: ""
         property bool automaticSync: true
+        property string awwwTransitionType: "wipe"
+        property string awwwTransitionStep: "90"
+        property string awwwTransitionAngle: "30"
     }
 
     Settings {
@@ -88,6 +91,10 @@ Flickable {
         var cmd = "";
         if (cleanWp !== "" && wallpaperSettings.automaticSync !== false) {
             console.log("[USER ACTION] Running Matugen and system theme mode sync: " + cleanWp + " (" + matugenArg + ", " + mode + ")");
+            var trans = wallpaperSettings.awwwTransitionType || "wipe";
+            var step = wallpaperSettings.awwwTransitionStep || "90";
+            var angle = wallpaperSettings.awwwTransitionAngle || "30";
+            Quickshell.execDetached({ command: ["bash", "-c", "awww img '" + cleanWp + "' --transition-type " + trans + " --transition-angle " + angle + " --transition-step " + step] });
             cmd += "matugen image '" + cleanWp + "' -m '" + mode + "' -t '" + matugenArg + "' --source-color-index 0; ";
         }
         console.log("[USER ACTION] Running set-theme mode switch: " + mode);
@@ -220,6 +227,10 @@ Flickable {
         var mode = themeModeSettings.currentMode || "dark";
 
         if (cleanWp !== "") {
+            var trans2 = wallpaperSettings.awwwTransitionType || "wipe";
+            var step2 = wallpaperSettings.awwwTransitionStep || "90";
+            var angle2 = wallpaperSettings.awwwTransitionAngle || "30";
+            Quickshell.execDetached({ command: ["bash", "-c", "awww img '" + cleanWp + "' --transition-type " + trans2 + " --transition-angle " + angle2 + " --transition-step " + step2] });
             shellCmds += "matugen image '" + cleanWp + "' -m '" + mode + "' -t '" + matugenArg + "' --source-color-index 0; ";
         }
         shellCmds += "bash ~/.config/color-schemes/set-theme.sh 'material-you' '" + mode + "'; ";
@@ -676,7 +687,6 @@ Flickable {
                 // Global Style Selection
                 ColumnLayout {
                     Layout.fillWidth: true
-                    Layout.preferredWidth: 2
                     Layout.alignment: Qt.AlignTop
                     spacing: 10
 
@@ -819,6 +829,92 @@ Flickable {
                             cursorShape: Qt.PointingHandCursor
                             onClicked: {
                                 wallpaperSettings.automaticSync = !wallpaperSettings.automaticSync;
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Awww Transition Type Selection
+            RowLayout {
+                Layout.fillWidth: true
+                Layout.topMargin: 4
+                spacing: 28
+
+                ColumnLayout {
+                    Layout.fillWidth: true
+                    Layout.alignment: Qt.AlignTop
+                    spacing: 10
+
+                    RowLayout {
+                        spacing: 12
+                        Text {
+                            text: "\ue503" // switch_video icon
+                            font.family: "Material Symbols Outlined"
+                            font.pixelSize: 22
+                            color: Theme.on_surface_variant
+                        }
+                        Text {
+                            text: "Wallpaper Transition"
+                            font.family: Vars.fontFamily
+                            font.pixelSize: 15
+                            font.weight: 500
+                            color: Theme.on_surface
+                        }
+                    }
+
+                    RowLayout {
+                        Layout.fillWidth: true
+                        spacing: 3
+
+                        Repeater {
+                            id: transitionTypeRepeater
+                            model: [
+                                { mode: "none", label: "None" },
+                                { mode: "fade", label: "Fade" },
+                                { mode: "wipe", label: "Wipe" },
+                                { mode: "wave", label: "Wave" },
+                                { mode: "grow", label: "Grow" }
+                            ]
+                            delegate: Rectangle {
+                                Layout.fillWidth: true
+                                Layout.preferredHeight: 38
+                                property bool isSelected: (wallpaperSettings.awwwTransitionType || "wipe") === modelData.mode
+                                property bool hasLeft: index > 0
+                                property bool hasRight: index < transitionTypeRepeater.count - 1
+
+                                topLeftRadius: isSelected ? 19 : (hasLeft ? 6 : 19)
+                                bottomLeftRadius: isSelected ? 19 : (hasLeft ? 6 : 19)
+                                topRightRadius: isSelected ? 19 : (hasRight ? 6 : 19)
+                                bottomRightRadius: isSelected ? 19 : (hasRight ? 6 : 19)
+
+                                color: isSelected ? (Vars.translucent ? Qt.rgba(Theme.secondary_container.r, Theme.secondary_container.g, Theme.secondary_container.b, 0.7) : Theme.secondary_container) : (transHover.containsMouse ? (Vars.translucent ? Qt.rgba(Theme.surface_container_highest.r, Theme.surface_container_highest.g, Theme.surface_container_highest.b, 0.6) : Theme.surface_container_highest) : (Vars.translucent ? Qt.rgba(Theme.surface_container_high.r, Theme.surface_container_high.g, Theme.surface_container_high.b, 0.4) : Theme.surface_container_high))
+                                border.width: 0
+
+                                Behavior on topLeftRadius { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
+                                Behavior on bottomLeftRadius { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
+                                Behavior on topRightRadius { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
+                                Behavior on bottomRightRadius { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
+                                Behavior on color { ColorAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
+
+                                Text {
+                                    anchors.centerIn: parent
+                                    text: modelData.label
+                                    font.family: Vars.fontFamily
+                                    font.pixelSize: 13
+                                    font.weight: parent.isSelected ? 600 : 500
+                                    color: parent.isSelected ? Theme.on_secondary_container : Theme.on_surface_variant
+                                }
+
+                                MouseArea {
+                                    id: transHover
+                                    anchors.fill: parent
+                                    hoverEnabled: true
+                                    cursorShape: Qt.PointingHandCursor
+                                    onClicked: {
+                                        wallpaperSettings.awwwTransitionType = modelData.mode;
+                                    }
+                                }
                             }
                         }
                     }

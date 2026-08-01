@@ -69,14 +69,11 @@ Item {
     visible: opacity > 0
     signal closeRequested()
     onExpandedChanged: {
-        if (expanded) MorphState.notifyOpened(root.isFloatingInstance ? root.width : 1320, root.isFloatingInstance ? root.height : 740);
+        if (expanded) MorphState.notifyOpened(root.isFloatingInstance ? root.width : 1320, root.isFloatingInstance ? root.height : 740, panel.targetRad, panel);
         else MorphState.notifyClosed();
     }
 
-    HyprlandFocusGrab {
-        active: root.expanded && root.focusWindow !== null
-        windows: root.focusWindow ? [root.focusWindow] : []
-    }
+
     
     Item {
         id: panelMask
@@ -87,8 +84,9 @@ Item {
     
     Rectangle {
         id: panel
+        property bool isBackgroundActive: root.expanded || (MorphState.openCount === 0 && MorphState.activeItem === panel && panel.width > 105)
         layer.enabled: true
-        layer.effect: MultiEffect { shadowEnabled: !root.gameMode; shadowBlur: 1.0; shadowColor: Qt.rgba(0,0,0,0.25); shadowVerticalOffset: 4; shadowHorizontalOffset: 0 }
+        layer.effect: MultiEffect { shadowEnabled: !root.gameMode && panel.isBackgroundActive; shadowBlur: 1.0; shadowColor: Qt.rgba(0,0,0,0.25); shadowVerticalOffset: 4; shadowHorizontalOffset: 0 }
         anchors.top: (!Vars.pillPosition || Vars.pillPosition === "Top" || root.isFloatingInstance) ? parent.top : undefined
         anchors.bottom: (!root.isFloatingInstance && Vars.pillPosition === "Bottom") ? parent.bottom : undefined
         anchors.left: (!root.isFloatingInstance && Vars.pillPosition === "Left") ? parent.left : undefined
@@ -99,15 +97,15 @@ Item {
         width: root.expanded ? (root.isFloatingInstance ? root.width : 1320) : (MorphState.anyExpanded ? MorphState.targetWidth : 100)
         height: root.expanded ? (root.isFloatingInstance ? root.height : 740) : (MorphState.anyExpanded ? MorphState.targetHeight : 40)
         
-        color: Vars.translucent ? Qt.rgba(Theme.surface_container_low.r, Theme.surface_container_low.g, Theme.surface_container_low.b, 0.85) : Theme.surface_container_low
-        property real targetRad: root.expanded ? Vars.radiusExtraLarge : height / 2
+        color: isBackgroundActive ? (Vars.translucent ? Qt.rgba(Theme.surface_container_low.r, Theme.surface_container_low.g, Theme.surface_container_low.b, 0.85) : Theme.surface_container_low) : "transparent"
+        property real targetRad: root.expanded ? Vars.radiusExtraLarge : (MorphState.anyExpanded ? MorphState.targetRadius : height / 2)
         topLeftRadius: root.isFloatingInstance ? Vars.radiusExtraLarge : Vars.getTopLeftRadius(Vars.panelStyle, Vars.pillPosition, false, targetRad)
         topRightRadius: root.isFloatingInstance ? Vars.radiusExtraLarge : Vars.getTopRightRadius(Vars.panelStyle, Vars.pillPosition, false, targetRad)
         bottomLeftRadius: root.isFloatingInstance ? Vars.radiusExtraLarge : Vars.getBottomLeftRadius(Vars.panelStyle, Vars.pillPosition, false, targetRad)
         bottomRightRadius: root.isFloatingInstance ? Vars.radiusExtraLarge : Vars.getBottomRightRadius(Vars.panelStyle, Vars.pillPosition, false, targetRad)
         
-        opacity: root.expanded || panel.width > 105 ? 1.0 : 0.0
-        visible: opacity > 0
+        opacity: isBackgroundActive || innerUI.opacity > 0 ? 1.0 : 0.0
+        // visible: opacity > 0 // Removed to preserve Behavior when hidden
 
         Behavior on topLeftRadius { enabled: !root.gameMode; NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customExpressiveSpatialSlow } }
         Behavior on topRightRadius { enabled: !root.gameMode; NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customExpressiveSpatialSlow } }
@@ -117,17 +115,20 @@ Item {
         Behavior on height { enabled: !root.gameMode; NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customExpressiveSpatialSlow } }
 
         Item {
-            anchors.fill: parent
-            anchors.margins: Vars.spacingLarge
+            id: innerUI
+            anchors.centerIn: parent
+            width: Math.max(1, parent.width - Vars.spacingLarge * 2)
+            height: Math.max(1, parent.height - Vars.spacingLarge * 2)
             
             opacity: root.expanded ? 1.0 : 0.0
             visible: opacity > 0
-            Behavior on opacity { enabled: !root.gameMode; SequentialAnimation { PauseAnimation { duration: root.expanded ? Vars.animationDuration : 0 } NumberAnimation { duration: root.expanded ? Vars.animationDuration : Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: root.expanded ? Vars.customEmphasizedDecelerate : Vars.customEmphasizedAccelerate } } }
+            clip: true
+            Behavior on opacity { enabled: !root.gameMode; NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: root.expanded ? Vars.customEmphasizedDecelerate : Vars.customEmphasizedAccelerate } }
 
             Loader {
                 anchors.fill: parent
                 active: root.expanded || parent.opacity > 0
-                asynchronous: true
+                asynchronous: false
                 sourceComponent: RowLayout {
                 anchors.fill: parent
                 spacing: Vars.spacingLarge

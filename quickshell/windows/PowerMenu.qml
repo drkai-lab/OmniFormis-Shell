@@ -39,10 +39,7 @@ Item {
     
     focus: true
 
-    HyprlandFocusGrab {
-        active: root.expanded && root.focusWindow !== null
-        windows: root.focusWindow ? [root.focusWindow] : []
-    }
+
     
     // Close on escape
     Keys.onEscapePressed: {
@@ -51,7 +48,7 @@ Item {
     
     onExpandedChanged: {
         if (expanded) {
-            MorphState.notifyOpened(isVertical ? 96 : 432, isVertical ? 432 : 96);
+            MorphState.notifyOpened(isVertical ? 96 : 432, isVertical ? 432 : 96, panel.targetRad, panel);
             vimKeysChecker.running = true;
             currentIndex = 0;
             root.forceActiveFocus();
@@ -171,8 +168,9 @@ Item {
 
     Rectangle {
         id: panel
+        property bool isBackgroundActive: root.expanded || (MorphState.openCount === 0 && MorphState.activeItem === panel && (isVertical ? panel.height > 105 : panel.width > 105))
         layer.enabled: true
-        layer.effect: MultiEffect { shadowEnabled: !root.gameMode; shadowBlur: 1.0; shadowColor: Qt.rgba(0,0,0,0.25); shadowVerticalOffset: 4; shadowHorizontalOffset: 0 }
+        layer.effect: MultiEffect { shadowEnabled: !root.gameMode && panel.isBackgroundActive; shadowBlur: 1.0; shadowColor: Qt.rgba(0,0,0,0.25); shadowVerticalOffset: 4; shadowHorizontalOffset: 0 }
         anchors.top: (!Vars.pillPosition || Vars.pillPosition === "Top") ? parent.top : undefined
         anchors.bottom: Vars.pillPosition === "Bottom" ? parent.bottom : undefined
         anchors.left: Vars.pillPosition === "Left" ? parent.left : undefined
@@ -183,16 +181,16 @@ Item {
         width: root.expanded ? (isVertical ? 96 : 432) : (MorphState.anyExpanded ? MorphState.targetWidth : (isVertical ? 40 : 100))
         height: root.expanded ? (isVertical ? 432 : 96) : (MorphState.anyExpanded ? MorphState.targetHeight : (isVertical ? 100 : 40))
         
-        color: Vars.translucent ? Qt.rgba(Theme.surface.r, Theme.surface.g, Theme.surface.b, 0.85) : Theme.surface
-        property real targetRad: root.expanded ? Vars.radiusExtraLarge : height / 2
+        color: isBackgroundActive ? (Vars.translucent ? Qt.rgba(Theme.surface.r, Theme.surface.g, Theme.surface.b, 0.85) : Theme.surface) : "transparent"
+        property real targetRad: root.expanded ? Vars.radiusExtraLarge : (MorphState.anyExpanded ? MorphState.targetRadius : height / 2)
         topLeftRadius: Vars.getTopLeftRadius(Vars.panelStyle, Vars.pillPosition, false, targetRad)
         topRightRadius: Vars.getTopRightRadius(Vars.panelStyle, Vars.pillPosition, false, targetRad)
         bottomLeftRadius: Vars.getBottomLeftRadius(Vars.panelStyle, Vars.pillPosition, false, targetRad)
         bottomRightRadius: Vars.getBottomRightRadius(Vars.panelStyle, Vars.pillPosition, false, targetRad)
         // clip removed for shadow
 
-        opacity: root.expanded || (isVertical ? panel.height > 105 : panel.width > 105) ? 1.0 : 0.0
-        visible: opacity > 0
+        opacity: isBackgroundActive || rowLayout.opacity > 0 ? 1.0 : 0.0
+        // visible: opacity > 0 // Removed to preserve Behavior when hidden
 
         Behavior on topLeftRadius { enabled: !root.gameMode; NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customExpressiveSpatialSlow } }
         Behavior on topRightRadius { enabled: !root.gameMode; NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customExpressiveSpatialSlow } }
@@ -218,7 +216,7 @@ Item {
             
             opacity: root.expanded ? 1.0 : 0.0
             visible: opacity > 0
-            Behavior on opacity { SequentialAnimation { PauseAnimation { duration: root.expanded ? Vars.animationDuration : 0 } NumberAnimation { duration: root.expanded ? Vars.animationDuration : Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: root.expanded ? Vars.customEmphasizedDecelerate : Vars.customEmphasizedAccelerate } } }
+            Behavior on opacity { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: root.expanded ? Vars.customEmphasizedDecelerate : Vars.customEmphasizedAccelerate } }
 
             PowerMenuButton {
                 id: btn0

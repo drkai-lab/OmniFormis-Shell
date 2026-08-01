@@ -25,6 +25,12 @@ Item {
     // A state flag to indicate if we are dismissing so we can trigger animations
     property bool dismissing: false
 
+    onModelDataChanged: {
+        // We removed the opacity flash here because the parent NotificationPopup 
+        // handles the global fade-in, and resetting opacity on every incoming 
+        // message in a burst causes a terrible strobe effect.
+    }
+
     property color textColor: isPopup ? (modelData.urgency === NotificationUrgency.Critical ? Theme.on_error : Theme.on_surface) : (modelData.urgency === NotificationUrgency.Critical ? Theme.on_error_container : Theme.on_surface)
 
     // Drag-to-dismiss properties
@@ -121,13 +127,7 @@ Item {
         }
 
         // Entry animation (opacity from 0)
-        Component.onCompleted: {
-            if (isPopup) {
-                opacity = 0;
-                Qt.callLater(() => { opacity = 1.0; });
-                Vars.pushNotification(rootCard.modelData);
-            }
-        }
+        // Handled by parent.
 
         Accessible.role: Accessible.StaticText
         Accessible.name: (modelData.urgency === NotificationUrgency.Critical ? "[Critical] " :
@@ -185,12 +185,13 @@ Item {
                             rootCard.popupRightClicked();
                         }
                     } else {
-                        if (typeof modelData.dismiss === "function") {
-                            modelData.dismiss();
-                        }
                         if (isPopup) {
                             rootCard.dismissing = true;
                             dismissTimer.start();
+                        } else {
+                            if (typeof modelData.dismiss === "function") {
+                                modelData.dismiss();
+                            }
                         }
                     }
                 }
@@ -201,8 +202,12 @@ Item {
             id: dismissTimer
             interval: 250
             onTriggered: {
-                if (typeof modelData.dismiss === "function") {
-                    modelData.dismiss();
+                if (isPopup) {
+                    NotificationService.clearPopups();
+                } else {
+                    if (typeof modelData.dismiss === "function") {
+                        modelData.dismiss();
+                    }
                 }
                 rootCard.dragEnded(listIndex);
             }

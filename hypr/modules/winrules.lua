@@ -6,6 +6,17 @@ local vars = require("modules.variables")
 local windowOpacity = vars.windowOpacity or "0.9"
 local singleWindowGapsOut = vars.GameMode and "0" or (vars.singleWindowGapsOut or "10")
 
+local has_virtual = false
+local monitors = hl.get_monitors()
+if type(monitors) == "table" then
+    for _, m in ipairs(monitors) do
+        if m.name and m.name:match("HEADLESS") then
+            has_virtual = true
+            break
+        end
+    end
+end
+
 --------------------------------------------------------------------------------
 -- ## Global Window Rules
 --------------------------------------------------------------------------------
@@ -108,15 +119,23 @@ hl.window_rule({
 
 hl.window_rule({
     name = "music-apps",
-    match = { class = "^(feishin|Spotify|Supersonic|Cider|com\\.github\\.th_ch\\.youtube_music|Plexamp|com-maxrave-simpmusic-MainKt)$" },
+    match = { class = "^(feishin|Supersonic|Cider|com\\.github\\.th_ch\\.youtube_music|Plexamp|com-maxrave-simpmusic-MainKt)$" },
     workspace = "special:music"
 })
 
-hl.window_rule({
-    name = "music-spotify-wayland",
-    match = { initial_title = "^(Spotify( Free)?)$" },
-    workspace = "special:music"
-})
+if has_virtual then
+    hl.window_rule({
+        name = "music-spotify",
+        match = { class = "^(Spotify|spotify)$" },
+        workspace = "6"
+    })
+else
+    hl.window_rule({
+        name = "music-spotify",
+        match = { class = "^(Spotify|spotify)$" },
+        workspace = "special:music"
+    })
+end
 
 hl.window_rule({
     name = "communication-apps",
@@ -258,6 +277,22 @@ if vars.enableSpecialWorkspaceGaps then
         workspace = "s[true]",
         gaps_out = singleWindowGapsOut
     })
+end
+
+
+if has_virtual then
+    for i = 1, 5 do
+        hl.workspace_rule({
+            workspace = tostring(i),
+            monitor = "DP-1"
+        })
+    end
+    for i = 6, 10 do
+        hl.workspace_rule({
+            workspace = tostring(i),
+            monitor = "HEADLESS-2"
+        })
+    end
 end
 
 hl.layer_rule({

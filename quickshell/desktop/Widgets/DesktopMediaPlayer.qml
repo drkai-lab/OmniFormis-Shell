@@ -28,7 +28,7 @@ PanelWindow {
 
     Settings {
         id: playerSettings
-        category: "DesktopMediaPlayer"
+        category: "DesktopMediaPlayer_" + (window.screen ? window.screen.name : "")
         property int posX: 100
         property int posY: 500
     }

@@ -27,7 +27,7 @@ PanelWindow {
 
     Settings {
         id: clockSettings
-        category: "DesktopCalender"
+        category: "DesktopCalender_" + (window.screen ? window.screen.name : "")
         property int posX: 500
         property int posY: 100
     }

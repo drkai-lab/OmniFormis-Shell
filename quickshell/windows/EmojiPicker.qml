@@ -90,17 +90,14 @@ Item {
         return root.emojiModel.filter(item => Vars.fuzzyMatch(filterText, item.name));
     }
 
-    HyprlandFocusGrab {
-        active: root.expanded && root.focusWindow !== null
-        windows: root.focusWindow ? [root.focusWindow] : []
-    }
+
     
     onExpandedChanged: {
         if (!expanded) {
             MorphState.notifyClosed();
             searchInput.text = "";
         } else {
-            MorphState.notifyOpened(500, 450);
+            MorphState.notifyOpened(500, 450, panel.targetRad, panel);
             searchInput.forceActiveFocus();
         }
     }
@@ -114,8 +111,9 @@ Item {
 
     Rectangle {
         id: panel
+        property bool isBackgroundActive: root.expanded || (MorphState.openCount === 0 && MorphState.activeItem === panel && panel.width > 105)
         layer.enabled: true
-        layer.effect: MultiEffect { shadowEnabled: !root.gameMode; shadowBlur: 1.0; shadowColor: Qt.rgba(0,0,0,0.25); shadowVerticalOffset: 4; shadowHorizontalOffset: 0 }
+        layer.effect: MultiEffect { shadowEnabled: !root.gameMode && panel.isBackgroundActive; shadowBlur: 1.0; shadowColor: Qt.rgba(0,0,0,0.25); shadowVerticalOffset: 4; shadowHorizontalOffset: 0 }
         anchors.top: (!Vars.pillPosition || Vars.pillPosition === "Top") ? parent.top : undefined
         anchors.bottom: Vars.pillPosition === "Bottom" ? parent.bottom : undefined
         anchors.left: Vars.pillPosition === "Left" ? parent.left : undefined
@@ -126,11 +124,11 @@ Item {
         width: root.expanded ? 500 : (MorphState.anyExpanded ? MorphState.targetWidth : 100)
         height: root.expanded ? 450 : (MorphState.anyExpanded ? MorphState.targetHeight : 40)
         
-        opacity: root.expanded || panel.width > 105 ? 1.0 : 0.0
-        visible: opacity > 0
+        opacity: isBackgroundActive || innerUI.opacity > 0 ? 1.0 : 0.0
+        // visible: opacity > 0 // Removed to preserve Behavior when hidden
         
-        color: Theme.surface_container_high
-        property real targetRad: root.expanded ? Vars.radiusExtraLarge : height / 2
+        color: isBackgroundActive ? Theme.surface_container_high : "transparent"
+        property real targetRad: root.expanded ? Vars.radiusExtraLarge : (MorphState.anyExpanded ? MorphState.targetRadius : height / 2)
         topLeftRadius: Vars.getTopLeftRadius(Vars.panelStyle, Vars.pillPosition, false, targetRad)
         topRightRadius: Vars.getTopRightRadius(Vars.panelStyle, Vars.pillPosition, false, targetRad)
         bottomLeftRadius: Vars.getBottomLeftRadius(Vars.panelStyle, Vars.pillPosition, false, targetRad)
@@ -142,12 +140,13 @@ Item {
         Behavior on height { enabled: !root.gameMode; NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customExpressiveSpatialSlow } }
 
         Item {
+            id: innerUI
             anchors.fill: parent
             anchors.margins: Vars.spacingLarge
             
             opacity: root.expanded ? 1.0 : 0.0
             visible: opacity > 0
-            Behavior on opacity { enabled: !root.gameMode; SequentialAnimation { PauseAnimation { duration: root.expanded ? Vars.animationDuration : 0 } NumberAnimation { duration: root.expanded ? Vars.animationDuration : Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: root.expanded ? Vars.customEmphasizedDecelerate : Vars.customEmphasizedAccelerate } } }
+            Behavior on opacity { enabled: !root.gameMode; NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: root.expanded ? Vars.customEmphasizedDecelerate : Vars.customEmphasizedAccelerate } }
 
             ColumnLayout {
                 id: mainLayout

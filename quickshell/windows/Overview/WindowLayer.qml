@@ -179,8 +179,8 @@ Item {
             ScreencopyView {
                 id: preview
                 anchors.fill: parent
-                captureSource: winItem.modelData
-                live: true
+                captureSource: (overviewContainer && overviewContainer.visibleState) ? winItem.modelData : null
+                live: overviewContainer && overviewContainer.visibleState
                 layer.enabled: true
                 layer.smooth: true
                 layer.effect: MultiEffect {

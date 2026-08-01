@@ -4,7 +4,8 @@ hyprctl reload;
 
 pkill -9 quickshell
 pkill -9 .quickshell-wra
+pkill -f qs-watchdog
 
 sleep 0.5
-quickshell &
+bash /home/boing/Dotfiles/quickshell/scripts/qs-watchdog.sh &
 disown

@@ -107,6 +107,8 @@ Item {
             spacing: root.isVertical ? 6 : 8
             columns: root.isVertical ? 1 : 2
             rows: root.isVertical ? 2 : 1
+            horizontalItemAlignment: Grid.AlignHCenter
+            verticalItemAlignment: Grid.AlignVCenter
 
             Text {
                 id: clockText

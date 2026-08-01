@@ -137,9 +137,9 @@ Item {
             
             // Snooze button
             Rectangle {
-                property real targetWidth: snoozeHover.pressed ? 96 : (clearAllHover.pressed ? 32 : 64)
+                property real targetWidth: snoozeHover.pressed ? 82 : (clearAllHover.pressed ? 46 : 64)
                 Layout.preferredWidth: targetWidth
-                Behavior on targetWidth { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
+                Behavior on targetWidth { NumberAnimation { duration: 150; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
 
                 Layout.preferredHeight: 48
                 radius: 24
@@ -195,9 +195,9 @@ Item {
 
             // Settings button
             Rectangle {
-                property real targetWidth: settingsHover.pressed ? 96 : (clearAllHover.pressed ? 32 : 64)
+                property real targetWidth: settingsHover.pressed ? 82 : (clearAllHover.pressed ? 46 : 64)
                 Layout.preferredWidth: targetWidth
-                Behavior on targetWidth { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
+                Behavior on targetWidth { NumberAnimation { duration: 150; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
 
                 Layout.preferredHeight: 48
                 radius: 24

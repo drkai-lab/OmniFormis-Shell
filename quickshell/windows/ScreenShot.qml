@@ -19,6 +19,32 @@ PanelWindow {
     signal openRequested
     property bool internalVisible: false
     property var m3Expressive: [0.05, 0.7, 0.1, 1.0]
+    
+    property int layoutX: 0
+    property int layoutY: 0
+
+    Process {
+        id: monitorPosProcess
+        command: ["sh", "-c", "hyprctl monitors -j"]
+        running: true
+        stdout: StdioCollector {
+            onStreamFinished: {
+                try {
+                    let monitors = JSON.parse(this.text);
+                    let scrName = root.screen ? root.screen.name : "";
+                    for (let m of monitors) {
+                        if (m.name === scrName) {
+                            root.layoutX = m.x;
+                            root.layoutY = m.y;
+                            break;
+                        }
+                    }
+                } catch(e) {
+                    console.log("[ScreenShot] Failed to parse hyprctl output");
+                }
+            }
+        }
+    }
 
     onVisibleChanged: {
         if (visible) {
@@ -26,7 +52,8 @@ PanelWindow {
             dimLayer.visible = true;
             dimLayer.opacity = 0.0; 
             frozenImage.visible = false;
-            freezeProcess.command = ["grim", "/tmp/qs_freeze.png"];
+            let scrName = root.screen ? root.screen.name : "";
+            freezeProcess.command = ["grim", "-o", scrName, "/tmp/qs_freeze_" + scrName + ".png"];
             freezeProcess.running = true;
         } else {
             frozenImage.source = "";
@@ -36,7 +63,8 @@ PanelWindow {
     Process {
         id: freezeProcess
         onExited: {
-            frozenImage.source = "file:///tmp/qs_freeze.png?" + Date.now();
+            let scrName = root.screen ? root.screen.name : "";
+            frozenImage.source = "file:///tmp/qs_freeze_" + scrName + ".png?" + Date.now();
             frozenImage.visible = true;
             dimLayer.opacity = 0.15; 
         }
@@ -348,7 +376,10 @@ PanelWindow {
                 return;
             }
             
-            captureTimer.geometry = `${x},${y} ${w}x${h}`;
+            let absX = Math.round(x + root.layoutX);
+            let absY = Math.round(y + root.layoutY);
+            
+            captureTimer.geometry = `${absX},${absY} ${w}x${h}`;
             
             if (root.isLensMode) {
                 lensBrackets.x = x;
@@ -396,7 +427,8 @@ PanelWindow {
         interval: 150 
         property string geometry: ""
         onTriggered: {
-            let target = root.isLensMode ? "/tmp/qs_lens.png" : "/tmp/qs_crop.png";
+            let scrName = root.screen ? root.screen.name : "";
+            let target = root.isLensMode ? `/tmp/qs_lens_${scrName}.png` : `/tmp/qs_crop_${scrName}.png`;
             captureProcess.command = ["grim", "-g", geometry, target];
             console.log(`[Lens Debug] Triggering capture command: ${captureProcess.command.join(" ")}`);
             captureProcess.running = true;
@@ -420,11 +452,13 @@ PanelWindow {
 
     Process {
         id: sattyProcess
-        command: ["satty", "--filename", "/tmp/qs_crop.png"]
+        property string scrName: root.screen ? root.screen.name : ""
+        command: ["satty", "--filename", `/tmp/qs_crop_${scrName}.png`]
     }
 
     Process {
         id: lensProcess
-        command: ["bash", "/home/boing/Dotfiles/scripts/lens.sh"]
+        property string scrName: root.screen ? root.screen.name : ""
+        command: ["bash", "/home/boing/Dotfiles/scripts/lens.sh", scrName]
     }
 }

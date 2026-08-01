@@ -26,8 +26,8 @@ hl.animation({ leaf = "fade",          enabled = true, speed = 2, bezier = "m3St
 
 -- Layers (App launchers, menus)
 hl.animation({ leaf = "layers",        enabled = true, speed = 5, spring = "elasticGlide" })
-hl.animation({ leaf = "layersIn",      enabled = true, speed = 5, spring = "elasticGlide", style = "slide" })
-hl.animation({ leaf = "layersOut",     enabled = true, speed = 4, spring = "snapOut",      style = "slide" })
+hl.animation({ leaf = "layersIn",      enabled = true, speed = 5, spring = "elasticGlide", style = "popin 80%" })
+hl.animation({ leaf = "layersOut",     enabled = true, speed = 4, spring = "snapOut",      style = "popin 80%" })
 hl.animation({ leaf = "fadeLayersIn",  enabled = true, speed = 2, bezier = "m3Standard" })
 hl.animation({ leaf = "fadeLayersOut", enabled = true, speed = 2, bezier = "m3Standard" })
 
