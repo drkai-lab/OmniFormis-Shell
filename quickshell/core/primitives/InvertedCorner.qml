@@ -12,19 +12,21 @@ Item {
     height: radius
     clip: true
 
+    property bool isRightSolid: (side === "left" || side === "top-right" || side === "bottom-right" || side === "bottom-left-attach" || side === "right-top" || side === "right-bottom")
+    property bool isBottomSolid: (side === "bottom-left" || side === "bottom-right" || side === "bottom-left-attach" || side === "bottom-right-attach" || side === "right-top" || side === "left-top" || side === "left-bottom" || side === "right-bottom")
+
     Rectangle {
         width: root.radius * 4
         height: root.radius * 4
-        
-        property bool isRightSolid: (root.side === "left" || root.side === "top-right" || root.side === "bottom-right" || root.side === "bottom-left-attach" || root.side === "right-top" || root.side === "right-bottom")
-        property bool isBottomSolid: (root.side === "bottom-left" || root.side === "bottom-right" || root.side === "bottom-left-attach" || root.side === "bottom-right-attach" || root.side === "right-top" || root.side === "left-top" || root.side === "left-bottom" || root.side === "right-bottom")
-
-        x: isRightSolid ? -root.radius * 2 : -root.radius
-        y: isBottomSolid ? -root.radius * 2 : -root.radius
-        
         radius: root.radius * 2
         color: "transparent"
         border.color: root.color
         border.width: root.radius
+        
+        property real holeCenterX: root.isRightSolid ? 0 : root.radius
+        property real holeCenterY: root.isBottomSolid ? 0 : root.radius
+        
+        x: holeCenterX - (width / 2)
+        y: holeCenterY - (height / 2)
     }
 }

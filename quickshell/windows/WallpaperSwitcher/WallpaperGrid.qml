@@ -105,10 +105,45 @@ GridView {
         }
     }
     displaced: Transition {
-        NumberAnimation { properties: "x,y"; duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customExpressiveSpatialSlow }
+        PropertyAction { property: "z"; value: 0 }
+        ParallelAnimation {
+            NumberAnimation { properties: "x,y"; duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customExpressiveSpatialSlow }
+            SequentialAnimation {
+                NumberAnimation { property: "opacity"; to: 0.2; duration: Vars.animationDuration * 0.3 }
+                NumberAnimation { property: "opacity"; to: 1.0; duration: Vars.animationDuration * 0.7 }
+            }
+        }
     }
     removeDisplaced: Transition {
+        PropertyAction { property: "z"; value: 0 }
+        ParallelAnimation {
+            NumberAnimation { properties: "x,y"; duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customExpressiveSpatialSlow }
+            SequentialAnimation {
+                NumberAnimation { property: "opacity"; to: 0.2; duration: Vars.animationDuration * 0.3 }
+                NumberAnimation { property: "opacity"; to: 1.0; duration: Vars.animationDuration * 0.7 }
+            }
+        }
+    }
+    move: Transition {
+        PropertyAction { property: "z"; value: 100 }
         NumberAnimation { properties: "x,y"; duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customExpressiveSpatialSlow }
+        PropertyAction { property: "z"; value: 0 }
+    }
+    moveDisplaced: Transition {
+        PropertyAction { property: "z"; value: 0 }
+        ParallelAnimation {
+            NumberAnimation { properties: "x,y"; duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customExpressiveSpatialSlow }
+            SequentialAnimation {
+                NumberAnimation { property: "opacity"; to: 0.2; duration: Vars.animationDuration * 0.3 }
+                NumberAnimation { property: "opacity"; to: 1.0; duration: Vars.animationDuration * 0.7 }
+            }
+        }
+    }
+    populate: Transition {
+        ParallelAnimation {
+            NumberAnimation { property: "opacity"; from: 0; to: 1; duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customEmphasizedDecelerate }
+            NumberAnimation { property: "scale"; from: 0.8; to: 1; duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customEmphasizedDecelerate }
+        }
     }
 
     property bool vimKeysEnabled: false

@@ -139,7 +139,7 @@ Item {
             if (root.expanded) MorphState.updateDimensions(600, targetHeight, targetRad);
         }
         
-        color: isBackgroundActive ? (Vars.translucent ? Qt.rgba(Theme.surface.r, Theme.surface.g, Theme.surface.b, 0.85) : Theme.surface) : "transparent"
+        color: isBackgroundActive ? (Vars.translucent ? Qt.rgba(Theme.surface.r, Theme.surface.g, Theme.surface.b, Vars.panelOpacity) : Theme.surface) : "transparent"
         property real targetRad: root.expanded ? Vars.radiusExtraLarge : (MorphState.anyExpanded ? MorphState.targetRadius : height / 2)
         topLeftRadius: Vars.getTopLeftRadius(Vars.panelStyle, Vars.pillPosition, false, targetRad)
         topRightRadius: Vars.getTopRightRadius(Vars.panelStyle, Vars.pillPosition, false, targetRad)
@@ -203,7 +203,7 @@ Item {
                             Layout.preferredHeight: 40
                             Layout.preferredWidth: logoLayout.implicitWidth + 16
                             radius: 20
-                            color: Vars.translucent ? Qt.rgba(Theme.surface_container_high.r, Theme.surface_container_high.g, Theme.surface_container_high.b, 0.85) : Theme.surface_container_high
+                            color: Vars.translucent ? Qt.rgba(Theme.surface_container_high.r, Theme.surface_container_high.g, Theme.surface_container_high.b, Vars.componentOpacity) : Theme.surface_container_high
                             clip: true
                             
                             RowLayout {
@@ -331,7 +331,7 @@ Item {
                             Layout.preferredHeight: 40
                             Layout.preferredWidth: btnLayout.implicitWidth + 16
                             radius: 20
-                            color: Vars.translucent ? Qt.rgba(Theme.surface_container_high.r, Theme.surface_container_high.g, Theme.surface_container_high.b, 0.85) : Theme.surface_container_high
+                            color: Vars.translucent ? Qt.rgba(Theme.surface_container_high.r, Theme.surface_container_high.g, Theme.surface_container_high.b, Vars.componentOpacity) : Theme.surface_container_high
                             clip: true
                             
                             RowLayout {

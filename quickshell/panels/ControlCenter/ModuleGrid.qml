@@ -386,7 +386,7 @@ ColumnLayout {
                 width: activeDelegateWrapper.width
                 height: activeDelegateWrapper.height
                 radius: isActive ? 16 : height / 2
-                color: dragArea.drag.active ? Theme.surface_container_highest : (isActive ? Theme.surface_container_highest : Theme.surface_container_high)
+                color: dragArea.drag.active ? (Vars.translucent ? Qt.rgba(Theme.surface_container_highest.r, Theme.surface_container_highest.g, Theme.surface_container_highest.b, Vars.componentOpacity) : Theme.surface_container_highest) : (isActive ? (Vars.translucent ? Qt.rgba(Theme.secondary_container.r, Theme.secondary_container.g, Theme.secondary_container.b, Vars.componentOpacity) : Theme.secondary_container) : (Vars.translucent ? Qt.rgba(Theme.surface_container_high.r, Theme.surface_container_high.g, Theme.surface_container_high.b, Vars.componentOpacity) : Theme.surface_container_high))
                 scale: dragArea.drag.active ? 1.05 : 1.0
                 
                 Behavior on radius { NumberAnimation { duration: 200; easing.type: Easing.OutCubic } }

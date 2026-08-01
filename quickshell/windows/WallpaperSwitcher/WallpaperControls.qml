@@ -20,7 +20,7 @@ ColumnLayout {
     property var autocompleteModelRef: null
     property alias filterText: searchInput.text
 
-    function focusSearch() { searchInput.forceActiveFocus(); }
+    function focusSearch() { Qt.callLater(() => { searchInput.forceActiveFocus(); }); }
     function clearSearch() { searchInput.text = ""; }
 
     RowLayout {
@@ -50,7 +50,7 @@ ColumnLayout {
                     text: "search"
                     font.family: "Material Symbols Outlined"
                     font.pixelSize: 20
-                    color: Theme.on_surface
+                    color: searchInput.activeFocus ? Theme.on_primary_container : Theme.on_surface
                     opacity: 0.7
                 }
 
@@ -60,7 +60,7 @@ ColumnLayout {
                     Layout.fillWidth: true
                     font.family: Vars.fontFamily
                     font.pixelSize: 14
-                    color: Theme.on_surface
+                    color: searchInput.activeFocus ? Theme.on_primary_container : Theme.on_surface
                     focus: true
                     selectByMouse: true
 
@@ -90,7 +90,7 @@ ColumnLayout {
                 Text {
                     text: "✕"
                     font.pixelSize: 14
-                    color: Theme.on_surface
+                    color: searchInput.activeFocus ? Theme.on_primary_container : Theme.on_surface
                     visible: searchInput.text.length > 0
                     Layout.alignment: Qt.AlignVCenter
                     MouseArea {

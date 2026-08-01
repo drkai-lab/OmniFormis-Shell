@@ -232,7 +232,7 @@ Item {
                 property real innerMaxWidth: parent.width - (2 * Vars.spacingSmall)
                 property bool touchesEdges: false
 
-                property real activeMargin: (Vars.panelStyle === "Framed" || Vars.panelStyle === "Flat" || (Vars.panelStyle === "Attached" && overviewContainer.gameMode)) ? 0 : Vars.spacingSmall
+                property real activeMargin: (Vars.panelStyle === "Framed" || Vars.panelStyle === "Flat" || Vars.panelStyle === "Attached") ? 0 : Vars.spacingSmall
                 anchors.topMargin: (!Vars.pillPosition || Vars.pillPosition === "Top") ? activeMargin : 0
                 anchors.bottomMargin: Vars.pillPosition === "Bottom" ? activeMargin : 0
                 anchors.leftMargin: Vars.pillPosition === "Left" ? activeMargin : 0
@@ -257,7 +257,7 @@ Item {
                 bottomLeftRadius: touchesEdges ? 0 : Vars.getBottomLeftRadius(Vars.panelStyle, Vars.pillPosition, false, defaultRadius)
                 bottomRightRadius: touchesEdges ? 0 : Vars.getBottomRightRadius(Vars.panelStyle, Vars.pillPosition, false, defaultRadius)
 
-                color: isBackgroundActive ? (Vars.translucent ? Qt.rgba(Theme.surface.r, Theme.surface.g, Theme.surface.b, 0.85) : Theme.surface) : "transparent"
+                color: isBackgroundActive ? (Vars.translucent ? Qt.rgba(Theme.surface.r, Theme.surface.g, Theme.surface.b, Vars.panelOpacity) : Theme.surface) : "transparent"
                 
                 opacity: isBackgroundActive || expandedUI.opacity > 0 ? 1.0 : 0.0
                 // visible: opacity > 0 // Removed to preserve Behavior when hidden

@@ -108,7 +108,7 @@ Rectangle {
         Rectangle {
             anchors.fill: parent
             color: Theme.surface_container_highest
-            opacity: bgArt.source !== "" ? (Vars.translucent ? 0.75 : 0.90) : (Vars.translucent ? 0.60 : 1.0)
+            opacity: bgArt.source !== "" ? (Vars.translucent ? Vars.componentOpacity + (1.0 - Vars.componentOpacity) / 2 : 0.90) : (Vars.translucent ? Vars.componentOpacity : 1.0)
         }
     }
 

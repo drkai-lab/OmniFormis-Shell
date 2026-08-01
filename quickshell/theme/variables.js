@@ -20,36 +20,38 @@ var _radiusMedium = radiusMedium;
 var _radiusLarge = radiusLarge;
 var _radiusExtraLarge = radiusExtraLarge;
 
-Object.defineProperty(this, 'radiusAmount', { get: function() { return panelStyle === "Framed" ? 0 : _radiusAmount; }, set: function(v) { _radiusAmount = v; } });
-Object.defineProperty(this, 'radiusSmall', { get: function() { return panelStyle === "Framed" ? 0 : _radiusSmall; }, set: function(v) { _radiusSmall = v; } });
-Object.defineProperty(this, 'radiusMedium', { get: function() { return panelStyle === "Framed" ? 0 : _radiusMedium; }, set: function(v) { _radiusMedium = v; } });
-Object.defineProperty(this, 'radiusLarge', { get: function() { return panelStyle === "Framed" ? 0 : _radiusLarge; }, set: function(v) { _radiusLarge = v; } });
-Object.defineProperty(this, 'radiusExtraLarge', { get: function() { return panelStyle === "Framed" ? 0 : _radiusExtraLarge; }, set: function(v) { _radiusExtraLarge = v; } });
+Object.defineProperty(this, 'radiusAmount', { get: function () { return panelStyle === "Framed" ? 0 : _radiusAmount; }, set: function (v) { _radiusAmount = v; } });
+Object.defineProperty(this, 'radiusSmall', { get: function () { return panelStyle === "Framed" ? 0 : _radiusSmall; }, set: function (v) { _radiusSmall = v; } });
+Object.defineProperty(this, 'radiusMedium', { get: function () { return panelStyle === "Framed" ? 0 : _radiusMedium; }, set: function (v) { _radiusMedium = v; } });
+Object.defineProperty(this, 'radiusLarge', { get: function () { return panelStyle === "Framed" ? 0 : _radiusLarge; }, set: function (v) { _radiusLarge = v; } });
+Object.defineProperty(this, 'radiusExtraLarge', { get: function () { return panelStyle === "Framed" ? 0 : _radiusExtraLarge; }, set: function (v) { _radiusExtraLarge = v; } });
 
 var _spacingSmall = spacingSmall;
 var _spacingMedium = spacingMedium;
 var _spacingLarge = spacingLarge;
 
-Object.defineProperty(this, 'spacingSmall', { get: function() { return panelStyle === "Framed" ? 0 : _spacingSmall; }, set: function(v) { _spacingSmall = v; } });
-Object.defineProperty(this, 'spacingMedium', { get: function() { return panelStyle === "Framed" ? 0 : _spacingMedium; }, set: function(v) { _spacingMedium = v; } });
-Object.defineProperty(this, 'spacingLarge', { get: function() { return panelStyle === "Framed" ? 0 : _spacingLarge; }, set: function(v) { _spacingLarge = v; } });
+Object.defineProperty(this, 'spacingSmall', { get: function () { return panelStyle === "Framed" ? 0 : _spacingSmall; }, set: function (v) { _spacingSmall = v; } });
+Object.defineProperty(this, 'spacingMedium', { get: function () { return panelStyle === "Framed" ? 0 : _spacingMedium; }, set: function (v) { _spacingMedium = v; } });
+Object.defineProperty(this, 'spacingLarge', { get: function () { return panelStyle === "Framed" ? 0 : _spacingLarge; }, set: function (v) { _spacingLarge = v; } });
 
 var _paddingSmall = paddingSmall;
 var _paddingMedium = paddingMedium;
 var _paddingLarge = paddingLarge;
 
-Object.defineProperty(this, 'paddingSmall', { get: function() { return panelStyle === "Framed" ? 0 : _paddingSmall; }, set: function(v) { _paddingSmall = v; } });
-Object.defineProperty(this, 'paddingMedium', { get: function() { return panelStyle === "Framed" ? 0 : _paddingMedium; }, set: function(v) { _paddingMedium = v; } });
-Object.defineProperty(this, 'paddingLarge', { get: function() { return panelStyle === "Framed" ? 0 : _paddingLarge; }, set: function(v) { _paddingLarge = v; } });
+Object.defineProperty(this, 'paddingSmall', { get: function () { return panelStyle === "Framed" ? 0 : _paddingSmall; }, set: function (v) { _paddingSmall = v; } });
+Object.defineProperty(this, 'paddingMedium', { get: function () { return panelStyle === "Framed" ? 0 : _paddingMedium; }, set: function (v) { _paddingMedium = v; } });
+Object.defineProperty(this, 'paddingLarge', { get: function () { return panelStyle === "Framed" ? 0 : _paddingLarge; }, set: function (v) { _paddingLarge = v; } });
 
 var fontFamily = "Google Sans Flex";
 var animationDuration = 240;
 var flickDeceleration = 1500;
 var maximumFlickVelocity = 3000;
-var translucent = false;
-var liquidGlass = true;
+var translucent = true;
+var liquidGlass = false;
 var liquidGlassPreset = "apple";
-var blurAmount = 30;
+var blurAmount = 27;
+var panelOpacity = 0.6;
+var componentOpacity = 0.3;
 
 var overviewGridRows = 2;
 var overviewGridColumns = 5;
@@ -57,7 +59,7 @@ var overviewScale = 0.8;
 
 var wallpaperMaskEnabled = true;
 var wallpaperMaskScale = 1.05;
-var wallpaperMaskShape = "4LeafClover";
+var wallpaperMaskShape = "9SidedCookie";
 var wallpaperMaskColor = "primary";
 var wallpaperMaskOffsetX = 0;
 var wallpaperMaskOffsetY = 4;
@@ -134,7 +136,7 @@ function fuzzyMatchScore(pattern, str) {
     if (!str) return 0;
     pattern = pattern.toLowerCase();
     str = str.toLowerCase();
-    
+
     var patternIdx = 0;
     var score = 0;
     var firstMatchIndex = -1;
@@ -158,7 +160,7 @@ var historyUpdated = 0;
 
 function pushNotification(modelData) {
     if (!modelData) return;
-    
+
     var uniqueId = modelData.seqId !== undefined ? modelData.seqId : (modelData.id !== undefined ? modelData.id : Math.random());
 
     for (var i = 0; i < notificationHistory.length; i++) {
@@ -166,7 +168,7 @@ function pushNotification(modelData) {
             return;
         }
     }
-    
+
     var actionsArray = [];
     if (modelData.actions) {
         for (var j = 0; j < modelData.actions.length; j++) {
@@ -176,7 +178,7 @@ function pushNotification(modelData) {
             });
         }
     }
-    
+
     var n = {
         seqId: uniqueId,
         appName: modelData.appName,
@@ -188,22 +190,22 @@ function pushNotification(modelData) {
         actions: actionsArray,
         expireTimeout: modelData.expireTimeout,
         defaultTimeout: modelData.defaultTimeout,
-        invokeAction: function(id) {
-            try { modelData.invokeAction(id); } catch(e) {}
+        invokeAction: function (id) {
+            try { modelData.invokeAction(id); } catch (e) { }
         },
-        dismiss: function() {
-            try { modelData.dismiss(); } catch(e) {}
+        dismiss: function () {
+            try { modelData.dismiss(); } catch (e) { }
             removeNotification(this.seqId);
         }
     };
-    
+
     notificationHistory.unshift(n);
     historyUpdated++;
 }
 
 function removeNotification(seqId) {
     var initialLen = notificationHistory.length;
-    notificationHistory = notificationHistory.filter(function(n) { return n.seqId !== seqId; });
+    notificationHistory = notificationHistory.filter(function (n) { return n.seqId !== seqId; });
     if (notificationHistory.length !== initialLen) {
         historyUpdated++;
     }

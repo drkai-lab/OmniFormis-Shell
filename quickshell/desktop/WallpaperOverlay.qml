@@ -239,13 +239,6 @@ PanelWindow {
             layer.enabled: true
             visible: false
             antialiasing: true
-            opacity: root.currentMaskEnabled ? 1.0 : 0.0
-            Behavior on opacity {
-                NumberAnimation {
-                    duration: 500
-                    easing.type: Easing.InOutQuad
-                }
-            }
             color: {
                 var c = root.currentMaskColor;
                 if (c === "transparent" || c === undefined)
@@ -281,6 +274,14 @@ PanelWindow {
             maskEnabled: true
             maskInverted: true
             maskSource: maskContainer
+            opacity: root.currentMaskEnabled ? 1.0 : 0.0
+            visible: opacity > 0
+            Behavior on opacity {
+                NumberAnimation {
+                    duration: 500
+                    easing.type: Easing.InOutQuad
+                }
+            }
         }
 
         // 6. Inner Shadow SVG
@@ -396,6 +397,29 @@ PanelWindow {
             maskEnabled: true
             maskSource: maskContainer2
             opacity: root.currentMaskEnabled ? 1.0 : 0.0
+            visible: opacity > 0
+            Behavior on opacity {
+                NumberAnimation {
+                    duration: 500
+                    easing.type: Easing.InOutQuad
+                }
+            }
+        }
+
+        // 7.5 Inner Shadow Blended (Opacity Boost)
+        MultiEffect {
+            z: 100
+            anchors.fill: parent
+            source: shadowStrokeContainer
+            blurEnabled: true
+            blurMax: Vars.blurAmount
+            blur: 1.0
+            autoPaddingEnabled: false
+            colorizationColor: bgRect.color
+            colorization: 1.0
+            maskEnabled: true
+            maskSource: maskContainer2
+            opacity: root.currentMaskEnabled ? 0.6 : 0.0
             visible: opacity > 0
             Behavior on opacity {
                 NumberAnimation {

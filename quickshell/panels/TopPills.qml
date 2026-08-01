@@ -47,7 +47,7 @@ PanelWindow {
     }
 
     property string pillPos: Vars.pillPosition || "Top"
-    property int defaultEdgeMargin: (Vars.panelStyle === "Framed" || Vars.panelStyle === "Flat" || (Vars.panelStyle === "Attached" && topWindow.gameMode)) ? 0 : currentSpacingSmall
+    property int defaultEdgeMargin: (Vars.panelStyle === "Framed" || Vars.panelStyle === "Flat" || Vars.panelStyle === "Attached") ? 0 : currentSpacingSmall
 
 
     signal popupOpened
@@ -709,8 +709,8 @@ PanelWindow {
                 y: Math.round((parent.pos === "Right" || parent.pos === "Left") ? parent.py - height : (parent.pos === "Bottom" ? parent.py + parent.ph - height : parent.py))
                 side: parent.pos === "Right" ? "bottom-right" : (parent.pos === "Left" ? "bottom-left" : (parent.pos === "Bottom" ? "bottom-right" : "top-right"))
                 visible: Vars.panelStyle === "Attached" && opacity > 0 && parent.pw > 0 && parent.ph > 0
-                color: parent.targetPanel?.panel?.color ?? "transparent"
-                opacity: (parent.targetPanel?.panel?.opacity ?? 1.0) * (parent.targetPanel?.opacity ?? 1.0)
+                color: (parent.targetPanel && parent.targetPanel.panel) ? parent.targetPanel.panel.color : "transparent"
+                opacity: (parent.targetPanel && parent.targetPanel.panel ? parent.targetPanel.panel.opacity : 1.0) * (parent.targetPanel ? parent.targetPanel.opacity : 1.0)
                 radius: Math.max(0, Math.min(currentRadiusExtraLarge, Math.min(parent.pw, parent.ph) / 2))
             }
             InvertedCorner {
@@ -718,8 +718,8 @@ PanelWindow {
                 y: Math.round((parent.pos === "Right" || parent.pos === "Left") ? parent.py + parent.ph : (parent.pos === "Bottom" ? parent.py + parent.ph - height : parent.py))
                 side: parent.pos === "Right" ? "top-right" : (parent.pos === "Left" ? "top-left" : (parent.pos === "Bottom" ? "bottom-left" : "top-left"))
                 visible: Vars.panelStyle === "Attached" && opacity > 0 && parent.pw > 0 && parent.ph > 0
-                color: parent.targetPanel?.panel?.color ?? "transparent"
-                opacity: (parent.targetPanel?.panel?.opacity ?? 1.0) * (parent.targetPanel?.opacity ?? 1.0)
+                color: (parent.targetPanel && parent.targetPanel.panel) ? parent.targetPanel.panel.color : "transparent"
+                opacity: (parent.targetPanel && parent.targetPanel.panel ? parent.targetPanel.panel.opacity : 1.0) * (parent.targetPanel ? parent.targetPanel.opacity : 1.0)
                 radius: Math.max(0, Math.min(currentRadiusExtraLarge, Math.min(parent.pw, parent.ph) / 2))
             }
         }

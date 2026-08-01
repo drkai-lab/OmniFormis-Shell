@@ -140,7 +140,7 @@ if [ -f "$CURRENT_DIR/spicetify.ini" ]; then
     echo "Linked spicetify.ini to ~/.config/spicetify/Themes/text/color.ini"
     
     # Reload Spicetify quietly
-    nohup bash -c "spicetify config color_scheme MaterialYou && spicetify apply" >/dev/null 2>&1 &
+    nohup bash -c "spicetify config current_theme text color_scheme MaterialYou && spicetify apply" >/dev/null 2>&1 &
 fi
 
 # Update AdwSteamGtk Theme

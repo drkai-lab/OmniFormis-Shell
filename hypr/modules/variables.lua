@@ -79,13 +79,13 @@ local vars = {
     -- Set the gap size between windows (inner)
     gaps_in = 5,
     -- Set the gap size between windows and screen edge (outer)
-    gaps_out = 27,
+    gaps_out = 15,
     -- Set the border size
     border_size = 2,
     -- Set window rounding
     rounding = 13,
     -- Set rounding power (higher = larger area the rounding is applied)
-    rounding_power = 20,
+    rounding_power = 22,
     -- Set active window opacity
     active_opacity = 1.0,
     -- Set inactive window opacity
@@ -109,7 +109,7 @@ local vars = {
 
     -- Blur
     -- Enable blur
-    blur_enabled = false,
+    blur_enabled = true,
     -- Set blur size
     blur_size = 4,
     -- Set number of blur passes
@@ -118,7 +118,7 @@ local vars = {
     blur_vibrancy = 0.1696,
 
     -- Liquid Glass
-    liquidGlass = true,
+    liquidGlass = false,
     liquidGlassPreset = "apple",
 
     -- Groupbar

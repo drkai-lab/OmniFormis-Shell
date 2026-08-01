@@ -31,7 +31,7 @@ Item {
     height: Math.max(80, delegateRow.implicitHeight + 32)
     property bool isSelected: false
     
-    property color targetColor: delegateMouse.containsMouse ? Qt.tint((Vars.translucent ? Qt.rgba(Theme.surface_container.r, Theme.surface_container.g, Theme.surface_container.b, 0.5) : Theme.surface_container), Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.08)) : (Vars.translucent ? Qt.rgba(Theme.surface_container.r, Theme.surface_container.g, Theme.surface_container.b, 0.5) : Theme.surface_container)
+    property color targetColor: delegateMouse.containsMouse ? Qt.tint((Vars.translucent ? Qt.rgba(Theme.surface_container.r, Theme.surface_container.g, Theme.surface_container.b, Vars.componentOpacity) : Theme.surface_container), Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.08)) : (Vars.translucent ? Qt.rgba(Theme.surface_container.r, Theme.surface_container.g, Theme.surface_container.b, Vars.componentOpacity) : Theme.surface_container)
     Behavior on targetColor {
         ColorAnimation {
             duration: Vars.animationDuration
@@ -126,7 +126,7 @@ Item {
             width: 52
             height: 32
             radius: 16
-            color: delegateRoot.itemVal === "true" ? Theme.primary : Theme.surface_variant
+            color: delegateRoot.itemVal === "true" ? (Vars.translucent ? Qt.rgba(Theme.primary.r, Theme.primary.g, Theme.primary.b, 0.8) : Theme.primary) : (Vars.translucent ? Qt.rgba(Theme.surface_variant.r, Theme.surface_variant.g, Theme.surface_variant.b, Vars.componentOpacity) : Theme.surface_variant)
             border.color: delegateRoot.activeFocus ? Theme.on_surface : "transparent"
             border.width: delegateRoot.activeFocus ? 2 : 0
             Behavior on color {
@@ -178,27 +178,30 @@ Item {
             Layout.preferredWidth: Math.max(150, Math.min(450, tInput.implicitWidth + 32))
             height: 32
             radius: Vars.radiusSmall
-            color: Theme.surface_container_highest
+            color: Vars.translucent ? Qt.rgba(Theme.surface_container_highest.r, Theme.surface_container_highest.g, Theme.surface_container_highest.b, Vars.componentOpacity) : Theme.surface_container_highest
             border.color: tInput.activeFocus ? Theme.primary : "transparent"
             border.width: 1
 
-            TextInput {
+            TextField {
                 id: tInput
                 anchors.fill: parent
-                anchors.leftMargin: 8
-                anchors.rightMargin: 8
-                verticalAlignment: Text.AlignVCenter
+                verticalAlignment: TextInput.AlignVCenter
                 text: delegateRoot.itemVal
                 font.family: Vars.fontFamily
                 font.pixelSize: 14
                 color: Theme.on_surface
                 selectByMouse: true
                 clip: true
+                background: Item {}
+                padding: 0
+                leftPadding: 8
+                rightPadding: 8
+                
                 onAccepted: {
                     tInput.focus = false;
                     settingsList.forceActiveFocus();
                 }
-                onEditingFinished: {
+                onTextEdited: {
                     if (text !== delegateRoot.itemVal) {
                         settingsModel.setProperty(delegateRoot.delegateIndex, "val", text);
                         rootPage.updateVariable(delegateRoot.itemKey, text, delegateRoot.itemSource);
@@ -221,26 +224,29 @@ Item {
                 width: 80
                 height: 32
                 radius: Vars.radiusSmall
-                color: Theme.surface_container_highest
+                color: Vars.translucent ? Qt.rgba(Theme.surface_container_highest.r, Theme.surface_container_highest.g, Theme.surface_container_highest.b, Vars.componentOpacity) : Theme.surface_container_highest
                 border.color: numInput.activeFocus ? Theme.primary : "transparent"
                 border.width: 1
-                TextInput {
+                TextField {
                     id: numInput
                     anchors.fill: parent
-                    anchors.leftMargin: 8
-                    anchors.rightMargin: 8
-                    verticalAlignment: Text.AlignVCenter
+                    verticalAlignment: TextInput.AlignVCenter
                     text: delegateRoot.itemVal
                     font.family: Vars.fontFamily
                     font.pixelSize: 14
                     color: Theme.on_surface
                     selectByMouse: true
                     clip: true
+                    background: Item {}
+                    padding: 0
+                    leftPadding: 8
+                    rightPadding: 8
+                    
                     onAccepted: {
                         numInput.focus = false;
                         settingsList.forceActiveFocus();
                     }
-                    onEditingFinished: {
+                    onTextEdited: {
                         if (text !== delegateRoot.itemVal) {
                             settingsModel.setProperty(delegateRoot.delegateIndex, "val", text);
                             rootPage.updateVariable(delegateRoot.itemKey, text, delegateRoot.itemSource);
@@ -258,7 +264,7 @@ Item {
                 width: 32
                 height: 32
                 radius: Vars.radiusSmall
-                color: numMinusHover.containsMouse ? Theme.surface_container_high : Theme.surface_container_highest
+                color: numMinusHover.containsMouse ? (Vars.translucent ? Qt.rgba(Theme.surface_container_high.r, Theme.surface_container_high.g, Theme.surface_container_high.b, Vars.componentOpacity) : Theme.surface_container_high) : (Vars.translucent ? Qt.rgba(Theme.surface_container_highest.r, Theme.surface_container_highest.g, Theme.surface_container_highest.b, Vars.componentOpacity) : Theme.surface_container_highest)
                 Text {
                     anchors.centerIn: parent
                     text: "remove"
@@ -283,7 +289,7 @@ Item {
                 width: 32
                 height: 32
                 radius: Vars.radiusSmall
-                color: numPlusHover.containsMouse ? Theme.surface_container_high : Theme.surface_container_highest
+                color: numPlusHover.containsMouse ? (Vars.translucent ? Qt.rgba(Theme.surface_container_high.r, Theme.surface_container_high.g, Theme.surface_container_high.b, Vars.componentOpacity) : Theme.surface_container_high) : (Vars.translucent ? Qt.rgba(Theme.surface_container_highest.r, Theme.surface_container_highest.g, Theme.surface_container_highest.b, Vars.componentOpacity) : Theme.surface_container_highest)
                 Text {
                     anchors.centerIn: parent
                     text: "add"
@@ -416,7 +422,7 @@ Item {
                         contentItem: Rectangle {
                             implicitWidth: 188
                             implicitHeight: 1
-                            color: Qt.rgba(Theme.outline_variant.r, Theme.outline_variant.g, Theme.outline_variant.b, 0.5)
+                            color: Qt.rgba(Theme.outline_variant.r, Theme.outline_variant.g, Theme.outline_variant.b, Vars.componentOpacity)
                             anchors.centerIn: parent
                         }
                     }
@@ -759,7 +765,7 @@ Item {
                         Behavior on topRightRadius { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customExpressiveSpatialSlow } }
                         Behavior on bottomRightRadius { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customExpressiveSpatialSlow } }
 
-                        color: isSelected ? Theme.primary : Theme.surface_container_highest
+                        color: isSelected ? (Vars.translucent ? Qt.rgba(Theme.primary.r, Theme.primary.g, Theme.primary.b, 0.8) : Theme.primary) : (Vars.translucent ? Qt.rgba(Theme.surface_container_highest.r, Theme.surface_container_highest.g, Theme.surface_container_highest.b, Vars.componentOpacity) : Theme.surface_container_highest)
 
                         Behavior on color { ColorAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customExpressiveSpatialSlow } }
 

@@ -114,7 +114,7 @@ Item {
                         Layout.fillWidth: true
                         Layout.preferredHeight: 72
 
-                        property color targetColor: wifiHeaderMouse.containsMouse ? Qt.tint((Vars.translucent ? Qt.rgba(Theme.surface_container.r, Theme.surface_container.g, Theme.surface_container.b, 0.5) : Theme.surface_container), Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.08)) : (Vars.translucent ? Qt.rgba(Theme.surface_container.r, Theme.surface_container.g, Theme.surface_container.b, 0.5) : Theme.surface_container)
+                        property color targetColor: wifiHeaderMouse.containsMouse ? Qt.tint((Vars.translucent ? Qt.rgba(Theme.surface_container.r, Theme.surface_container.g, Theme.surface_container.b, Vars.componentOpacity) : Theme.surface_container), Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.08)) : (Vars.translucent ? Qt.rgba(Theme.surface_container.r, Theme.surface_container.g, Theme.surface_container.b, Vars.componentOpacity) : Theme.surface_container)
                         Behavior on targetColor {
                             ColorAnimation {
                                 duration: Vars.animationDuration
@@ -216,36 +216,7 @@ Item {
                         Layout.preferredHeight: 120
                         visible: Networking.wifiEnabled && (!rootWifiPage.wifiDevice || rootWifiPage.wifiDevice.networks.values.length === 0)
                         radius: 16
-                        color: Vars.translucent ? Qt.rgba(Theme.surface_container.r, Theme.surface_container.g, Theme.surface_container.b, 0.5) : Theme.surface_container
-
-                        Rectangle {
-                            width: 16
-                            height: 16
-                            color: parent.color
-                            anchors.top: parent.top
-                            anchors.left: parent.left
-                        }
-                        Rectangle {
-                            width: 16
-                            height: 16
-                            color: parent.color
-                            anchors.top: parent.top
-                            anchors.right: parent.right
-                        }
-                        Rectangle {
-                            width: 16
-                            height: 16
-                            color: parent.color
-                            anchors.bottom: parent.bottom
-                            anchors.left: parent.left
-                        }
-                        Rectangle {
-                            width: 16
-                            height: 16
-                            color: parent.color
-                            anchors.bottom: parent.bottom
-                            anchors.right: parent.right
-                        }
+                        color: Vars.translucent ? Qt.rgba(Theme.surface_container.r, Theme.surface_container.g, Theme.surface_container.b, Vars.componentOpacity) : Theme.surface_container
 
                         ColumnLayout {
                             anchors.centerIn: parent
@@ -282,7 +253,7 @@ Item {
                         Layout.preferredHeight: 72
                         visible: Networking.wifiEnabled
 
-                        property color targetColor: scanMouse.containsMouse ? Qt.tint((Vars.translucent ? Qt.rgba(Theme.surface_container.r, Theme.surface_container.g, Theme.surface_container.b, 0.5) : Theme.surface_container), Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.08)) : (Vars.translucent ? Qt.rgba(Theme.surface_container.r, Theme.surface_container.g, Theme.surface_container.b, 0.5) : Theme.surface_container)
+                        property color targetColor: scanMouse.containsMouse ? Qt.tint((Vars.translucent ? Qt.rgba(Theme.surface_container.r, Theme.surface_container.g, Theme.surface_container.b, Vars.componentOpacity) : Theme.surface_container), Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.08)) : (Vars.translucent ? Qt.rgba(Theme.surface_container.r, Theme.surface_container.g, Theme.surface_container.b, Vars.componentOpacity) : Theme.surface_container)
                         Behavior on targetColor {
                             ColorAnimation {
                                 duration: Vars.animationDuration
@@ -463,7 +434,7 @@ Item {
                 Layout.fillWidth: true
                 Layout.preferredHeight: 100
                 radius: 16
-                color: Vars.translucent ? Qt.rgba(Theme.surface_container.r, Theme.surface_container.g, Theme.surface_container.b, 0.5) : Theme.surface_container
+                color: Vars.translucent ? Qt.rgba(Theme.surface_container.r, Theme.surface_container.g, Theme.surface_container.b, Vars.componentOpacity) : Theme.surface_container
 
                 ColumnLayout {
                     anchors.centerIn: parent
@@ -489,7 +460,7 @@ Item {
                 Layout.fillWidth: true
                 Layout.preferredHeight: 64
                 radius: 16
-                color: Vars.translucent ? Qt.rgba(Theme.surface_container_highest.r, Theme.surface_container_highest.g, Theme.surface_container_highest.b, 0.5) : Theme.surface_container_highest
+                color: Vars.translucent ? Qt.rgba(Theme.surface_container_highest.r, Theme.surface_container_highest.g, Theme.surface_container_highest.b, Vars.componentOpacity) : Theme.surface_container_highest
 
                 RowLayout {
                     anchors.fill: parent
@@ -611,7 +582,7 @@ Item {
                 Layout.fillWidth: true
                 Layout.preferredHeight: 180
                 radius: 16
-                color: Vars.translucent ? Qt.rgba(Theme.surface_container.r, Theme.surface_container.g, Theme.surface_container.b, 0.5) : Theme.surface_container
+                color: Vars.translucent ? Qt.rgba(Theme.surface_container.r, Theme.surface_container.g, Theme.surface_container.b, Vars.componentOpacity) : Theme.surface_container
 
                 ColumnLayout {
                     anchors.centerIn: parent
@@ -647,16 +618,19 @@ Item {
                             }
                         }
 
-                        TextInput {
+                        TextField {
                             id: authPwdInput
                             anchors.fill: parent
-                            anchors.margins: 16
                             verticalAlignment: TextInput.AlignVCenter
                             font.family: Vars.fontFamily
                             font.pixelSize: 16
                             color: rootWifiPage.authError ? Theme.error : Theme.on_surface
                             echoMode: TextInput.Password
                             clip: true
+                            background: Item {}
+                            padding: 0
+                            leftPadding: 16
+                            rightPadding: 16
 
                             Keys.onReturnPressed: {
                                 authProcess.pwd = authPwdInput.text;

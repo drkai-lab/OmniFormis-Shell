@@ -98,7 +98,7 @@ Item {
         width: root.expanded ? 1100 : (MorphState.anyExpanded ? MorphState.targetWidth : 100)
         height: root.expanded ? 650 : (MorphState.anyExpanded ? MorphState.targetHeight : 40)
 
-        color: isBackgroundActive ? (Vars.translucent ? Qt.rgba(Theme.surface.r, Theme.surface.g, Theme.surface.b, 0.85) : Theme.surface) : "transparent"
+        color: isBackgroundActive ? (Vars.translucent ? Qt.rgba(Theme.surface.r, Theme.surface.g, Theme.surface.b, Vars.panelOpacity) : Theme.surface) : "transparent"
         property real targetRad: root.expanded ? Vars.radiusExtraLarge : (MorphState.anyExpanded ? MorphState.targetRadius : height / 2)
         topLeftRadius: Vars.getTopLeftRadius(Vars.panelStyle, Vars.pillPosition, false, targetRad)
         topRightRadius: Vars.getTopRightRadius(Vars.panelStyle, Vars.pillPosition, false, targetRad)
@@ -153,6 +153,11 @@ Item {
                 anchors.fill: parent
                 active: root.expanded || parent.opacity > 0
                 asynchronous: false
+                onLoaded: {
+                    if (root.expanded && item && item.controls) {
+                        item.controls.focusSearch();
+                    }
+                }
                 sourceComponent: Component {
                     Item {
                         property alias controls: controls
@@ -200,10 +205,11 @@ Item {
                                 proxyModelObj.clear();
                                 for (var i = 0; i < wallpaperModel.count; i++) {
                                     var item = wallpaperModel.get(i);
-                                    if (Vars.fuzzyMatch(filterText, item.fileName)) {
+                                    if (Vars.fuzzyMatch(filterText, item.fileName) || (item.folderName && Vars.fuzzyMatch(filterText, item.folderName))) {
                                         proxyModelObj.append({
                                             "filePath": item.filePath,
-                                            "fileName": item.fileName
+                                            "fileName": item.fileName,
+                                            "folderName": item.folderName
                                         });
                                     }
                                 }
@@ -230,10 +236,13 @@ Item {
                                     for (var i = 0; i < lines.length; i++) {
                                         var path = lines[i].trim();
                                         if (path.length > 0) {
-                                            var name = path.substring(path.lastIndexOf('/') + 1);
+                                            var pathParts = path.split('/');
+                                            var folderName = pathParts.length > 1 ? pathParts[pathParts.length - 2] : "";
+                                            var name = pathParts[pathParts.length - 1];
                                             items.push({
                                                 "filePath": path,
-                                                "fileName": name
+                                                "fileName": name,
+                                                "folderName": folderName
                                             });
                                         }
                                     }

@@ -20,6 +20,8 @@ var flickDeceleration = 1500;
 var maximumFlickVelocity = 3000;
 var translucent = true;
 var blurAmount = 30;
+var panelOpacity = 0.85;
+var componentOpacity = 0.5;
 
 var overviewGridRows = 2;
 var overviewGridColumns = 5;

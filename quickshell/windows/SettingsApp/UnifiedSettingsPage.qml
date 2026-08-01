@@ -38,6 +38,8 @@ ColumnLayout {
             "flickDeceleration": "Scroll Deceleration Rate",
             "maximumFlickVelocity": "Max Scroll Velocity",
             "blurAmount": "Window Blur Intensity",
+            "panelOpacity": "Main Panel Opacity",
+            "componentOpacity": "Inner Component Opacity",
             "radiusAmount": "Window Corner Radius Scale",
             "fontFamily": "Interface Font Family",
             "pillPosition": "Panel Screen Position",
@@ -81,6 +83,8 @@ ColumnLayout {
             "flickDeceleration": "Friction rate applied when coasting through scrollable UI flick views.",
             "maximumFlickVelocity": "Maximum speed velocity clamp for touch and mouse scroll swiping.",
             "blurAmount": "Gaussian background blur radius applied behind translucent shell elements and windows.",
+            "panelOpacity": "Global opacity level for main background panels and floating windows.",
+            "componentOpacity": "Global opacity level for interactive components and lists inside panels.",
             "radiusAmount": "Master multiplication ratio applied to window and container corner roundings.",
             "fontFamily": "Primary typography font family used across Quickshell overlays and panels.",
             "pillPosition": "Select the edge of the display monitor where the shell control bar is docked.",
@@ -587,7 +591,7 @@ ColumnLayout {
                         category = "Desktop";
                     } else if (key.startsWith("spacing") || key.startsWith("padding")) {
                         category = "Layout";
-                    } else if (key.startsWith("radius") || key === "blurAmount" || key === "fontFamily" || key === "liquidGlassPreset") {
+                    } else if (key.startsWith("radius") || key === "blurAmount" || key === "panelOpacity" || key === "componentOpacity" || key === "fontFamily" || key === "liquidGlassPreset") {
                         category = "Theme";
                     } else if (key === "animationDuration" || key === "flickDeceleration" || key === "maximumFlickVelocity" || key.startsWith("custom") || key.startsWith("m3")) {
                         category = "Animations";
@@ -618,9 +622,13 @@ ColumnLayout {
                     } else if (key === "blurAmount") {
                         type = "slider";
                         min = 0;
-                        max = 128;
-                        step = 2;
-                        category = "General";
+                        max = 100;
+                        step = 1;
+                    } else if (key === "panelOpacity" || key === "componentOpacity") {
+                        type = "slider";
+                        min = 0.0;
+                        max = 1.0;
+                        step = 0.05;
                     } else if (key.startsWith("radius") || key.startsWith("spacing") || key.startsWith("padding")) {
                         type = "slider";
                         min = 0;

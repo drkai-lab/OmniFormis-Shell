@@ -48,13 +48,12 @@ PanelWindow {
     Item {
         anchors.fill: parent
         layer.enabled: Vars.translucent
-        opacity: Vars.translucent ? 0.85 : 1.0
 
         Rectangle {
             anchors.fill: parent
             color: "transparent"
             border.color: Theme.surface
-            border.width: Vars.spacingSmall
+            border.width: 0
             radius: Vars.radiusExtraLarge
         }
 
@@ -63,7 +62,7 @@ PanelWindow {
             anchors.left: parent.left
             side: "top-left"
             radius: Vars.radiusExtraLarge
-            color: Theme.surface
+            color: Vars.translucent ? Qt.rgba(Theme.surface.r, Theme.surface.g, Theme.surface.b, Vars.panelOpacity) : Theme.surface
         }
 
         InvertedCorner {
@@ -71,7 +70,7 @@ PanelWindow {
             anchors.right: parent.right
             side: "top-right"
             radius: Vars.radiusExtraLarge
-            color: Theme.surface
+            color: Vars.translucent ? Qt.rgba(Theme.surface.r, Theme.surface.g, Theme.surface.b, Vars.panelOpacity) : Theme.surface
         }
 
         InvertedCorner {
@@ -79,7 +78,7 @@ PanelWindow {
             anchors.left: parent.left
             side: "bottom-left"
             radius: Vars.radiusExtraLarge
-            color: Theme.surface
+            color: Vars.translucent ? Qt.rgba(Theme.surface.r, Theme.surface.g, Theme.surface.b, Vars.panelOpacity) : Theme.surface
         }
 
         InvertedCorner {
@@ -87,7 +86,7 @@ PanelWindow {
             anchors.right: parent.right
             side: "bottom-right"
             radius: Vars.radiusExtraLarge
-            color: Theme.surface
+            color: Vars.translucent ? Qt.rgba(Theme.surface.r, Theme.surface.g, Theme.surface.b, Vars.panelOpacity) : Theme.surface
         }
     }
     }

@@ -143,7 +143,7 @@ Item {
             shadowHorizontalOffset: 0
         }
 
-        opacity: mainContainer.isVisible ? (Vars.translucent ? 0.85 : 1.0) : 0.0
+        opacity: mainContainer.isVisible ? (Vars.translucent ? Vars.panelOpacity : 1.0) : 0.0
         visible: opacity > 0
 
         Behavior on width {
@@ -253,7 +253,7 @@ Item {
                     y: 0
                     width: Math.max(0, parent.width - x)
                     height: parent.height
-                    color: Vars.translucent ? Qt.rgba(Theme.surface_variant.r, Theme.surface_variant.g, Theme.surface_variant.b, 0.4) : Theme.surface_variant
+                    color: Vars.translucent ? Qt.rgba(Theme.surface_variant.r, Theme.surface_variant.g, Theme.surface_variant.b, Vars.componentOpacity) : Theme.surface_variant
 
                     topLeftRadius: Math.min(parent.leftRadiusSmall, width / 2)
                     bottomLeftRadius: Math.min(parent.leftRadiusSmall, width / 2)
@@ -296,7 +296,7 @@ Item {
                     y: 0
                     width: parent.width
                     height: Math.max(0, parent.handlePos - mainContainer.gap)
-                    color: Vars.translucent ? Qt.rgba(Theme.surface_variant.r, Theme.surface_variant.g, Theme.surface_variant.b, 0.4) : Theme.surface_variant
+                    color: Vars.translucent ? Qt.rgba(Theme.surface_variant.r, Theme.surface_variant.g, Theme.surface_variant.b, Vars.componentOpacity) : Theme.surface_variant
 
                     topLeftRadius: Math.min(parent.leftRadiusLarge, height / 2)
                     topRightRadius: Math.min(parent.leftRadiusLarge, height / 2)

@@ -80,7 +80,7 @@ Item {
         width: root.expanded ? 380 : 100
         height: root.expanded ? Math.max(100, root.currentHeight + Vars.spacingLarge * 2) : 40
 
-        color: Vars.translucent ? Qt.rgba((root.expanded ? root.expandedColor.r : Theme.primary.r), (root.expanded ? root.expandedColor.g : Theme.primary.g), (root.expanded ? root.expandedColor.b : Theme.primary.b), 0.85) : (root.expanded ? root.expandedColor : Theme.primary)
+        color: Vars.translucent ? Qt.rgba((root.expanded ? root.expandedColor.r : Theme.primary.r), (root.expanded ? root.expandedColor.g : Theme.primary.g), (root.expanded ? root.expandedColor.b : Theme.primary.b), Vars.panelOpacity) : (root.expanded ? root.expandedColor : Theme.primary)
         Behavior on color { ColorAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customExpressiveSpatialSlow } }
         radius: root.expanded ? Vars.radiusLarge : height / 2
 
