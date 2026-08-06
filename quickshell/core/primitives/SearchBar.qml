@@ -6,6 +6,7 @@ import "../../theme/variables.js" as Vars
 
 Rectangle {
     id: root
+    color: "transparent"
 
     property alias text: searchInput.text
     property bool isActiveFocus: searchInput.activeFocus
