@@ -115,10 +115,9 @@ PanelWindow {
         closeAllExcept(null);
     }
 
-    // 1. The Mask Region Array
     mask: Region {
         Region {
-            item: globalFocusGrab.active ? popupScrim : null
+            item: topWindow.hasAnyPopupOpen ? popupScrim : null
         }
         Region {
             item: clockHoverZone
@@ -166,7 +165,7 @@ PanelWindow {
     MouseArea {
         id: popupScrim
         anchors.fill: parent
-        enabled: globalFocusGrab.active
+        enabled: topWindow.hasAnyPopupOpen
         hoverEnabled: true
         acceptedButtons: Qt.AllButtons
         onWheel: (wheel) => wheel.accepted = true
