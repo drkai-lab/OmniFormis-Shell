@@ -62,7 +62,9 @@ Item {
                 contentLoader.item.controls.clearSearch();
             } else {
                 MorphState.notifyOpened(1100, 650, panel.targetRad, panel);
-                contentLoader.item.controls.focusSearch();
+                contentLoader.visible = true;
+            contentLoader.item.controls.focusSearch();
+            contentLoader.visible = Qt.binding(() => root.expanded || contentLoader.opacity > 0);
             }
         } else {
             if (!expanded) MorphState.notifyClosed();
@@ -72,9 +74,19 @@ Item {
 
     Item {
         id: panelMask
-        anchors.centerIn: panel
-        width: panel.width + 40
-        height: panel.height + 40
+                anchors.top: (!Vars.pillPosition || Vars.pillPosition === "Top") ? parent.top : undefined
+        anchors.bottom: Vars.pillPosition === "Bottom" ? parent.bottom : undefined
+        anchors.left: Vars.pillPosition === "Left" ? parent.left : undefined
+        anchors.right: Vars.pillPosition === "Right" ? parent.right : undefined
+        anchors.horizontalCenter: (Vars.pillPosition === "Left" || Vars.pillPosition === "Right") ? undefined : parent.horizontalCenter
+        anchors.verticalCenter: (Vars.pillPosition === "Left" || Vars.pillPosition === "Right") ? parent.verticalCenter : undefined
+        
+        anchors.topMargin: -20
+        anchors.bottomMargin: -20
+        anchors.leftMargin: -20
+        anchors.rightMargin: -20
+        width: root.expanded ? 640 : 140
+        height: root.expanded ? 590 : 80
     }
 
     Rectangle {
@@ -137,7 +149,7 @@ Item {
             height: Math.max(1, parent.height - Vars.spacingLarge * 2)
 
             opacity: root.expanded ? 1.0 : 0.0
-            visible: opacity > 0
+            visible: root.expanded || opacity > 0
             clip: true
             Behavior on opacity {
                 enabled: !root.gameMode
@@ -160,37 +172,39 @@ Item {
                 }
                 sourceComponent: Component {
                     Item {
-                        property alias controls: controls
+                        property var controls: gridView.headerItem
                         width: 1052
                         height: parent.height
                         anchors.left: parent.left
                         anchors.top: parent.top
 
-                        ColumnLayout {
+                        WallpaperGrid {
+                            id: gridView
                             anchors.fill: parent
-                            spacing: Vars.spacingMedium
+                            model: sortFilterProxyModel.proxyModel
+                            rootRef: root
 
-                            WallpaperControls {
-                                id: controls
+                            header: WallpaperControls {
+                                width: gridView.width
                                 rootRef: root
                                 settingsRef: settings
                                 loadWallpapersProcRef: loadWallpapersProc
                                 gridViewRef: gridView
                                 autocompleteProcRef: autocompleteProc
                                 autocompleteModelRef: autocompleteModel
+                                
+                                Item {
+                                    width: 1
+                                    height: Vars.spacingMedium
+                                }
                             }
 
-                            WallpaperGrid {
-                                id: gridView
-                                model: sortFilterProxyModel.proxyModel
-                                rootRef: root
-
-                                onWallpaperSelected: path => {
-                                    executeWallpaperChange(path);
-                                }
-                                onRequestFocusSearch: {
-                                    controls.focusSearch();
-                                }
+                            onWallpaperSelected: path => {
+                                executeWallpaperChange(path);
+                            }
+                            onRequestFocusSearch: {
+                                gridView.positionViewAtBeginning();
+                                if (gridView.headerItem) gridView.headerItem.focusSearch();
                             }
                         }
 
@@ -199,7 +213,7 @@ Item {
 
                         QtObject {
                             id: sortFilterProxyModel
-                            property string filterText: controls.filterText
+                            property string filterText: controls ? controls.filterText : ""
                             onFilterTextChanged: updateVisualGrid()
                             function updateVisualGrid() {
                                 proxyModelObj.clear();

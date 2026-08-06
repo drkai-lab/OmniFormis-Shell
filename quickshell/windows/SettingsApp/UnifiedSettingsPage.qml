@@ -188,83 +188,80 @@ ColumnLayout {
         }
     }
 
-    Rectangle {
+    RowLayout {
         Layout.fillWidth: true
-        height: 72
-        color: Vars.translucent ? Qt.rgba(Theme.surface_container.r, Theme.surface_container.g, Theme.surface_container.b, 0.5) : Theme.surface_container
-        radius: Vars.radiusMedium
+        spacing: Vars.spacingMedium
 
-        RowLayout {
-            anchors.fill: parent
-            anchors.leftMargin: Vars.spacingLarge
-            anchors.rightMargin: Vars.spacingLarge
-            spacing: Vars.spacingMedium
-            Text {
-                text: "search"
-                font.family: "Material Symbols Outlined"
-                font.pixelSize: 24
-                color: Theme.on_surface
+        SearchBar {
+            id: searchBar
+            Layout.fillWidth: true
+            placeholderText: "Search settings..."
+            showIcon: true
+            iconText: "search"
+            defaultHeight: 72
+            defaultColor: Vars.translucent ? Qt.rgba(Theme.surface_container.r, Theme.surface_container.g, Theme.surface_container.b, 0.5) : Theme.surface_container
+            
+            onTextChanged: applyFilter()
+            onDownPressed: {
+                settingsList.forceActiveFocus();
             }
-            TextInput {
-                id: searchInput
-                Layout.fillWidth: true
-                color: Theme.on_surface
-                font.family: Vars.fontFamily
-                font.pixelSize: 16
-                verticalAlignment: TextInput.AlignVCenter
-                clip: true
-                onTextChanged: applyFilter()
-                KeyNavigation.down: settingsList
-                Keys.onDownPressed: {
-                    settingsList.forceActiveFocus();
-                }
+        }
+
+        Button {
+            Layout.alignment: Qt.AlignVCenter
+            visible: rootPage.activeCategory === "Input"
+            onClicked: {
+                var proc = Qt.createQmlObject('import Quickshell.Io; Process { command: ["sh", "-c", "hyprctl devices -j | jq -r \\".keyboards[].name\\" | while read -r kb; do hyprctl switchxkblayout \\"$kb\\" next; done"]; onExited: destroy() }', rootPage);
+                proc.running = true;
             }
-            Button {
-                visible: rootPage.activeCategory === "Input"
+            background: Rectangle {
+                color: layoutBtnHover.containsMouse ? Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.1) : "transparent"
+                radius: Vars.radiusMedium
+                implicitHeight: 72
+                implicitWidth: layoutBtnContent.width + Vars.spacingLarge * 2
+            }
+            contentItem: RowLayout {
+                id: layoutBtnContent
+                spacing: 8
+                Text { text: "keyboard"; font.family: "Material Symbols Outlined"; color: Theme.on_surface; font.pixelSize: 20 }
+                Text { text: "Switch Layout"; color: Theme.on_surface; font.family: Vars.fontFamily; font.bold: true }
+            }
+            MouseArea {
+                id: layoutBtnHover
+                anchors.fill: parent
+                hoverEnabled: true
+                cursorShape: Qt.PointingHandCursor
                 onClicked: {
                     var proc = Qt.createQmlObject('import Quickshell.Io; Process { command: ["sh", "-c", "hyprctl devices -j | jq -r \\".keyboards[].name\\" | while read -r kb; do hyprctl switchxkblayout \\"$kb\\" next; done"]; onExited: destroy() }', rootPage);
                     proc.running = true;
                 }
-                background: Rectangle {
-                    color: layoutBtnHover.containsMouse ? Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.1) : "transparent"
-                    radius: Vars.radiusMedium
-                }
-                contentItem: RowLayout {
-                    spacing: 8
-                    Text { text: "keyboard"; font.family: "Material Symbols Outlined"; color: Theme.on_surface; font.pixelSize: 20 }
-                    Text { text: "Switch Layout"; color: Theme.on_surface; font.family: Vars.fontFamily; font.bold: true }
-                }
-                MouseArea {
-                    id: layoutBtnHover
-                    anchors.fill: parent
-                    hoverEnabled: true
-                    cursorShape: Qt.PointingHandCursor
-                    onClicked: {
-                        var proc = Qt.createQmlObject('import Quickshell.Io; Process { command: ["sh", "-c", "hyprctl devices -j | jq -r \\".keyboards[].name\\" | while read -r kb; do hyprctl switchxkblayout \\"$kb\\" next; done"]; onExited: destroy() }', rootPage);
-                        proc.running = true;
-                    }
-                }
             }
+        }
 
-            Button {
+        Button {
+            Layout.alignment: Qt.AlignVCenter
+            onClicked: loadSettings()
+            background: Rectangle {
+                color: refreshBtnHover.containsMouse ? Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.1) : "transparent"
+                radius: Vars.radiusMedium
+                implicitHeight: 72
+                implicitWidth: refreshBtnContent.width + Vars.spacingLarge * 2
+            }
+            contentItem: Text {
+                id: refreshBtnContent
+                text: "Refresh"
+                color: Theme.on_surface
+                font.family: Vars.fontFamily
+                font.bold: true
+                horizontalAlignment: Text.AlignHCenter
+                verticalAlignment: Text.AlignVCenter
+            }
+            MouseArea {
+                id: refreshBtnHover
+                anchors.fill: parent
+                hoverEnabled: true
+                cursorShape: Qt.PointingHandCursor
                 onClicked: loadSettings()
-                background: Rectangle {
-                    color: refreshBtnHover.containsMouse ? Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.1) : "transparent"
-                    radius: Vars.radiusMedium
-                }
-                contentItem: Text {
-                    text: "Refresh"
-                    color: Theme.on_surface
-                    font.family: Vars.fontFamily
-                    font.bold: true
-                }
-                MouseArea {
-                    id: refreshBtnHover
-                    anchors.fill: parent
-                    hoverEnabled: true
-                    cursorShape: Qt.PointingHandCursor
-                    onClicked: loadSettings()
-                }
             }
         }
     }

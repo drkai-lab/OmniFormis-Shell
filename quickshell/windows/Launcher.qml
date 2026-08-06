@@ -60,15 +60,28 @@ Item {
         } else {
             MorphState.notifyOpened(500, panel.targetHeight, panel.targetRad, panel);
             launcherModel.refreshClipboard();
-            Qt.callLater(() => { searchBar.forceActiveFocus(); });
+            innerUI.visible = true;
+            searchBar.forceActiveFocus();
+            innerUI.visible = Qt.binding(() => root.expanded || innerUI.opacity > 0);
         }
     }
 
     Item {
         id: panelMask
-        anchors.centerIn: panel
-        width: root.expanded ? 540 : panel.width + 40
-        height: root.expanded ? 490 : panel.height + 40
+        anchors.top: (!Vars.pillPosition || Vars.pillPosition === "Top") ? parent.top : undefined
+        anchors.bottom: Vars.pillPosition === "Bottom" ? parent.bottom : undefined
+        anchors.left: Vars.pillPosition === "Left" ? parent.left : undefined
+        anchors.right: Vars.pillPosition === "Right" ? parent.right : undefined
+        anchors.horizontalCenter: (Vars.pillPosition === "Left" || Vars.pillPosition === "Right") ? undefined : parent.horizontalCenter
+        anchors.verticalCenter: (Vars.pillPosition === "Left" || Vars.pillPosition === "Right") ? parent.verticalCenter : undefined
+        
+        anchors.topMargin: -20
+        anchors.bottomMargin: -20
+        anchors.leftMargin: -20
+        anchors.rightMargin: -20
+
+        width: root.expanded ? 540 : 140
+        height: root.expanded ? 490 : 80
     }
 
     // The visual panel that animates
@@ -84,6 +97,7 @@ Item {
         anchors.horizontalCenter: (Vars.pillPosition === "Left" || Vars.pillPosition === "Right") ? undefined : parent.horizontalCenter
         anchors.verticalCenter: (Vars.pillPosition === "Left" || Vars.pillPosition === "Right") ? parent.verticalCenter : undefined
         
+        onHeightChanged: console.log("[DEBUG] Launcher panel.height:", height, "implicit:", mainLayout.implicitHeight)
         property real targetHeight: root.expanded ? Math.max(80, Math.min(450, mainLayout.implicitHeight + (Vars.spacingLarge * 2))) : (MorphState.anyExpanded ? MorphState.targetHeight : 40)
         width: root.expanded ? 500 : (MorphState.anyExpanded ? MorphState.targetWidth : 100)
         height: targetHeight
@@ -121,7 +135,7 @@ Item {
             anchors.margins: Vars.spacingLarge
             
             opacity: root.expanded ? 1.0 : 0.0
-            visible: opacity > 0
+            visible: root.expanded || opacity > 0
             Behavior on opacity { enabled: !root.gameMode; NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: root.expanded ? Vars.customEmphasizedDecelerate : Vars.customEmphasizedAccelerate } }
 
             ColumnLayout {
@@ -134,9 +148,10 @@ Item {
 
                 // Header removed per user request
 
-                LC.SearchBar {
+                SearchBar {
                     id: searchBar
                     expanded: root.expanded
+                    placeholderText: "Search apps..."
                     onDownPressed: {
                         if (appList.count > 0 && appList.currentIndex === -1) {
                             appList.currentIndex = 0;

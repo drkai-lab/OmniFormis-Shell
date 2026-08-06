@@ -91,7 +91,9 @@ Item {
     onExpandedChanged: {
         if (expanded) {
             MorphState.notifyOpened(600, panel.targetHeight, panel.targetRad, panel);
+            expandedUI.visible = true;
             forceActiveFocus();
+            expandedUI.visible = Qt.binding(() => root.expanded || expandedUI.opacity > 0);
             uptimeProc.running = true;
         } else {
             MorphState.notifyClosed();
@@ -106,9 +108,19 @@ Item {
 
     Item {
         id: panelMask
-        anchors.centerIn: panel
-        width: panel.width + 40
-        height: panel.height + 40
+                anchors.top: (!Vars.pillPosition || Vars.pillPosition === "Top") ? parent.top : undefined
+        anchors.bottom: Vars.pillPosition === "Bottom" ? parent.bottom : undefined
+        anchors.left: Vars.pillPosition === "Left" ? parent.left : undefined
+        anchors.right: Vars.pillPosition === "Right" ? parent.right : undefined
+        anchors.horizontalCenter: (Vars.pillPosition === "Left" || Vars.pillPosition === "Right") ? undefined : parent.horizontalCenter
+        anchors.verticalCenter: (Vars.pillPosition === "Left" || Vars.pillPosition === "Right") ? parent.verticalCenter : undefined
+        
+        anchors.topMargin: -20
+        anchors.bottomMargin: -20
+        anchors.leftMargin: -20
+        anchors.rightMargin: -20
+        width: root.expanded ? 640 : 140
+        height: root.expanded ? 640 : 80
     }
 
     Rectangle {
@@ -159,7 +171,7 @@ Item {
             anchors.fill: parent
             
             opacity: root.expanded ? 1.0 : 0.0
-            visible: opacity > 0
+            visible: root.expanded || opacity > 0
             clip: true
             Behavior on opacity { enabled: !root.gameMode; NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: root.expanded ? Vars.customEmphasizedDecelerate : Vars.customEmphasizedAccelerate } }
 

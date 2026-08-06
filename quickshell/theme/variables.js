@@ -46,8 +46,11 @@ var fontFamily = "Google Sans Flex";
 var animationDuration = 240;
 var flickDeceleration = 1500;
 var maximumFlickVelocity = 3000;
-var translucent = true;
-var liquidGlass = false;
+var _translucent = true;
+var _liquidGlass = false;
+
+Object.defineProperty(this, 'translucent', { get: function () { return gameMode ? false : _translucent; }, set: function (v) { _translucent = v; } });
+Object.defineProperty(this, 'liquidGlass', { get: function () { return gameMode ? false : _liquidGlass; }, set: function (v) { _liquidGlass = v; } });
 var liquidGlassPreset = "apple";
 var blurAmount = 27;
 var panelOpacity = 0.6;
@@ -60,7 +63,7 @@ var overviewScale = 0.8;
 var wallpaperMaskEnabled = true;
 var wallpaperMaskScale = 1.05;
 var wallpaperMaskShape = "9SidedCookie";
-var wallpaperMaskColor = "primary";
+var wallpaperMaskColor = "surface_variant";
 var wallpaperMaskOffsetX = 0;
 var wallpaperMaskOffsetY = 4;
 
@@ -69,7 +72,7 @@ var clockShowTicks = false;
 var clockShowCenterDot = false;
 
 var mediaPlayerShape = "12SidedCookie";
-var mediaPlayerArtScale = 1;
+var mediaPlayerArtScale = 1.25;
 
 var panelStyle = "Attached";
 var pillPosition = "Left";

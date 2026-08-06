@@ -1,28 +1,28 @@
 {
   "checksum": ":)",
-  "wallpaper": "/home/boing/Pictures/Wallpapers/Apple/Section 1/Lake.jpg",
+  "wallpaper": "/home/boing/Pictures/Wallpapers/Wallpapers-Bank/Dynamic-Wallpapers/Light/Mountain_light.png",
   "alpha": "100",
   "special": {
-    "background": "#131318",
-    "foreground": "#e4e1e9",
-    "cursor": "#bbc3ff"
+    "background": "#141318",
+    "foreground": "#e5e1e9",
+    "cursor": "#c7bfff"
   },
   "colors": {
-    "color0": "#131318",
-    "color1": "#dfcffb",
-    "color2": "#bbbce6",
-    "color3": "#edb3d9",
-    "color4": "#bbc3ff",
-    "color5": "#e6bad7",
-    "color6": "#333869",
-    "color7": "#c7c5d0",
-    "color8": "#46464f",
-    "color9": "#bbc3ff",
-    "color10": "#9598d9",
-    "color11": "#e38ac5",
-    "color12": "#8896ff",
-    "color13": "#d895c1",
-    "color14": "#313b82",
-    "color15": "#e4e1e9"
+    "color0": "#141318",
+    "color1": "#e5cffb",
+    "color2": "#c2bae6",
+    "color3": "#f3b1cd",
+    "color4": "#c7bfff",
+    "color5": "#ecb8ce",
+    "color6": "#3c3469",
+    "color7": "#c9c5d0",
+    "color8": "#47464f",
+    "color9": "#c7bfff",
+    "color10": "#a294d8",
+    "color11": "#ec85b1",
+    "color12": "#9a8cff",
+    "color13": "#e190b2",
+    "color14": "#3f3680",
+    "color15": "#e5e1e9"
   }
 }

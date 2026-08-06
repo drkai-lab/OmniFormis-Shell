@@ -84,29 +84,40 @@ Item {
     }
 
     property var filteredModel: {
-        var filterText = searchInput.text.toLowerCase().trim();
+        var filterText = searchBar.text.toLowerCase().trim();
         if (filterText === "") return root.emojiModel;
         
         return root.emojiModel.filter(item => Vars.fuzzyMatch(filterText, item.name));
     }
 
-
     
     onExpandedChanged: {
         if (!expanded) {
             MorphState.notifyClosed();
-            searchInput.text = "";
+            searchBar.text = "";
         } else {
             MorphState.notifyOpened(500, 450, panel.targetRad, panel);
-            searchInput.forceActiveFocus();
+            expandedUI.visible = true;
+            searchBar.forceActiveFocus();
+            expandedUI.visible = Qt.binding(() => root.expanded || expandedUI.opacity > 0);
         }
     }
 
     Item {
         id: panelMask
-        anchors.centerIn: panel
-        width: panel.width + 40
-        height: panel.height + 40
+                anchors.top: (!Vars.pillPosition || Vars.pillPosition === "Top") ? parent.top : undefined
+        anchors.bottom: Vars.pillPosition === "Bottom" ? parent.bottom : undefined
+        anchors.left: Vars.pillPosition === "Left" ? parent.left : undefined
+        anchors.right: Vars.pillPosition === "Right" ? parent.right : undefined
+        anchors.horizontalCenter: (Vars.pillPosition === "Left" || Vars.pillPosition === "Right") ? undefined : parent.horizontalCenter
+        anchors.verticalCenter: (Vars.pillPosition === "Left" || Vars.pillPosition === "Right") ? parent.verticalCenter : undefined
+        
+        anchors.topMargin: -20
+        anchors.bottomMargin: -20
+        anchors.leftMargin: -20
+        anchors.rightMargin: -20
+        width: root.expanded ? 440 : 140
+        height: root.expanded ? 490 : 80
     }
 
     Rectangle {
@@ -145,7 +156,7 @@ Item {
             anchors.margins: Vars.spacingLarge
             
             opacity: root.expanded ? 1.0 : 0.0
-            visible: opacity > 0
+            visible: root.expanded || opacity > 0
             Behavior on opacity { enabled: !root.gameMode; NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: root.expanded ? Vars.customEmphasizedDecelerate : Vars.customEmphasizedAccelerate } }
 
             ColumnLayout {
@@ -167,60 +178,19 @@ Item {
                     Text { text: "Emoji Picker"; font.family: Vars.fontFamily; font.pixelSize: 20; font.weight: 600; color: Theme.on_primary }
                 }
 
-                Rectangle {
-                    id: searchBox
-                    Layout.fillWidth: true
-                    Layout.preferredHeight: 44
-                    color: searchInput.activeFocus ? "transparent" : Qt.rgba(Theme.on_primary.r, Theme.on_primary.g, Theme.on_primary.b, 0.08)
-                    radius: Vars.radiusMedium
-
-                    RowLayout {
-                        anchors.fill: parent
-                        anchors.leftMargin: Vars.spacingMedium
-                        anchors.rightMargin: Vars.spacingMedium
-
-                        TextInput {
-                            id: searchInput
-                            Layout.fillWidth: true
-                            font.family: Vars.fontFamily
-                            font.pixelSize: 14
-                            color: Theme.on_primary
-                            focus: root.expanded
-                            selectByMouse: true
-
-                            Text {
-                                text: "Search emojis..."
-                                font.family: Vars.fontFamily
-                                font.pixelSize: 14
-                                color: Theme.on_primary
-                                opacity: 0.6
-                                visible: !searchInput.text && !searchInput.activeFocus
-                            }
-
-                            Keys.onDownPressed: (event) => {
-                                if (emojiGridView.count > 0 && emojiGridView.currentIndex === -1) {
-                                    emojiGridView.currentIndex = 0;
-                                }
-                                emojiGridView.forceActiveFocus();
-                                event.accepted = true;
-                            }
-                            Keys.onEscapePressed: (event) => {
-                                root.expanded = false;
-                                event.accepted = true;
-                            }
+                SearchBar {
+                    id: searchBar
+                    expanded: root.expanded
+                    placeholderText: "Search emojis..."
+                    defaultHeight: 44
+                    onDownPressed: {
+                        if (emojiGridView.count > 0 && emojiGridView.currentIndex === -1) {
+                            emojiGridView.currentIndex = 0;
                         }
-
-                        Text {
-                            text: "✕"
-                            font.pixelSize: 14
-                            color: Theme.on_primary
-                            visible: searchInput.text.length > 0
-                            Layout.alignment: Qt.AlignVCenter
-                            MouseArea {
-                                anchors.fill: parent
-                                onClicked: searchInput.text = ""
-                            }
-                        }
+                        emojiGridView.forceActiveFocus();
+                    }
+                    onEscapePressed: {
+                        root.expanded = false;
                     }
                 }
 
@@ -246,7 +216,9 @@ Item {
                     
                     Keys.onUpPressed: (event) => {
                         if (currentIndex < Math.floor(width / cellWidth)) {
-                            searchInput.forceActiveFocus();
+                            expandedUI.visible = true;
+            searchBar.forceActiveFocus();
+            expandedUI.visible = Qt.binding(() => root.expanded || expandedUI.opacity > 0);
                         } else {
                             moveCurrentIndexUp();
                         }
@@ -263,7 +235,9 @@ Item {
                                 event.accepted = true;
                             } else if (event.key === Qt.Key_K) {
                                 if (currentIndex < Math.floor(width / cellWidth)) {
-                                    searchInput.forceActiveFocus();
+                                    expandedUI.visible = true;
+            searchBar.forceActiveFocus();
+            expandedUI.visible = Qt.binding(() => root.expanded || expandedUI.opacity > 0);
                                 } else {
                                     moveCurrentIndexUp();
                                 }

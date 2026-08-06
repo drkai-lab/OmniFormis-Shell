@@ -24,7 +24,7 @@ local vars = {
     -- Set keyboard layout
     kb_layout = "us,us",
     -- Set keyboard variant
-    kb_variant = ",colemak",
+    kb_variant = ",colemak_dh",
     -- Set keyboard options
     kb_options = "grp:alt_shift_toggle,caps:escape",
     -- Set follow mouse mode

@@ -69,17 +69,33 @@ Item {
     visible: opacity > 0
     signal closeRequested()
     onExpandedChanged: {
-        if (expanded) MorphState.notifyOpened(root.isFloatingInstance ? root.width : 1320, root.isFloatingInstance ? root.height : 740, panel.targetRad, panel);
-        else MorphState.notifyClosed();
+        if (expanded) {
+            MorphState.notifyOpened(root.isFloatingInstance ? root.width : 1320, root.isFloatingInstance ? root.height : 740, panel.targetRad, panel);
+            expandedUI.visible = true;
+            root.forceActiveFocus();
+            expandedUI.visible = Qt.binding(() => root.expanded || expandedUI.opacity > 0);
+        } else {
+            MorphState.notifyClosed();
+        }
     }
 
 
     
     Item {
         id: panelMask
-        anchors.centerIn: panel
-        width: panel.width + 40
-        height: panel.height + 40
+                anchors.top: (!Vars.pillPosition || Vars.pillPosition === "Top") ? parent.top : undefined
+        anchors.bottom: Vars.pillPosition === "Bottom" ? parent.bottom : undefined
+        anchors.left: Vars.pillPosition === "Left" ? parent.left : undefined
+        anchors.right: Vars.pillPosition === "Right" ? parent.right : undefined
+        anchors.horizontalCenter: (Vars.pillPosition === "Left" || Vars.pillPosition === "Right") ? undefined : parent.horizontalCenter
+        anchors.verticalCenter: (Vars.pillPosition === "Left" || Vars.pillPosition === "Right") ? parent.verticalCenter : undefined
+        
+        anchors.topMargin: -20
+        anchors.bottomMargin: -20
+        anchors.leftMargin: -20
+        anchors.rightMargin: -20
+        width: root.expanded ? 740 : 140
+        height: root.expanded ? 540 : 80
     }
     
     Rectangle {
@@ -121,7 +137,7 @@ Item {
             height: Math.max(1, parent.height - Vars.spacingLarge * 2)
             
             opacity: root.expanded ? 1.0 : 0.0
-            visible: opacity > 0
+            visible: root.expanded || opacity > 0
             clip: true
             Behavior on opacity { enabled: !root.gameMode; NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: root.expanded ? Vars.customEmphasizedDecelerate : Vars.customEmphasizedAccelerate } }
 

@@ -209,7 +209,10 @@ ListView {
         event.accepted = true;
     }
     
+    onActiveFocusChanged: console.log("[DEBUG] AppList activeFocus changed to:", activeFocus)
+    onCurrentIndexChanged: console.log("[DEBUG] AppList currentIndex changed to:", currentIndex)
     onModelChanged: {
+        console.log("[DEBUG] AppList onModelChanged. count:", count)
         if (count > 0 && currentIndex === -1) {
             currentIndex = 0;
         }

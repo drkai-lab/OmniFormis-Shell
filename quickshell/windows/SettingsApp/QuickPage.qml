@@ -95,7 +95,11 @@ Flickable {
             var step = wallpaperSettings.awwwTransitionStep || "90";
             var angle = wallpaperSettings.awwwTransitionAngle || "30";
             Quickshell.execDetached({ command: ["bash", "-c", "awww img '" + cleanWp + "' --transition-type " + trans + " --transition-angle " + angle + " --transition-step " + step] });
-            cmd += "matugen image '" + cleanWp + "' -m '" + mode + "' -t '" + matugenArg + "' --source-color-index 0; ";
+            if (scheme === "scheme-auto" || scheme === "auto") {
+                cmd += "bash ~/Dotfiles/scripts/auto_scheme_matugen.sh '" + cleanWp + "' '" + mode + "'; ";
+            } else {
+                cmd += "matugen image '" + cleanWp + "' -m '" + mode + "' -t '" + matugenArg + "' --source-color-index 0; ";
+            }
         }
         console.log("[USER ACTION] Running set-theme mode switch: " + mode);
         cmd += "bash ~/.config/color-schemes/set-theme.sh 'material-you' '" + mode + "'; ";
@@ -231,7 +235,11 @@ Flickable {
             var step2 = wallpaperSettings.awwwTransitionStep || "90";
             var angle2 = wallpaperSettings.awwwTransitionAngle || "30";
             Quickshell.execDetached({ command: ["bash", "-c", "awww img '" + cleanWp + "' --transition-type " + trans2 + " --transition-angle " + angle2 + " --transition-step " + step2] });
-            shellCmds += "matugen image '" + cleanWp + "' -m '" + mode + "' -t '" + matugenArg + "' --source-color-index 0; ";
+            if (scheme === "scheme-auto" || scheme === "auto") {
+                shellCmds += "bash ~/Dotfiles/scripts/auto_scheme_matugen.sh '" + cleanWp + "' '" + mode + "'; ";
+            } else {
+                shellCmds += "matugen image '" + cleanWp + "' -m '" + mode + "' -t '" + matugenArg + "' --source-color-index 0; ";
+            }
         }
         shellCmds += "bash ~/.config/color-schemes/set-theme.sh 'material-you' '" + mode + "'; ";
         shellCmds += "nohup bash ~/Dotfiles/scripts/reload.sh >/dev/null 2>&1 &";

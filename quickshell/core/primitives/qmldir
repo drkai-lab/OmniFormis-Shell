@@ -1,2 +1,3 @@
 module Primitives
 LoadingIndicator 1.0 LoadingIndicator.qml
+SearchBar 1.0 SearchBar.qml

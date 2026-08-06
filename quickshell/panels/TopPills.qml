@@ -16,7 +16,8 @@ PanelWindow {
     exclusiveZone: 0
     WlrLayershell.namespace: "quickshell"
     WlrLayershell.layer: WlrLayer.Top
-    WlrLayershell.keyboardFocus: globalFocusGrab.active ? WlrKeyboardFocus.OnDemand : WlrKeyboardFocus.None
+    property bool hasAnyPopupOpen: launcherItem.expanded || controlCenterItem.expanded || wallpaperSwitcherItem.expanded || colorSchemeSwitcherItem.expanded || powerMenuItem.expanded || polkitItem.expanded || emojiPickerItem.expanded || settingsAppItem.expanded
+    WlrLayershell.keyboardFocus: hasAnyPopupOpen ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
     anchors {
         top: true
         left: true
@@ -27,21 +28,17 @@ PanelWindow {
     implicitHeight: 750
     color: "transparent"
 
+    property bool _forceDropGrab: false
+
     HyprlandFocusGrab {
         id: globalFocusGrab
         windows: [topWindow]
-        active: launcherItem.expanded || controlCenterItem.expanded || wallpaperSwitcherItem.expanded || colorSchemeSwitcherItem.expanded || powerMenuItem.expanded || polkitItem.expanded || emojiPickerItem.expanded || settingsAppItem.expanded
+        onActiveChanged: console.log("[DEBUG] HyprlandFocusGrab active changed to:", active)
+        active: !_forceDropGrab && topWindow.hasAnyPopupOpen
         onCleared: {
+            console.log("[DEBUG] HyprlandFocusGrab onCleared fired! active:", active);
             if (active) {
-                Qt.callLater(() => {
-                    if (globalFocusGrab.active) {
-                        globalFocusGrab.active = false;
-                        globalFocusGrab.active = true;
-                        if (launcherItem.expanded) {
-                            launcherItem.forceSearchFocus();
-                        }
-                    }
-                });
+                closeAll();
             }
         }
     }
@@ -121,6 +118,9 @@ PanelWindow {
     // 1. The Mask Region Array
     mask: Region {
         Region {
+            item: globalFocusGrab.active ? popupScrim : null
+        }
+        Region {
             item: clockHoverZone
         }
         Region {
@@ -161,8 +161,18 @@ PanelWindow {
         }
     }
 
-    // popupScrim removed — clicking outside a popup passes through to underlying windows
-    // and HyprlandFocusGrab.onCleared handles closing the popup automatically
+    // Restored popupScrim because Hyprland drops OnDemand focus on every commit
+    // if the pointer is over another window. Exclusive focus + Scrim is required for animations.
+    MouseArea {
+        id: popupScrim
+        anchors.fill: parent
+        enabled: globalFocusGrab.active
+        hoverEnabled: true
+        acceptedButtons: Qt.AllButtons
+        onWheel: (wheel) => wheel.accepted = true
+        onClicked: closeAll()
+        z: -1
+    }
 
     property bool suppressHover: false
     property bool pillHoverGrace: false
@@ -338,49 +348,71 @@ PanelWindow {
                 launcherItem.expanded = false;
             } else {
                 topWindow.popupOpened();
+                _forceDropGrab = true;
+                closeAllExcept(launcherItem);
                 launcherItem.expanded = true;
                 launcherItem.searchText = "";
-                closeAllExcept(launcherItem);
+                _forceDropGrab = false;
             }
         }
     }
 
     function toggleControlCenter() {
         if (!polkitItem.expanded) {
-            controlCenterItem.expanded = !controlCenterItem.expanded;
-            if (controlCenterItem.expanded) {
+            let wasExpanded = controlCenterItem.expanded;
+            if (wasExpanded) {
+                controlCenterItem.expanded = false;
+            } else {
                 topWindow.popupOpened();
+                _forceDropGrab = true;
                 closeAllExcept(controlCenterItem);
+                controlCenterItem.expanded = true;
+                _forceDropGrab = false;
             }
         }
     }
 
     function toggleWallpaper() {
         if (!polkitItem.expanded) {
-            wallpaperSwitcherItem.expanded = !wallpaperSwitcherItem.expanded;
-            if (wallpaperSwitcherItem.expanded) {
+            let wasExpanded = wallpaperSwitcherItem.expanded;
+            if (wasExpanded) {
+                wallpaperSwitcherItem.expanded = false;
+            } else {
                 topWindow.popupOpened();
+                _forceDropGrab = true;
                 closeAllExcept(wallpaperSwitcherItem);
+                wallpaperSwitcherItem.expanded = true;
+                _forceDropGrab = false;
             }
         }
     }
 
     function toggleColorScheme() {
         if (!polkitItem.expanded) {
-            colorSchemeSwitcherItem.expanded = !colorSchemeSwitcherItem.expanded;
-            if (colorSchemeSwitcherItem.expanded) {
+            let wasExpanded = colorSchemeSwitcherItem.expanded;
+            if (wasExpanded) {
+                colorSchemeSwitcherItem.expanded = false;
+            } else {
                 topWindow.popupOpened();
+                _forceDropGrab = true;
                 closeAllExcept(colorSchemeSwitcherItem);
+                colorSchemeSwitcherItem.expanded = true;
+                _forceDropGrab = false;
             }
         }
     }
 
     function togglePowerMenu() {
         if (!polkitItem.expanded) {
-            powerMenuItem.expanded = !powerMenuItem.expanded;
-            if (powerMenuItem.expanded) {
+            let wasExpanded = powerMenuItem.expanded;
+            if (wasExpanded) {
+                powerMenuItem.expanded = false;
+            } else {
                 topWindow.popupOpened();
+                _forceDropGrab = true;
                 closeAllExcept(powerMenuItem);
+                powerMenuItem.expanded = true;
+                _forceDropGrab = false;
             }
         }
     }
@@ -391,9 +423,11 @@ PanelWindow {
                 launcherItem.expanded = false;
             } else {
                 topWindow.popupOpened();
+                _forceDropGrab = true;
+                closeAllExcept(launcherItem);
                 launcherItem.expanded = true;
                 launcherItem.searchText = "/emoji ";
-                closeAllExcept(launcherItem);
+                _forceDropGrab = false;
             }
         }
     }
@@ -404,19 +438,26 @@ PanelWindow {
                 launcherItem.expanded = false;
             } else {
                 topWindow.popupOpened();
+                _forceDropGrab = true;
+                closeAllExcept(launcherItem);
                 launcherItem.expanded = true;
                 launcherItem.searchText = "/clipboard ";
-                closeAllExcept(launcherItem);
+                _forceDropGrab = false;
             }
         }
     }
 
     function toggleSettings() {
         if (!polkitItem.expanded) {
-            settingsAppItem.expanded = !settingsAppItem.expanded;
-            if (settingsAppItem.expanded) {
+            let wasExpanded = settingsAppItem.expanded;
+            if (wasExpanded) {
+                settingsAppItem.expanded = false;
+            } else {
                 topWindow.popupOpened();
+                _forceDropGrab = true;
                 closeAllExcept(settingsAppItem);
+                settingsAppItem.expanded = true;
+                _forceDropGrab = false;
             }
         }
     }
