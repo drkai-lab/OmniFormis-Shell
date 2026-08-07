@@ -100,7 +100,7 @@ ColumnLayout {
                 y: 0
                 width: Math.max(0, parent.width - x)
                 height: parent.height
-                color: Vars.translucent ? Qt.rgba(Theme.surface_variant.r, Theme.surface_variant.g, Theme.surface_variant.b, Vars.componentOpacity) : Theme.surface_variant
+                color: (Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_variant.r, Theme.surface_variant.g, Theme.surface_variant.b, Vars.componentOpacity) : Theme.surface_variant
 
                 topLeftRadius: Math.min(sliders.leftRadiusSmall, width / 2)
                 bottomLeftRadius: Math.min(sliders.leftRadiusSmall, width / 2)
@@ -183,7 +183,7 @@ ColumnLayout {
                 y: 0
                 width: Math.max(0, parent.width - x)
                 height: parent.height
-                color: Vars.translucent ? Qt.rgba(Theme.surface_variant.r, Theme.surface_variant.g, Theme.surface_variant.b, Vars.componentOpacity) : Theme.surface_variant
+                color: (Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_variant.r, Theme.surface_variant.g, Theme.surface_variant.b, Vars.componentOpacity) : Theme.surface_variant
 
                 topLeftRadius: Math.min(sliders.leftRadiusSmall, width / 2)
                 bottomLeftRadius: Math.min(sliders.leftRadiusSmall, width / 2)

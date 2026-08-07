@@ -46,14 +46,14 @@ var fontFamily = "Google Sans Flex";
 var animationDuration = 240;
 var flickDeceleration = 1500;
 var maximumFlickVelocity = 3000;
-var _translucent = true;
+var _translucent = false;
 var _liquidGlass = false;
 
 Object.defineProperty(this, 'translucent', { get: function () { return gameMode ? false : _translucent; }, set: function (v) { _translucent = v; } });
 Object.defineProperty(this, 'liquidGlass', { get: function () { return gameMode ? false : _liquidGlass; }, set: function (v) { _liquidGlass = v; } });
 var liquidGlassPreset = "apple";
 var blurAmount = 27;
-var panelOpacity = 0.6;
+var panelOpacity = 0.5;
 var componentOpacity = 0.3;
 
 var overviewGridRows = 2;
@@ -62,25 +62,36 @@ var overviewScale = 0.8;
 
 var wallpaperMaskEnabled = true;
 var wallpaperMaskScale = 1.05;
-var wallpaperMaskShape = "9SidedCookie";
+var wallpaperMaskShape = "Pill";
 var wallpaperMaskColor = "surface_variant";
 var wallpaperMaskOffsetX = 0;
 var wallpaperMaskOffsetY = 4;
 
-var clockShape = "6SidedCookie";
+var clockShape = "Sunny";
 var clockShowTicks = false;
 var clockShowCenterDot = false;
 
 var mediaPlayerShape = "12SidedCookie";
-var mediaPlayerArtScale = 1.25;
+var mediaPlayerArtScale = 1.05;
 
 var panelStyle = "Attached";
-var pillPosition = "Left";
+var pillPosition = "Top";
 var gameMode = false;
 
 var desktopClockEnabled = true;
+var desktopClockAnchorEnabled = true;
+var desktopClockAnchorPoint = "Center";
+var desktopClockAnchorCurve = 0;
+
 var desktopCalenderEnabled = false;
+var desktopCalenderAnchorEnabled = false;
+var desktopCalenderAnchorPoint = "Center";
+var desktopCalenderAnchorCurve = 0;
+
 var desktopMediaPlayerEnabled = false;
+var desktopMediaPlayerAnchorEnabled = false;
+var desktopMediaPlayerAnchorPoint = "Center";
+var desktopMediaPlayerAnchorCurve = 0;
 
 var m3Standard = [0.2, 0.0, 0.0, 1.0];
 var m3StandardDecelerate = [0.0, 0.0, 0.0, 1.0];

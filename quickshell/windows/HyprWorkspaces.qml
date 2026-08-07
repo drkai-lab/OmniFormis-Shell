@@ -117,14 +117,14 @@ Item {
             shadowHorizontalOffset: 0
         }
         anchors.fill: parent
-        color: Vars.translucent ? Qt.rgba(Theme.surface.r, Theme.surface.g, Theme.surface.b, Vars.panelOpacity) : Theme.surface
+        color: (Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface.r, Theme.surface.g, Theme.surface.b, Vars.panelOpacity) : Theme.surface
         property real targetRad: Math.min(mainContainer.width, mainContainer.height) / 2
         topLeftRadius: Vars.getTopLeftRadius(Vars.panelStyle, Vars.pillPosition, false, targetRad)
         topRightRadius: Vars.getTopRightRadius(Vars.panelStyle, Vars.pillPosition, false, targetRad)
         bottomLeftRadius: Vars.getBottomLeftRadius(Vars.panelStyle, Vars.pillPosition, false, targetRad)
         bottomRightRadius: Vars.getBottomRightRadius(Vars.panelStyle, Vars.pillPosition, false, targetRad)
 
-        opacity: (overlayVisible && !mainContainer.forceHidePill) ? (Vars.translucent ? 0.85 : 1.0) : 0.0
+        opacity: (overlayVisible && !mainContainer.forceHidePill) ? ((Vars._translucent && !Vars.gameMode) ? 0.85 : 1.0) : 0.0
         visible: opacity > 0
         Behavior on opacity {
             enabled: !mainContainer.gameMode
@@ -182,7 +182,7 @@ Item {
                     }
                 }
 
-                color: isFocused ? (Vars.translucent ? Qt.rgba(Theme.primary.r, Theme.primary.g, Theme.primary.b, 0.85) : Theme.primary) : (wsMouseArea.pressed ? Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.12) : (wsMouseArea.containsMouse ? Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.08) : "transparent"))
+                color: isFocused ? ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.primary.r, Theme.primary.g, Theme.primary.b, 0.85) : Theme.primary) : (wsMouseArea.pressed ? Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.12) : (wsMouseArea.containsMouse ? Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.08) : "transparent"))
 
                 Behavior on color {
                     enabled: !mainContainer.gameMode

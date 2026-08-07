@@ -20,22 +20,47 @@ ColumnLayout {
     property var adapter
     property bool adapterState: adapter ? adapter.enabled : false
 
-    ColumnLayout {
+    property string pageTitle: "Bluetooth Settings"
+    property string pageIcon: "\ue15f"
+    property string pageShape: "Puffy"
+    property color pageColor: Theme.primary
+    property color pageOnColor: Theme.on_primary
+
+    M3Shapes { id: m3Shapes }
+
+    RowLayout {
         Layout.fillWidth: true
-        spacing: 2
-        Text {
-            text: "Connected devices"
-            font.family: Vars.fontFamily
-            font.pixelSize: 16
-            font.weight: 500
-            color: Theme.on_surface
+        spacing: 12
+
+        Item {
+            width: 38
+            height: 38
+
+            Image {
+                anchors.fill: parent
+                sourceSize: Qt.size(width, height)
+                source: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><path d='" + m3Shapes.getPath(rootBluetoothPage.pageShape) + "' fill='" + String(rootBluetoothPage.pageColor || "#3b383e").replace("#", "%23") + "'/></svg>"
+                smooth: true
+                antialiasing: true
+            }
+
+            Text {
+                anchors.centerIn: parent
+                text: rootBluetoothPage.pageIcon
+                font.family: "Material Symbols Outlined"
+                font.pixelSize: 20
+                color: rootBluetoothPage.pageOnColor
+            }
         }
+
         Text {
-            text: "Manage devices and discoverability"
+            Layout.fillWidth: true
+            text: rootBluetoothPage.pageTitle
             font.family: Vars.fontFamily
-            font.pixelSize: 12
+            font.pixelSize: 18
+            font.weight: 600
             color: Theme.on_surface
-            opacity: 0.7
+            elide: Text.ElideRight
         }
     }
 
@@ -68,7 +93,7 @@ ColumnLayout {
                         id: btHeader
                         Layout.fillWidth: true; Layout.preferredHeight: 72
                         
-                        property color targetColor: btHeaderMouse.containsMouse ? Qt.tint((Vars.translucent ? Qt.rgba(Theme.surface_container.r, Theme.surface_container.g, Theme.surface_container.b, Vars.componentOpacity) : Theme.surface_container), Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.08)) : (Vars.translucent ? Qt.rgba(Theme.surface_container.r, Theme.surface_container.g, Theme.surface_container.b, Vars.componentOpacity) : Theme.surface_container)
+                        property color targetColor: btHeaderMouse.containsMouse ? Qt.tint(((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_container.r, Theme.surface_container.g, Theme.surface_container.b, Vars.componentOpacity) : Theme.surface_container), Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.08)) : ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_container.r, Theme.surface_container.g, Theme.surface_container.b, Vars.componentOpacity) : Theme.surface_container)
                         Behavior on targetColor { ColorAnimation { duration: Vars.animationDuration } }
                         
                         property bool hasDeviceBelow: {
@@ -99,11 +124,11 @@ ColumnLayout {
                         
                         RowLayout {
                             anchors.fill: parent; anchors.leftMargin: 20; anchors.rightMargin: 20
-                            Text { text: "Bluetooth"; font.family: Vars.fontFamily; font.pixelSize: 16; font.weight: 500; color: Theme.on_surface; Layout.fillWidth: true }
+                            Text { text: rootBluetoothPage.pageTitle; font.family: Vars.fontFamily; font.pixelSize: 16; font.weight: 500; color: Theme.on_surface; Layout.fillWidth: true }
                             
                             Rectangle {
                                 width: 52; height: 32; radius: 16
-                                color: rootBluetoothPage.adapterState ? Theme.primary : Theme.surface_variant
+                                color: rootBluetoothPage.adapterState ? ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.primary.r, Theme.primary.g, Theme.primary.b, Vars.componentOpacity) : Theme.primary) : ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_variant.r, Theme.surface_variant.g, Theme.surface_variant.b, Vars.componentOpacity) : Theme.surface_variant)
                                 border.color: btHeader.activeFocus ? Theme.on_surface : "transparent"
                                 border.width: btHeader.activeFocus ? 2 : 0
                                 Rectangle {
@@ -123,7 +148,7 @@ ColumnLayout {
                     Rectangle {
                         Layout.fillWidth: true; Layout.preferredHeight: 120
                         visible: rootBluetoothPage.adapterState && (!rootBluetoothPage.adapter || rootBluetoothPage.adapter.devices.values.length === 0)
-                        radius: 16; color: Vars.translucent ? Qt.rgba(Theme.surface_container.r, Theme.surface_container.g, Theme.surface_container.b, Vars.componentOpacity) : Theme.surface_container
+                        radius: 16; color: (Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_container.r, Theme.surface_container.g, Theme.surface_container.b, Vars.componentOpacity) : Theme.surface_container
                         
                         ColumnLayout {
                             anchors.centerIn: parent; spacing: 8
@@ -145,7 +170,7 @@ ColumnLayout {
                         Layout.fillWidth: true; Layout.preferredHeight: 72
                         visible: rootBluetoothPage.adapterState
                         
-                        property color targetColor: btPairMouse.containsMouse ? Qt.tint((Vars.translucent ? Qt.rgba(Theme.surface_container.r, Theme.surface_container.g, Theme.surface_container.b, Vars.componentOpacity) : Theme.surface_container), Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.08)) : (Vars.translucent ? Qt.rgba(Theme.surface_container.r, Theme.surface_container.g, Theme.surface_container.b, Vars.componentOpacity) : Theme.surface_container)
+                        property color targetColor: btPairMouse.containsMouse ? Qt.tint(((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_container.r, Theme.surface_container.g, Theme.surface_container.b, Vars.componentOpacity) : Theme.surface_container), Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.08)) : ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_container.r, Theme.surface_container.g, Theme.surface_container.b, Vars.componentOpacity) : Theme.surface_container)
                         Behavior on targetColor { ColorAnimation { duration: Vars.animationDuration } }
                         
                         Item {
@@ -191,7 +216,7 @@ ColumnLayout {
                         Layout.fillWidth: true; Layout.preferredHeight: 72
                         visible: rootBluetoothPage.adapterState
                         
-                        property color targetColor: discMouse.containsMouse ? Qt.tint((Vars.translucent ? Qt.rgba(Theme.surface_container.r, Theme.surface_container.g, Theme.surface_container.b, Vars.componentOpacity) : Theme.surface_container), Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.08)) : (Vars.translucent ? Qt.rgba(Theme.surface_container.r, Theme.surface_container.g, Theme.surface_container.b, Vars.componentOpacity) : Theme.surface_container)
+                        property color targetColor: discMouse.containsMouse ? Qt.tint(((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_container.r, Theme.surface_container.g, Theme.surface_container.b, Vars.componentOpacity) : Theme.surface_container), Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.08)) : ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_container.r, Theme.surface_container.g, Theme.surface_container.b, Vars.componentOpacity) : Theme.surface_container)
                         Behavior on targetColor { ColorAnimation { duration: Vars.animationDuration } }
                         
                         Item {
@@ -224,7 +249,7 @@ ColumnLayout {
                                 Text { text: "Allow nearby devices to find this one"; font.family: Vars.fontFamily; font.pixelSize: 13; color: Theme.on_surface_variant; Layout.fillWidth: true; horizontalAlignment: Text.AlignLeft }
                             }
                             Rectangle {
-                                width: 52; height: 32; radius: 16; color: rootBluetoothPage.adapter && rootBluetoothPage.adapter.discoverable ? Theme.primary : Theme.surface_variant
+                                width: 52; height: 32; radius: 16; color: rootBluetoothPage.adapter && rootBluetoothPage.adapter.discoverable ? ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.primary.r, Theme.primary.g, Theme.primary.b, Vars.componentOpacity) : Theme.primary) : ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_variant.r, Theme.surface_variant.g, Theme.surface_variant.b, Vars.componentOpacity) : Theme.surface_variant)
                                 border.color: discCard.activeFocus ? Theme.on_surface : "transparent"; border.width: discCard.activeFocus ? 2 : 0
                                 Rectangle {
                                     width: 24; height: 24; radius: 12; color: rootBluetoothPage.adapter && rootBluetoothPage.adapter.discoverable ? Theme.on_primary : Theme.on_surface_variant
@@ -243,7 +268,7 @@ ColumnLayout {
                         Layout.fillWidth: true; Layout.preferredHeight: 72
                         visible: rootBluetoothPage.adapterState
                         
-                        property color targetColor: pairMouse.containsMouse ? Qt.tint((Vars.translucent ? Qt.rgba(Theme.surface_container.r, Theme.surface_container.g, Theme.surface_container.b, Vars.componentOpacity) : Theme.surface_container), Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.08)) : (Vars.translucent ? Qt.rgba(Theme.surface_container.r, Theme.surface_container.g, Theme.surface_container.b, Vars.componentOpacity) : Theme.surface_container)
+                        property color targetColor: pairMouse.containsMouse ? Qt.tint(((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_container.r, Theme.surface_container.g, Theme.surface_container.b, Vars.componentOpacity) : Theme.surface_container), Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.08)) : ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_container.r, Theme.surface_container.g, Theme.surface_container.b, Vars.componentOpacity) : Theme.surface_container)
                         Behavior on targetColor { ColorAnimation { duration: Vars.animationDuration } }
                         
                         Item {
@@ -276,7 +301,7 @@ ColumnLayout {
                                 Text { text: "Allow devices like phones to pair to this PC (not needed for speakers)"; font.family: Vars.fontFamily; font.pixelSize: 13; color: Theme.on_surface_variant; Layout.fillWidth: true; horizontalAlignment: Text.AlignLeft }
                             }
                             Rectangle {
-                                width: 52; height: 32; radius: 16; color: rootBluetoothPage.adapter && rootBluetoothPage.adapter.pairable ? Theme.primary : Theme.surface_variant
+                                width: 52; height: 32; radius: 16; color: rootBluetoothPage.adapter && rootBluetoothPage.adapter.pairable ? ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.primary.r, Theme.primary.g, Theme.primary.b, Vars.componentOpacity) : Theme.primary) : ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_variant.r, Theme.surface_variant.g, Theme.surface_variant.b, Vars.componentOpacity) : Theme.surface_variant)
                                 border.color: pairCard.activeFocus ? Theme.on_surface : "transparent"; border.width: pairCard.activeFocus ? 2 : 0
                                 Rectangle {
                                     width: 24; height: 24; radius: 12; color: rootBluetoothPage.adapter && rootBluetoothPage.adapter.pairable ? Theme.on_primary : Theme.on_surface_variant
@@ -301,7 +326,7 @@ ColumnLayout {
                 Rectangle {
                     Layout.fillWidth: true; Layout.preferredHeight: 72
                     radius: 16; 
-                    color: Vars.translucent ? Qt.rgba(Theme.surface_container.r, Theme.surface_container.g, Theme.surface_container.b, Vars.componentOpacity) : Theme.surface_container
+                    color: (Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_container.r, Theme.surface_container.g, Theme.surface_container.b, Vars.componentOpacity) : Theme.surface_container
                     
                     property bool hasDeviceBelow: {
                         if (!rootBluetoothPage.adapter || !rootBluetoothPage.adapter.devices.values) return false;
@@ -332,7 +357,7 @@ ColumnLayout {
                         Rectangle {
                             width: 52; height: 32; radius: 16
                             property bool isDiscovering: rootBluetoothPage.adapter && rootBluetoothPage.adapter.discovering !== undefined ? rootBluetoothPage.adapter.discovering : false
-                            color: isDiscovering ? Theme.primary : Theme.surface_variant
+                            color: isDiscovering ? ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.primary.r, Theme.primary.g, Theme.primary.b, Vars.componentOpacity) : Theme.primary) : ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_variant.r, Theme.surface_variant.g, Theme.surface_variant.b, Vars.componentOpacity) : Theme.surface_variant)
                             Rectangle {
                                 width: 24; height: 24; radius: 12
                                 color: parent.isDiscovering ? Theme.on_primary : Theme.on_surface_variant

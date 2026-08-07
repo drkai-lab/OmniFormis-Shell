@@ -42,4 +42,56 @@ QtObject {
     function getPath(shapeName) {
         return m3AbstractPaths[shapeName] || m3AbstractPaths["Circle"];
     }
+
+    function getShapePeaks(shapeName) {
+        var pathStr = getPath(shapeName);
+        var tokens = pathStr.match(/[A-Za-z]|[-+]?\d*\.?\d+(?:[eE][-+]?\d+)?/g);
+        if (!tokens) return [];
+        var pts = [];
+        var x = 0, y = 0;
+        var i = 0;
+        while (i < tokens.length) {
+            var cmd = tokens[i];
+            if (cmd === 'M' || cmd === 'L') {
+                x = parseFloat(tokens[i+1]); y = parseFloat(tokens[i+2]);
+                pts.push({x: x, y: y});
+                i += 3;
+            } else if (cmd === 'C') {
+                var cx1 = parseFloat(tokens[i+1]), cy1 = parseFloat(tokens[i+2]);
+                var cx2 = parseFloat(tokens[i+3]), cy2 = parseFloat(tokens[i+4]);
+                var cx3 = parseFloat(tokens[i+5]), cy3 = parseFloat(tokens[i+6]);
+                for (var t = 1; t <= 10; t++) {
+                    var T = t / 10.0;
+                    var nx = Math.pow(1-T, 3) * x + 3*Math.pow(1-T, 2)*T * cx1 + 3*(1-T)*Math.pow(T, 2) * cx2 + Math.pow(T, 3) * cx3;
+                    var ny = Math.pow(1-T, 3) * y + 3*Math.pow(1-T, 2)*T * cy1 + 3*(1-T)*Math.pow(T, 2) * cy2 + Math.pow(T, 3) * cy3;
+                    pts.push({x: nx, y: ny});
+                }
+                x = cx3; y = cy3;
+                i += 7;
+            } else if (cmd === 'H') {
+                x = parseFloat(tokens[i+1]);
+                pts.push({x: x, y: y});
+                i += 2;
+            } else if (cmd === 'V') {
+                y = parseFloat(tokens[i+1]);
+                pts.push({x: x, y: y});
+                i += 2;
+            } else if (cmd === 'Z' || cmd === 'z') {
+                i += 1;
+            } else {
+                i += 1;
+            }
+        }
+        var dists = pts.map(function(p) { return Math.hypot(p.x - 50, p.y - 50); });
+        var peaks = [];
+        var n = dists.length;
+        for (var j = 0; j < n; j++) {
+            var prev = dists[(j - 1 + n) % n];
+            var nxt = dists[(j + 1) % n];
+            if (dists[j] > prev && dists[j] > nxt) {
+                peaks.push(pts[j]);
+            }
+        }
+        return peaks;
+    }
 }

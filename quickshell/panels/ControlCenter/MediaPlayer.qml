@@ -55,7 +55,7 @@ Rectangle {
         id: rootMask
         anchors.fill: parent
         radius: 16
-        color: Theme.surface
+        color: (Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface.r, Theme.surface.g, Theme.surface.b, Vars.componentOpacity) : Theme.surface
         layer.enabled: true
         layer.samples: 4
         visible: false
@@ -79,8 +79,8 @@ Rectangle {
         // Base solid color to prevent transparency when translucent is disabled
         Rectangle {
             anchors.fill: parent
-            color: Theme.surface_container_highest
-            visible: !Vars.translucent
+            color: (Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_container_highest.r, Theme.surface_container_highest.g, Theme.surface_container_highest.b, Vars.componentOpacity) : Theme.surface_container_highest
+            visible: !(Vars._translucent && !Vars.gameMode)
         }
 
         // Stage 1: Blur the background image
@@ -107,8 +107,8 @@ Rectangle {
         // Translucent overlay
         Rectangle {
             anchors.fill: parent
-            color: Theme.surface_container_highest
-            opacity: bgArt.source !== "" ? (Vars.translucent ? Vars.componentOpacity + (1.0 - Vars.componentOpacity) / 2 : 0.90) : (Vars.translucent ? Vars.componentOpacity : 1.0)
+            color: (Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_container_highest.r, Theme.surface_container_highest.g, Theme.surface_container_highest.b, Vars.componentOpacity) : Theme.surface_container_highest
+            opacity: bgArt.source !== "" ? ((Vars._translucent && !Vars.gameMode) ? Vars.componentOpacity + (1.0 - Vars.componentOpacity) / 2 : 0.90) : ((Vars._translucent && !Vars.gameMode) ? Vars.componentOpacity : 1.0)
         }
     }
 
@@ -263,7 +263,7 @@ Rectangle {
                 // Fallback icon
                 Rectangle {
                     anchors.fill: parent
-                    color: Theme.surface_container
+                    color: (Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_container.r, Theme.surface_container.g, Theme.surface_container.b, Vars.componentOpacity) : Theme.surface_container
                     visible: !mprisPlayer || !mprisPlayer.trackArtUrl
 
                     Text {
@@ -675,7 +675,7 @@ Rectangle {
                 Rectangle {
                     anchors.fill: parent
                     radius: playerDropdown.radius
-                    color: Vars.translucent ? Qt.rgba(Theme.surface_container_highest.r, Theme.surface_container_highest.g, Theme.surface_container_highest.b, 0.6) : Theme.surface_container_highest
+                    color: (Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_container_highest.r, Theme.surface_container_highest.g, Theme.surface_container_highest.b, 0.6) : Theme.surface_container_highest
                     border.color: Theme.outline_variant
                     border.width: 1
                 }

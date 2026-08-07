@@ -41,7 +41,7 @@ Item {
             Layout.preferredHeight: 120
             Layout.topMargin: Vars.spacingSmall
             radius: Vars.radiusLarge
-            color: Vars.translucent ? Qt.rgba(Theme.surface_container_high.r, Theme.surface_container_high.g, Theme.surface_container_high.b, Vars.componentOpacity) : Theme.surface_container_high
+            color: (Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_container_high.r, Theme.surface_container_high.g, Theme.surface_container_high.b, Vars.componentOpacity) : Theme.surface_container_high
             visible: notificationsRoot.historyList.length === 0
             
             Text {

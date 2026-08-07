@@ -48,7 +48,7 @@ ColumnLayout {
         // Master Toggle Switch
         Rectangle {
             width: 56; height: 32; radius: 16
-            color: Networking.wifiEnabled ? Theme.primary : Theme.surface_variant
+            color: Networking.wifiEnabled ? ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.primary.r, Theme.primary.g, Theme.primary.b, Vars.componentOpacity) : Theme.primary) : ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_variant.r, Theme.surface_variant.g, Theme.surface_variant.b, Vars.componentOpacity) : Theme.surface_variant)
             Rectangle {
                 width: 24; height: 24; radius: 12
                 color: Networking.wifiEnabled ? Theme.on_primary : Theme.on_surface_variant
@@ -76,7 +76,7 @@ ColumnLayout {
                     Layout.fillWidth: true; Layout.preferredHeight: 64
                     radius: 16
                     Behavior on radius { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
-                    color: modelData.connected ? Theme.surface_container_highest : (wifiMouse.pressed ? Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.12) : (wifiMouse.containsMouse ? Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.08) : Theme.surface_container_low))
+                    color: modelData.connected ? ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_container_highest.r, Theme.surface_container_highest.g, Theme.surface_container_highest.b, Vars.componentOpacity) : Theme.surface_container_highest) : (wifiMouse.pressed ? Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.12) : (wifiMouse.containsMouse ? Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.08) : ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_container_low.r, Theme.surface_container_low.g, Theme.surface_container_low.b, Vars.componentOpacity) : Theme.surface_container_low)))
                     Behavior on color { ColorAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
                     
                     RowLayout {
@@ -86,7 +86,7 @@ ColumnLayout {
                             Layout.preferredWidth: 40; Layout.preferredHeight: 40
                             radius: modelData.connected ? 12 : 20
                             Behavior on radius { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
-                            color: modelData.connected ? Theme.primary : Qt.rgba(Theme.on_surface_variant.r, Theme.on_surface_variant.g, Theme.on_surface_variant.b, 0.1)
+                            color: modelData.connected ? ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.primary.r, Theme.primary.g, Theme.primary.b, Vars.componentOpacity) : Theme.primary) : Qt.rgba(Theme.on_surface_variant.r, Theme.on_surface_variant.g, Theme.on_surface_variant.b, 0.1)
                             Text {
                                 anchors.centerIn: parent
                                 font.family: modelData.connected ? filledIconFont.name : "Material Symbols Outlined"

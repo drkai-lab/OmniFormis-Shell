@@ -77,7 +77,7 @@ ColumnLayout {
                 height: 64
                 radius: 16
                 
-                color: availDragArea.drag.active ? Theme.surface_container_highest : Theme.surface_container_high
+                color: availDragArea.drag.active ? ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_container_highest.r, Theme.surface_container_highest.g, Theme.surface_container_highest.b, Vars.componentOpacity) : Theme.surface_container_highest) : ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_container_high.r, Theme.surface_container_high.g, Theme.surface_container_high.b, Vars.componentOpacity) : Theme.surface_container_high)
                 scale: availDragArea.drag.active ? 1.05 : 1.0
                 
                 Behavior on scale { NumberAnimation { duration: 200; easing.type: Easing.OutCubic } }
@@ -156,7 +156,7 @@ ColumnLayout {
 
         Rectangle {
             anchors.fill: parent
-            color: stashDropArea.containsDrag ? Qt.rgba(Theme.primary.r, Theme.primary.g, Theme.primary.b, 0.08) : Theme.surface
+            color: stashDropArea.containsDrag ? Qt.rgba(Theme.primary.r, Theme.primary.g, Theme.primary.b, 0.08) : ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface.r, Theme.surface.g, Theme.surface.b, Vars.componentOpacity) : Theme.surface)
             border.color: Theme.outline_variant
             border.width: 1
             radius: 16

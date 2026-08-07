@@ -50,9 +50,9 @@ Item {
             controlBar.searchText = "";
         } else {
             MorphState.notifyOpened(900, 550, panel.targetRad, panel);
-            expandedUI.visible = true;
+            innerUI.visible = true;
             controlBar.forceSearchFocus();
-            expandedUI.visible = Qt.binding(() => root.expanded || expandedUI.opacity > 0);
+            innerUI.visible = Qt.binding(() => root.expanded || innerUI.opacity > 0);
             loadThemesProc.running = true;
         }
     }
@@ -89,7 +89,7 @@ Item {
         width: root.expanded ? 900 : (MorphState.anyExpanded ? MorphState.targetWidth : 100)
         height: root.expanded ? 550 : (MorphState.anyExpanded ? MorphState.targetHeight : 40)
         
-        color: isBackgroundActive ? (Vars.translucent ? Qt.rgba(Theme.surface.r, Theme.surface.g, Theme.surface.b, Vars.panelOpacity) : Theme.surface) : "transparent"
+        color: isBackgroundActive ? ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface.r, Theme.surface.g, Theme.surface.b, Vars.panelOpacity) : Theme.surface) : "transparent"
         property real targetRad: root.expanded ? Vars.radiusExtraLarge : (MorphState.anyExpanded ? MorphState.targetRadius : height / 2)
         topLeftRadius: Vars.getTopLeftRadius(Vars.panelStyle, Vars.pillPosition, false, targetRad)
         topRightRadius: Vars.getTopRightRadius(Vars.panelStyle, Vars.pillPosition, false, targetRad)

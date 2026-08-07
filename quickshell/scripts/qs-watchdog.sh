@@ -30,8 +30,8 @@ while true; do
     sleep 0.3
 
     echo "[qs-watchdog] Starting Quickshell..."
-    export TZ=":/etc/localtime"
-    quickshell &
+
+    quickshell > /tmp/quickshell.log 2>&1 &
     QS_PID=$!
 
     # Wait for it to exit

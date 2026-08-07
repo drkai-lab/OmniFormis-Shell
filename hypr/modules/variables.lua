@@ -109,7 +109,7 @@ local vars = {
 
     -- Blur
     -- Enable blur
-    blur_enabled = true,
+    blur_enabled = false,
     -- Set blur size
     blur_size = 4,
     -- Set number of blur passes

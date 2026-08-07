@@ -22,6 +22,12 @@ ColumnLayout {
     property real p2x: 0.0
     property real p2y: 1.0
     
+    property string pageTitle: "Curve Editor"
+    property string pageIcon: "\ue429"
+    property string pageShape: "Oval"
+    property color pageColor: Theme.tertiary
+    property color pageOnColor: Theme.on_tertiary
+    
     signal settingsChanged()
     
     // Auto-update values when target curve changes
@@ -78,21 +84,41 @@ ColumnLayout {
         rootPage.settingsChanged();
     }
 
-    ColumnLayout {
+    M3Shapes { id: m3Shapes }
+
+    RowLayout {
         Layout.fillWidth: true
-        spacing: 2
-        Text {
-            text: "Animation Editor"
-            font.family: Vars.fontFamily
-            font.pixelSize: 16
-            font.weight: 500
-            color: Theme.on_surface
+        spacing: 12
+
+        Item {
+            width: 38
+            height: 38
+
+            Image {
+                anchors.fill: parent
+                sourceSize: Qt.size(width, height)
+                source: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><path d='" + m3Shapes.getPath(rootPage.pageShape) + "' fill='" + String(rootPage.pageColor || "#3b383e").replace("#", "%23") + "'/></svg>"
+                smooth: true
+                antialiasing: true
+            }
+
+            Text {
+                anchors.centerIn: parent
+                text: rootPage.pageIcon
+                font.family: "Material Symbols Outlined"
+                font.pixelSize: 20
+                color: rootPage.pageOnColor
+            }
         }
+
         Text {
-            text: "Design custom bezier curves for system animations"
+            Layout.fillWidth: true
+            text: rootPage.pageTitle
             font.family: Vars.fontFamily
-            font.pixelSize: 12
-            color: Theme.on_surface_variant
+            font.pixelSize: 18
+            font.weight: 600
+            color: Theme.on_surface
+            elide: Text.ElideRight
         }
     }
 

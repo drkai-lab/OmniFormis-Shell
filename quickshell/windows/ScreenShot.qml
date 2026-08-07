@@ -150,7 +150,7 @@ PanelWindow {
     Rectangle {
         id: selectionBox
         // Blanket Style: A soft, translucent fill instead of a completely empty box
-        color: Theme.surface_container_high
+        color: (Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_container_high.r, Theme.surface_container_high.g, Theme.surface_container_high.b, Vars.panelOpacity) : Theme.surface_container_high
         opacity: 0.15 // The fill is highly transparent
         
         // A softer border to match the aesthetic

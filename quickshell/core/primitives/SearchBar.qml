@@ -9,6 +9,7 @@ Rectangle {
     color: "transparent"
 
     property alias text: searchInput.text
+    property alias searchInput: searchInput
     property bool isActiveFocus: searchInput.activeFocus
     property bool expanded: false
     property bool keepFocus: expanded
@@ -16,8 +17,8 @@ Rectangle {
     property string iconText: "search"
     property bool showIcon: false
     property int defaultHeight: 48
-    property color defaultColor: Vars.translucent ? Qt.rgba(Theme.surface_container_highest.r, Theme.surface_container_highest.g, Theme.surface_container_highest.b, Vars.componentOpacity) : Theme.surface_container_highest
-    property color activeColor: Vars.translucent ? Qt.rgba(Theme.primary_container.r, Theme.primary_container.g, Theme.primary_container.b, Vars.componentOpacity) : Theme.primary_container
+    property color defaultColor: (Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_container_highest.r, Theme.surface_container_highest.g, Theme.surface_container_highest.b, Vars.componentOpacity) : Theme.surface_container_highest
+    property color activeColor: (Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.primary_container.r, Theme.primary_container.g, Theme.primary_container.b, Vars.componentOpacity) : Theme.primary_container
     property color defaultTextColor: Theme.on_surface
     property color activeTextColor: Theme.on_primary_container
     property color defaultPlaceholderColor: Theme.on_surface_variant

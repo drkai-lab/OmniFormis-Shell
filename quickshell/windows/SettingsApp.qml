@@ -39,6 +39,46 @@ Item {
     signal detachToggled(bool isFloating)
     
     property string currentSection: "quick"
+    
+    // Extracted navigation properties mapped from the sidebar
+    readonly property var navItems: [
+        // Presets & Quick Settings
+        { id: "quick", name: "Quick & Presets", subtitle: "Presets, wallpaper, panel style & position", icon: "\ue41d", section: "Presets & Customization", isFirst: true, isLast: true, hue: 0.80, shape: "Sunny" },
+
+        // Connections
+        { id: "wifi", name: "Wi-Fi", subtitle: "Wi-Fi, ethernet", icon: root.wifiIcon, section: "Connections", isFirst: true, isLast: false, hue: 0.60, shape: "Circle" },
+        { id: "bluetooth", name: "Connected devices", subtitle: "Bluetooth, devices, pairing", icon: root.bluetoothIcon, section: "Connections", isFirst: false, isLast: true, hue: 0.65, shape: "Square" },
+        
+        // System & Input
+        { id: "General", name: "System & Apps", subtitle: "Default apps, environment, gaming", icon: "\ue8b8", section: "System & Input", isFirst: true, isLast: false, hue: 0.70, shape: "4SidedCookie" },
+        { id: "Input", name: "Input Devices", subtitle: "Keyboard layout, mouse, gestures", icon: "\ue312", section: "System & Input", isFirst: false, isLast: false, hue: 0.75, shape: "Pill" },
+        { id: "Keybinds", name: "Shortcuts & Modifiers", subtitle: "System shortcuts, hotkeys, modifiers", icon: "\ue31c", section: "System & Input", isFirst: false, isLast: true, hue: 0.80, shape: "6SidedCookie" },
+
+        // Desktop & Windows
+        { id: "Desktop", name: "Desktop & Widgets", subtitle: "Wallpaper mask, clock, calendar, overview", icon: "\ue871", section: "Desktop & Windows", isFirst: true, isLast: false, hue: 0.85, shape: "Clamshell" },
+        { id: "Layout", name: "Window Gaps & Layout", subtitle: "Window gaps, border size, spacing, padding", icon: "\ue8f1", section: "Desktop & Windows", isFirst: false, isLast: true, hue: 0.90, shape: "Bun" },
+
+        // Appearance & Animations
+        { id: "Theme", name: "Visuals & Effects", subtitle: "Rounding, opacity, blur, shadow, font family", icon: "\ue3b7", section: "Appearance & Animations", isFirst: true, isLast: false, hue: 0.95, shape: "Flower" },
+        { id: "Animations", name: "Animation & Physics", subtitle: "Animation style, durations, scroll physics", icon: "\ue410", section: "Appearance & Animations", isFirst: false, isLast: false, hue: 0.00, shape: "VerySunny" },
+        { id: "bezier", name: "Curve Editor", subtitle: "Interactive custom bezier creator", icon: "\ue71c", section: "Appearance & Animations", isFirst: false, isLast: true, hue: 0.06, shape: "Oval" },
+        
+        // System Monitor & Info
+        { id: "taskmanager", name: "Task Manager", subtitle: "System resources, processes", icon: "\ue85c", section: "System Info", isFirst: true, isLast: false, hue: 0.12, shape: "12SidedCookie" },
+        { id: "about", name: "About", subtitle: "Omniformis Shell info", icon: "\ue88e", section: "System Info", isFirst: false, isLast: true, hue: 0.18, shape: "8LeafClover" }
+    ]
+
+    property var currentNavItem: navItems ? (navItems.find(i => i.id === currentSection) || navItems[0]) : null
+    property int currentNavIndex: navItems ? Math.max(0, navItems.findIndex(i => i.id === currentSection)) : 0
+    property color currentNavColor: {
+        var colors = [Theme.primary, Theme.secondary, Theme.tertiary];
+        return colors[currentNavIndex % 3];
+    }
+    property color currentNavOnColor: {
+        var colors = [Theme.on_primary, Theme.on_secondary, Theme.on_tertiary];
+        return colors[currentNavIndex % 3];
+    }
+
     signal openWallpaperSwitcherRequested()
     
     // Wi-Fi
@@ -71,9 +111,7 @@ Item {
     onExpandedChanged: {
         if (expanded) {
             MorphState.notifyOpened(root.isFloatingInstance ? root.width : 1320, root.isFloatingInstance ? root.height : 740, panel.targetRad, panel);
-            expandedUI.visible = true;
             root.forceActiveFocus();
-            expandedUI.visible = Qt.binding(() => root.expanded || expandedUI.opacity > 0);
         } else {
             MorphState.notifyClosed();
         }
@@ -113,7 +151,7 @@ Item {
         width: root.expanded ? (root.isFloatingInstance ? root.width : 1320) : (MorphState.anyExpanded ? MorphState.targetWidth : 100)
         height: root.expanded ? (root.isFloatingInstance ? root.height : 740) : (MorphState.anyExpanded ? MorphState.targetHeight : 40)
         
-        color: isBackgroundActive ? (Vars.translucent ? Qt.rgba(Theme.surface_container_low.r, Theme.surface_container_low.g, Theme.surface_container_low.b, Vars.panelOpacity) : Theme.surface_container_low) : "transparent"
+        color: isBackgroundActive ? ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_container_low.r, Theme.surface_container_low.g, Theme.surface_container_low.b, Vars.panelOpacity) : Theme.surface_container_low) : "transparent"
         property real targetRad: root.expanded ? Vars.radiusExtraLarge : (MorphState.anyExpanded ? MorphState.targetRadius : height / 2)
         topLeftRadius: root.isFloatingInstance ? Vars.radiusExtraLarge : Vars.getTopLeftRadius(Vars.panelStyle, Vars.pillPosition, false, targetRad)
         topRightRadius: root.isFloatingInstance ? Vars.radiusExtraLarge : Vars.getTopRightRadius(Vars.panelStyle, Vars.pillPosition, false, targetRad)
@@ -207,8 +245,7 @@ Item {
                             id: sidebar
                             width: parent.width
                             currentSection: root.currentSection
-                            wifiIcon: root.wifiIcon
-                            bluetoothIcon: root.bluetoothIcon
+                            navItems: root.navItems
                             onCurrentSectionChanged: {
                                 if (root.currentSection !== currentSection) {
                                     root.currentSection = currentSection
@@ -244,6 +281,11 @@ Item {
                         id: quickPage
                         Layout.fillWidth: true
                         Layout.fillHeight: true
+                        pageTitle: root.currentNavItem ? root.currentNavItem.name : ""
+                        pageIcon: root.currentNavItem ? root.currentNavItem.icon : ""
+                        pageShape: root.currentNavItem ? root.currentNavItem.shape : "Circle"
+                        pageColor: root.currentNavColor
+                        pageOnColor: root.currentNavOnColor
                         onOpenWallpaperSwitcher: {
                             root.openWallpaperSwitcherRequested();
                         }
@@ -255,6 +297,11 @@ Item {
                         activeCategory: (root.currentSection === "General" || root.currentSection === "Input" || root.currentSection === "Keybinds" || root.currentSection === "Desktop" || root.currentSection === "Layout" || root.currentSection === "Theme" || root.currentSection === "Animations") ? root.currentSection : "General"
                         Layout.fillWidth: true
                         Layout.fillHeight: true
+                        pageTitle: root.currentNavItem ? root.currentNavItem.name : ""
+                        pageIcon: root.currentNavItem ? root.currentNavItem.icon : ""
+                        pageShape: root.currentNavItem ? root.currentNavItem.shape : "Circle"
+                        pageColor: root.currentNavColor
+                        pageOnColor: root.currentNavOnColor
                     }
 
                     // 1: Bezier Editor
@@ -262,6 +309,11 @@ Item {
                         id: bezierPage
                         Layout.fillWidth: true
                         Layout.fillHeight: true
+                        pageTitle: root.currentNavItem ? root.currentNavItem.name : ""
+                        pageIcon: root.currentNavItem ? root.currentNavItem.icon : ""
+                        pageShape: root.currentNavItem ? root.currentNavItem.shape : "Circle"
+                        pageColor: root.currentNavColor
+                        pageOnColor: root.currentNavOnColor
                         onSettingsChanged: {
                             unifiedPage.loadSettings();
                         }
@@ -274,6 +326,11 @@ Item {
                         panelRef: root.panel
                         Layout.fillWidth: true
                         Layout.fillHeight: true
+                        pageTitle: root.currentNavItem ? root.currentNavItem.name : ""
+                        pageIcon: root.currentNavItem ? root.currentNavItem.icon : ""
+                        pageShape: root.currentNavItem ? root.currentNavItem.shape : "Circle"
+                        pageColor: root.currentNavColor
+                        pageOnColor: root.currentNavOnColor
                     }
 
                     // 3: Bluetooth Settings
@@ -282,6 +339,11 @@ Item {
                         adapter: root.adapter
                         Layout.fillWidth: true
                         Layout.fillHeight: true
+                        pageTitle: root.currentNavItem ? root.currentNavItem.name : ""
+                        pageIcon: root.currentNavItem ? root.currentNavItem.icon : ""
+                        pageShape: root.currentNavItem ? root.currentNavItem.shape : "Circle"
+                        pageColor: root.currentNavColor
+                        pageOnColor: root.currentNavOnColor
                     }
                     
                     // 4: About Page
@@ -289,6 +351,11 @@ Item {
                         id: aboutPage
                         Layout.fillWidth: true
                         Layout.fillHeight: true
+                        pageTitle: root.currentNavItem ? root.currentNavItem.name : ""
+                        pageIcon: root.currentNavItem ? root.currentNavItem.icon : ""
+                        pageShape: root.currentNavItem ? root.currentNavItem.shape : "Circle"
+                        pageColor: root.currentNavColor
+                        pageOnColor: root.currentNavOnColor
                     }
                     
                     // 5: Task Manager Page
@@ -296,6 +363,11 @@ Item {
                         id: taskManagerPage
                         Layout.fillWidth: true
                         Layout.fillHeight: true
+                        pageTitle: root.currentNavItem ? root.currentNavItem.name : ""
+                        pageIcon: root.currentNavItem ? root.currentNavItem.icon : ""
+                        pageShape: root.currentNavItem ? root.currentNavItem.shape : "Circle"
+                        pageColor: root.currentNavColor
+                        pageOnColor: root.currentNavOnColor
                     }
                 }
                 }

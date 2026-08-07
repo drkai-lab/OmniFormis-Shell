@@ -11,6 +11,8 @@ import "../../theme/variables.js" as Vars
 Item {
     id: delegateRoot
 
+    M3Shapes { id: m3ShapesObj }
+
     property var settingsList: ListView.view
     property var settingsModel: ListView.view.model
     required property int index
@@ -31,12 +33,15 @@ Item {
     height: Math.max(80, delegateRow.implicitHeight + 32)
     property bool isSelected: false
     
-    property color targetColor: delegateMouse.containsMouse ? Qt.tint((Vars.translucent ? Qt.rgba(Theme.surface_container.r, Theme.surface_container.g, Theme.surface_container.b, Vars.componentOpacity) : Theme.surface_container), Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.08)) : (Vars.translucent ? Qt.rgba(Theme.surface_container.r, Theme.surface_container.g, Theme.surface_container.b, Vars.componentOpacity) : Theme.surface_container)
+    property color targetColor: delegateMouse.containsMouse ? Qt.tint(((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_container.r, Theme.surface_container.g, Theme.surface_container.b, Vars.componentOpacity) : Theme.surface_container), Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.08)) : ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_container.r, Theme.surface_container.g, Theme.surface_container.b, Vars.componentOpacity) : Theme.surface_container)
     Behavior on targetColor {
         ColorAnimation {
             duration: Vars.animationDuration
         }
     }
+    
+    scale: delegateMouse.pressed ? 1.08 : 1.0
+    Behavior on scale { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.OutBack } }
     
     Item {
         anchors.fill: parent
@@ -126,7 +131,7 @@ Item {
             width: 52
             height: 32
             radius: 16
-            color: delegateRoot.itemVal === "true" ? (Vars.translucent ? Qt.rgba(Theme.primary.r, Theme.primary.g, Theme.primary.b, 0.8) : Theme.primary) : (Vars.translucent ? Qt.rgba(Theme.surface_variant.r, Theme.surface_variant.g, Theme.surface_variant.b, Vars.componentOpacity) : Theme.surface_variant)
+            color: delegateRoot.itemVal === "true" ? ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.primary.r, Theme.primary.g, Theme.primary.b, 0.8) : Theme.primary) : ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_variant.r, Theme.surface_variant.g, Theme.surface_variant.b, Vars.componentOpacity) : Theme.surface_variant)
             border.color: delegateRoot.activeFocus ? Theme.on_surface : "transparent"
             border.width: delegateRoot.activeFocus ? 2 : 0
             Behavior on color {
@@ -157,12 +162,16 @@ Item {
                     anchors.centerIn: parent
                     font.family: "Material Symbols Outlined"
                     font.pixelSize: 16
-                    color: delegateRoot.itemVal === "true" ? Theme.primary : Theme.surface_variant
+                    color: delegateRoot.itemVal === "true" ? ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.primary.r, Theme.primary.g, Theme.primary.b, 0.8) : Theme.primary) : ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_variant.r, Theme.surface_variant.g, Theme.surface_variant.b, Vars.componentOpacity) : Theme.surface_variant)
                     text: delegateRoot.itemVal === "true" ? "\ue5ca" : "\ue5cd"
                 }
             }
 
+            scale: toggleMouse.pressed ? 1.08 : 1.0
+            Behavior on scale { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.OutBack } }
+
             MouseArea {
+                id: toggleMouse
                 anchors.fill: parent
                 cursorShape: Qt.PointingHandCursor
                 onClicked: {
@@ -178,7 +187,7 @@ Item {
             Layout.preferredWidth: Math.max(150, Math.min(450, tInput.implicitWidth + 32))
             height: 32
             radius: Vars.radiusSmall
-            color: Vars.translucent ? Qt.rgba(Theme.surface_container_highest.r, Theme.surface_container_highest.g, Theme.surface_container_highest.b, Vars.componentOpacity) : Theme.surface_container_highest
+            color: (Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_container_highest.r, Theme.surface_container_highest.g, Theme.surface_container_highest.b, Vars.componentOpacity) : Theme.surface_container_highest
             border.color: tInput.activeFocus ? Theme.primary : "transparent"
             border.width: 1
 
@@ -224,7 +233,7 @@ Item {
                 width: 80
                 height: 32
                 radius: Vars.radiusSmall
-                color: Vars.translucent ? Qt.rgba(Theme.surface_container_highest.r, Theme.surface_container_highest.g, Theme.surface_container_highest.b, Vars.componentOpacity) : Theme.surface_container_highest
+                color: (Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_container_highest.r, Theme.surface_container_highest.g, Theme.surface_container_highest.b, Vars.componentOpacity) : Theme.surface_container_highest
                 border.color: numInput.activeFocus ? Theme.primary : "transparent"
                 border.width: 1
                 TextField {
@@ -264,7 +273,7 @@ Item {
                 width: 32
                 height: 32
                 radius: Vars.radiusSmall
-                color: numMinusHover.containsMouse ? (Vars.translucent ? Qt.rgba(Theme.surface_container_high.r, Theme.surface_container_high.g, Theme.surface_container_high.b, Vars.componentOpacity) : Theme.surface_container_high) : (Vars.translucent ? Qt.rgba(Theme.surface_container_highest.r, Theme.surface_container_highest.g, Theme.surface_container_highest.b, Vars.componentOpacity) : Theme.surface_container_highest)
+                color: numMinusHover.containsMouse ? ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_container_high.r, Theme.surface_container_high.g, Theme.surface_container_high.b, Vars.componentOpacity) : Theme.surface_container_high) : ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_container_highest.r, Theme.surface_container_highest.g, Theme.surface_container_highest.b, Vars.componentOpacity) : Theme.surface_container_highest)
                 Text {
                     anchors.centerIn: parent
                     text: "remove"
@@ -272,6 +281,9 @@ Item {
                     font.pixelSize: 20
                     color: Theme.on_surface
                 }
+                scale: numMinusHover.pressed ? 1.15 : 1.0
+                Behavior on scale { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.OutBack } }
+
                 MouseArea {
                     id: numMinusHover
                     anchors.fill: parent
@@ -289,7 +301,7 @@ Item {
                 width: 32
                 height: 32
                 radius: Vars.radiusSmall
-                color: numPlusHover.containsMouse ? (Vars.translucent ? Qt.rgba(Theme.surface_container_high.r, Theme.surface_container_high.g, Theme.surface_container_high.b, Vars.componentOpacity) : Theme.surface_container_high) : (Vars.translucent ? Qt.rgba(Theme.surface_container_highest.r, Theme.surface_container_highest.g, Theme.surface_container_highest.b, Vars.componentOpacity) : Theme.surface_container_highest)
+                color: numPlusHover.containsMouse ? ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_container_high.r, Theme.surface_container_high.g, Theme.surface_container_high.b, Vars.componentOpacity) : Theme.surface_container_high) : ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_container_highest.r, Theme.surface_container_highest.g, Theme.surface_container_highest.b, Vars.componentOpacity) : Theme.surface_container_highest)
                 Text {
                     anchors.centerIn: parent
                     text: "add"
@@ -297,6 +309,9 @@ Item {
                     font.pixelSize: 20
                     color: Theme.on_surface
                 }
+                scale: numPlusHover.pressed ? 1.15 : 1.0
+                Behavior on scale { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.OutBack } }
+
                 MouseArea {
                     id: numPlusHover
                     anchors.fill: parent
@@ -319,8 +334,16 @@ Item {
             implicitHeight: 48
             padding: 0
 
+            property real computedMax: {
+                if (delegateRoot.itemKey.endsWith("AnchorCurve")) {
+                    var peaks = m3ShapesObj.getShapePeaks(Vars.wallpaperMaskShape);
+                    return peaks.length > 0 ? peaks.length - 1 : -1;
+                }
+                return delegateRoot.itemMax;
+            }
+
             from: delegateRoot.itemMin
-            to: delegateRoot.itemMax
+            to: computedMax
             stepSize: delegateRoot.itemStep
             value: parseFloat(delegateRoot.itemVal)
             snapMode: showTicks ? Slider.SnapAlways : Slider.NoSnap
@@ -374,7 +397,7 @@ Item {
 
                     background: Rectangle {
                         implicitWidth: 220
-                        color: Theme.surface_container_highest
+                        color: (Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_container_highest.r, Theme.surface_container_highest.g, Theme.surface_container_highest.b, Vars.componentOpacity) : Theme.surface_container_highest
                         radius: 12
                         border.color: Theme.outline_variant
                         border.width: 1
@@ -570,7 +593,7 @@ Item {
                         return Math.max(m3Slider.leftRadiusLarge * 2, endAt);
                     }
                     height: parent.height
-                    color: Theme.surface_container_highest
+                    color: (Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_container_highest.r, Theme.surface_container_highest.g, Theme.surface_container_highest.b, Vars.componentOpacity) : Theme.surface_container_highest
 
                     topLeftRadius: m3Slider.leftRadiusLarge
                     bottomLeftRadius: m3Slider.leftRadiusLarge
@@ -612,7 +635,7 @@ Item {
                     y: 0
                     width: Math.max(0, parent.width - x)
                     height: parent.height
-                    color: Theme.surface_container_highest
+                    color: (Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_container_highest.r, Theme.surface_container_highest.g, Theme.surface_container_highest.b, Vars.componentOpacity) : Theme.surface_container_highest
 
                     topLeftRadius: Math.min(m3Slider.leftRadiusSmall, width / 2)
                     bottomLeftRadius: Math.min(m3Slider.leftRadiusSmall, width / 2)
@@ -642,7 +665,7 @@ Item {
                         radius: 2
 
                         property bool inColoredArea: parent.isLeftOfCenter ? (tickPos >= parent.handlePos + m3Slider.handleWidth / 2 && tickPos <= parent.centerX) : (tickPos >= parent.centerX && tickPos <= parent.handlePos + m3Slider.handleWidth / 2)
-                        color: inColoredArea ? Theme.surface_container_highest : Theme.primary
+                        color: inColoredArea ? ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_container_highest.r, Theme.surface_container_highest.g, Theme.surface_container_highest.b, Vars.componentOpacity) : Theme.surface_container_highest) : ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.primary.r, Theme.primary.g, Theme.primary.b, Vars.componentOpacity) : Theme.primary)
                     }
                 }
             }
@@ -677,7 +700,7 @@ Item {
                         y: 0
                         width: Math.max(0, parent.width - x)
                         height: parent.height
-                        color: Theme.surface_container_highest
+                        color: (Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_container_highest.r, Theme.surface_container_highest.g, Theme.surface_container_highest.b, Vars.componentOpacity) : Theme.surface_container_highest
 
                         topLeftRadius: Math.min(m3Slider.leftRadiusSmall, width / 2)
                         bottomLeftRadius: Math.min(m3Slider.leftRadiusSmall, width / 2)
@@ -707,7 +730,7 @@ Item {
                             radius: 2
 
                             property bool inColoredArea: tickPos <= parent.handlePos + m3Slider.handleWidth / 2
-                            color: inColoredArea ? Theme.surface_container_highest : Theme.primary
+                            color: inColoredArea ? ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_container_highest.r, Theme.surface_container_highest.g, Theme.surface_container_highest.b, Vars.componentOpacity) : Theme.surface_container_highest) : ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.primary.r, Theme.primary.g, Theme.primary.b, Vars.componentOpacity) : Theme.primary)
                         }
                     }
                 }
@@ -765,7 +788,10 @@ Item {
                         Behavior on topRightRadius { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customExpressiveSpatialSlow } }
                         Behavior on bottomRightRadius { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customExpressiveSpatialSlow } }
 
-                        color: isSelected ? (Vars.translucent ? Qt.rgba(Theme.primary.r, Theme.primary.g, Theme.primary.b, 0.8) : Theme.primary) : (Vars.translucent ? Qt.rgba(Theme.surface_container_highest.r, Theme.surface_container_highest.g, Theme.surface_container_highest.b, Vars.componentOpacity) : Theme.surface_container_highest)
+                        scale: chipMouse.pressed ? 1.08 : 1.0
+                        Behavior on scale { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.OutBack } }
+
+                        color: isSelected ? ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.primary.r, Theme.primary.g, Theme.primary.b, 0.8) : Theme.primary) : ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_container_highest.r, Theme.surface_container_highest.g, Theme.surface_container_highest.b, Vars.componentOpacity) : Theme.surface_container_highest)
 
                         Behavior on color { ColorAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customExpressiveSpatialSlow } }
 
@@ -779,6 +805,7 @@ Item {
                             Behavior on color { ColorAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customExpressiveSpatialSlow } }
                         }
                         MouseArea {
+                            id: chipMouse
                             anchors.fill: parent
                             cursorShape: Qt.PointingHandCursor
                             onClicked: {
@@ -789,10 +816,6 @@ Item {
                     }
                 }
             }
-        }
-
-        M3Shapes {
-            id: m3ShapesObj
         }
 
         Grid {
@@ -821,7 +844,7 @@ Item {
                     Behavior on topRightRadius { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customExpressiveSpatialSlow } }
                     Behavior on bottomRightRadius { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customExpressiveSpatialSlow } }
 
-                    color: isSelected ? Theme.primary : Theme.surface_container_highest
+                    color: isSelected ? ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.primary.r, Theme.primary.g, Theme.primary.b, Vars.componentOpacity + 0.3) : Theme.primary) : ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_container_highest.r, Theme.surface_container_highest.g, Theme.surface_container_highest.b, Vars.componentOpacity) : Theme.surface_container_highest)
                     Behavior on color { ColorAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customExpressiveSpatialSlow } }
 
                     Shape {

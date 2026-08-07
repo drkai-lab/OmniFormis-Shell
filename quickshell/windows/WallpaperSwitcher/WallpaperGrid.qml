@@ -232,7 +232,7 @@ GridView {
             anchors.margins: isCurrentFocus ? 0 : Vars.spacingSmall
             radius: isCurrentFocus ? Vars.radiusLarge : Vars.radiusMedium
 
-            color: isCurrentFocus ? Theme.primary_container : (tileMouseArea.containsMouse ? Theme.surface_container_highest : Theme.surface_container_low)
+            color: isCurrentFocus ? Theme.primary_container : (tileMouseArea.containsMouse ? ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_container_highest.r, Theme.surface_container_highest.g, Theme.surface_container_highest.b, Vars.componentOpacity) : Theme.surface_container_highest) : ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_container_low.r, Theme.surface_container_low.g, Theme.surface_container_low.b, Vars.componentOpacity) : Theme.surface_container_low))
 
             Rectangle {
                 id: tileMask

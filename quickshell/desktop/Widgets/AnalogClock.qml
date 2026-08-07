@@ -32,7 +32,7 @@ Item {
     property bool currentShowTicks: Vars.clockShowTicks !== undefined ? Vars.clockShowTicks : true
     property bool currentShowCenterDot: Vars.clockShowCenterDot !== undefined ? Vars.clockShowCenterDot : true
     property int currentAnimDuration: Vars.animationDuration !== undefined ? Vars.animationDuration : 240
-    property bool currentTranslucent: Vars.translucent !== undefined ? Vars.translucent : false
+    property bool currentTranslucent: (Vars._translucent && !Vars.gameMode) !== undefined ? (Vars._translucent && !Vars.gameMode) : false
 
     Timer {
         interval: 100
@@ -51,7 +51,7 @@ Item {
             var anim = Vars.animationDuration !== undefined ? Vars.animationDuration : 240;
             if (root.currentAnimDuration !== anim)
                 root.currentAnimDuration = anim;
-            var trans = Vars.translucent !== undefined ? Vars.translucent : false;
+            var trans = (Vars._translucent && !Vars.gameMode) !== undefined ? (Vars._translucent && !Vars.gameMode) : false;
             if (root.currentTranslucent !== trans)
                 root.currentTranslucent = trans;
         }

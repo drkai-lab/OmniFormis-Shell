@@ -33,7 +33,7 @@ ColumnLayout {
             id: searchBox
             Layout.fillWidth: true
             Layout.preferredHeight: 48
-            color: searchInput.activeFocus ? Theme.primary_container : Theme.surface_container_highest
+            color: searchInput.activeFocus ? Theme.primary_container : ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_container_highest.r, Theme.surface_container_highest.g, Theme.surface_container_highest.b, Vars.componentOpacity) : Theme.surface_container_highest)
             border.color: searchInput.activeFocus ? Theme.primary : "transparent"
             border.width: searchInput.activeFocus ? 2 : 0
             radius: searchInput.activeFocus ? Vars.radiusLarge : Vars.radiusExtraLarge

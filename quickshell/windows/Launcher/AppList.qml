@@ -282,7 +282,7 @@ ListView {
         Rectangle {
             anchors.fill: parent
             anchors.margins: isCurrent ? 0 : 2
-            color: isCurrent ? (Vars.translucent ? Qt.rgba(Theme.primary_container.r, Theme.primary_container.g, Theme.primary_container.b, Vars.componentOpacity) : Theme.primary_container) : (itemMouseArea.containsMouse ? (Vars.translucent ? Qt.rgba(Theme.surface_container_highest.r, Theme.surface_container_highest.g, Theme.surface_container_highest.b, Vars.componentOpacity) : Theme.surface_container_highest) : "transparent")
+            color: isCurrent ? ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.primary_container.r, Theme.primary_container.g, Theme.primary_container.b, Vars.componentOpacity) : Theme.primary_container) : (itemMouseArea.containsMouse ? ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_container_highest.r, Theme.surface_container_highest.g, Theme.surface_container_highest.b, Vars.componentOpacity) : Theme.surface_container_highest) : "transparent")
             radius: isCurrent ? Vars.radiusLarge : Vars.radiusMedium
             border.color: Theme.primary
             border.width: 0

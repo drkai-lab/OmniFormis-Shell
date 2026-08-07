@@ -48,10 +48,10 @@ Item {
     Rectangle {
         id: bg
         anchors.fill: parent
-        color: Theme.surface_container_high
+        color: (Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_container_high.r, Theme.surface_container_high.g, Theme.surface_container_high.b, Vars.panelOpacity) : Theme.surface_container_high
         radius: 24
         
-        opacity: Vars.translucent ? 0.85 : 1.0
+        opacity: (Vars._translucent && !Vars.gameMode) ? 0.85 : 1.0
         
         layer.enabled: true
         layer.effect: MultiEffect {

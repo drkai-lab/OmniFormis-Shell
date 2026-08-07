@@ -97,9 +97,9 @@ Item {
             searchBar.text = "";
         } else {
             MorphState.notifyOpened(500, 450, panel.targetRad, panel);
-            expandedUI.visible = true;
+            innerUI.visible = true;
             searchBar.forceActiveFocus();
-            expandedUI.visible = Qt.binding(() => root.expanded || expandedUI.opacity > 0);
+            innerUI.visible = Qt.binding(() => root.expanded || innerUI.opacity > 0);
         }
     }
 
@@ -138,7 +138,7 @@ Item {
         opacity: isBackgroundActive || innerUI.opacity > 0 ? 1.0 : 0.0
         // visible: opacity > 0 // Removed to preserve Behavior when hidden
         
-        color: isBackgroundActive ? Theme.surface_container_high : "transparent"
+        color: isBackgroundActive ? ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_container_high.r, Theme.surface_container_high.g, Theme.surface_container_high.b, Vars.panelOpacity) : Theme.surface_container_high) : "transparent"
         property real targetRad: root.expanded ? Vars.radiusExtraLarge : (MorphState.anyExpanded ? MorphState.targetRadius : height / 2)
         topLeftRadius: Vars.getTopLeftRadius(Vars.panelStyle, Vars.pillPosition, false, targetRad)
         topRightRadius: Vars.getTopRightRadius(Vars.panelStyle, Vars.pillPosition, false, targetRad)
@@ -216,9 +216,9 @@ Item {
                     
                     Keys.onUpPressed: (event) => {
                         if (currentIndex < Math.floor(width / cellWidth)) {
-                            expandedUI.visible = true;
+                            innerUI.visible = true;
             searchBar.forceActiveFocus();
-            expandedUI.visible = Qt.binding(() => root.expanded || expandedUI.opacity > 0);
+            innerUI.visible = Qt.binding(() => root.expanded || innerUI.opacity > 0);
                         } else {
                             moveCurrentIndexUp();
                         }
@@ -235,9 +235,9 @@ Item {
                                 event.accepted = true;
                             } else if (event.key === Qt.Key_K) {
                                 if (currentIndex < Math.floor(width / cellWidth)) {
-                                    expandedUI.visible = true;
+                                    innerUI.visible = true;
             searchBar.forceActiveFocus();
-            expandedUI.visible = Qt.binding(() => root.expanded || expandedUI.opacity > 0);
+            innerUI.visible = Qt.binding(() => root.expanded || innerUI.opacity > 0);
                                 } else {
                                     moveCurrentIndexUp();
                                 }

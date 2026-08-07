@@ -23,6 +23,12 @@ Flickable {
     flickDeceleration: Vars.flickDeceleration
     maximumFlickVelocity: Vars.maximumFlickVelocity
 
+    property string pageTitle: "Quick & Presets"
+    property string pageIcon: "\ue41d"
+    property string pageShape: "Sunny"
+    property color pageColor: Theme.primary
+    property color pageOnColor: Theme.on_primary
+
     signal openWallpaperSwitcher()
 
     M3Shapes { id: m3Shapes }
@@ -140,7 +146,7 @@ Flickable {
             var existingList = JSON.parse(presetStorage.savedPresetsJson || "[]");
             var varSnapshot = {
                 animationDuration: Vars.animationDuration,
-                translucent: Vars.translucent,
+                translucent: (Vars._translucent && !Vars.gameMode),
                 blurAmount: Vars.blurAmount,
                 overviewGridRows: Vars.overviewGridRows,
                 overviewGridColumns: Vars.overviewGridColumns,
@@ -173,7 +179,7 @@ Flickable {
                 desktopClockEnabled: Vars.desktopClockEnabled,
                 desktopCalenderEnabled: Vars.desktopCalenderEnabled,
                 desktopMediaPlayerEnabled: Vars.desktopMediaPlayerEnabled,
-                liquidGlass: Vars.liquidGlass,
+                liquidGlass: (Vars._liquidGlass && !Vars.gameMode),
                 liquidGlassPreset: Vars.liquidGlassPreset
             };
 
@@ -211,7 +217,16 @@ Flickable {
                 eval("Vars." + key + " = " + JSON.stringify(val) + ";");
             } catch (e) {}
             // Build command to save persistently via omniformis
-            shellCmds += "$HOME/.local/bin/omniformis qs set '" + key + "' '" + val + "'; ";
+            var omniKey = key;
+            if (key === "translucent") {
+                omniKey = "_translucent";
+                shellCmds += "$HOME/.local/bin/omniformis hypr set 'blur_enabled' '" + (val ? "true" : "false") + "'; ";
+            }
+            if (key === "liquidGlass") {
+                omniKey = "_liquidGlass";
+                shellCmds += "$HOME/.local/bin/omniformis hypr set 'liquidGlass' '" + (val ? "true" : "false") + "'; ";
+            }
+            shellCmds += "$HOME/.local/bin/omniformis qs set '" + omniKey + "' '" + val + "'; ";
         }
 
         if (item.wallpaper !== "") {
@@ -242,7 +257,7 @@ Flickable {
             }
         }
         shellCmds += "bash ~/.config/color-schemes/set-theme.sh 'material-you' '" + mode + "'; ";
-        shellCmds += "nohup bash ~/Dotfiles/scripts/reload.sh >/dev/null 2>&1 &";
+        shellCmds += "nohup bash -c 'sleep 0.25 && bash ~/Dotfiles/scripts/reload.sh' >/dev/null 2>&1 &";
 
         execProc.command = ["bash", "-c", shellCmds];
         execProc.running = true;
@@ -290,23 +305,23 @@ Flickable {
                     Image {
                         anchors.fill: parent
                         sourceSize: Qt.size(width, height)
-                        source: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><path d='" + m3Shapes.getPath("12SidedCookie") + "' fill='" + (Theme.surface_container_highest || "#3b383e") + "'/></svg>"
+                        source: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><path d='" + m3Shapes.getPath(quickPageRoot.pageShape) + "' fill='" + String(quickPageRoot.pageColor || "#3b383e").replace("#", "%23") + "'/></svg>"
                         smooth: true
                         antialiasing: true
                     }
 
                     Text {
                         anchors.centerIn: parent
-                        text: "\ue323" // display / screen icon
+                        text: quickPageRoot.pageIcon
                         font.family: "Material Symbols Outlined"
                         font.pixelSize: 20
-                        color: Theme.on_surface_variant
+                        color: quickPageRoot.pageOnColor
                     }
                 }
 
                 Text {
                     Layout.fillWidth: true
-                    text: "Wallpaper & Colors"
+                    text: quickPageRoot.pageTitle
                     font.family: Vars.fontFamily
                     font.pixelSize: 18
                     font.weight: 600
@@ -331,7 +346,7 @@ Flickable {
                     id: pathInputContainer
                     Layout.fillWidth: true
                     Layout.preferredHeight: 44
-                    color: pathInput.activeFocus ? Theme.primary_container : (Vars.translucent ? Qt.rgba(Theme.surface_container_highest.r, Theme.surface_container_highest.g, Theme.surface_container_highest.b, 0.6) : Theme.surface_container_highest)
+                    color: pathInput.activeFocus ? Theme.primary_container : ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_container_highest.r, Theme.surface_container_highest.g, Theme.surface_container_highest.b, 0.6) : Theme.surface_container_highest)
                     border.color: pathInput.activeFocus ? Theme.primary : "transparent"
                     border.width: pathInput.activeFocus ? 2 : 0
                     radius: 22
@@ -458,6 +473,7 @@ Flickable {
 
                         Behavior on color { ColorAnimation { duration: 150 } }
                         Behavior on scale { NumberAnimation { duration: 150; easing.type: Easing.OutBack } }
+                        scale: fabHover.pressed ? 1.08 : 1.0
 
                         Text {
                             anchors.centerIn: parent
@@ -475,6 +491,7 @@ Flickable {
                             hoverEnabled: true
                             cursorShape: Qt.PointingHandCursor
                             onClicked: {
+                                        console.log("Global Style Button Clicked: " + modelData.mode);
                                 quickPageRoot.openWallpaperSwitcher();
                             }
                         }
@@ -508,10 +525,12 @@ Flickable {
                             Behavior on bottomLeftRadius { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
                             Behavior on topRightRadius { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
                             Behavior on bottomRightRadius { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
-                            color: isSelected ? (Vars.translucent ? Qt.rgba(Theme.secondary_container.r, Theme.secondary_container.g, Theme.secondary_container.b, 0.7) : Theme.secondary_container) : (lightHover.containsMouse ? (Vars.translucent ? Qt.rgba(Theme.surface_container_highest.r, Theme.surface_container_highest.g, Theme.surface_container_highest.b, 0.6) : Theme.surface_container_highest) : (Vars.translucent ? Qt.rgba(Theme.surface_container_high.r, Theme.surface_container_high.g, Theme.surface_container_high.b, 0.4) : Theme.surface_container_high))
+                            color: isSelected ? ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.secondary_container.r, Theme.secondary_container.g, Theme.secondary_container.b, 0.7) : Theme.secondary_container) : (lightHover.containsMouse ? ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_container_highest.r, Theme.surface_container_highest.g, Theme.surface_container_highest.b, 0.6) : Theme.surface_container_highest) : ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_container_high.r, Theme.surface_container_high.g, Theme.surface_container_high.b, 0.4) : Theme.surface_container_high))
                             border.width: 0
 
                             Behavior on color { ColorAnimation { duration: 180 } }
+                            scale: lightHover.pressed ? 1.08 : 1.0
+                            Behavior on scale { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.OutBack } }
 
                             ColumnLayout {
                                 anchors.centerIn: parent
@@ -539,6 +558,7 @@ Flickable {
                                 hoverEnabled: true
                                 cursorShape: Qt.PointingHandCursor
                                 onClicked: {
+                                        console.log("Global Style Button Clicked: " + modelData.mode);
                                     if (themeModeSettings.currentMode !== "light") {
                                         themeModeSettings.currentMode = "light";
                                         syncMatugenAndTheme();
@@ -561,10 +581,12 @@ Flickable {
                             Behavior on bottomLeftRadius { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
                             Behavior on topRightRadius { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
                             Behavior on bottomRightRadius { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
-                            color: isSelected ? (Vars.translucent ? Qt.rgba(Theme.secondary_container.r, Theme.secondary_container.g, Theme.secondary_container.b, 0.7) : Theme.secondary_container) : (darkHover.containsMouse ? (Vars.translucent ? Qt.rgba(Theme.surface_container_highest.r, Theme.surface_container_highest.g, Theme.surface_container_highest.b, 0.6) : Theme.surface_container_highest) : (Vars.translucent ? Qt.rgba(Theme.surface_container_high.r, Theme.surface_container_high.g, Theme.surface_container_high.b, 0.4) : Theme.surface_container_high))
+                            color: isSelected ? ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.secondary_container.r, Theme.secondary_container.g, Theme.secondary_container.b, 0.7) : Theme.secondary_container) : (darkHover.containsMouse ? ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_container_highest.r, Theme.surface_container_highest.g, Theme.surface_container_highest.b, 0.6) : Theme.surface_container_highest) : ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_container_high.r, Theme.surface_container_high.g, Theme.surface_container_high.b, 0.4) : Theme.surface_container_high))
                             border.width: 0
 
                             Behavior on color { ColorAnimation { duration: 180 } }
+                            scale: darkHover.pressed ? 1.08 : 1.0
+                            Behavior on scale { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.OutBack } }
 
                             ColumnLayout {
                                 anchors.centerIn: parent
@@ -592,6 +614,7 @@ Flickable {
                                 hoverEnabled: true
                                 cursorShape: Qt.PointingHandCursor
                                 onClicked: {
+                                        console.log("Global Style Button Clicked: " + modelData.mode);
                                     if (themeModeSettings.currentMode !== "dark") {
                                         themeModeSettings.currentMode = "dark";
                                         syncMatugenAndTheme();
@@ -640,8 +663,11 @@ Flickable {
                                 Behavior on bottomLeftRadius { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
                                 Behavior on bottomRightRadius { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
 
-                                color: isSelected ? (Vars.translucent ? Qt.rgba(Theme.secondary_container.r, Theme.secondary_container.g, Theme.secondary_container.b, 0.7) : Theme.secondary_container) : (schemeHover.containsMouse ? (Vars.translucent ? Qt.rgba(Theme.surface_container_highest.r, Theme.surface_container_highest.g, Theme.surface_container_highest.b, 0.6) : Theme.surface_container_highest) : (Vars.translucent ? Qt.rgba(Theme.surface_container_high.r, Theme.surface_container_high.g, Theme.surface_container_high.b, 0.4) : Theme.surface_container_high))
+                                color: isSelected ? ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.secondary_container.r, Theme.secondary_container.g, Theme.secondary_container.b, 0.7) : Theme.secondary_container) : (schemeHover.containsMouse ? ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_container_highest.r, Theme.surface_container_highest.g, Theme.surface_container_highest.b, 0.6) : Theme.surface_container_highest) : ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_container_high.r, Theme.surface_container_high.g, Theme.surface_container_high.b, 0.4) : Theme.surface_container_high))
                                 border.width: 0
+
+                                scale: schemeHover.pressed ? 1.08 : 1.0
+                                Behavior on scale { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.OutBack } }
 
                                 Behavior on color { ColorAnimation { duration: 160 } }
 
@@ -676,6 +702,7 @@ Flickable {
                                     hoverEnabled: true
                                     cursorShape: Qt.PointingHandCursor
                                     onClicked: {
+                                        console.log("Global Style Button Clicked: " + modelData.mode);
                                         wallpaperSettings.matugenScheme = modelData.scheme;
                                         syncMatugenAndTheme();
                                     }
@@ -729,7 +756,8 @@ Flickable {
                             delegate: Rectangle {
                                 Layout.fillWidth: true
                                 Layout.preferredHeight: 38
-                                property bool isSelected: modelData.mode === "solid" ? (!Vars.translucent && !Vars.liquidGlass) : (modelData.mode === "translucent" ? Vars.translucent : Vars.liquidGlass)
+                                property bool localOverride: false
+                                property bool isSelected: localOverride ? true : (modelData.mode === "solid" ? (!(Vars._translucent && !Vars.gameMode) && !(Vars._liquidGlass && !Vars.gameMode)) : (modelData.mode === "translucent" ? (Vars._translucent && !Vars.gameMode) : (Vars._liquidGlass && !Vars.gameMode)))
                                 property bool hasLeft: index > 0
                                 property bool hasRight: index < styleModeRepeater.count - 1
 
@@ -738,8 +766,11 @@ Flickable {
                                 topRightRadius: isSelected ? 19 : (hasRight ? 6 : 19)
                                 bottomRightRadius: isSelected ? 19 : (hasRight ? 6 : 19)
 
-                                color: isSelected ? (Vars.translucent ? Qt.rgba(Theme.secondary_container.r, Theme.secondary_container.g, Theme.secondary_container.b, 0.7) : Theme.secondary_container) : (styleModeHover.containsMouse ? (Vars.translucent ? Qt.rgba(Theme.surface_container_highest.r, Theme.surface_container_highest.g, Theme.surface_container_highest.b, 0.6) : Theme.surface_container_highest) : (Vars.translucent ? Qt.rgba(Theme.surface_container_high.r, Theme.surface_container_high.g, Theme.surface_container_high.b, 0.4) : Theme.surface_container_high))
+                                color: isSelected ? ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.secondary_container.r, Theme.secondary_container.g, Theme.secondary_container.b, 0.7) : Theme.secondary_container) : (styleModeHover.containsMouse ? ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_container_highest.r, Theme.surface_container_highest.g, Theme.surface_container_highest.b, 0.6) : Theme.surface_container_highest) : ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_container_high.r, Theme.surface_container_high.g, Theme.surface_container_high.b, 0.4) : Theme.surface_container_high))
                                 border.width: 0
+
+                                scale: styleModeHover.pressed ? 1.08 : 1.0
+                                Behavior on scale { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.OutBack } }
 
                                 Behavior on topLeftRadius { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
                                 Behavior on bottomLeftRadius { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
@@ -761,23 +792,22 @@ Flickable {
                                     hoverEnabled: true
                                     cursorShape: Qt.PointingHandCursor
                                     onClicked: {
-                                        if (modelData.mode === "solid" && (Vars.translucent || Vars.liquidGlass)) {
-                                            Vars.translucent = false;
-                                            Vars.liquidGlass = false;
+                                        console.log("Global Style Button Clicked: " + modelData.mode);
+                                        if (parent.isSelected) return;
+                                        
+                                        parent.localOverride = true;
+                                        
+                                        if (modelData.mode === "solid") {
                                             Quickshell.execDetached({
-                                                command: ["bash", "-c", "$HOME/.local/bin/omniformis qs set 'translucent' 'false'; $HOME/.local/bin/omniformis qs set 'liquidGlass' 'false'; $HOME/.local/bin/omniformis hypr set 'liquidGlass' 'false'; $HOME/.local/bin/omniformis hypr set 'blur_enabled' 'false'; nohup bash ~/Dotfiles/scripts/reload.sh >/dev/null 2>&1 &"]
+                                                command: ["bash", "-c", "$HOME/.local/bin/omniformis qs set '_translucent' 'false'; $HOME/.local/bin/omniformis qs set '_liquidGlass' 'false'; $HOME/.local/bin/omniformis hypr set 'liquidGlass' 'false'; $HOME/.local/bin/omniformis hypr set 'blur_enabled' 'false'; nohup bash -c 'sleep 0.25 && bash ~/Dotfiles/scripts/reload.sh' >/dev/null 2>&1 &"]
                                             });
-                                        } else if (modelData.mode === "translucent" && !Vars.translucent) {
-                                            Vars.translucent = true;
-                                            Vars.liquidGlass = false;
+                                        } else if (modelData.mode === "translucent") {
                                             Quickshell.execDetached({
-                                                command: ["bash", "-c", "$HOME/.local/bin/omniformis qs set 'translucent' 'true'; $HOME/.local/bin/omniformis qs set 'liquidGlass' 'false'; $HOME/.local/bin/omniformis hypr set 'liquidGlass' 'false'; $HOME/.local/bin/omniformis hypr set 'blur_enabled' 'true'; nohup bash ~/Dotfiles/scripts/reload.sh >/dev/null 2>&1 &"]
+                                                command: ["bash", "-c", "$HOME/.local/bin/omniformis qs set '_translucent' 'true'; $HOME/.local/bin/omniformis qs set '_liquidGlass' 'false'; $HOME/.local/bin/omniformis hypr set 'liquidGlass' 'false'; $HOME/.local/bin/omniformis hypr set 'blur_enabled' 'true'; nohup bash -c 'sleep 0.25 && bash ~/Dotfiles/scripts/reload.sh' >/dev/null 2>&1 &"]
                                             });
-                                        } else if (modelData.mode === "liquid" && !Vars.liquidGlass) {
-                                            Vars.liquidGlass = true;
-                                            Vars.translucent = false;
+                                        } else if (modelData.mode === "liquid") {
                                             Quickshell.execDetached({
-                                                command: ["bash", "-c", "$HOME/.local/bin/omniformis qs set 'liquidGlass' 'true'; $HOME/.local/bin/omniformis qs set 'translucent' 'false'; $HOME/.local/bin/omniformis hypr set 'liquidGlass' 'true'; $HOME/.local/bin/omniformis hypr set 'blur_enabled' 'false'; nohup bash ~/Dotfiles/scripts/reload.sh >/dev/null 2>&1 &"]
+                                                command: ["bash", "-c", "$HOME/.local/bin/omniformis qs set '_liquidGlass' 'true'; $HOME/.local/bin/omniformis qs set '_translucent' 'false'; $HOME/.local/bin/omniformis hypr set 'liquidGlass' 'true'; $HOME/.local/bin/omniformis hypr set 'blur_enabled' 'false'; nohup bash -c 'sleep 0.25 && bash ~/Dotfiles/scripts/reload.sh' >/dev/null 2>&1 &"]
                                             });
                                         }
                                     }
@@ -787,68 +817,7 @@ Flickable {
                     }
                 }
 
-                // Automatic Sync Toggle Item
-                RowLayout {
-                    Layout.fillWidth: true
-                    spacing: 12
-
-                    Text {
-                        text: "\ue387" // color synchronization icon
-                        font.family: "Material Symbols Outlined"
-                        font.pixelSize: 22
-                        color: Theme.on_surface_variant
-                    }
-
-                    Text {
-                        Layout.fillWidth: true
-                        text: "Automatic"
-                        font.family: Vars.fontFamily
-                        font.pixelSize: 15
-                        font.weight: 500
-                        color: Theme.on_surface
-                    }
-
-                    // M3 Toggle Pill Switch
-                    Rectangle {
-                        width: 50
-                        height: 30
-                        radius: 15
-                        color: wallpaperSettings.automaticSync !== false ? Theme.primary_container : Theme.surface_container_highest
-                        border.color: wallpaperSettings.automaticSync !== false ? "transparent" : Theme.outline_variant
-                        border.width: wallpaperSettings.automaticSync !== false ? 0 : 1
-
-                        Behavior on color { ColorAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
-
-                        // Thumb Circle
-                        Rectangle {
-                            width: wallpaperSettings.automaticSync !== false ? 22 : 18
-                            height: width
-                            radius: width / 2
-                            y: (parent.height - height) / 2
-                            x: wallpaperSettings.automaticSync !== false ? parent.width - width - 4 : 5
-                            color: wallpaperSettings.automaticSync !== false ? Theme.on_primary_container : Theme.on_surface_variant
-
-                            Behavior on x { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
-                            Behavior on width { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
-                        }
-
-                        MouseArea {
-                            anchors.fill: parent
-                            cursorShape: Qt.PointingHandCursor
-                            onClicked: {
-                                wallpaperSettings.automaticSync = !wallpaperSettings.automaticSync;
-                            }
-                        }
-                    }
-                }
-            }
-
-            // Awww Transition Type Selection
-            RowLayout {
-                Layout.fillWidth: true
-                Layout.topMargin: 4
-                spacing: 28
-
+                // Wallpaper Transition Selection
                 ColumnLayout {
                     Layout.fillWidth: true
                     Layout.alignment: Qt.AlignTop
@@ -896,8 +865,11 @@ Flickable {
                                 topRightRadius: isSelected ? 19 : (hasRight ? 6 : 19)
                                 bottomRightRadius: isSelected ? 19 : (hasRight ? 6 : 19)
 
-                                color: isSelected ? (Vars.translucent ? Qt.rgba(Theme.secondary_container.r, Theme.secondary_container.g, Theme.secondary_container.b, 0.7) : Theme.secondary_container) : (transHover.containsMouse ? (Vars.translucent ? Qt.rgba(Theme.surface_container_highest.r, Theme.surface_container_highest.g, Theme.surface_container_highest.b, 0.6) : Theme.surface_container_highest) : (Vars.translucent ? Qt.rgba(Theme.surface_container_high.r, Theme.surface_container_high.g, Theme.surface_container_high.b, 0.4) : Theme.surface_container_high))
+                                color: isSelected ? ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.secondary_container.r, Theme.secondary_container.g, Theme.secondary_container.b, 0.7) : Theme.secondary_container) : (transHover.containsMouse ? ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_container_highest.r, Theme.surface_container_highest.g, Theme.surface_container_highest.b, 0.6) : Theme.surface_container_highest) : ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_container_high.r, Theme.surface_container_high.g, Theme.surface_container_high.b, 0.4) : Theme.surface_container_high))
                                 border.width: 0
+
+                                scale: transHover.pressed ? 1.08 : 1.0
+                                Behavior on scale { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.OutBack } }
 
                                 Behavior on topLeftRadius { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
                                 Behavior on bottomLeftRadius { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
@@ -920,6 +892,7 @@ Flickable {
                                     hoverEnabled: true
                                     cursorShape: Qt.PointingHandCursor
                                     onClicked: {
+                                        console.log("Global Style Button Clicked: " + modelData.mode);
                                         wallpaperSettings.awwwTransitionType = modelData.mode;
                                     }
                                 }
@@ -1002,8 +975,11 @@ Flickable {
                             topRightRadius: isSelected ? 19 : (hasRight ? 6 : 19)
                             bottomRightRadius: isSelected ? 19 : (hasRight ? 6 : 19)
 
-                            color: isSelected ? (Vars.translucent ? Qt.rgba(Theme.secondary_container.r, Theme.secondary_container.g, Theme.secondary_container.b, 0.7) : Theme.secondary_container) : (posHover.containsMouse ? (Vars.translucent ? Qt.rgba(Theme.surface_container_highest.r, Theme.surface_container_highest.g, Theme.surface_container_highest.b, 0.6) : Theme.surface_container_highest) : (Vars.translucent ? Qt.rgba(Theme.surface_container_high.r, Theme.surface_container_high.g, Theme.surface_container_high.b, 0.4) : Theme.surface_container_high))
+                            color: isSelected ? ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.secondary_container.r, Theme.secondary_container.g, Theme.secondary_container.b, 0.7) : Theme.secondary_container) : (posHover.containsMouse ? ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_container_highest.r, Theme.surface_container_highest.g, Theme.surface_container_highest.b, 0.6) : Theme.surface_container_highest) : ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_container_high.r, Theme.surface_container_high.g, Theme.surface_container_high.b, 0.4) : Theme.surface_container_high))
                             border.width: 0
+
+                            scale: posHover.pressed ? 1.08 : 1.0
+                            Behavior on scale { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.OutBack } }
 
                             Behavior on topLeftRadius { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
                             Behavior on bottomLeftRadius { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
@@ -1025,6 +1001,7 @@ Flickable {
                                 hoverEnabled: true
                                 cursorShape: Qt.PointingHandCursor
                                 onClicked: {
+                                        console.log("Global Style Button Clicked: " + modelData.mode);
                                     if (Vars.pillPosition !== modelData.pos) {
                                         Vars.pillPosition = modelData.pos;
                                         Quickshell.execDetached({
@@ -1085,8 +1062,11 @@ Flickable {
                             topRightRadius: isSelected ? 19 : (hasRight ? 6 : 19)
                             bottomRightRadius: isSelected ? 19 : (hasRight ? 6 : 19)
 
-                            color: isSelected ? (Vars.translucent ? Qt.rgba(Theme.secondary_container.r, Theme.secondary_container.g, Theme.secondary_container.b, 0.7) : Theme.secondary_container) : (styleHover.containsMouse ? (Vars.translucent ? Qt.rgba(Theme.surface_container_highest.r, Theme.surface_container_highest.g, Theme.surface_container_highest.b, 0.6) : Theme.surface_container_highest) : (Vars.translucent ? Qt.rgba(Theme.surface_container_high.r, Theme.surface_container_high.g, Theme.surface_container_high.b, 0.4) : Theme.surface_container_high))
+                            color: isSelected ? ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.secondary_container.r, Theme.secondary_container.g, Theme.secondary_container.b, 0.7) : Theme.secondary_container) : (styleHover.containsMouse ? ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_container_highest.r, Theme.surface_container_highest.g, Theme.surface_container_highest.b, 0.6) : Theme.surface_container_highest) : ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_container_high.r, Theme.surface_container_high.g, Theme.surface_container_high.b, 0.4) : Theme.surface_container_high))
                             border.width: 0
+
+                            scale: styleHover.pressed ? 1.08 : 1.0
+                            Behavior on scale { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.OutBack } }
 
                             Behavior on topLeftRadius { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
                             Behavior on bottomLeftRadius { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
@@ -1108,6 +1088,7 @@ Flickable {
                                 hoverEnabled: true
                                 cursorShape: Qt.PointingHandCursor
                                 onClicked: {
+                                        console.log("Global Style Button Clicked: " + modelData.mode);
                                     if (Vars.panelStyle !== modelData.style) {
                                         Vars.panelStyle = modelData.style;
                                         Quickshell.execDetached({
@@ -1176,8 +1157,11 @@ Flickable {
                                 topRightRadius: isSelected ? 19 : (hasRight ? 6 : 19)
                                 bottomRightRadius: isSelected ? 19 : (hasRight ? 6 : 19)
 
-                                color: isSelected ? (Vars.translucent ? Qt.rgba(Theme.secondary_container.r, Theme.secondary_container.g, Theme.secondary_container.b, 0.7) : Theme.secondary_container) : (presetHover.containsMouse ? (Vars.translucent ? Qt.rgba(Theme.surface_container_highest.r, Theme.surface_container_highest.g, Theme.surface_container_highest.b, 0.6) : Theme.surface_container_highest) : (Vars.translucent ? Qt.rgba(Theme.surface_container_high.r, Theme.surface_container_high.g, Theme.surface_container_high.b, 0.4) : Theme.surface_container_high))
+                                color: isSelected ? ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.secondary_container.r, Theme.secondary_container.g, Theme.secondary_container.b, 0.7) : Theme.secondary_container) : (presetHover.containsMouse ? ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_container_highest.r, Theme.surface_container_highest.g, Theme.surface_container_highest.b, 0.6) : Theme.surface_container_highest) : ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_container_high.r, Theme.surface_container_high.g, Theme.surface_container_high.b, 0.4) : Theme.surface_container_high))
                                 border.width: 0
+
+                                scale: presetHover.pressed ? 1.08 : 1.0
+                                Behavior on scale { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.OutBack } }
 
                                 Behavior on topLeftRadius { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
                                 Behavior on bottomLeftRadius { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
@@ -1209,6 +1193,7 @@ Flickable {
                                     hoverEnabled: true
                                     cursorShape: Qt.PointingHandCursor
                                     onClicked: {
+                                        console.log("Global Style Button Clicked: " + modelData.mode);
                                         if (Vars.liquidGlassPreset !== modelData.preset) {
                                             Vars.liquidGlassPreset = modelData.preset;
                                             Quickshell.execDetached({
@@ -1302,8 +1287,8 @@ Flickable {
                         font.family: "Material Symbols Outlined"
                         font.pixelSize: 24
                         color: Theme.on_secondary_container
-                        scale: createHover.pressed ? 0.92 : 1.0
-                        Behavior on scale { NumberAnimation { duration: 150 } }
+                        scale: createHover.pressed ? 1.08 : 1.0
+                        Behavior on scale { NumberAnimation { duration: 150; easing.type: Easing.OutBack } }
                     }
 
                     MouseArea {
@@ -1312,6 +1297,7 @@ Flickable {
                         hoverEnabled: true
                         cursorShape: Qt.PointingHandCursor
                         onClicked: {
+                                        console.log("Global Style Button Clicked: " + modelData.mode);
                             morphAnim.restart();
                             createNewPreset();
                         }
@@ -1348,7 +1334,7 @@ Flickable {
                             id: cardBase
                             anchors.fill: parent
                             radius: 24
-                            color: Vars.translucent ? Qt.rgba(Theme.surface_container_low.r, Theme.surface_container_low.g, Theme.surface_container_low.b, 0.35) : Theme.surface_container_low
+                            color: (Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_container_low.r, Theme.surface_container_low.g, Theme.surface_container_low.b, 0.35) : Theme.surface_container_low
                             border.color: Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.08)
                             border.width: 1
                             clip: true
@@ -1432,7 +1418,7 @@ Flickable {
                                 height: 56
                                 bottomLeftRadius: 24
                                 bottomRightRadius: 24
-                                color: Vars.translucent ? Qt.rgba(Theme.surface_container_highest.r, Theme.surface_container_highest.g, Theme.surface_container_highest.b, 0.5) : Theme.surface_container_highest
+                                color: (Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_container_highest.r, Theme.surface_container_highest.g, Theme.surface_container_highest.b, 0.5) : Theme.surface_container_highest
                                 
                                 Rectangle {
                                     anchors.top: parent.top
@@ -1496,6 +1482,8 @@ Flickable {
                                             bottomRightRadius: 6
                                             color: applyHover.containsMouse ? Theme.primary : Qt.rgba(Theme.primary.r, Theme.primary.g, Theme.primary.b, 0.2)
                                             Behavior on color { ColorAnimation { duration: 150 } }
+                                            scale: applyHover.pressed ? 1.08 : 1.0
+                                            Behavior on scale { NumberAnimation { duration: 150; easing.type: Easing.OutBack } }
 
                                             Text {
                                                 anchors.centerIn: parent
@@ -1513,6 +1501,7 @@ Flickable {
                                                 hoverEnabled: true
                                                 cursorShape: Qt.PointingHandCursor
                                                 onClicked: {
+                                        console.log("Global Style Button Clicked: " + modelData.mode);
                                                     applyPreset(index);
                                                 }
                                             }
@@ -1528,6 +1517,8 @@ Flickable {
                                             bottomRightRadius: 18
                                             color: delHover.containsMouse ? Theme.error : Qt.rgba(Theme.error.r, Theme.error.g, Theme.error.b, 0.18)
                                             Behavior on color { ColorAnimation { duration: 150 } }
+                                            scale: delHover.pressed ? 1.08 : 1.0
+                                            Behavior on scale { NumberAnimation { duration: 150; easing.type: Easing.OutBack } }
 
                                             Text {
                                                 anchors.centerIn: parent
@@ -1544,6 +1535,7 @@ Flickable {
                                                 hoverEnabled: true
                                                 cursorShape: Qt.PointingHandCursor
                                                 onClicked: {
+                                        console.log("Global Style Button Clicked: " + modelData.mode);
                                                     deletePreset(index);
                                                 }
                                             }
@@ -1561,6 +1553,7 @@ Flickable {
                             height: parent.height - 56
                             cursorShape: Qt.PointingHandCursor
                             onClicked: {
+                                        console.log("Global Style Button Clicked: " + modelData.mode);
                                 applyPreset(index);
                             }
                         }

@@ -17,6 +17,12 @@ ColumnLayout {
 
     property var allVars: []
     property string activeCategory: "General"
+    
+    property string pageTitle: ""
+    property string pageIcon: ""
+    property string pageShape: "Circle"
+    property color pageColor: Theme.primary
+    property color pageOnColor: Theme.on_primary
     onActiveCategoryChanged: applyFilter()
     property string copiedSliderValue: ""
 
@@ -117,7 +123,7 @@ ColumnLayout {
         var isLive = false;
         if (isQs) {
             var liveVars = ["clockShape", "clockShowTicks", "clockShowCenterDot", "wallpaperMaskShape", "wallpaperMaskScale", "wallpaperMaskColor", "wallpaperMaskEnabled", "wallpaperMaskOffsetX", "wallpaperMaskOffsetY", "mediaPlayerShape", "mediaPlayerArtScale", "gameMode"];
-            isLive = liveVars.indexOf(key) !== -1;
+            isLive = liveVars.indexOf(key) !== -1 || key.startsWith("desktop");
             cmdArray = ["/home/boing/.local/bin/omniformis", "qs", "set", key, String(val)];
         } else {
             cmdArray = ["/home/boing/.local/bin/omniformis", "hypr", "set", key, String(val)];
@@ -138,6 +144,9 @@ ColumnLayout {
             } catch (e) {
                 console.warn("SettingsApp: Failed to update live variable: " + key + " = " + val + ". Error: " + e);
             }
+        } else if (isQs && !isLive) {
+            var reloadProc = Qt.createQmlObject('import Quickshell.Io; Process { command: ["bash", "-c", "nohup bash ~/Dotfiles/scripts/reload.sh >/dev/null 2>&1 &"]; onExited: destroy() }', rootPage);
+            reloadProc.running = true;
         }
     }
 
@@ -151,40 +160,41 @@ ColumnLayout {
         loadSettings();
     }
 
-    ColumnLayout {
+    M3Shapes { id: m3Shapes }
+
+    RowLayout {
         Layout.fillWidth: true
-        spacing: 2
-        Text {
-            text: {
-                if (activeCategory === "Layout") return "Window Gaps & Layout";
-                if (activeCategory === "Keybinds") return "Shortcuts & Modifiers";
-                if (activeCategory === "Theme") return "Visuals & Effects";
-                if (activeCategory === "Animations") return "Animation & Physics";
-                if (activeCategory === "Desktop") return "Desktop & Widgets";
-                if (activeCategory === "Input") return "Input Devices";
-                if (activeCategory === "General") return "System & Apps";
-                return activeCategory;
+        spacing: 12
+
+        Item {
+            width: 38
+            height: 38
+
+            Image {
+                anchors.fill: parent
+                sourceSize: Qt.size(width, height)
+                source: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><path d='" + m3Shapes.getPath(rootPage.pageShape) + "' fill='" + String(rootPage.pageColor || "#3b383e").replace("#", "%23") + "'/></svg>"
+                smooth: true
+                antialiasing: true
             }
+
+            Text {
+                anchors.centerIn: parent
+                text: rootPage.pageIcon
+                font.family: "Material Symbols Outlined"
+                font.pixelSize: 20
+                color: rootPage.pageOnColor
+            }
+        }
+
+        Text {
+            Layout.fillWidth: true
+            text: rootPage.pageTitle
             font.family: Vars.fontFamily
             font.pixelSize: 18
             font.weight: 600
             color: Theme.on_surface
-        }
-        Text {
-            text: {
-                if (activeCategory === "Layout") return "Configure window gaps, border sizing, tiling layout, and system spacing tokens";
-                if (activeCategory === "Keybinds") return "Manage system shortcuts, hotkeys, modifier key combinations, and launcher actions";
-                if (activeCategory === "Theme") return "Customize window corner rounding, opacity, drop shadows, blur effects, and font family";
-                if (activeCategory === "Animations") return "Adjust expressive Material 3 animation styles, transition durations, and scrolling physics";
-                if (activeCategory === "Desktop") return "Configure wallpaper mask & settings, desktop widgets (clock, calendar, media player), and overview dimensions";
-                if (activeCategory === "Input") return "Tune mouse sensitivity, touchpad gestures, natural scrolling, and keyboard layout rules";
-                if (activeCategory === "General") return "Configure default terminal, browser, code editor, environment scale factors, and Game Mode";
-                return "Manage settings for " + activeCategory;
-            }
-            font.family: Vars.fontFamily
-            font.pixelSize: 13
-            color: Theme.on_surface_variant
-            opacity: 0.8
+            elide: Text.ElideRight
         }
     }
 
@@ -199,7 +209,7 @@ ColumnLayout {
             showIcon: true
             iconText: "search"
             defaultHeight: 72
-            defaultColor: Vars.translucent ? Qt.rgba(Theme.surface_container.r, Theme.surface_container.g, Theme.surface_container.b, 0.5) : Theme.surface_container
+            defaultColor: (Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_container.r, Theme.surface_container.g, Theme.surface_container.b, 0.5) : Theme.surface_container
             
             onTextChanged: applyFilter()
             onDownPressed: {
@@ -218,7 +228,7 @@ ColumnLayout {
                 color: layoutBtnHover.containsMouse ? Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.1) : "transparent"
                 radius: Vars.radiusMedium
                 implicitHeight: 72
-                implicitWidth: layoutBtnContent.width + Vars.spacingLarge * 2
+                implicitWidth: layoutBtnContent.implicitWidth + Vars.spacingLarge * 2
             }
             contentItem: RowLayout {
                 id: layoutBtnContent
@@ -245,7 +255,7 @@ ColumnLayout {
                 color: refreshBtnHover.containsMouse ? Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.1) : "transparent"
                 radius: Vars.radiusMedium
                 implicitHeight: 72
-                implicitWidth: refreshBtnContent.width + Vars.spacingLarge * 2
+                implicitWidth: refreshBtnContent.implicitWidth + Vars.spacingLarge * 2
             }
             contentItem: Text {
                 id: refreshBtnContent
@@ -291,7 +301,7 @@ ColumnLayout {
         model: settingsModel
         focus: true
         bottomMargin: 112
-        KeyNavigation.up: searchInput
+        KeyNavigation.up: searchBar.searchInput
 
         // boundsBehavior: Flickable.StopAtBounds
         flickDeceleration: Vars.flickDeceleration
@@ -333,7 +343,7 @@ ColumnLayout {
                     if (currentIndex > 0) {
                         decrementCurrentIndex();
                     } else {
-                        searchInput.forceActiveFocus();
+                        searchBar.forceActiveFocus();
                     }
                     event.accepted = true;
                 } else if (event.key === Qt.Key_L || event.key === Qt.Key_H) {
@@ -641,6 +651,11 @@ ColumnLayout {
                         min = -500;
                         max = 500;
                         step = 1;
+                    } else if (key.endsWith("AnchorCurve")) {
+                        type = "slider";
+                        min = 0;
+                        max = 20; // Will be overridden in the delegate dynamically
+                        step = 1;
                     }
 
                     var enumsStr = "";
@@ -664,6 +679,9 @@ ColumnLayout {
                     } else if (key === "liquidGlassPreset") {
                         type = "enum";
                         enumsStr = "glass|||apple|||clear|||contrasted";
+                    } else if (key.endsWith("AnchorPoint")) {
+                        type = "enum";
+                        enumsStr = "TopLeft|||TopCenter|||TopRight|||MiddleLeft|||Center|||MiddleRight|||BottomLeft|||BottomCenter|||BottomRight";
                     }
 
                     newVars.push({
@@ -687,7 +705,7 @@ ColumnLayout {
     }
 
     function applyFilter() {
-        var term = searchInput.text.trim();
+        var term = searchBar.text.trim();
         settingsModel.clear();
         var filteredVars = [];
         for (var k = 0; k < rootPage.allVars.length; k++) {
@@ -771,7 +789,7 @@ ColumnLayout {
                     Rectangle {
                         anchors.fill: parent
                         radius: reloadFab.radius
-                        color: Vars.translucent ? Qt.rgba(Theme.primary.r, Theme.primary.g, Theme.primary.b, 0.4) : Theme.primary
+                        color: (Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.primary.r, Theme.primary.g, Theme.primary.b, 0.4) : Theme.primary
                         border.color: Theme.outline_variant
                         border.width: 1
                     }

@@ -14,6 +14,14 @@ Item {
     property string gpuName: "Unknown GPU"
     property string memName: "Unknown RAM"
 
+    property string pageTitle: "About OmniFormis"
+    property string pageIcon: "\ue88e"
+    property string pageShape: "4SidedCookie"
+    property color pageColor: Theme.secondary
+    property color pageOnColor: Theme.on_secondary
+
+    M3Shapes { id: m3Shapes }
+
     Process {
         id: fastfetchProc
         command: ["fastfetch"] // Run without json to parse custom config output
@@ -60,50 +68,42 @@ Item {
             
             Item { Layout.preferredHeight: Vars.spacingLarge }
 
-            // Logo & Header
-            ColumnLayout {
-                Layout.alignment: Qt.AlignHCenter
-                spacing: Vars.spacingSmall
-                
-                Rectangle {
-                    Layout.alignment: Qt.AlignHCenter
-                    width: 96; height: 96
-                    radius: 48
-                    color: Theme.primary_container
-                    clip: true
-                    
-                    // To add an image to this logo, uncomment the Image component below and set the source.
-                    // Image {
-                    //     anchors.fill: parent
-                    //     source: "file:///home/boing/Pictures/logo.png"
-                    //     fillMode: Image.PreserveAspectCrop
-                    // }
-                    
+            // Logo & Header (Standardized Title)
+            RowLayout {
+                Layout.fillWidth: true
+                Layout.leftMargin: Vars.spacingLarge
+                Layout.rightMargin: Vars.spacingLarge
+                spacing: 12
+
+                Item {
+                    width: 38
+                    height: 38
+
+                    Image {
+                        anchors.fill: parent
+                        sourceSize: Qt.size(width, height)
+                        source: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><path d='" + m3Shapes.getPath(aboutPage.pageShape) + "' fill='" + String(aboutPage.pageColor || "#3b383e").replace("#", "%23") + "'/></svg>"
+                        smooth: true
+                        antialiasing: true
+                    }
+
                     Text {
                         anchors.centerIn: parent
+                        text: aboutPage.pageIcon
                         font.family: "Material Symbols Outlined"
-                        font.pixelSize: 48
-                        color: Theme.on_primary_container
-                        text: "code"
-                        // Add `visible: false` here if you uncomment the Image above.
+                        font.pixelSize: 20
+                        color: aboutPage.pageOnColor
                     }
                 }
-                
+
                 Text {
-                    text: "OmniFormis Shell"
+                    Layout.fillWidth: true
+                    text: aboutPage.pageTitle
                     font.family: Vars.fontFamily
-                    font.pixelSize: 28
-                    font.weight: Font.Bold
+                    font.pixelSize: 18
+                    font.weight: 600
                     color: Theme.on_surface
-                    Layout.alignment: Qt.AlignHCenter
-                }
-                
-                Text {
-                    text: "Version 1.0"
-                    font.family: Vars.fontFamily
-                    font.pixelSize: 16
-                    color: Theme.on_surface_variant
-                    Layout.alignment: Qt.AlignHCenter
+                    elide: Text.ElideRight
                 }
             }
             
