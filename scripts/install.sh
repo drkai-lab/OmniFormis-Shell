@@ -190,7 +190,53 @@ elif grep -qi "arch" /etc/os-release; then
     fi
     
     mkdir -p ~/.local/bin
-    ln -sf ~/.local/share/spotify-spicetify/spotify ~/.local/bin/spotify
+    cat << 'EOF' > ~/.local/bin/spotify
+#!/usr/bin/env bash
+
+LOCAL_SPOTIFY="$HOME/.local/share/spotify-spicetify"
+SYSTEM_SPOTIFY_BIN=""
+
+if grep -qi "nixos" /etc/os-release; then
+    if [ -x "/run/current-system/sw/bin/spotify" ]; then
+        SYSTEM_SPOTIFY_BIN=$(readlink -f /run/current-system/sw/bin/spotify)
+    elif [ -x "$HOME/.nix-profile/bin/spotify" ]; then
+        SYSTEM_SPOTIFY_BIN=$(readlink -f "$HOME/.nix-profile/bin/spotify")
+    fi
+else
+    SYSTEM_SPOTIFY_BIN=$(readlink -f /usr/bin/spotify 2>/dev/null)
+fi
+
+if [ -n "$SYSTEM_SPOTIFY_BIN" ] && [ -x "$SYSTEM_SPOTIFY_BIN" ]; then
+    SYSTEM_SHARE="$(dirname "$SYSTEM_SPOTIFY_BIN")"
+    if [[ "$SYSTEM_SHARE" == */bin ]]; then
+        SYSTEM_SHARE="$(dirname "$SYSTEM_SHARE")/share/spotify"
+    fi
+    
+    CHECK_FILE="spotify"
+    if [ -f "$SYSTEM_SHARE/.spotify-wrapped" ]; then
+        CHECK_FILE=".spotify-wrapped"
+    fi
+
+    if [ -f "$SYSTEM_SHARE/$CHECK_FILE" ]; then
+        if [ ! -f "$LOCAL_SPOTIFY/$CHECK_FILE" ] || ! cmp -s "$SYSTEM_SHARE/$CHECK_FILE" "$LOCAL_SPOTIFY/$CHECK_FILE"; then
+            echo "Spotify version mismatch detected. Updating local Spicetify installation..."
+            rm -rf "$LOCAL_SPOTIFY"
+            mkdir -p "$LOCAL_SPOTIFY"
+            cp -rT "$SYSTEM_SHARE" "$LOCAL_SPOTIFY"
+            chmod -R a+wr "$LOCAL_SPOTIFY"
+            
+            if grep -qi "nixos" /etc/os-release && [ -f "$LOCAL_SPOTIFY/.spotify-wrapped" ]; then
+                sed -i -E "s|/nix/store/[^/]+/share/spotify/\.spotify-wrapped|$LOCAL_SPOTIFY/.spotify-wrapped|g" "$LOCAL_SPOTIFY/spotify"
+            fi
+            
+            spicetify backup apply
+        fi
+    fi
+fi
+
+exec "$LOCAL_SPOTIFY/spotify" "$@"
+EOF
+    chmod +x ~/.local/bin/spotify
 
     spicetify config extensions adblockify.js beautifulLyrics.js popupLyrics.js spicyLyrics.js fullAppDisplay.js || true
     spicetify backup apply || true
