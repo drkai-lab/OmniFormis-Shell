@@ -34,11 +34,11 @@ ColumnLayout {
         Rectangle {
             width: 40; height: 40; radius: 20
             color: backHoverDisp.pressed ? Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.12) : (backHoverDisp.containsMouse ? Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.08) : "transparent")
-            Text { anchors.centerIn: parent; font.family: "Material Symbols Outlined"; font.pixelSize: 20; color: Theme.on_surface; text: "\ue5c4" }
+            QsText { anchors.centerIn: parent; font.family: "Material Symbols Outlined"; font.pixelSize: 20; color: Theme.on_surface; text: "\ue5c4" }
             MouseArea { id: backHoverDisp; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: displayMenu.backRequested() }
             Behavior on color { ColorAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
         }
-        Text { text: "Display Scale"; font.family: Vars.fontFamily; font.pixelSize: 24; font.weight: Font.Bold; color: Theme.on_surface; Layout.fillWidth: true }
+        QsText { text: "Display Scale"; font.family: Vars.fontFamily; font.pixelSize: 24; setWeight: Font.Bold; color: Theme.on_surface; Layout.fillWidth: true }
     }
 
     Flickable {
@@ -69,7 +69,7 @@ ColumnLayout {
                             radius: isScaleActive ? 12 : 20
                             Behavior on radius { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
                             color: isScaleActive ? Theme.on_primary : Qt.rgba(Theme.on_surface_variant.r, Theme.on_surface_variant.g, Theme.on_surface_variant.b, 0.1)
-                            Text {
+                            QsText {
                                 anchors.centerIn: parent
                                 font.family: "Material Symbols Outlined"; font.pixelSize: 22
                                 color: isScaleActive ? Theme.surface : Theme.on_surface_variant
@@ -80,12 +80,12 @@ ColumnLayout {
                         
                         ColumnLayout {
                             Layout.alignment: Qt.AlignLeft | Qt.AlignVCenter; spacing: 0
-                            Text { 
-                                text: modelData + "x Scale"; font.family: Vars.fontFamily; font.pixelSize: 14; font.weight: Font.Bold
+                            QsText { 
+                                text: modelData + "x Scale"; font.family: Vars.fontFamily; font.pixelSize: 14; setWeight: Font.Bold
                                 color: isScaleActive ? Theme.surface : Theme.on_surface_variant
                                 Behavior on color { ColorAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
                             }
-                            Text { 
+                            QsText { 
                                 text: isScaleActive ? "Active" : "Apply scale"; font.family: Vars.fontFamily; font.pixelSize: 12; opacity: 0.8
                                 color: isScaleActive ? Theme.surface : Theme.on_surface_variant
                                 Behavior on color { ColorAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }

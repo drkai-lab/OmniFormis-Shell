@@ -241,7 +241,7 @@ Item {
 
                             Primitives.M3Shapes { id: m3 }
                             
-                            Text {
+                            QsText {
                                 text: "Enter password"
                                 color: Theme.on_surface_variant
                                 font.family: Vars.fontFamily
@@ -302,7 +302,7 @@ Item {
                             }
                         }
 
-                        Text {
+                        QsText {
                             Layout.alignment: Qt.AlignHCenter
                             text: root.statusMessage
                             font.family: Vars.fontFamily

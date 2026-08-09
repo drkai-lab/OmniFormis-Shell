@@ -3,6 +3,7 @@ import QtQuick.Layouts
 import Quickshell
 import Quickshell.Services.Mpris
 import "../../theme/variables.js" as Vars
+import "../../core/primitives" as Primitives
 import "../.."
 import QtQuick.Effects
 import QtQuick.Shapes
@@ -48,16 +49,27 @@ Rectangle {
 
     Layout.fillWidth: true
     Layout.preferredHeight: 180
-    radius: 16
     color: "transparent"
 
-    Rectangle {
-        id: rootMask
+    Primitives.SquircleMask {
+        id: rootMaskShape
         anchors.fill: parent
-        radius: 16
-        color: (Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface.r, Theme.surface.g, Theme.surface.b, Vars.componentOpacity) : Theme.surface
-        layer.enabled: true
-        layer.samples: 4
+        property real targetRad: 32
+        topLeftRadius: targetRad
+        topRightRadius: targetRad
+        bottomLeftRadius: targetRad
+        bottomRightRadius: targetRad
+        color: "black"
+        visible: true // Keep visible true, hide via ShaderEffectSource
+        antialiasing: true
+        smooth: true
+    }
+
+    ShaderEffectSource {
+        id: rootMask
+        sourceItem: rootMaskShape
+        anchors.fill: parent
+        hideSource: true
         visible: false
     }
 
@@ -76,11 +88,11 @@ Rectangle {
         layer.enabled: true
         visible: false
 
-        // Base solid color to prevent transparency when translucent is disabled
+        // Base background for when there is no album art
         Rectangle {
             anchors.fill: parent
-            color: (Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_container_highest.r, Theme.surface_container_highest.g, Theme.surface_container_highest.b, Vars.componentOpacity) : Theme.surface_container_highest
-            visible: !(Vars._translucent && !Vars.gameMode)
+            color: Vars.tColor(Theme.surface_container_highest, Vars.componentOpacity)
+            visible: bgArt.source === ""
         }
 
         // Stage 1: Blur the background image
@@ -104,11 +116,12 @@ Rectangle {
             }
         }
 
-        // Translucent overlay
+        // Overlay for when album art is present to ensure text readability
         Rectangle {
             anchors.fill: parent
-            color: (Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_container_highest.r, Theme.surface_container_highest.g, Theme.surface_container_highest.b, Vars.componentOpacity) : Theme.surface_container_highest
-            opacity: bgArt.source !== "" ? ((Vars._translucent && !Vars.gameMode) ? Vars.componentOpacity + (1.0 - Vars.componentOpacity) / 2 : 0.90) : ((Vars._translucent && !Vars.gameMode) ? Vars.componentOpacity : 1.0)
+            color: Theme.surface_container_highest
+            opacity: (Vars._translucent && !Vars.gameMode) ? (Vars.componentOpacity * 0.8) : 0.85
+            visible: bgArt.source !== ""
         }
     }
 
@@ -116,8 +129,9 @@ Rectangle {
     Item {
         anchors.fill: parent
         layer.enabled: true
+        layer.samples: 16
         layer.effect: MultiEffect {
-            shadowEnabled: !Vars.gameMode
+            shadowEnabled: !Vars.gameMode && !Vars._translucent
             shadowBlur: 1.0
             shadowColor: Qt.rgba(0, 0, 0, 0.25)
             shadowVerticalOffset: 4
@@ -160,7 +174,7 @@ Rectangle {
         id: contentLayer
         anchors.fill: parent
         layer.enabled: true
-        layer.samples: 4
+        layer.samples: 16
         layer.effect: MultiEffect {
             maskEnabled: true
             maskSource: rootMask
@@ -171,139 +185,142 @@ Rectangle {
             anchors.margins: 16
             spacing: 16
 
-            // Left: Album Art
+            // Left: Album Art with upward glow
             Item {
-                id: albumArtContainer
                 width: 148
                 height: 148
-                scale: mediaPlayerRoot.currentMediaPlayerArtScale
-                Behavior on scale {
-                    NumberAnimation {
-                        duration: Vars.animationDuration
-                        easing.type: Easing.BezierSpline
-                        easing.bezierCurve: Vars.customStandard
+
+                Item {
+                    id: albumArtContainer
+                    anchors.fill: parent
+                    scale: mediaPlayerRoot.currentMediaPlayerArtScale
+                    Behavior on scale {
+                        NumberAnimation {
+                            duration: Vars.animationDuration
+                            easing.type: Easing.BezierSpline
+                            easing.bezierCurve: Vars.customStandard
+                        }
+                    }
+
+                M3Shapes {
+                    id: m3
+                }
+
+                Item {
+                    id: maskContainer
+                    anchors.fill: parent
+                    visible: false
+                    layer.enabled: true
+                    layer.samples: 32
+
+                    Item {
+                        id: rotationWrapper
+                        anchors.centerIn: parent
+                        property real scaleFactor: Math.min(4, 4096 / Math.max(parent.width, parent.height, 1))
+                        width: parent.width * scaleFactor
+                        height: parent.height * scaleFactor
+                        scale: 1.0 / scaleFactor
+
+                        RotationAnimation {
+                            target: rotationWrapper
+                            property: "rotation"
+                            from: 0
+                            to: 360
+                            duration: 10000
+                            loops: Animation.Infinite
+                            running: mprisPlayer && mprisPlayer.isPlaying
+                        }
+
+                        Image {
+                            id: maskImage
+                            anchors.fill: parent
+                            sourceSize.width: width
+                            sourceSize.height: height
+                            
+                            property string currentPathName: mediaPlayerRoot.currentMediaPlayerShape
+                            property string currentPath: m3.getPath(currentPathName)
+
+                            source: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><path d='" + currentPath + "' fill='white'/></svg>"
+                            smooth: true
+                            antialiasing: true
+                            mipmap: true
+
+                            onCurrentPathNameChanged: {
+                                if (maskImage.status === Image.Ready) {
+                                    shapeAnim.restart();
+                                }
+                            }
+
+                            SequentialAnimation {
+                                id: shapeAnim
+                                NumberAnimation {
+                                    target: maskImage
+                                    property: "scale"
+                                    to: 0.01
+                                    duration: 250
+                                    easing.type: Easing.InBack
+                                }
+                                NumberAnimation {
+                                    target: maskImage
+                                    property: "scale"
+                                    to: 1.0
+                                    duration: 550
+                                    easing.type: Easing.OutElastic
+                                }
+                            }
+                        }
                     }
                 }
 
-            M3Shapes {
-                id: m3
-            }
-
-            Item {
-                id: maskContainer
-                anchors.fill: parent
-                visible: false
-                layer.enabled: true
-                layer.samples: 4
-
                 Item {
-                    id: rotationWrapper
-                    anchors.centerIn: parent
-                    property real scaleFactor: Math.min(4, 4096 / Math.max(parent.width, parent.height, 1))
-                    width: parent.width * scaleFactor
-                    height: parent.height * scaleFactor
-                    scale: 1.0 / scaleFactor
+                    id: albumContent
+                    anchors.fill: parent
+                    visible: false
 
-                    RotationAnimation {
-                        target: rotationWrapper
-                        property: "rotation"
-                        from: 0
-                        to: 360
-                        duration: 10000
-                        loops: Animation.Infinite
-                        running: mprisPlayer && mprisPlayer.isPlaying
+                    // Fallback icon
+                    Rectangle {
+                        anchors.fill: parent
+                        color: Vars.tColor(Theme.surface_container, Vars.componentOpacity)
+                        visible: !mprisPlayer || !mprisPlayer.trackArtUrl
+
+                        QsText {
+                            anchors.centerIn: parent
+                            font.family: "Material Symbols Outlined"
+                            font.pixelSize: 48
+                            antialiasing: true
+                            renderType: Text.QtRendering
+                            font.hintingPreference: Font.PreferNoHinting
+                            color: Theme.on_surface_variant
+                            text: "\ue405"
+                        }
                     }
 
                     Image {
-                        id: maskImage
+                        id: albumImage
                         anchors.fill: parent
-                        sourceSize.width: width
-                        sourceSize.height: height
-                        
-                        property string currentPathName: mediaPlayerRoot.currentMediaPlayerShape
-                        property string currentPath: m3.getPath(currentPathName)
-
-                        source: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><path d='" + currentPath + "' fill='white'/></svg>"
+                        source: mprisPlayer && mprisPlayer.trackArtUrl ? mprisPlayer.trackArtUrl : ""
+                        fillMode: Image.PreserveAspectCrop
+                        visible: albumImage.source !== ""
+                        antialiasing: true
                         smooth: true
-                        antialiasing: true
                         mipmap: true
-
-                        onCurrentPathNameChanged: {
-                            if (maskImage.status === Image.Ready) {
-                                shapeAnim.restart();
-                            }
-                        }
-
-                        SequentialAnimation {
-                            id: shapeAnim
-                            NumberAnimation {
-                                target: maskImage
-                                property: "scale"
-                                to: 0.01
-                                duration: 250
-                                easing.type: Easing.InBack
-                            }
-                            NumberAnimation {
-                                target: maskImage
-                                property: "scale"
-                                to: 1.0
-                                duration: 550
-                                easing.type: Easing.OutElastic
-                            }
-                        }
-                    }
-                }
-            }
-
-            Item {
-                id: albumContent
-                anchors.fill: parent
-                visible: false
-
-                // Fallback icon
-                Rectangle {
-                    anchors.fill: parent
-                    color: (Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_container.r, Theme.surface_container.g, Theme.surface_container.b, Vars.componentOpacity) : Theme.surface_container
-                    visible: !mprisPlayer || !mprisPlayer.trackArtUrl
-
-                    Text {
-                        anchors.centerIn: parent
-                        font.family: "Material Symbols Outlined"
-                        font.pixelSize: 48
-                        antialiasing: true
-                        renderType: Text.QtRendering
-                        font.hintingPreference: Font.PreferNoHinting
-                        color: Theme.on_surface_variant
-                        text: "\ue405"
                     }
                 }
 
-                Image {
-                    id: albumImage
+                MultiEffect {
+                    source: albumContent
                     anchors.fill: parent
-                    source: mprisPlayer && mprisPlayer.trackArtUrl ? mprisPlayer.trackArtUrl : ""
-                    fillMode: Image.PreserveAspectCrop
-                    visible: albumImage.source !== ""
+                    maskEnabled: true
+                    maskSource: maskContainer
                     antialiasing: true
                     smooth: true
-                    mipmap: true
+                    maskThresholdMin: 0.5
+                    maskSpreadAtMin: 1.0
+                    maskSpreadAtMax: 0.0
+                    maskThresholdMax: 1.0
+                }
                 }
             }
-
-            MultiEffect {
-                source: albumContent
-                anchors.fill: parent
-                maskEnabled: true
-                maskSource: maskContainer
-                antialiasing: true
-                smooth: true
-                maskThresholdMin: 0.5
-                maskSpreadAtMin: 1.0
-                maskSpreadAtMax: 0.0
-                maskThresholdMax: 1.0
-            }
-
-        }
 
         // Right: Metadata and Controls
         ColumnLayout {
@@ -322,16 +339,16 @@ Rectangle {
                     spacing: 2
                     Layout.alignment: Qt.AlignTop
 
-                    Text {
+                    QsText {
                         text: mprisPlayer ? (mprisPlayer.trackTitle || (mprisPlayer.metadata ? mprisPlayer.metadata["xesam:title"] : null) || mprisPlayer.identity || "Unknown Title") : "No Media Playing"
                         font.family: Vars.fontFamily
                         font.pixelSize: 18
-                        font.weight: 700
+                        setWeight: 700
                         color: Theme.on_surface
                         elide: Text.ElideRight
                         Layout.fillWidth: true
                     }
-                    Text {
+                    QsText {
                         text: mprisPlayer && mprisPlayer.trackArtist ? mprisPlayer.trackArtist : "Artist"
                         font.family: Vars.fontFamily
                         font.pixelSize: 14
@@ -344,7 +361,7 @@ Rectangle {
                         Layout.preferredHeight: 4
                     } // Spacer
 
-                    Text {
+                    QsText {
                         text: formatTime(mprisPlayer ? mprisPlayer.position : 0) + " / " + formatTime(mprisPlayer ? mprisPlayer.length : 0)
                         font.family: Vars.fontFamily
                         font.pixelSize: 13
@@ -365,28 +382,28 @@ Rectangle {
                         Layout.preferredHeight: 28 // Smaller height
                         Layout.minimumWidth: Layout.preferredWidth
                         radius: 14 // Scaled radius
-                        color: Qt.rgba(Theme.on_surface_variant.r, Theme.on_surface_variant.g, Theme.on_surface_variant.b, 0.15)
+                        color: Vars.tColor(Theme.on_surface_variant, Vars.componentOpacity)
                         visible: Mpris.players.values.length > 1
 
                         RowLayout {
                             id: playerSelectorRow
                             anchors.centerIn: parent
                             spacing: 4
-                            Text {
+                            QsText {
                                 text: mprisPlayer ? (mprisPlayer.identity || "Unknown") : "Player"
                                 font.family: Vars.fontFamily
                                 font.pixelSize: 12 // Slightly smaller text
                                 color: Theme.on_surface_variant
-                                font.weight: 500
+                                setWeight: 500
                             }
-                            Text {
+                            QsText {
                                 font.family: "Material Symbols Rounded"
                                 font.pixelSize: 16 // Slightly smaller icon
                                 antialiasing: true
                                 renderType: Text.QtRendering
                                 font.hintingPreference: Font.PreferNoHinting
                                 color: Theme.on_surface_variant
-                                font.weight: 700
+                                setWeight: 700
                                 text: "\ue5cf" // expand_more
                             }
                         }
@@ -406,7 +423,7 @@ Rectangle {
                         radius: 18
                         color: Theme.primary
 
-                        Text {
+                        QsText {
                             anchors.centerIn: parent
                             font.family: filledIconFont.name
                             font.pixelSize: 28
@@ -441,7 +458,7 @@ Rectangle {
                 Layout.alignment: Qt.AlignBottom
 
                 // Previous
-                Text {
+                QsText {
                     font.family: filledIconFont.name
                     font.pixelSize: 26
                     antialiasing: true
@@ -479,9 +496,9 @@ Rectangle {
                         id: handle
                         anchors.verticalCenter: parent.verticalCenter
                         x: progressContainer.playRatio * (parent.width - width)
-                        width: 4
+                        width: 2
                         height: 30
-                        radius: 5
+                        radius: 1
                         color: Theme.on_surface
                     }
 
@@ -492,6 +509,8 @@ Rectangle {
                         anchors.left: parent.left
                         width: Math.max(0, handle.x - 6)
                         height: 12
+                        renderTarget: Canvas.FramebufferObject
+                        antialiasing: true
 
                         property color waveColor: Theme.primary
                         property real phase: 0
@@ -506,13 +525,14 @@ Rectangle {
 
                         onPaint: {
                             var ctx = getContext("2d");
+                            ctx.reset();
                             ctx.clearRect(0, 0, width, height);
                             if (width <= 0)
                                 return;
                             ctx.beginPath();
                             var amplitude = 3;
                             var frequency = 0.25;
-                            ctx.lineWidth = 4;
+                            ctx.lineWidth = Vars.mediaPlayerWaveThickness !== undefined ? Vars.mediaPlayerWaveThickness : 2.5;
                             ctx.lineCap = "round";
                             ctx.lineJoin = "round";
                             ctx.strokeStyle = waveColor;
@@ -538,9 +558,9 @@ Rectangle {
                         anchors.left: handle.right
                         anchors.leftMargin: 6
                         anchors.right: parent.right
-                        height: 4
-                        radius: 2
-                        color: Qt.rgba(Theme.on_surface_variant.r, Theme.on_surface_variant.g, Theme.on_surface_variant.b, 0.3)
+                        height: 2
+                        radius: 1
+                        color: Theme.on_surface_variant
 
                         // Unplayed part dot (from the image)
                         Rectangle {
@@ -549,7 +569,7 @@ Rectangle {
                             width: 4
                             height: 4
                             radius: 2
-                            color: Qt.rgba(Theme.on_surface_variant.r, Theme.on_surface_variant.g, Theme.on_surface_variant.b, 0.6)
+                            color: Theme.on_surface_variant
                         }
                     }
 
@@ -581,7 +601,7 @@ Rectangle {
                 }
 
                 // Next
-                Text {
+                QsText {
                     font.family: filledIconFont.name
                     font.pixelSize: 26
                     antialiasing: true
@@ -634,7 +654,7 @@ Rectangle {
             color: "black"
             visible: false
             layer.enabled: true
-            layer.samples: 4
+            layer.samples: 8
         }
 
         Item {
@@ -642,7 +662,7 @@ Rectangle {
             anchors.fill: parent
             layer.enabled: true
             layer.effect: MultiEffect {
-                shadowEnabled: true
+                shadowEnabled: !Vars.gameMode && !Vars._translucent
                 shadowBlur: 1.0
                 shadowColor: Qt.rgba(0,0,0,0.25)
                 shadowVerticalOffset: 4
@@ -675,7 +695,7 @@ Rectangle {
                 Rectangle {
                     anchors.fill: parent
                     radius: playerDropdown.radius
-                    color: (Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_container_highest.r, Theme.surface_container_highest.g, Theme.surface_container_highest.b, 0.6) : Theme.surface_container_highest
+                    color: Vars.tColor(Theme.surface_container_highest, Vars.componentOpacity)
                     border.color: Theme.outline_variant
                     border.width: 1
                 }
@@ -702,7 +722,7 @@ Rectangle {
                         anchors.rightMargin: 12
                         spacing: 12
 
-                        Text {
+                        QsText {
                             text: modelData.identity || "Unknown"
                             font.family: Vars.fontFamily
                             font.pixelSize: 14
@@ -712,7 +732,7 @@ Rectangle {
                             verticalAlignment: Text.AlignVCenter
                         }
 
-                        Text {
+                        QsText {
                             font.family: "Material Symbols Outlined"
                             font.pixelSize: 18
                             antialiasing: true

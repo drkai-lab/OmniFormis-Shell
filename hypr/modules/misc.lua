@@ -14,5 +14,15 @@ hl.config({
   xwayland = {
     force_zero_scaling = vars.xwayland_force_zero_scaling,
     use_nearest_neighbor = vars.xwayland_use_nearest_neighbor
+  },
+
+  experimental = {
+    wp_cm_1_2 = true
+  },
+
+  render = {
+    cm_auto_hdr = true,
+    use_shader_blur_blend = true,
+    keep_unmodified_copy = true
   }
 })

@@ -62,7 +62,7 @@ PanelWindow {
             anchors.left: parent.left
             side: "top-left"
             radius: Vars.radiusExtraLarge
-            color: (Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface.r, Theme.surface.g, Theme.surface.b, Vars.panelOpacity) : Theme.surface
+            color: Vars.tColor(Theme.surface, Vars.panelOpacity)
         }
 
         InvertedCorner {
@@ -70,7 +70,7 @@ PanelWindow {
             anchors.right: parent.right
             side: "top-right"
             radius: Vars.radiusExtraLarge
-            color: (Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface.r, Theme.surface.g, Theme.surface.b, Vars.panelOpacity) : Theme.surface
+            color: Vars.tColor(Theme.surface, Vars.panelOpacity)
         }
 
         InvertedCorner {
@@ -78,7 +78,7 @@ PanelWindow {
             anchors.left: parent.left
             side: "bottom-left"
             radius: Vars.radiusExtraLarge
-            color: (Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface.r, Theme.surface.g, Theme.surface.b, Vars.panelOpacity) : Theme.surface
+            color: Vars.tColor(Theme.surface, Vars.panelOpacity)
         }
 
         InvertedCorner {
@@ -86,7 +86,7 @@ PanelWindow {
             anchors.right: parent.right
             side: "bottom-right"
             radius: Vars.radiusExtraLarge
-            color: (Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface.r, Theme.surface.g, Theme.surface.b, Vars.panelOpacity) : Theme.surface
+            color: Vars.tColor(Theme.surface, Vars.panelOpacity)
         }
     }
     }

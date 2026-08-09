@@ -8,6 +8,7 @@ import Quickshell.Hyprland
 import Quickshell.Widgets
 import "../theme"
 import "../theme/variables.js" as Vars
+import "../core/primitives" as Primitives
 import ".."
 import Quickshell.Io
 
@@ -185,12 +186,29 @@ Item {
             property int draggingTargetWorkspace: -1
             property int draggingFromWorkspace: -1
 
+            Timer {
+                id: grabDelayTimer
+                interval: 50
+                running: false
+            }
+
+            Connections {
+                target: overviewContainer
+                function onVisibleStateChanged() {
+                    if (overviewContainer.visibleState) {
+                        grabDelayTimer.restart();
+                    } else {
+                        grabDelayTimer.stop();
+                    }
+                }
+            }
+
             HyprlandFocusGrab {
                 id: focusGrab
                 windows: [overviewPanel]
-                active: overviewContainer.visibleState || overviewPanel.isAnimating
+                active: !grabDelayTimer.running && (overviewContainer.visibleState || overviewPanel.isAnimating)
                 onCleared: {
-                    if (overviewContainer.visibleState)
+                    if (overviewContainer.visibleState && !grabDelayTimer.running)
                         overviewContainer.closeRequested();
                 }
             }
@@ -207,17 +225,10 @@ Item {
             }
 
             // === OVERVIEW PANEL ===
-            Rectangle {
+            Primitives.SquircleMask {
                 id: panelBackground
                 property bool isBackgroundActive: overviewContainer.visibleState || (MorphState.openCount === 0 && MorphState.activeItem === panelBackground && panelBackground.width > 105)
                 layer.enabled: true
-                layer.effect: MultiEffect {
-                    shadowEnabled: !overviewContainer.gameMode && panelBackground.isBackgroundActive
-                    shadowBlur: 1.0
-                    shadowColor: Qt.rgba(0, 0, 0, 0.25)
-                    shadowVerticalOffset: 4
-                    shadowHorizontalOffset: 0
-                }
 
                 anchors.top: (!Vars.pillPosition || Vars.pillPosition === "Top") ? parent.top : undefined
                 anchors.bottom: Vars.pillPosition === "Bottom" ? parent.bottom : undefined
@@ -232,7 +243,7 @@ Item {
                 property real innerMaxWidth: parent.width - (2 * Vars.spacingSmall)
                 property bool touchesEdges: false
 
-                property real activeMargin: (Vars.panelStyle === "Framed" || Vars.panelStyle === "Flat" || Vars.panelStyle === "Attached") ? 0 : Vars.spacingSmall
+                property real activeMargin: (Vars.panelStyle === "Flat" || Vars.panelStyle === "Attached") ? 0 : Vars.spacingSmall
                 anchors.topMargin: (!Vars.pillPosition || Vars.pillPosition === "Top") ? activeMargin : 0
                 anchors.bottomMargin: Vars.pillPosition === "Bottom" ? activeMargin : 0
                 anchors.leftMargin: Vars.pillPosition === "Left" ? activeMargin : 0
@@ -257,7 +268,7 @@ Item {
                 bottomLeftRadius: touchesEdges ? 0 : Vars.getBottomLeftRadius(Vars.panelStyle, Vars.pillPosition, false, defaultRadius)
                 bottomRightRadius: touchesEdges ? 0 : Vars.getBottomRightRadius(Vars.panelStyle, Vars.pillPosition, false, defaultRadius)
 
-                color: isBackgroundActive ? ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface.r, Theme.surface.g, Theme.surface.b, Vars.panelOpacity) : Theme.surface) : "transparent"
+                color: Vars.tColorActive(isBackgroundActive, Theme.surface, Vars.panelOpacity)
                 
                 opacity: isBackgroundActive || expandedUI.opacity > 0 ? 1.0 : 0.0
                 // visible: opacity > 0 // Removed to preserve Behavior when hidden
@@ -465,22 +476,22 @@ Item {
                         event.accepted = true;
                     } else
                     // Arrow/vim navigation
-                    if (event.key === Qt.Key_Left || (overviewContainer.vimKeysEnabled && event.key === Qt.Key_H) ||
-                        event.key === Qt.Key_Right || (overviewContainer.vimKeysEnabled && event.key === Qt.Key_L) ||
-                        event.key === Qt.Key_Up || (overviewContainer.vimKeysEnabled && event.key === Qt.Key_K) ||
-                        event.key === Qt.Key_Down || (overviewContainer.vimKeysEnabled && event.key === Qt.Key_J)) {
+                    if (event.key === Qt.Key_Left || (overviewContainer.vimKeysEnabled && (event.key === Qt.Key_H || event.key === Qt.Key_A)) ||
+                        event.key === Qt.Key_Right || (overviewContainer.vimKeysEnabled && (event.key === Qt.Key_L || event.key === Qt.Key_F)) ||
+                        event.key === Qt.Key_Up || (overviewContainer.vimKeysEnabled && (event.key === Qt.Key_K || event.key === Qt.Key_D)) ||
+                        event.key === Qt.Key_Down || (overviewContainer.vimKeysEnabled && (event.key === Qt.Key_J || event.key === Qt.Key_S))) {
                         
                         const currentId = Hyprland.focusedWorkspace?.id ?? 1;
                         const baseId = Math.floor((currentId - 1) / total) * total + 1;
                         let currentIndex = overviewContainer.indexFromWsId(currentId, baseId);
                         
-                        if (event.key === Qt.Key_Left || (overviewContainer.vimKeysEnabled && event.key === Qt.Key_H)) {
+                        if (event.key === Qt.Key_Left || (overviewContainer.vimKeysEnabled && (event.key === Qt.Key_H || event.key === Qt.Key_A))) {
                             currentIndex = Math.max(0, currentIndex - 1);
-                        } else if (event.key === Qt.Key_Right || (overviewContainer.vimKeysEnabled && event.key === Qt.Key_L)) {
+                        } else if (event.key === Qt.Key_Right || (overviewContainer.vimKeysEnabled && (event.key === Qt.Key_L || event.key === Qt.Key_F))) {
                             currentIndex = Math.min(total - 1, currentIndex + 1);
-                        } else if (event.key === Qt.Key_Up || (overviewContainer.vimKeysEnabled && event.key === Qt.Key_K)) {
+                        } else if (event.key === Qt.Key_Up || (overviewContainer.vimKeysEnabled && (event.key === Qt.Key_K || event.key === Qt.Key_D))) {
                             currentIndex = Math.max(0, currentIndex - cols);
-                        } else if (event.key === Qt.Key_Down || (overviewContainer.vimKeysEnabled && event.key === Qt.Key_J)) {
+                        } else if (event.key === Qt.Key_Down || (overviewContainer.vimKeysEnabled && (event.key === Qt.Key_J || event.key === Qt.Key_S))) {
                             currentIndex = Math.min(total - 1, currentIndex + cols);
                         }
                         

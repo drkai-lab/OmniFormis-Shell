@@ -17,8 +17,8 @@ Rectangle {
     property string iconText: "search"
     property bool showIcon: false
     property int defaultHeight: 48
-    property color defaultColor: (Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_container_highest.r, Theme.surface_container_highest.g, Theme.surface_container_highest.b, Vars.componentOpacity) : Theme.surface_container_highest
-    property color activeColor: (Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.primary_container.r, Theme.primary_container.g, Theme.primary_container.b, Vars.componentOpacity) : Theme.primary_container
+    property color defaultColor: Vars.tColor(Theme.surface_container_highest, Vars.componentOpacity)
+    property color activeColor: Vars.tColor(Theme.primary_container, Vars.componentOpacity)
     property color defaultTextColor: Theme.on_surface
     property color activeTextColor: Theme.on_primary_container
     property color defaultPlaceholderColor: Theme.on_surface_variant
@@ -39,6 +39,10 @@ Rectangle {
         border.color: searchInput.activeFocus ? Theme.primary : "transparent"
         border.width: searchInput.activeFocus ? 2 : 0
         radius: searchInput.activeFocus ? Vars.radiusLarge : Vars.radiusExtraLarge
+        topLeftRadius: root.topLeftRadius !== 0 ? root.topLeftRadius : radius
+        topRightRadius: root.topRightRadius !== 0 ? root.topRightRadius : radius
+        bottomLeftRadius: root.bottomLeftRadius !== 0 ? root.bottomLeftRadius : radius
+        bottomRightRadius: root.bottomRightRadius !== 0 ? root.bottomRightRadius : radius
 
         Behavior on color { ColorAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
         Behavior on radius { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customExpressiveSpatialSlow } }
@@ -64,7 +68,7 @@ Rectangle {
         anchors.rightMargin: Vars.spacingMedium
         spacing: Vars.spacingMedium
 
-        Text {
+        QsText {
             text: root.iconText
             font.family: "Material Symbols Outlined"
             font.pixelSize: 24
@@ -94,7 +98,7 @@ Rectangle {
                 }
             }
 
-            Text {
+            QsText {
                 text: root.placeholderText
                 font.family: Vars.fontFamily
                 font.pixelSize: searchInput.font.pixelSize
@@ -122,7 +126,7 @@ Rectangle {
             }
         }
 
-        Text {
+        QsText {
             id: clearIcon
             text: "✕"
             font.pixelSize: 14

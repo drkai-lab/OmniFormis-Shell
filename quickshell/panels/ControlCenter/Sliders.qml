@@ -21,7 +21,7 @@ ColumnLayout {
 
     property var audioNode: Pipewire.defaultAudioSink
     property real currentVolume: audioNode && audioNode.audio ? audioNode.audio.volume : 0.0
-    property real currentBrightness: 1 // Default fallback
+    property real currentBrightness: Vars.currentBrightness !== undefined ? Vars.currentBrightness : 1
 
     Component.onCompleted: {
         ddcQueryProcess.running = true;
@@ -36,7 +36,7 @@ ColumnLayout {
                 if (parts.length >= 4) {
                     let b = parseInt(parts[3]);
                     if (!isNaN(b)) {
-                        currentBrightness = b / 100.0;
+                        Vars.currentBrightness = b / 100.0;
                     }
                 }
             }
@@ -78,6 +78,19 @@ ColumnLayout {
 
             property real handlePos: volumeSlider.visualPosition * (width - sliders.handleWidth)
 
+            QsText {
+                anchors.left: parent.left
+                anchors.leftMargin: 16
+                anchors.verticalCenter: parent.verticalCenter
+                text: audioNode && audioNode.audio.muted ? "\ue04f" : "\ue050"
+                font.family: "Material Symbols Outlined"
+                font.pixelSize: 20
+                color: Theme.on_surface_variant
+                opacity: 0.8
+                renderType: Text.QtRendering
+                font.hintingPreference: Font.PreferNoHinting
+            }
+
             // 1. LEFT TRACK (Colored fill — no icon, no dot for 0-to-+ sliders)
             Rectangle {
                 id: volLeftTrack
@@ -86,45 +99,38 @@ ColumnLayout {
                 width: Math.max(0, parent.handlePos - sliders.gap)
                 height: parent.height
                 color: Theme.primary
+                clip: true
 
                 topLeftRadius: Math.min(sliders.leftRadiusLarge, width / 2)
                 bottomLeftRadius: Math.min(sliders.leftRadiusLarge, width / 2)
                 topRightRadius: Math.min(sliders.leftRadiusSmall, width / 2)
                 bottomRightRadius: Math.min(sliders.leftRadiusSmall, width / 2)
+
+                QsText {
+                    x: 16
+                    anchors.verticalCenter: parent.verticalCenter
+                    text: audioNode && audioNode.audio.muted ? "\ue04f" : "\ue050"
+                    font.family: "Material Symbols Outlined"
+                    font.pixelSize: 20
+                    color: Theme.on_primary
+                    renderType: Text.QtRendering
+                    font.hintingPreference: Font.PreferNoHinting
+                }
             }
 
-            // 2. RIGHT TRACK (Inactive — icon + dot at right end)
+            // 2. RIGHT TRACK (Inactive)
             Rectangle {
                 id: volRightTrack
                 x: parent.handlePos + sliders.handleWidth + sliders.gap
                 y: 0
                 width: Math.max(0, parent.width - x)
                 height: parent.height
-                color: (Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_variant.r, Theme.surface_variant.g, Theme.surface_variant.b, Vars.componentOpacity) : Theme.surface_variant
+                color: Vars.tColor(Theme.surface_variant, Vars.componentOpacity)
 
                 topLeftRadius: Math.min(sliders.leftRadiusSmall, width / 2)
                 bottomLeftRadius: Math.min(sliders.leftRadiusSmall, width / 2)
                 topRightRadius: Math.min(sliders.leftRadiusLarge, width / 2)
                 bottomRightRadius: Math.min(sliders.leftRadiusLarge, width / 2)
-
-                // Icon at right end
-                Text {
-                    anchors.right: parent.right
-                    anchors.rightMargin: 16
-                    anchors.verticalCenter: parent.verticalCenter
-                    text: audioNode && audioNode.audio.muted ? "\ue04f" : "\ue050"
-                    font.family: "Material Symbols Outlined"
-                    font.pixelSize: 20
-                    color: Theme.on_surface_variant
-                    opacity: volRightTrack.width > sliders.leftRadiusLarge * 2.5 ? 0.6 : 0.0
-                    Behavior on opacity {
-                        NumberAnimation {
-                            duration: Vars.animationDuration
-                            easing.type: Easing.BezierSpline
-                            easing.bezierCurve: Vars.customStandard
-                        }
-                    }
-                }
             }
         }
 
@@ -149,8 +155,19 @@ ColumnLayout {
 
         value: currentBrightness
         onMoved: {
-            currentBrightness = value;
+            Vars.currentBrightness = value;
             ddcSetTimer.restart();
+        }
+
+        property string brightnessIcon: {
+            let b = Vars.currentBrightness !== undefined ? Vars.currentBrightness : 1.0;
+            if (b <= 0.0) return "brightness_1";
+            if (b <= 0.16) return "brightness_2";
+            if (b <= 0.33) return "brightness_3";
+            if (b <= 0.50) return "brightness_4";
+            if (b <= 0.66) return "brightness_5";
+            if (b <= 0.83) return "brightness_6";
+            return "brightness_7";
         }
 
         background: Item {
@@ -161,6 +178,19 @@ ColumnLayout {
 
             property real handlePos: brightnessSlider.visualPosition * (width - sliders.handleWidth)
 
+            QsText {
+                anchors.left: parent.left
+                anchors.leftMargin: 16
+                anchors.verticalCenter: parent.verticalCenter
+                text: brightnessSlider.brightnessIcon
+                font.family: "Material Symbols Outlined"
+                font.pixelSize: 20
+                color: Theme.on_surface_variant
+                opacity: 0.8
+                renderType: Text.QtRendering
+                font.hintingPreference: Font.PreferNoHinting
+            }
+
             // 1. LEFT TRACK (Colored fill — no icon, no dot for 0-to-+ sliders)
             Rectangle {
                 id: brightLeftTrack
@@ -169,45 +199,38 @@ ColumnLayout {
                 width: Math.max(0, parent.handlePos - sliders.gap)
                 height: parent.height
                 color: Theme.primary
+                clip: true
 
                 topLeftRadius: Math.min(sliders.leftRadiusLarge, width / 2)
                 bottomLeftRadius: Math.min(sliders.leftRadiusLarge, width / 2)
                 topRightRadius: Math.min(sliders.leftRadiusSmall, width / 2)
                 bottomRightRadius: Math.min(sliders.leftRadiusSmall, width / 2)
+
+                QsText {
+                    x: 16
+                    anchors.verticalCenter: parent.verticalCenter
+                    text: brightnessSlider.brightnessIcon
+                    font.family: "Material Symbols Outlined"
+                    font.pixelSize: 20
+                    color: Theme.on_primary
+                    renderType: Text.QtRendering
+                    font.hintingPreference: Font.PreferNoHinting
+                }
             }
 
-            // 2. RIGHT TRACK (Inactive — icon + dot at right end)
+            // 2. RIGHT TRACK (Inactive)
             Rectangle {
                 id: brightRightTrack
                 x: parent.handlePos + sliders.handleWidth + sliders.gap
                 y: 0
                 width: Math.max(0, parent.width - x)
                 height: parent.height
-                color: (Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_variant.r, Theme.surface_variant.g, Theme.surface_variant.b, Vars.componentOpacity) : Theme.surface_variant
+                color: Vars.tColor(Theme.surface_variant, Vars.componentOpacity)
 
                 topLeftRadius: Math.min(sliders.leftRadiusSmall, width / 2)
                 bottomLeftRadius: Math.min(sliders.leftRadiusSmall, width / 2)
                 topRightRadius: Math.min(sliders.leftRadiusLarge, width / 2)
                 bottomRightRadius: Math.min(sliders.leftRadiusLarge, width / 2)
-
-                // Icon at right end
-                Text {
-                    anchors.right: parent.right
-                    anchors.rightMargin: 16
-                    anchors.verticalCenter: parent.verticalCenter
-                    text: "\ue518"
-                    font.family: "Material Symbols Outlined"
-                    font.pixelSize: 20
-                    color: Theme.on_surface_variant
-                    opacity: brightRightTrack.width > sliders.leftRadiusLarge * 2.5 ? 0.6 : 0.0
-                    Behavior on opacity {
-                        NumberAnimation {
-                            duration: Vars.animationDuration
-                            easing.type: Easing.BezierSpline
-                            easing.bezierCurve: Vars.customStandard
-                        }
-                    }
-                }
             }
         }
 

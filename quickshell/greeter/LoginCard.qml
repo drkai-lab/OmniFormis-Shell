@@ -160,22 +160,22 @@ Rectangle {
         Item { Layout.fillHeight: true }
 
         // ── Clock ──
-        Text {
+        QsText {
             Layout.alignment: Qt.AlignHCenter
             text: clockHours + ":" + clockMinutes
             font.family: Vars.fontFamily
             font.pixelSize: 72
-            font.weight: 700
+            setWeight: 700
             color: root.textPrimary
         }
 
         // ── Date ──
-        Text {
+        QsText {
             Layout.alignment: Qt.AlignHCenter
             text: clockDate
             font.family: Vars.fontFamily
             font.pixelSize: 12
-            font.weight: 600
+            setWeight: 600
             font.letterSpacing: 2.0
             color: root.textDim
         }
@@ -214,7 +214,7 @@ Rectangle {
                     }
                 }
 
-                Text {
+                QsText {
                     id: fallbackIcon
                     anchors.centerIn: parent
                     font.family: "Material Symbols Outlined"
@@ -232,25 +232,25 @@ Rectangle {
         RowLayout {
             Layout.alignment: Qt.AlignHCenter
             spacing: 6
-            Text {
+            QsText {
                 text: activeUser
                 font.family: Vars.fontFamily
                 font.pixelSize: 18
-                font.weight: 700
+                setWeight: 700
                 color: root.textPrimary
             }
-            Text {
+            QsText {
                 text: "|"
                 font.family: Vars.fontFamily
                 font.pixelSize: 16
-                font.weight: 400
+                setWeight: 400
                 color: Theme.outline_variant
             }
-            Text {
+            QsText {
                 text: activeSession
                 font.family: Vars.fontFamily
                 font.pixelSize: 16
-                font.weight: 500
+                setWeight: 500
                 color: root.textDim
             }
         }
@@ -275,7 +275,7 @@ Rectangle {
                 anchors.rightMargin: 8
                 spacing: 12
 
-                Text {
+                QsText {
                     font.family: "Material Symbols Outlined"
                     font.pixelSize: 20
                     color: root.textDim
@@ -296,7 +296,7 @@ Rectangle {
                     clip: true
                     focus: !showSwitcher
 
-                    Text {
+                    QsText {
                         anchors.fill: parent
                         verticalAlignment: Text.AlignVCenter
                         leftPadding: 4
@@ -320,7 +320,7 @@ Rectangle {
                     color: passwordInput.text.length > 0 ? root.accentPrimary : Theme.surface_container_high
                     Behavior on color { ColorAnimation { duration: Vars.animationDuration } }
 
-                    Text {
+                    QsText {
                         anchors.centerIn: parent
                         font.family: "Material Symbols Outlined"
                         font.pixelSize: 18
@@ -341,7 +341,7 @@ Rectangle {
         }
 
         // ── Status message ──
-        Text {
+        QsText {
             Layout.alignment: Qt.AlignHCenter
             text: statusMessage
             font.family: Vars.fontFamily
@@ -365,7 +365,7 @@ Rectangle {
                 color: suspendMouse.containsMouse ? root.surfaceDim : "transparent"
                 Behavior on color { ColorAnimation { duration: Vars.animationDuration } }
                 
-                Text {
+                QsText {
                     anchors.centerIn: parent
                     font.family: "Material Symbols Outlined"
                     font.pixelSize: 24
@@ -387,7 +387,7 @@ Rectangle {
                 color: rebootMouse.containsMouse ? root.surfaceDim : "transparent"
                 Behavior on color { ColorAnimation { duration: Vars.animationDuration } }
                 
-                Text {
+                QsText {
                     anchors.centerIn: parent
                     font.family: "Material Symbols Outlined"
                     font.pixelSize: 24
@@ -409,7 +409,7 @@ Rectangle {
                 color: powerMouse.containsMouse ? root.surfaceDim : "transparent"
                 Behavior on color { ColorAnimation { duration: Vars.animationDuration } }
                 
-                Text {
+                QsText {
                     anchors.centerIn: parent
                     font.family: "Material Symbols Outlined"
                     font.pixelSize: 24
@@ -439,13 +439,13 @@ Rectangle {
                 anchors.centerIn: parent
                 spacing: 6
 
-                Text {
+                QsText {
                     font.family: "Material Symbols Outlined"
                     font.pixelSize: 14
                     color: root.textDim
                     text: "\ue5d2"
                 }
-                Text {
+                QsText {
                     text: "Click to switch User and Session"
                     font.family: Vars.fontFamily
                     font.pixelSize: 12
@@ -475,7 +475,7 @@ Rectangle {
                 width: 36; height: 36; radius: 18
                 color: root.surfaceDim
 
-                Text {
+                QsText {
                     anchors.centerIn: parent
                     font.family: "Material Symbols Outlined"
                     font.pixelSize: 20
@@ -492,22 +492,22 @@ Rectangle {
                 }
             }
 
-            Text {
+            QsText {
                 text: "Switch User & Session"
                 font.family: Vars.fontFamily
                 font.pixelSize: 18
-                font.weight: 600
+                setWeight: 600
                 color: root.textPrimary
                 Layout.fillWidth: true
             }
         }
 
         // ── User selection ──
-        Text {
+        QsText {
             text: "USER"
             font.family: Vars.fontFamily
             font.pixelSize: 11
-            font.weight: 700
+            setWeight: 700
             font.letterSpacing: 2
             color: root.textDim
         }
@@ -533,21 +533,21 @@ Rectangle {
                         anchors.rightMargin: 16
                         spacing: 12
 
-                        Text {
+                        QsText {
                             font.family: "Material Symbols Outlined"
                             font.pixelSize: 20
                             color: currentUserIndex === index ? root.accentDark : root.textDim
                             text: "\ue7fd"
                         }
-                        Text {
+                        QsText {
                             text: modelData
                             font.family: Vars.fontFamily
                             font.pixelSize: 14
-                            font.weight: 500
+                            setWeight: 500
                             color: currentUserIndex === index ? root.accentDark : root.textPrimary
                             Layout.fillWidth: true
                         }
-                        Text {
+                        QsText {
                             font.family: "Material Symbols Outlined"
                             font.pixelSize: 18
                             color: currentUserIndex === index ? root.accentDark : "transparent"
@@ -569,11 +569,11 @@ Rectangle {
         Item { Layout.preferredHeight: 8 }
 
         // ── Session selection ──
-        Text {
+        QsText {
             text: "SESSION"
             font.family: Vars.fontFamily
             font.pixelSize: 11
-            font.weight: 700
+            setWeight: 700
             font.letterSpacing: 2
             color: root.textDim
         }
@@ -607,21 +607,21 @@ Rectangle {
                             anchors.rightMargin: 16
                             spacing: 12
 
-                            Text {
+                            QsText {
                                 font.family: "Material Symbols Outlined"
                                 font.pixelSize: 20
                                 color: currentSessionIndex === index ? root.accentDark : root.textDim
                                 text: "\ue30b"
                             }
-                            Text {
+                            QsText {
                                 text: modelData.name
                                 font.family: Vars.fontFamily
                                 font.pixelSize: 14
-                                font.weight: 500
+                                setWeight: 500
                                 color: currentSessionIndex === index ? root.accentDark : root.textPrimary
                                 Layout.fillWidth: true
                             }
-                            Text {
+                            QsText {
                                 font.family: "Material Symbols Outlined"
                                 font.pixelSize: 18
                                 color: currentSessionIndex === index ? root.accentDark : "transparent"
@@ -648,12 +648,12 @@ Rectangle {
             radius: 24
             color: root.accentPrimary
 
-            Text {
+            QsText {
                 anchors.centerIn: parent
                 text: "Confirm"
                 font.family: Vars.fontFamily
                 font.pixelSize: 15
-                font.weight: 600
+                setWeight: 600
                 color: root.accentDark
             }
 

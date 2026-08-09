@@ -33,7 +33,7 @@ Item {
     height: Math.max(80, delegateRow.implicitHeight + 32)
     property bool isSelected: false
     
-    property color targetColor: delegateMouse.containsMouse ? Qt.tint(((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_container.r, Theme.surface_container.g, Theme.surface_container.b, Vars.componentOpacity) : Theme.surface_container), Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.08)) : ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_container.r, Theme.surface_container.g, Theme.surface_container.b, Vars.componentOpacity) : Theme.surface_container)
+    property color targetColor: delegateMouse.containsMouse ? Qt.tint((Vars.tColor(Theme.surface_container, Vars.componentOpacity)), Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.08)) : (Vars.tColor(Theme.surface_container, Vars.componentOpacity))
     Behavior on targetColor {
         ColorAnimation {
             duration: Vars.animationDuration
@@ -43,9 +43,11 @@ Item {
     scale: delegateMouse.pressed ? 1.08 : 1.0
     Behavior on scale { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.OutBack } }
     
+    layer.enabled: true
+    layer.smooth: true
+    
     Item {
         anchors.fill: parent
-        layer.enabled: true
         opacity: parent.targetColor.a
         
         property bool isEffectivelyFirst: delegateRoot.ListView.previousSection !== delegateRoot.ListView.section
@@ -104,14 +106,15 @@ Item {
             Layout.minimumWidth: 200
             Layout.fillWidth: true
             spacing: 4
-            Text {
+            QsText {
                 text: rootPage ? rootPage.prettyTitle(delegateRoot.itemKey) : delegateRoot.itemKey
                 font.family: Vars.fontFamily
                 font.pixelSize: 16
-                font.weight: 600
+                setWeight: Vars.fontWeight
+                font.italic: Vars.fontItalic
                 color: Theme.on_surface
             }
-            Text {
+            QsText {
                 text: rootPage ? rootPage.prettyHelp(delegateRoot.itemKey, (delegateRoot.itemType === "enum" || delegateRoot.itemType === "color") ? delegateRoot.itemHelp.replace(/\s*\(.*\)/, "") : delegateRoot.itemHelp) : delegateRoot.itemHelp
                 font.family: Vars.fontFamily
                 font.pixelSize: 12
@@ -131,7 +134,7 @@ Item {
             width: 52
             height: 32
             radius: 16
-            color: delegateRoot.itemVal === "true" ? ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.primary.r, Theme.primary.g, Theme.primary.b, 0.8) : Theme.primary) : ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_variant.r, Theme.surface_variant.g, Theme.surface_variant.b, Vars.componentOpacity) : Theme.surface_variant)
+            color: delegateRoot.itemVal === "true" ? (Vars.tColor(Theme.primary, 0.8)) : (Vars.tColor(Theme.surface_variant, Vars.componentOpacity))
             border.color: delegateRoot.activeFocus ? Theme.on_surface : "transparent"
             border.width: delegateRoot.activeFocus ? 2 : 0
             Behavior on color {
@@ -158,11 +161,11 @@ Item {
                     }
                 }
 
-                Text {
+                QsText {
                     anchors.centerIn: parent
                     font.family: "Material Symbols Outlined"
                     font.pixelSize: 16
-                    color: delegateRoot.itemVal === "true" ? ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.primary.r, Theme.primary.g, Theme.primary.b, 0.8) : Theme.primary) : ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_variant.r, Theme.surface_variant.g, Theme.surface_variant.b, Vars.componentOpacity) : Theme.surface_variant)
+                    color: delegateRoot.itemVal === "true" ? (Vars.tColor(Theme.primary, 0.8)) : (Vars.tColor(Theme.surface_variant, Vars.componentOpacity))
                     text: delegateRoot.itemVal === "true" ? "\ue5ca" : "\ue5cd"
                 }
             }
@@ -187,7 +190,7 @@ Item {
             Layout.preferredWidth: Math.max(150, Math.min(450, tInput.implicitWidth + 32))
             height: 32
             radius: Vars.radiusSmall
-            color: (Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_container_highest.r, Theme.surface_container_highest.g, Theme.surface_container_highest.b, Vars.componentOpacity) : Theme.surface_container_highest
+            color: Vars.tColor(Theme.surface_container_highest, Vars.componentOpacity)
             border.color: tInput.activeFocus ? Theme.primary : "transparent"
             border.width: 1
 
@@ -205,12 +208,13 @@ Item {
                 padding: 0
                 leftPadding: 8
                 rightPadding: 8
+                MouseArea { anchors.fill: parent; cursorShape: Qt.IBeamCursor; onPressed: (mouse) => { parent.forceActiveFocus(); mouse.accepted = false; } }
                 
                 onAccepted: {
                     tInput.focus = false;
                     settingsList.forceActiveFocus();
                 }
-                onTextEdited: {
+                onEditingFinished: {
                     if (text !== delegateRoot.itemVal) {
                         settingsModel.setProperty(delegateRoot.delegateIndex, "val", text);
                         rootPage.updateVariable(delegateRoot.itemKey, text, delegateRoot.itemSource);
@@ -233,7 +237,7 @@ Item {
                 width: 80
                 height: 32
                 radius: Vars.radiusSmall
-                color: (Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_container_highest.r, Theme.surface_container_highest.g, Theme.surface_container_highest.b, Vars.componentOpacity) : Theme.surface_container_highest
+                color: Vars.tColor(Theme.surface_container_highest, Vars.componentOpacity)
                 border.color: numInput.activeFocus ? Theme.primary : "transparent"
                 border.width: 1
                 TextField {
@@ -250,12 +254,13 @@ Item {
                     padding: 0
                     leftPadding: 8
                     rightPadding: 8
+                    MouseArea { anchors.fill: parent; cursorShape: Qt.IBeamCursor; onPressed: (mouse) => { parent.forceActiveFocus(); mouse.accepted = false; } }
                     
                     onAccepted: {
                         numInput.focus = false;
                         settingsList.forceActiveFocus();
                     }
-                    onTextEdited: {
+                    onEditingFinished: {
                         if (text !== delegateRoot.itemVal) {
                             settingsModel.setProperty(delegateRoot.delegateIndex, "val", text);
                             rootPage.updateVariable(delegateRoot.itemKey, text, delegateRoot.itemSource);
@@ -273,8 +278,8 @@ Item {
                 width: 32
                 height: 32
                 radius: Vars.radiusSmall
-                color: numMinusHover.containsMouse ? ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_container_high.r, Theme.surface_container_high.g, Theme.surface_container_high.b, Vars.componentOpacity) : Theme.surface_container_high) : ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_container_highest.r, Theme.surface_container_highest.g, Theme.surface_container_highest.b, Vars.componentOpacity) : Theme.surface_container_highest)
-                Text {
+                color: numMinusHover.containsMouse ? (Vars.tColor(Theme.surface_container_high, Vars.componentOpacity)) : (Vars.tColor(Theme.surface_container_highest, Vars.componentOpacity))
+                QsText {
                     anchors.centerIn: parent
                     text: "remove"
                     font.family: "Material Symbols Outlined"
@@ -290,7 +295,11 @@ Item {
                     hoverEnabled: true
                     cursorShape: Qt.PointingHandCursor
                     onClicked: {
-                        var val = parseFloat(delegateRoot.itemVal) - 1;
+                        var step = delegateRoot.itemStep > 0 ? delegateRoot.itemStep : 1;
+                        var val = parseFloat(delegateRoot.itemVal) - step;
+                        if (delegateRoot.itemMin !== 0 || delegateRoot.itemMax !== 0)
+                            val = Math.max(delegateRoot.itemMin, val);
+                        val = Number(val.toFixed(4));
                         settingsModel.setProperty(delegateRoot.delegateIndex, "val", val.toString());
                         rootPage.updateVariable(delegateRoot.itemKey, val.toString(), delegateRoot.itemSource);
                     }
@@ -301,8 +310,8 @@ Item {
                 width: 32
                 height: 32
                 radius: Vars.radiusSmall
-                color: numPlusHover.containsMouse ? ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_container_high.r, Theme.surface_container_high.g, Theme.surface_container_high.b, Vars.componentOpacity) : Theme.surface_container_high) : ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_container_highest.r, Theme.surface_container_highest.g, Theme.surface_container_highest.b, Vars.componentOpacity) : Theme.surface_container_highest)
-                Text {
+                color: numPlusHover.containsMouse ? (Vars.tColor(Theme.surface_container_high, Vars.componentOpacity)) : (Vars.tColor(Theme.surface_container_highest, Vars.componentOpacity))
+                QsText {
                     anchors.centerIn: parent
                     text: "add"
                     font.family: "Material Symbols Outlined"
@@ -318,7 +327,11 @@ Item {
                     hoverEnabled: true
                     cursorShape: Qt.PointingHandCursor
                     onClicked: {
-                        var val = parseFloat(delegateRoot.itemVal) + 1;
+                        var step = delegateRoot.itemStep > 0 ? delegateRoot.itemStep : 1;
+                        var val = parseFloat(delegateRoot.itemVal) + step;
+                        if (delegateRoot.itemMin !== 0 || delegateRoot.itemMax !== 0)
+                            val = Math.min(delegateRoot.itemMax, val);
+                        val = Number(val.toFixed(4));
                         settingsModel.setProperty(delegateRoot.delegateIndex, "val", val.toString());
                         rootPage.updateVariable(delegateRoot.itemKey, val.toString(), delegateRoot.itemSource);
                     }
@@ -397,7 +410,7 @@ Item {
 
                     background: Rectangle {
                         implicitWidth: 220
-                        color: (Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_container_highest.r, Theme.surface_container_highest.g, Theme.surface_container_highest.b, Vars.componentOpacity) : Theme.surface_container_highest
+                        color: Vars.tColor(Theme.surface_container_highest, Vars.componentOpacity)
                         radius: 12
                         border.color: Theme.outline_variant
                         border.width: 1
@@ -416,7 +429,7 @@ Item {
                         implicitWidth: 220
                         implicitHeight: 36
                         contentItem: Item {
-                            Text {
+                            QsText {
                                 anchors.left: parent.left
                                 anchors.leftMargin: 16
                                 anchors.verticalCenter: parent.verticalCenter
@@ -425,7 +438,7 @@ Item {
                                 font.family: Vars.fontFamily
                                 font.pixelSize: 13
                             }
-                            Text {
+                            QsText {
                                 anchors.right: parent.right
                                 anchors.rightMargin: 16
                                 anchors.verticalCenter: parent.verticalCenter
@@ -433,7 +446,8 @@ Item {
                                 color: Theme.on_surface
                                 font.family: Vars.fontFamily
                                 font.pixelSize: 14
-                                font.weight: 600
+                                setWeight: Vars.fontWeight
+                                font.italic: Vars.fontItalic
                             }
                         }
                         background: Rectangle { color: "transparent" }
@@ -458,19 +472,20 @@ Item {
                             anchors.leftMargin: 16
                             anchors.rightMargin: 16
                             spacing: 12
-                            Text {
+                            QsText {
                                 text: "\ue14d"
                                 font.family: "Material Symbols Outlined"
                                 font.pixelSize: 18
                                 color: parent.parent.highlighted ? Theme.primary : Theme.on_surface_variant
                             }
-                            Text {
+                            QsText {
                                 Layout.fillWidth: true
                                 text: "Copy Value"
                                 color: parent.parent.highlighted ? Theme.primary : Theme.on_surface
                                 font.family: Vars.fontFamily
                                 font.pixelSize: 14
-                                font.weight: 500
+                                setWeight: Vars.fontWeight
+                                font.italic: Vars.fontItalic
                             }
                         }
                         background: Rectangle {
@@ -492,21 +507,22 @@ Item {
                             anchors.leftMargin: 16
                             anchors.rightMargin: 16
                             spacing: 12
-                            Text {
+                            QsText {
                                 text: "\ue14f"
                                 font.family: "Material Symbols Outlined"
                                 font.pixelSize: 18
                                 color: parent.enabled ? (parent.parent.highlighted ? Theme.primary : Theme.on_surface_variant) : Theme.outline
                             }
-                            Text {
+                            QsText {
                                 Layout.fillWidth: true
                                 text: "Paste Value"
                                 color: parent.enabled ? (parent.parent.highlighted ? Theme.primary : Theme.on_surface) : Theme.outline
                                 font.family: Vars.fontFamily
                                 font.pixelSize: 14
-                                font.weight: 500
+                                setWeight: Vars.fontWeight
+                                font.italic: Vars.fontItalic
                             }
-                            Text {
+                            QsText {
                                 text: (rootPage && rootPage.copiedSliderValue) ? Number(rootPage.copiedSliderValue).toFixed(3) : ""
                                 color: Theme.on_surface_variant
                                 font.family: Vars.fontFamily
@@ -538,19 +554,20 @@ Item {
                             anchors.leftMargin: 16
                             anchors.rightMargin: 16
                             spacing: 12
-                            Text {
+                            QsText {
                                 text: "\ue166"
                                 font.family: "Material Symbols Outlined"
                                 font.pixelSize: 18
                                 color: parent.parent.highlighted ? Theme.error : Theme.on_surface_variant
                             }
-                            Text {
+                            QsText {
                                 Layout.fillWidth: true
                                 text: "Reset Value"
                                 color: parent.parent.highlighted ? Theme.error : Theme.on_surface
                                 font.family: Vars.fontFamily
                                 font.pixelSize: 14
-                                font.weight: 500
+                                setWeight: Vars.fontWeight
+                                font.italic: Vars.fontItalic
                             }
                         }
                         background: Rectangle {
@@ -593,7 +610,7 @@ Item {
                         return Math.max(m3Slider.leftRadiusLarge * 2, endAt);
                     }
                     height: parent.height
-                    color: (Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_container_highest.r, Theme.surface_container_highest.g, Theme.surface_container_highest.b, Vars.componentOpacity) : Theme.surface_container_highest
+                    color: Vars.tColor(Theme.surface_container_highest, Vars.componentOpacity)
 
                     topLeftRadius: m3Slider.leftRadiusLarge
                     bottomLeftRadius: m3Slider.leftRadiusLarge
@@ -635,7 +652,7 @@ Item {
                     y: 0
                     width: Math.max(0, parent.width - x)
                     height: parent.height
-                    color: (Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_container_highest.r, Theme.surface_container_highest.g, Theme.surface_container_highest.b, Vars.componentOpacity) : Theme.surface_container_highest
+                    color: Vars.tColor(Theme.surface_container_highest, Vars.componentOpacity)
 
                     topLeftRadius: Math.min(m3Slider.leftRadiusSmall, width / 2)
                     bottomLeftRadius: Math.min(m3Slider.leftRadiusSmall, width / 2)
@@ -665,7 +682,7 @@ Item {
                         radius: 2
 
                         property bool inColoredArea: parent.isLeftOfCenter ? (tickPos >= parent.handlePos + m3Slider.handleWidth / 2 && tickPos <= parent.centerX) : (tickPos >= parent.centerX && tickPos <= parent.handlePos + m3Slider.handleWidth / 2)
-                        color: inColoredArea ? ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_container_highest.r, Theme.surface_container_highest.g, Theme.surface_container_highest.b, Vars.componentOpacity) : Theme.surface_container_highest) : ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.primary.r, Theme.primary.g, Theme.primary.b, Vars.componentOpacity) : Theme.primary)
+                        color: inColoredArea ? (Vars.tColor(Theme.surface_container_highest, Vars.componentOpacity)) : (Vars.tColor(Theme.primary, Vars.componentOpacity))
                     }
                 }
             }
@@ -700,7 +717,7 @@ Item {
                         y: 0
                         width: Math.max(0, parent.width - x)
                         height: parent.height
-                        color: (Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_container_highest.r, Theme.surface_container_highest.g, Theme.surface_container_highest.b, Vars.componentOpacity) : Theme.surface_container_highest
+                        color: Vars.tColor(Theme.surface_container_highest, Vars.componentOpacity)
 
                         topLeftRadius: Math.min(m3Slider.leftRadiusSmall, width / 2)
                         bottomLeftRadius: Math.min(m3Slider.leftRadiusSmall, width / 2)
@@ -730,7 +747,7 @@ Item {
                             radius: 2
 
                             property bool inColoredArea: tickPos <= parent.handlePos + m3Slider.handleWidth / 2
-                            color: inColoredArea ? ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_container_highest.r, Theme.surface_container_highest.g, Theme.surface_container_highest.b, Vars.componentOpacity) : Theme.surface_container_highest) : ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.primary.r, Theme.primary.g, Theme.primary.b, Vars.componentOpacity) : Theme.primary)
+                            color: inColoredArea ? (Vars.tColor(Theme.surface_container_highest, Vars.componentOpacity)) : (Vars.tColor(Theme.primary, Vars.componentOpacity))
                         }
                     }
                 }
@@ -791,11 +808,11 @@ Item {
                         scale: chipMouse.pressed ? 1.08 : 1.0
                         Behavior on scale { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.OutBack } }
 
-                        color: isSelected ? ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.primary.r, Theme.primary.g, Theme.primary.b, 0.8) : Theme.primary) : ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_container_highest.r, Theme.surface_container_highest.g, Theme.surface_container_highest.b, Vars.componentOpacity) : Theme.surface_container_highest)
+                        color: isSelected ? (Vars.tColor(Theme.primary, 0.8)) : (Vars.tColor(Theme.surface_container_highest, Vars.componentOpacity))
 
                         Behavior on color { ColorAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customExpressiveSpatialSlow } }
 
-                        Text {
+                        QsText {
                             id: chipText
                             anchors.centerIn: parent
                             text: modelData
@@ -844,7 +861,7 @@ Item {
                     Behavior on topRightRadius { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customExpressiveSpatialSlow } }
                     Behavior on bottomRightRadius { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customExpressiveSpatialSlow } }
 
-                    color: isSelected ? ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.primary.r, Theme.primary.g, Theme.primary.b, Vars.componentOpacity + 0.3) : Theme.primary) : ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_container_highest.r, Theme.surface_container_highest.g, Theme.surface_container_highest.b, Vars.componentOpacity) : Theme.surface_container_highest)
+                    color: isSelected ? (Vars.tColor(Theme.primary, Vars.componentOpacity + 0.3)) : (Vars.tColor(Theme.surface_container_highest, Vars.componentOpacity))
                     Behavior on color { ColorAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customExpressiveSpatialSlow } }
 
                     Shape {

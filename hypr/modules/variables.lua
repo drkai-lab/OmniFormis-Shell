@@ -118,7 +118,7 @@ local vars = {
     blur_vibrancy = 0.1696,
 
     -- Liquid Glass
-    liquidGlass = false,
+    liquidGlass = true,
     liquidGlassPreset = "apple",
 
     -- Groupbar

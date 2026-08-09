@@ -12,15 +12,12 @@ Rectangle {
     id: systemTrayContainer
 
     signal openTrayMenuRequested(var menu)
-    layer.enabled: true
-    layer.samples: 4
-    layer.effect: MultiEffect { shadowEnabled: true; shadowBlur: 1.0; shadowColor: Qt.rgba(0,0,0,0.25); shadowVerticalOffset: 4; shadowHorizontalOffset: 0 }
-    color: (Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_container_high.r, Theme.surface_container_high.g, Theme.surface_container_high.b, Vars.panelOpacity) : Theme.surface_container_high
+    color: Vars.tColor(Theme.surface_container_high, Vars.panelOpacity)
     property bool isVertical: Vars.pillPosition === "Left" || Vars.pillPosition === "Right"
     radius: Math.min(width, height) / 2
     
     // THE FIX: Only show this pill if there is actually an app in the tray!
-    visible: SystemTray.items.length > 0
+    visible: SystemTray.items ? (SystemTray.items.length > 0 || SystemTray.items.count > 0) : false
     
     // Auto-size based on the number of tray items and orientation
     implicitWidth: isVertical ? 40 : (trayLayout.implicitWidth + Vars.spacingLarge)

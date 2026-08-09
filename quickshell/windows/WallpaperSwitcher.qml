@@ -9,6 +9,7 @@ import Quickshell.Hyprland
 import QtCore
 
 import "../theme/variables.js" as Vars
+import "../core/primitives" as Primitives
 import "WallpaperSwitcher"
 
 Item {
@@ -89,7 +90,7 @@ Item {
         height: root.expanded ? 590 : 80
     }
 
-    Rectangle {
+    Primitives.SquircleMask {
         id: panel
         property bool isBackgroundActive: root.expanded || (MorphState.openCount === 0 && MorphState.activeItem === panel && panel.width > 105)
         layer.enabled: true
@@ -110,7 +111,7 @@ Item {
         width: root.expanded ? 1100 : (MorphState.anyExpanded ? MorphState.targetWidth : 100)
         height: root.expanded ? 650 : (MorphState.anyExpanded ? MorphState.targetHeight : 40)
 
-        color: isBackgroundActive ? ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface.r, Theme.surface.g, Theme.surface.b, Vars.panelOpacity) : Theme.surface) : "transparent"
+        color: Vars.tColorActive(isBackgroundActive, Theme.surface, Vars.panelOpacity)
         property real targetRad: root.expanded ? Vars.radiusExtraLarge : (MorphState.anyExpanded ? MorphState.targetRadius : height / 2)
         topLeftRadius: Vars.getTopLeftRadius(Vars.panelStyle, Vars.pillPosition, false, targetRad)
         topRightRadius: Vars.getTopRightRadius(Vars.panelStyle, Vars.pillPosition, false, targetRad)

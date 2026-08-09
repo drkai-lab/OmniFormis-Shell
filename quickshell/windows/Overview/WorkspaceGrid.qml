@@ -66,10 +66,16 @@ GridLayout {
             Rectangle {
                 id: wsTile
                 anchors.fill: parent
-                radius: Vars.radiusSmall
+                property real rOuter: Math.max(0, Vars.radiusExtraLarge - overviewPanel.bgPadding)
+                property real rInner: Vars.radiusSmall
+
+                topLeftRadius: (wsContainer.visualRow === 0 && wsContainer.visualCol === 0) ? rOuter : rInner
+                topRightRadius: (wsContainer.visualRow === 0 && wsContainer.visualCol === (overviewContainer ? overviewContainer.gridColumns : 5) - 1) ? rOuter : rInner
+                bottomLeftRadius: (wsContainer.visualRow === (overviewContainer ? overviewContainer.gridRows : 2) - 1 && wsContainer.visualCol === 0) ? rOuter : rInner
+                bottomRightRadius: (wsContainer.visualRow === (overviewContainer ? overviewContainer.gridRows : 2) - 1 && wsContainer.visualCol === (overviewContainer ? overviewContainer.gridColumns : 5) - 1) ? rOuter : rInner
                 clip: true
 
-                color: wsContainer.hoveredWhileDragging ? Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.15) : wsContainer.isFocused ? ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.primary.r, Theme.primary.g, Theme.primary.b, 0.85) : Theme.primary) : Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.06)
+                color: wsContainer.hoveredWhileDragging ? (Vars.tColor(Theme.on_surface, Vars.componentOpacity)) : wsContainer.isFocused ? (Vars.tColor(Theme.primary, Vars.componentOpacity)) : (Vars.tColor(Theme.surface_container_highest, Vars.componentOpacity))
                 border.width: (wsContainer.isFocused || wsContainer.hoveredWhileDragging) ? 2 : 0
                 border.color: (wsContainer.isFocused || wsContainer.hoveredWhileDragging) ? Theme.primary : "transparent"
 
@@ -91,12 +97,12 @@ GridLayout {
                 }
 
                 // Workspace number watermark
-                Text {
+                QsText {
                     anchors.centerIn: parent
                     text: wsContainer.wsId
                     font.family: Vars.fontFamily
                     font.pixelSize: Math.round(root.wsHeight * 0.6) | 0
-                    font.weight: 600
+                    setWeight: 600
                     color: wsContainer.isFocused ? Theme.on_primary : Theme.on_surface_variant
                     opacity: wsContainer.isFocused ? 0.85 : 0.15
                 }
@@ -113,7 +119,10 @@ GridLayout {
 
                     Rectangle {
                         anchors.fill: parent
-                        radius: wsTile.radius
+                        topLeftRadius: wsTile.topLeftRadius
+                        topRightRadius: wsTile.topRightRadius
+                        bottomLeftRadius: wsTile.bottomLeftRadius
+                        bottomRightRadius: wsTile.bottomRightRadius
                         color: Theme.on_surface
                         opacity: parent.containsMouse ? 0.08 : 0
                         Behavior on opacity {

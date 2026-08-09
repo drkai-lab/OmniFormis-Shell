@@ -21,9 +21,10 @@ Item {
 
     property string pageTitle: "Wi-Fi Settings"
     property string pageIcon: "\ue63e"
-    property string pageShape: "Bun"
+    property string pageShape: "Puffy"
     property color pageColor: Theme.tertiary
     property color pageOnColor: Theme.on_tertiary
+    property string searchText: ""
 
     M3Shapes { id: m3Shapes }
 
@@ -81,6 +82,8 @@ Item {
 
         RowLayout {
             Layout.fillWidth: true
+            Layout.leftMargin: Vars.spacingLarge
+            Layout.rightMargin: Vars.spacingLarge
             spacing: 12
 
             Item {
@@ -95,7 +98,7 @@ Item {
                     antialiasing: true
                 }
 
-                Text {
+                QsText {
                     anchors.centerIn: parent
                     text: rootWifiPage.pageIcon
                     font.family: "Material Symbols Outlined"
@@ -104,12 +107,12 @@ Item {
                 }
             }
 
-            Text {
+            QsText {
                 Layout.fillWidth: true
                 text: rootWifiPage.pageTitle
                 font.family: Vars.fontFamily
                 font.pixelSize: 18
-                font.weight: 600
+                setWeight: 600
                 color: Theme.on_surface
                 elide: Text.ElideRight
             }
@@ -139,7 +142,7 @@ Item {
                         Layout.fillWidth: true
                         Layout.preferredHeight: 72
 
-                        property color targetColor: wifiHeaderMouse.containsMouse ? Qt.tint(((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_container.r, Theme.surface_container.g, Theme.surface_container.b, Vars.componentOpacity) : Theme.surface_container), Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.08)) : ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_container.r, Theme.surface_container.g, Theme.surface_container.b, Vars.componentOpacity) : Theme.surface_container)
+                        property color targetColor: wifiHeaderMouse.containsMouse ? Qt.tint((Vars.tColor(Theme.surface_container, Vars.componentOpacity)), Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.08)) : (Vars.tColor(Theme.surface_container, Vars.componentOpacity))
                         Behavior on targetColor {
                             ColorAnimation {
                                 duration: Vars.animationDuration
@@ -182,11 +185,11 @@ Item {
                             anchors.fill: parent
                             anchors.leftMargin: 20
                             anchors.rightMargin: 20
-                            Text {
+                            QsText {
                                 text: rootWifiPage.pageTitle
                                 font.family: Vars.fontFamily
                                 font.pixelSize: 16
-                                font.weight: 500
+                                setWeight: 500
                                 color: Theme.on_surface
                                 Layout.fillWidth: true
                             }
@@ -195,9 +198,16 @@ Item {
                                 width: 52
                                 height: 32
                                 radius: 16
-                                color: Networking.wifiEnabled ? ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.primary.r, Theme.primary.g, Theme.primary.b, Vars.componentOpacity) : Theme.primary) : ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_variant.r, Theme.surface_variant.g, Theme.surface_variant.b, Vars.componentOpacity) : Theme.surface_variant)
+                                color: Networking.wifiEnabled ? (Vars.tColor(Theme.primary, 0.8)) : (Vars.tColor(Theme.surface_variant, Vars.componentOpacity))
                                 border.color: wifiHeader.activeFocus ? Theme.on_surface : "transparent"
                                 border.width: wifiHeader.activeFocus ? 2 : 0
+                                Behavior on color {
+                                    ColorAnimation {
+                                        duration: Vars.animationDuration
+                                        easing.type: Easing.BezierSpline
+                                        easing.bezierCurve: Vars.customStandard
+                                    }
+                                }
                                 Rectangle {
                                     width: 24
                                     height: 24
@@ -213,11 +223,11 @@ Item {
                                             easing.bezierCurve: Vars.customStandard
                                         }
                                     }
-                                    Text {
+                                    QsText {
                                         anchors.centerIn: parent
                                         font.family: "Material Symbols Outlined"
                                         font.pixelSize: 16
-                                        color: Networking.wifiEnabled ? Theme.primary : Theme.surface_variant
+                                        color: Networking.wifiEnabled ? (Vars.tColor(Theme.primary, 0.8)) : (Vars.tColor(Theme.surface_variant, Vars.componentOpacity))
                                         text: Networking.wifiEnabled ? "\ue5ca" : "\ue5cd"
                                     }
                                 }
@@ -241,19 +251,19 @@ Item {
                         Layout.preferredHeight: 120
                         visible: Networking.wifiEnabled && (!rootWifiPage.wifiDevice || rootWifiPage.wifiDevice.networks.values.length === 0)
                         radius: 16
-                        color: (Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_container.r, Theme.surface_container.g, Theme.surface_container.b, Vars.componentOpacity) : Theme.surface_container
+                        color: Vars.tColor(Theme.surface_container, Vars.componentOpacity)
 
                         ColumnLayout {
                             anchors.centerIn: parent
                             spacing: 8
-                            Text {
+                            QsText {
                                 text: "\ue63e"
                                 font.family: "Material Symbols Outlined"
                                 font.pixelSize: 32
                                 color: Theme.on_surface_variant
                                 Layout.alignment: Qt.AlignHCenter
                             } // Wifi off icon
-                            Text {
+                            QsText {
                                 text: "No networks found"
                                 font.family: Vars.fontFamily
                                 font.pixelSize: 16
@@ -278,7 +288,7 @@ Item {
                         Layout.preferredHeight: 72
                         visible: Networking.wifiEnabled
 
-                        property color targetColor: scanMouse.containsMouse ? Qt.tint(((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_container.r, Theme.surface_container.g, Theme.surface_container.b, Vars.componentOpacity) : Theme.surface_container), Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.08)) : ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_container.r, Theme.surface_container.g, Theme.surface_container.b, Vars.componentOpacity) : Theme.surface_container)
+                        property color targetColor: scanMouse.containsMouse ? Qt.tint((Vars.tColor(Theme.surface_container, Vars.componentOpacity)), Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.08)) : (Vars.tColor(Theme.surface_container, Vars.componentOpacity))
                         Behavior on targetColor {
                             ColorAnimation {
                                 duration: Vars.animationDuration
@@ -343,7 +353,7 @@ Item {
                                     }
                                 }
 
-                                Text {
+                                QsText {
                                     id: wifiScanIcon
                                     anchors.centerIn: parent
                                     text: "\ue863"
@@ -359,11 +369,11 @@ Item {
                                 }
                             }
 
-                            Text {
+                            QsText {
                                 text: (rootWifiPage.wifiDevice && rootWifiPage.wifiDevice.scannerEnabled) ? "Scanning..." : "Scan for Networks"
                                 font.family: Vars.fontFamily
                                 font.pixelSize: 16
-                                font.weight: 500
+                                setWeight: 500
                                 color: Theme.on_surface
                                 Layout.fillWidth: true
                             }
@@ -389,7 +399,7 @@ Item {
     Rectangle {
         id: infoPageOverlay
         anchors.fill: parent
-        color: (Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_container_low.r, Theme.surface_container_low.g, Theme.surface_container_low.b, 0.85) : Theme.surface_container_low
+        color: Vars.tColor(Theme.surface_container_low, 0.85)
         visible: rootWifiPage.selectedNetworkForInfo !== ""
         opacity: visible ? 1.0 : 0.0
         Behavior on opacity {
@@ -420,7 +430,7 @@ Item {
                     height: 40
                     radius: 20
                     color: backInfoHover.pressed ? Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.12) : (backInfoHover.containsMouse ? Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.08) : "transparent")
-                    Text {
+                    QsText {
                         anchors.centerIn: parent
                         font.family: "Material Symbols Outlined"
                         font.pixelSize: 20
@@ -443,11 +453,11 @@ Item {
                     }
                 }
 
-                Text {
+                QsText {
                     text: "Network Password"
                     font.family: Vars.fontFamily
                     font.pixelSize: 20
-                    font.weight: 600
+                    setWeight: 600
                     color: Theme.on_surface
                 }
                 Item {
@@ -459,19 +469,19 @@ Item {
                 Layout.fillWidth: true
                 Layout.preferredHeight: 100
                 radius: 16
-                color: (Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_container.r, Theme.surface_container.g, Theme.surface_container.b, Vars.componentOpacity) : Theme.surface_container
+                color: Vars.tColor(Theme.surface_container, Vars.componentOpacity)
 
                 ColumnLayout {
                     anchors.centerIn: parent
-                    Text {
+                    QsText {
                         text: rootWifiPage.selectedNetworkForInfo
                         font.family: Vars.fontFamily
                         font.pixelSize: 18
-                        font.weight: 500
+                        setWeight: 500
                         color: Theme.on_surface
                         Layout.alignment: Qt.AlignHCenter
                     }
-                    Text {
+                    QsText {
                         text: "Saved Password"
                         font.family: Vars.fontFamily
                         font.pixelSize: 12
@@ -485,13 +495,13 @@ Item {
                 Layout.fillWidth: true
                 Layout.preferredHeight: 64
                 radius: 16
-                color: (Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_container_highest.r, Theme.surface_container_highest.g, Theme.surface_container_highest.b, Vars.componentOpacity) : Theme.surface_container_highest
+                color: Vars.tColor(Theme.surface_container_highest, Vars.componentOpacity)
 
                 RowLayout {
                     anchors.fill: parent
                     anchors.margins: 16
 
-                    Text {
+                    QsText {
                         text: rootWifiPage.selectedNetworkPassword !== "" ? rootWifiPage.selectedNetworkPassword : "No password found"
                         font.family: Vars.fontFamily
                         font.pixelSize: 16
@@ -505,7 +515,7 @@ Item {
                         height: 32
                         radius: 16
                         color: copyHover.containsMouse ? Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.08) : "transparent"
-                        Text {
+                        QsText {
                             anchors.centerIn: parent
                             font.family: "Material Symbols Outlined"
                             font.pixelSize: 20
@@ -537,7 +547,7 @@ Item {
     Rectangle {
         id: authPageOverlay
         anchors.fill: parent
-        color: (Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_container_low.r, Theme.surface_container_low.g, Theme.surface_container_low.b, 0.85) : Theme.surface_container_low
+        color: Vars.tColor(Theme.surface_container_low, 0.85)
         visible: rootWifiPage.authOverlayVisible
         opacity: visible ? 1.0 : 0.0
         Behavior on opacity {
@@ -568,7 +578,7 @@ Item {
                     height: 40
                     radius: 20
                     color: backAuthHover.pressed ? Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.12) : (backAuthHover.containsMouse ? Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.08) : "transparent")
-                    Text {
+                    QsText {
                         anchors.centerIn: parent
                         font.family: "Material Symbols Outlined"
                         font.pixelSize: 20
@@ -591,11 +601,11 @@ Item {
                     }
                 }
 
-                Text {
+                QsText {
                     text: "Authentication Required"
                     font.family: Vars.fontFamily
                     font.pixelSize: 20
-                    font.weight: 600
+                    setWeight: 600
                     color: Theme.on_surface
                 }
                 Item {
@@ -607,7 +617,7 @@ Item {
                 Layout.fillWidth: true
                 Layout.preferredHeight: 180
                 radius: 16
-                color: (Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_container.r, Theme.surface_container.g, Theme.surface_container.b, Vars.componentOpacity) : Theme.surface_container
+                color: Vars.tColor(Theme.surface_container, Vars.componentOpacity)
 
                 ColumnLayout {
                     anchors.centerIn: parent
@@ -631,13 +641,13 @@ Item {
                             anchors.left: parent.left
                             anchors.leftMargin: 12
 
-                            Text {
+                            QsText {
                                 id: ssidLabelText
                                 anchors.centerIn: parent
                                 text: rootWifiPage.pendingSsid
-                                font.family: "Google Sans Flefx"
+                                font.family: Vars.fontFamily
                                 font.pixelSize: 12
-                                font.weight: 800
+                                setWeight: 800
                                 color: rootWifiPage.authError ? Theme.error : (authPwdInput.activeFocus ? Theme.primary : Theme.on_surface_variant)
                                 Behavior on color { ColorAnimation { duration: 150 } }
                             }
@@ -656,6 +666,7 @@ Item {
                             padding: 0
                             leftPadding: 16
                             rightPadding: 16
+                            MouseArea { anchors.fill: parent; cursorShape: Qt.IBeamCursor; onPressed: (mouse) => { parent.forceActiveFocus(); mouse.accepted = false; } }
 
                             Keys.onReturnPressed: {
                                 authProcess.pwd = authPwdInput.text;
@@ -664,7 +675,7 @@ Item {
                         }
                     }
 
-                    Text {
+                    QsText {
                         text: "Enter system password to view Wi-Fi credentials."
                         font.family: Vars.fontFamily
                         font.pixelSize: 14
@@ -672,7 +683,7 @@ Item {
                         Layout.alignment: Qt.AlignHCenter
                     }
 
-                    Text {
+                    QsText {
                         text: "Incorrect password"
                         font.family: Vars.fontFamily
                         font.pixelSize: 12

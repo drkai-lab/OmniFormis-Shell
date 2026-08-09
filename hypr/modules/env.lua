@@ -21,3 +21,4 @@ hl.env("__GLX_VENDOR_LIBRARY_NAME", "nvidia")
 -- Fix for Qt Quick/Wayland inconsistent physics and flickering on NVIDIA
 hl.env("QSG_RENDER_LOOP", "basic")
 hl.env("QT_WAYLAND_DISABLE_WINDOWDECORATION", "1")
+hl.env("QT_QPA_PLATFORM", "wayland")

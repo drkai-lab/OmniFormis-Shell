@@ -25,9 +25,10 @@ Flickable {
 
     property string pageTitle: "Quick & Presets"
     property string pageIcon: "\ue41d"
-    property string pageShape: "Sunny"
+    property string pageShape: "Puffy"
     property color pageColor: Theme.primary
     property color pageOnColor: Theme.on_primary
+    property string searchText: ""
 
     signal openWallpaperSwitcher()
 
@@ -151,6 +152,9 @@ Flickable {
                 overviewGridRows: Vars.overviewGridRows,
                 overviewGridColumns: Vars.overviewGridColumns,
                 overviewScale: Vars.overviewScale,
+                gameLibraryRows: Vars.gameLibraryRows,
+                gameLibraryColumns: Vars.gameLibraryColumns,
+                gameLibraryScale: Vars.gameLibraryScale,
                 radiusAmount: Vars.radiusAmount,
                 radiusSmall: Vars.radiusSmall,
                 radiusMedium: Vars.radiusMedium,
@@ -295,6 +299,8 @@ Flickable {
             // M3 Styled Section Header
             RowLayout {
                 Layout.fillWidth: true
+                Layout.leftMargin: Vars.spacingLarge
+                Layout.rightMargin: Vars.spacingLarge
                 spacing: 12
 
                 // M3 Cookie Background Shape containing Monitor/Screen Icon (Without inverted background box!)
@@ -310,7 +316,7 @@ Flickable {
                         antialiasing: true
                     }
 
-                    Text {
+                    QsText {
                         anchors.centerIn: parent
                         text: quickPageRoot.pageIcon
                         font.family: "Material Symbols Outlined"
@@ -319,53 +325,56 @@ Flickable {
                     }
                 }
 
-                Text {
+                QsText {
                     Layout.fillWidth: true
                     text: quickPageRoot.pageTitle
                     font.family: Vars.fontFamily
                     font.pixelSize: 18
-                    font.weight: 600
+                    setWeight: 600
                     color: Theme.on_surface
                     elide: Text.ElideRight
                 }
             }
 
             // Folder Selection for Wallpapers
-            RowLayout {
+            Rectangle {
+                id: pathInputContainer
                 Layout.fillWidth: true
-                spacing: 12
+                Layout.preferredHeight: 48
+                color: pathInput.activeFocus ? Theme.primary_container : (Vars.tColor(Theme.surface_container_highest, Vars.componentOpacity))
+                border.color: pathInput.activeFocus ? Theme.primary : "transparent"
+                border.width: pathInput.activeFocus ? 2 : 0
+                radius: pathInput.activeFocus ? Vars.radiusLarge : Vars.radiusExtraLarge
 
-                Text {
-                    text: "folder"
-                    font.family: "Material Symbols Outlined"
-                    font.pixelSize: 24
-                    color: Theme.on_surface_variant
-                }
+                Behavior on color { ColorAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
+                Behavior on radius { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customExpressiveSpatialSlow } }
 
-                Rectangle {
-                    id: pathInputContainer
-                    Layout.fillWidth: true
-                    Layout.preferredHeight: 44
-                    color: pathInput.activeFocus ? Theme.primary_container : ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_container_highest.r, Theme.surface_container_highest.g, Theme.surface_container_highest.b, 0.6) : Theme.surface_container_highest)
-                    border.color: pathInput.activeFocus ? Theme.primary : "transparent"
-                    border.width: pathInput.activeFocus ? 2 : 0
-                    radius: 22
+                RowLayout {
+                    anchors.fill: parent
+                    anchors.leftMargin: Vars.spacingMedium
+                    anchors.rightMargin: Vars.spacingMedium
+                    spacing: 12
 
-                    Behavior on color { ColorAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
+                    QsText {
+                        text: "folder"
+                        font.family: "Material Symbols Outlined"
+                        font.pixelSize: 20
+                        color: pathInput.activeFocus ? Theme.on_primary_container : Theme.on_surface
+                        opacity: 0.7
+                    }
 
                     TextInput {
                         id: pathInput
-                        anchors.fill: parent
-                        anchors.leftMargin: 16
-                        anchors.rightMargin: 16
+                        Layout.fillWidth: true
                         font.family: Vars.fontFamily
                         font.pixelSize: 14
-                        color: Theme.on_surface
+                        color: pathInput.activeFocus ? Theme.on_primary_container : Theme.on_surface
                         verticalAlignment: Text.AlignVCenter
                         text: wallpaperSettings.wallpaperDir
                         selectByMouse: true
+                        MouseArea { anchors.fill: parent; cursorShape: Qt.IBeamCursor; onPressed: (mouse) => { parent.forceActiveFocus(); mouse.accepted = false; } }
                         
-                        Text {
+                        QsText {
                             text: "Wallpaper Folder Path..."
                             font.family: Vars.fontFamily
                             font.pixelSize: 14
@@ -439,7 +448,7 @@ Flickable {
                         }
 
                         // Elegant fallback icon when wallpaper image is loading or empty
-                        Text {
+                        QsText {
                             anchors.centerIn: parent
                             visible: wpPrevImg.status !== Image.Ready
                             text: "\ue386" // wallpaper photo icon
@@ -475,12 +484,14 @@ Flickable {
                         Behavior on scale { NumberAnimation { duration: 150; easing.type: Easing.OutBack } }
                         scale: fabHover.pressed ? 1.08 : 1.0
 
-                        Text {
+                        QsText {
                             anchors.centerIn: parent
                             text: "edit" // pen / edit icon
                             font.family: "Material Symbols Outlined"
                             font.pixelSize: 24
                             color: Theme.on_secondary_container
+                            layer.enabled: true
+                            layer.smooth: true
                             scale: fabHover.pressed ? 0.92 : 1.0
                             Behavior on scale { NumberAnimation { duration: 150 } }
                         }
@@ -525,29 +536,31 @@ Flickable {
                             Behavior on bottomLeftRadius { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
                             Behavior on topRightRadius { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
                             Behavior on bottomRightRadius { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
-                            color: isSelected ? ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.secondary_container.r, Theme.secondary_container.g, Theme.secondary_container.b, 0.7) : Theme.secondary_container) : (lightHover.containsMouse ? ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_container_highest.r, Theme.surface_container_highest.g, Theme.surface_container_highest.b, 0.6) : Theme.surface_container_highest) : ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_container_high.r, Theme.surface_container_high.g, Theme.surface_container_high.b, 0.4) : Theme.surface_container_high))
+                            color: isSelected ? (Vars.tColor(Theme.secondary_container, Vars.componentOpacity)) : (lightHover.containsMouse ? (Vars.tColor(Theme.surface_container_highest, Vars.componentOpacity)) : (Vars.tColor(Theme.surface_container_high, Vars.componentOpacity)))
                             border.width: 0
 
                             Behavior on color { ColorAnimation { duration: 180 } }
+                            layer.enabled: true
+                            layer.smooth: true
                             scale: lightHover.pressed ? 1.08 : 1.0
                             Behavior on scale { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.OutBack } }
 
                             ColumnLayout {
                                 anchors.centerIn: parent
                                 spacing: 6
-                                Text {
+                                QsText {
                                     Layout.alignment: Qt.AlignHCenter
                                     text: "\ue518" // light_mode sun
                                     font.family: parent.parent.isSelected ? filledIconFont.name : "Material Symbols Outlined"
                                     font.pixelSize: 24
                                     color: parent.parent.isSelected ? Theme.on_secondary_container : Theme.on_surface_variant
                                 }
-                                Text {
+                                QsText {
                                     Layout.alignment: Qt.AlignHCenter
                                     text: "Light"
                                     font.family: Vars.fontFamily
                                     font.pixelSize: 13
-                                    font.weight: parent.parent.isSelected ? 700 : 500
+                                    setWeight: parent.parent.isSelected ? 700 : 500
                                     color: parent.parent.isSelected ? Theme.on_secondary_container : Theme.on_surface_variant
                                 }
                             }
@@ -581,29 +594,31 @@ Flickable {
                             Behavior on bottomLeftRadius { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
                             Behavior on topRightRadius { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
                             Behavior on bottomRightRadius { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
-                            color: isSelected ? ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.secondary_container.r, Theme.secondary_container.g, Theme.secondary_container.b, 0.7) : Theme.secondary_container) : (darkHover.containsMouse ? ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_container_highest.r, Theme.surface_container_highest.g, Theme.surface_container_highest.b, 0.6) : Theme.surface_container_highest) : ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_container_high.r, Theme.surface_container_high.g, Theme.surface_container_high.b, 0.4) : Theme.surface_container_high))
+                            color: isSelected ? (Vars.tColor(Theme.secondary_container, Vars.componentOpacity)) : (darkHover.containsMouse ? (Vars.tColor(Theme.surface_container_highest, Vars.componentOpacity)) : (Vars.tColor(Theme.surface_container_high, Vars.componentOpacity)))
                             border.width: 0
 
                             Behavior on color { ColorAnimation { duration: 180 } }
+                            layer.enabled: true
+                            layer.smooth: true
                             scale: darkHover.pressed ? 1.08 : 1.0
                             Behavior on scale { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.OutBack } }
 
                             ColumnLayout {
                                 anchors.centerIn: parent
                                 spacing: 6
-                                Text {
+                                QsText {
                                     Layout.alignment: Qt.AlignHCenter
                                     text: "\ue51c" // dark_mode crescent moon
                                     font.family: parent.parent.isSelected ? filledIconFont.name : "Material Symbols Outlined"
                                     font.pixelSize: 24
                                     color: parent.parent.isSelected ? Theme.on_secondary_container : Theme.on_surface_variant
                                 }
-                                Text {
+                                QsText {
                                     Layout.alignment: Qt.AlignHCenter
                                     text: "Dark"
                                     font.family: Vars.fontFamily
                                     font.pixelSize: 13
-                                    font.weight: parent.parent.isSelected ? 700 : 500
+                                    setWeight: parent.parent.isSelected ? 700 : 500
                                     color: parent.parent.isSelected ? Theme.on_secondary_container : Theme.on_surface_variant
                                 }
                             }
@@ -663,16 +678,18 @@ Flickable {
                                 Behavior on bottomLeftRadius { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
                                 Behavior on bottomRightRadius { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
 
-                                color: isSelected ? ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.secondary_container.r, Theme.secondary_container.g, Theme.secondary_container.b, 0.7) : Theme.secondary_container) : (schemeHover.containsMouse ? ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_container_highest.r, Theme.surface_container_highest.g, Theme.surface_container_highest.b, 0.6) : Theme.surface_container_highest) : ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_container_high.r, Theme.surface_container_high.g, Theme.surface_container_high.b, 0.4) : Theme.surface_container_high))
+                                color: isSelected ? (Vars.tColor(Theme.secondary_container, Vars.componentOpacity)) : (schemeHover.containsMouse ? (Vars.tColor(Theme.surface_container_highest, Vars.componentOpacity)) : (Vars.tColor(Theme.surface_container_high, Vars.componentOpacity)))
                                 border.width: 0
 
+                                layer.enabled: true
+                                layer.smooth: true
                                 scale: schemeHover.pressed ? 1.08 : 1.0
                                 Behavior on scale { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.OutBack } }
 
                                 Behavior on color { ColorAnimation { duration: 160 } }
 
                                 // Icon Top-Left
-                                Text {
+                                QsText {
                                     anchors.top: parent.top
                                     anchors.left: parent.left
                                     anchors.margins: 10
@@ -683,14 +700,14 @@ Flickable {
                                 }
 
                                 // Text Bottom-Right
-                                Text {
+                                QsText {
                                     anchors.bottom: parent.bottom
                                     anchors.right: parent.right
                                     anchors.margins: 10
                                     text: modelData.name
                                     font.family: Vars.fontFamily
                                     font.pixelSize: 11
-                                    font.weight: parent.isSelected ? 700 : 500
+                                    setWeight: parent.isSelected ? 700 : 500
                                     color: parent.isSelected ? Theme.on_secondary_container : Theme.on_surface
                                     elide: Text.ElideRight
                                     maximumLineCount: 1
@@ -727,17 +744,17 @@ Flickable {
 
                     RowLayout {
                         spacing: 12
-                        Text {
+                        QsText {
                             text: "palette" // palette icon
                             font.family: "Material Symbols Outlined"
                             font.pixelSize: 22
                             color: Theme.on_surface_variant
                         }
-                        Text {
+                        QsText {
                             text: "Global Style"
                             font.family: Vars.fontFamily
                             font.pixelSize: 15
-                            font.weight: 500
+                            setWeight: 500
                             color: Theme.on_surface
                         }
                     }
@@ -766,9 +783,11 @@ Flickable {
                                 topRightRadius: isSelected ? 19 : (hasRight ? 6 : 19)
                                 bottomRightRadius: isSelected ? 19 : (hasRight ? 6 : 19)
 
-                                color: isSelected ? ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.secondary_container.r, Theme.secondary_container.g, Theme.secondary_container.b, 0.7) : Theme.secondary_container) : (styleModeHover.containsMouse ? ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_container_highest.r, Theme.surface_container_highest.g, Theme.surface_container_highest.b, 0.6) : Theme.surface_container_highest) : ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_container_high.r, Theme.surface_container_high.g, Theme.surface_container_high.b, 0.4) : Theme.surface_container_high))
+                                color: isSelected ? (Vars.tColor(Theme.secondary_container, Vars.componentOpacity)) : (styleModeHover.containsMouse ? (Vars.tColor(Theme.surface_container_highest, Vars.componentOpacity)) : (Vars.tColor(Theme.surface_container_high, Vars.componentOpacity)))
                                 border.width: 0
 
+                                layer.enabled: true
+                                layer.smooth: true
                                 scale: styleModeHover.pressed ? 1.08 : 1.0
                                 Behavior on scale { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.OutBack } }
 
@@ -778,7 +797,7 @@ Flickable {
                                 Behavior on bottomRightRadius { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
                                 Behavior on color { ColorAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
 
-                                Text {
+                                QsText {
                                     anchors.centerIn: parent
                                     text: modelData.icon
                                     font.family: parent.isSelected ? filledIconFont.name : "Material Symbols Outlined"
@@ -825,17 +844,17 @@ Flickable {
 
                     RowLayout {
                         spacing: 12
-                        Text {
+                        QsText {
                             text: "\ue503" // switch_video icon
                             font.family: "Material Symbols Outlined"
                             font.pixelSize: 22
                             color: Theme.on_surface_variant
                         }
-                        Text {
+                        QsText {
                             text: "Wallpaper Transition"
                             font.family: Vars.fontFamily
                             font.pixelSize: 15
-                            font.weight: 500
+                            setWeight: 500
                             color: Theme.on_surface
                         }
                     }
@@ -865,9 +884,11 @@ Flickable {
                                 topRightRadius: isSelected ? 19 : (hasRight ? 6 : 19)
                                 bottomRightRadius: isSelected ? 19 : (hasRight ? 6 : 19)
 
-                                color: isSelected ? ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.secondary_container.r, Theme.secondary_container.g, Theme.secondary_container.b, 0.7) : Theme.secondary_container) : (transHover.containsMouse ? ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_container_highest.r, Theme.surface_container_highest.g, Theme.surface_container_highest.b, 0.6) : Theme.surface_container_highest) : ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_container_high.r, Theme.surface_container_high.g, Theme.surface_container_high.b, 0.4) : Theme.surface_container_high))
+                                color: isSelected ? (Vars.tColor(Theme.secondary_container, Vars.componentOpacity)) : (transHover.containsMouse ? (Vars.tColor(Theme.surface_container_highest, Vars.componentOpacity)) : (Vars.tColor(Theme.surface_container_high, Vars.componentOpacity)))
                                 border.width: 0
 
+                                layer.enabled: true
+                                layer.smooth: true
                                 scale: transHover.pressed ? 1.08 : 1.0
                                 Behavior on scale { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.OutBack } }
 
@@ -877,12 +898,12 @@ Flickable {
                                 Behavior on bottomRightRadius { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
                                 Behavior on color { ColorAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
 
-                                Text {
+                                QsText {
                                     anchors.centerIn: parent
                                     text: modelData.label
                                     font.family: Vars.fontFamily
                                     font.pixelSize: 13
-                                    font.weight: parent.isSelected ? 600 : 500
+                                    setWeight: parent.isSelected ? 600 : 500
                                     color: parent.isSelected ? Theme.on_secondary_container : Theme.on_surface_variant
                                 }
 
@@ -936,17 +957,17 @@ Flickable {
                     
                     RowLayout {
                     spacing: 12
-                    Text {
+                    QsText {
                         text: "\ue250"
                         font.family: "Material Symbols Outlined"
                         font.pixelSize: 22
                         color: Theme.on_surface_variant
                     }
-                    Text {
+                    QsText {
                         text: "Panel Position"
                         font.family: Vars.fontFamily
                         font.pixelSize: 15
-                        font.weight: 500
+                        setWeight: 500
                         color: Theme.on_surface
                     }
                 }
@@ -975,9 +996,11 @@ Flickable {
                             topRightRadius: isSelected ? 19 : (hasRight ? 6 : 19)
                             bottomRightRadius: isSelected ? 19 : (hasRight ? 6 : 19)
 
-                            color: isSelected ? ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.secondary_container.r, Theme.secondary_container.g, Theme.secondary_container.b, 0.7) : Theme.secondary_container) : (posHover.containsMouse ? ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_container_highest.r, Theme.surface_container_highest.g, Theme.surface_container_highest.b, 0.6) : Theme.surface_container_highest) : ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_container_high.r, Theme.surface_container_high.g, Theme.surface_container_high.b, 0.4) : Theme.surface_container_high))
+                            color: isSelected ? (Vars.tColor(Theme.secondary_container, Vars.componentOpacity)) : (posHover.containsMouse ? (Vars.tColor(Theme.surface_container_highest, Vars.componentOpacity)) : (Vars.tColor(Theme.surface_container_high, Vars.componentOpacity)))
                             border.width: 0
 
+                            layer.enabled: true
+                            layer.smooth: true
                             scale: posHover.pressed ? 1.08 : 1.0
                             Behavior on scale { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.OutBack } }
 
@@ -987,7 +1010,7 @@ Flickable {
                             Behavior on bottomRightRadius { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
                             Behavior on color { ColorAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
 
-                            Text {
+                            QsText {
                                 anchors.centerIn: parent
                                 text: modelData.icon
                                 font.family: parent.isSelected ? filledIconFont.name : "Material Symbols Outlined"
@@ -1024,13 +1047,13 @@ Flickable {
 
                     RowLayout {
                     spacing: 12
-                    Text {
+                    QsText {
                         text: "\ue1bd"
                         font.family: "Material Symbols Outlined"
                         font.pixelSize: 22
                         color: Theme.on_surface_variant
                     }
-                    Text {
+                    QsText {
                         text: "Panel Style"
                         font.family: Vars.fontFamily
                         font.pixelSize: 15
@@ -1062,9 +1085,11 @@ Flickable {
                             topRightRadius: isSelected ? 19 : (hasRight ? 6 : 19)
                             bottomRightRadius: isSelected ? 19 : (hasRight ? 6 : 19)
 
-                            color: isSelected ? ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.secondary_container.r, Theme.secondary_container.g, Theme.secondary_container.b, 0.7) : Theme.secondary_container) : (styleHover.containsMouse ? ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_container_highest.r, Theme.surface_container_highest.g, Theme.surface_container_highest.b, 0.6) : Theme.surface_container_highest) : ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_container_high.r, Theme.surface_container_high.g, Theme.surface_container_high.b, 0.4) : Theme.surface_container_high))
+                            color: isSelected ? (Vars.tColor(Theme.secondary_container, Vars.componentOpacity)) : (styleHover.containsMouse ? (Vars.tColor(Theme.surface_container_highest, Vars.componentOpacity)) : (Vars.tColor(Theme.surface_container_high, Vars.componentOpacity)))
                             border.width: 0
 
+                            layer.enabled: true
+                            layer.smooth: true
                             scale: styleHover.pressed ? 1.08 : 1.0
                             Behavior on scale { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.OutBack } }
 
@@ -1074,7 +1099,7 @@ Flickable {
                             Behavior on bottomRightRadius { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
                             Behavior on color { ColorAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
 
-                            Text {
+                            QsText {
                                 anchors.centerIn: parent
                                 text: modelData.icon
                                 font.family: parent.isSelected ? filledIconFont.name : "Material Symbols Outlined"
@@ -1118,13 +1143,13 @@ Flickable {
 
                     RowLayout {
                         spacing: 12
-                        Text {
+                        QsText {
                             text: "\ue1a6"
                             font.family: "Material Symbols Outlined"
                             font.pixelSize: 22
                             color: Theme.on_surface_variant
                         }
-                        Text {
+                        QsText {
                             text: "Liquid Glass Preset"
                             font.family: Vars.fontFamily
                             font.pixelSize: 15
@@ -1157,9 +1182,11 @@ Flickable {
                                 topRightRadius: isSelected ? 19 : (hasRight ? 6 : 19)
                                 bottomRightRadius: isSelected ? 19 : (hasRight ? 6 : 19)
 
-                                color: isSelected ? ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.secondary_container.r, Theme.secondary_container.g, Theme.secondary_container.b, 0.7) : Theme.secondary_container) : (presetHover.containsMouse ? ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_container_highest.r, Theme.surface_container_highest.g, Theme.surface_container_highest.b, 0.6) : Theme.surface_container_highest) : ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_container_high.r, Theme.surface_container_high.g, Theme.surface_container_high.b, 0.4) : Theme.surface_container_high))
+                                color: isSelected ? (Vars.tColor(Theme.secondary_container, Vars.componentOpacity)) : (presetHover.containsMouse ? (Vars.tColor(Theme.surface_container_highest, Vars.componentOpacity)) : (Vars.tColor(Theme.surface_container_high, Vars.componentOpacity)))
                                 border.width: 0
 
+                                layer.enabled: true
+                                layer.smooth: true
                                 scale: presetHover.pressed ? 1.08 : 1.0
                                 Behavior on scale { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.OutBack } }
 
@@ -1172,13 +1199,13 @@ Flickable {
                                 RowLayout {
                                     anchors.centerIn: parent
                                     spacing: 4
-                                    Text {
+                                    QsText {
                                         text: modelData.icon
                                         font.family: parent.parent.isSelected ? filledIconFont.name : "Material Symbols Outlined"
                                         font.pixelSize: 18
                                         color: parent.parent.isSelected ? Theme.on_secondary_container : Theme.on_surface_variant
                                     }
-                                    Text {
+                                    QsText {
                                         text: modelData.name
                                         font.family: Vars.fontFamily
                                         font.pixelSize: 13
@@ -1244,7 +1271,7 @@ Flickable {
                             antialiasing: true
                         }
 
-                        Text {
+                        QsText {
                             anchors.centerIn: parent
                             text: "\ue41d" // presets / customization icon
                             font.family: "Material Symbols Outlined"
@@ -1253,7 +1280,7 @@ Flickable {
                         }
                     }
 
-                    Text {
+                    QsText {
                         Layout.fillWidth: true
                         text: "Configuration Presets"
                         font.family: Vars.fontFamily
@@ -1281,12 +1308,14 @@ Flickable {
                         NumberAnimation { to: 14; duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } // morph back to rounded square
                     }
 
-                    Text {
+                    QsText {
                         anchors.centerIn: parent
                         text: "add" // material icon ligature for add (+)
                         font.family: "Material Symbols Outlined"
                         font.pixelSize: 24
                         color: Theme.on_secondary_container
+                        layer.enabled: true
+                        layer.smooth: true
                         scale: createHover.pressed ? 1.08 : 1.0
                         Behavior on scale { NumberAnimation { duration: 150; easing.type: Easing.OutBack } }
                     }
@@ -1310,7 +1339,7 @@ Flickable {
                 Layout.fillWidth: true
                 spacing: 16
 
-                Text {
+                QsText {
                     visible: presetsModel.count === 0
                     text: "No presets here"
                     font.family: Vars.fontFamily
@@ -1334,7 +1363,7 @@ Flickable {
                             id: cardBase
                             anchors.fill: parent
                             radius: 24
-                            color: (Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_container_low.r, Theme.surface_container_low.g, Theme.surface_container_low.b, 0.35) : Theme.surface_container_low
+                            color: Vars.tColor(Theme.surface_container_low, Vars.componentOpacity)
                             border.color: Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.08)
                             border.width: 1
                             clip: true
@@ -1418,7 +1447,7 @@ Flickable {
                                 height: 56
                                 bottomLeftRadius: 24
                                 bottomRightRadius: 24
-                                color: (Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_container_highest.r, Theme.surface_container_highest.g, Theme.surface_container_highest.b, 0.5) : Theme.surface_container_highest
+                                color: Vars.tColor(Theme.surface_container_highest, Vars.componentOpacity)
                                 
                                 Rectangle {
                                     anchors.top: parent.top
@@ -1439,13 +1468,13 @@ Flickable {
 
                                         RowLayout {
                                             spacing: 6
-                                            Text {
+                                            QsText {
                                                 text: cardBase.panelStyle === "Attached" ? "vertical_align_top" : (cardBase.panelStyle === "Framed" ? "filter_frames" : "layers")
                                                 font.family: "Material Symbols Outlined"
                                                 font.pixelSize: 17
                                                 color: Theme.primary
                                             }
-                                            Text {
+                                            QsText {
                                                 Layout.fillWidth: true
                                                 text: cardBase.panelPosition + " Position"
                                                 font.family: Vars.fontFamily
@@ -1456,7 +1485,7 @@ Flickable {
                                             }
                                         }
 
-                                        Text {
+                                        QsText {
                                             Layout.fillWidth: true
                                             text: model.colorMode + " mode • " + model.matugenScheme.replace("scheme-", "")
                                             font.family: Vars.fontFamily
@@ -1482,10 +1511,12 @@ Flickable {
                                             bottomRightRadius: 6
                                             color: applyHover.containsMouse ? Theme.primary : Qt.rgba(Theme.primary.r, Theme.primary.g, Theme.primary.b, 0.2)
                                             Behavior on color { ColorAnimation { duration: 150 } }
+                                            layer.enabled: true
+                                            layer.smooth: true
                                             scale: applyHover.pressed ? 1.08 : 1.0
                                             Behavior on scale { NumberAnimation { duration: 150; easing.type: Easing.OutBack } }
 
-                                            Text {
+                                            QsText {
                                                 anchors.centerIn: parent
                                                 text: "Apply"
                                                 font.family: Vars.fontFamily
@@ -1517,10 +1548,12 @@ Flickable {
                                             bottomRightRadius: 18
                                             color: delHover.containsMouse ? Theme.error : Qt.rgba(Theme.error.r, Theme.error.g, Theme.error.b, 0.18)
                                             Behavior on color { ColorAnimation { duration: 150 } }
+                                            layer.enabled: true
+                                            layer.smooth: true
                                             scale: delHover.pressed ? 1.08 : 1.0
                                             Behavior on scale { NumberAnimation { duration: 150; easing.type: Easing.OutBack } }
 
-                                            Text {
+                                            QsText {
                                                 anchors.centerIn: parent
                                                 text: "\ue872" // delete trash icon
                                                 font.family: "Material Symbols Outlined"

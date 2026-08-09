@@ -24,27 +24,61 @@ ColumnLayout {
 
     property var navItems: []
 
-    Repeater {
+    ListView {
+        id: navList
+        Layout.fillWidth: true
+        Layout.preferredHeight: contentHeight
+        interactive: false
+        
+        add: Transition {
+            ParallelAnimation {
+                NumberAnimation { property: "opacity"; from: 0; to: 1; duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customEmphasizedDecelerate }
+                NumberAnimation { property: "x"; from: 30; to: 0; duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customEmphasizedDecelerate }
+            }
+        }
+        remove: Transition {
+            ParallelAnimation {
+                NumberAnimation { property: "opacity"; to: 0; duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customEmphasizedAccelerate }
+                NumberAnimation { property: "x"; to: -30; duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customEmphasizedAccelerate }
+            }
+        }
+        displaced: Transition {
+            PropertyAction { property: "z"; value: 0 }
+            ParallelAnimation {
+                NumberAnimation { properties: "x,y"; duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customExpressiveSpatialSlow }
+                SequentialAnimation {
+                    NumberAnimation { property: "opacity"; to: 0.2; duration: Vars.animationDuration * 0.3 }
+                    NumberAnimation { property: "opacity"; to: 1.0; duration: Vars.animationDuration * 0.7 }
+                }
+            }
+        }
+
         model: navItems
-        delegate: ColumnLayout {
-            Layout.fillWidth: true
-            Layout.topMargin: (modelData.isFirst && index !== 0) ? 16 : 0
-            spacing: 4
-
-
+        
+        delegate: Item {
+            width: navList.width
+            property int extraMargin: (modelData.isFirst && index !== 0) ? 16 : 0
+            height: 72 + extraMargin + 4
 
             Item {
                 id: delegateItem
-                Layout.fillWidth: true
-                Layout.preferredHeight: 72
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.top: parent.top
+                anchors.topMargin: parent.extraMargin
+                height: 72
+                
                 property bool isSelected: rootSidebar.currentSection === modelData.id
                 
                 // Determine target color (which may contain alpha)
-                property color targetColor: isSelected ? ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.secondary_container.r, Theme.secondary_container.g, Theme.secondary_container.b, Vars.componentOpacity) : Theme.secondary_container) : (navHover.containsMouse ? Qt.tint(((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_container_high.r, Theme.surface_container_high.g, Theme.surface_container_high.b, Vars.componentOpacity) : Theme.surface_container_high), Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.08)) : ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_container_high.r, Theme.surface_container_high.g, Theme.surface_container_high.b, Vars.componentOpacity) : Theme.surface_container_high))
+                property color targetColor: isSelected ? (Vars.tColor(Theme.secondary_container, Vars.componentOpacity)) : (navHover.containsMouse ? Qt.tint((Vars.tColor(Theme.surface_container_high, Vars.componentOpacity)), Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.08)) : (Vars.tColor(Theme.surface_container_high, Vars.componentOpacity)))
                 Behavior on targetColor { ColorAnimation { duration: Vars.animationDuration } }
 
+                layer.enabled: true
+                layer.smooth: true
                 scale: navHover.pressed ? 1.08 : 1.0
                 Behavior on scale { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.OutBack } }
+
 
                 Item {
                     anchors.fill: parent
@@ -53,36 +87,20 @@ ColumnLayout {
 
                     Rectangle {
                         anchors.fill: parent
-                        radius: delegateItem.isSelected ? height / 2 : 16
-                        Behavior on radius { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customExpressiveSpatialSlow } }
                         color: Qt.rgba(delegateItem.targetColor.r, delegateItem.targetColor.g, delegateItem.targetColor.b, 1.0)
                         
-                        // Square-off top corners if not the first item
-                        Rectangle {
-                            width: parent.radius; height: parent.radius; color: parent.color
-                            anchors.top: parent.top; anchors.left: parent.left
-                            opacity: (!modelData.isFirst && !delegateItem.isSelected) ? 1.0 : 0.0
-                            Behavior on opacity { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customExpressiveSpatialSlow } }
-                        }
-                        Rectangle {
-                            width: parent.radius; height: parent.radius; color: parent.color
-                            anchors.top: parent.top; anchors.right: parent.right
-                            opacity: (!modelData.isFirst && !delegateItem.isSelected) ? 1.0 : 0.0
-                            Behavior on opacity { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customExpressiveSpatialSlow } }
-                        }
-                        // Square-off bottom corners if not the last item
-                        Rectangle {
-                            width: parent.radius; height: parent.radius; color: parent.color
-                            anchors.bottom: parent.bottom; anchors.left: parent.left
-                            opacity: (!modelData.isLast && !delegateItem.isSelected) ? 1.0 : 0.0
-                            Behavior on opacity { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customExpressiveSpatialSlow } }
-                        }
-                        Rectangle {
-                            width: parent.radius; height: parent.radius; color: parent.color
-                            anchors.bottom: parent.bottom; anchors.right: parent.right
-                            opacity: (!modelData.isLast && !delegateItem.isSelected) ? 1.0 : 0.0
-                            Behavior on opacity { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customExpressiveSpatialSlow } }
-                        }
+                        property real baseRadius: delegateItem.isSelected ? height / 2 : 16
+                        property real edgeRadius: delegateItem.isSelected ? height / 2 : 4
+                        
+                        topLeftRadius: modelData.isFirst ? baseRadius : edgeRadius
+                        topRightRadius: modelData.isFirst ? baseRadius : edgeRadius
+                        bottomLeftRadius: modelData.isLast ? baseRadius : edgeRadius
+                        bottomRightRadius: modelData.isLast ? baseRadius : edgeRadius
+
+                        Behavior on topLeftRadius { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customExpressiveSpatialSlow } }
+                        Behavior on topRightRadius { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customExpressiveSpatialSlow } }
+                        Behavior on bottomLeftRadius { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customExpressiveSpatialSlow } }
+                        Behavior on bottomRightRadius { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customExpressiveSpatialSlow } }
                     }
                 }
 
@@ -118,7 +136,7 @@ ColumnLayout {
                         }
 
                         // Outlined (Empty) Icon
-                        Text {
+                        QsText {
                             anchors.centerIn: parent
                             text: modelData.icon
                             font.family: "Material Symbols Outlined"
@@ -132,7 +150,7 @@ ColumnLayout {
                         }
 
                         // Filled Icon
-                        Text {
+                        QsText {
                             anchors.centerIn: parent
                             text: modelData.icon
                             font.family: filledIconFont.name
@@ -148,17 +166,17 @@ ColumnLayout {
                     ColumnLayout {
                         Layout.fillWidth: true
                         spacing: 2
-                        Text {
+                        QsText {
                             text: modelData.name
                             font.family: Vars.fontFamily
                             font.pixelSize: 16
-                            font.weight: delegateItem.isSelected ? 500 : 400
+                            setWeight: delegateItem.isSelected ? 500 : 400
                             color: delegateItem.isSelected ? Theme.on_secondary_container : Theme.on_surface
                             Layout.fillWidth: true
                             horizontalAlignment: Text.AlignLeft
                             elide: Text.ElideRight
                         }
-                        Text {
+                        QsText {
                             text: modelData.subtitle
                             font.family: Vars.fontFamily
                             font.pixelSize: 12
@@ -178,6 +196,31 @@ ColumnLayout {
                     cursorShape: Qt.PointingHandCursor
                     onClicked: rootSidebar.currentSection = modelData.id
                 }
+            }
+        }
+    }
+
+    Item {
+        Layout.fillWidth: true
+        Layout.preferredHeight: 160
+        visible: navList.count === 0
+        
+        ColumnLayout {
+            anchors.centerIn: parent
+            spacing: 12
+            QsText {
+                text: "search_off"
+                font.family: "Material Symbols Outlined"
+                font.pixelSize: 48
+                color: Theme.on_surface_variant
+                Layout.alignment: Qt.AlignHCenter
+            }
+            QsText {
+                text: "No pages match your search"
+                font.family: Vars.fontFamily
+                font.pixelSize: 16
+                color: Theme.on_surface_variant
+                Layout.alignment: Qt.AlignHCenter
             }
         }
     }

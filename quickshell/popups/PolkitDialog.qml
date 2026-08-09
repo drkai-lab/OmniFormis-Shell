@@ -6,7 +6,7 @@ import Quickshell
 import Quickshell.Services.Polkit
 import Quickshell.Hyprland
 import "../theme/variables.js" as Vars
-
+import "../core/primitives" as Primitives
 Item {
     id: root
 
@@ -125,11 +125,10 @@ Item {
         height: root.expanded ? 400 : 80
     }
 
-    Rectangle {
+    Primitives.SquircleMask {
         id: panel
         property bool isBackgroundActive: root.expanded || (MorphState.openCount === 0 && MorphState.activeItem === panel && panel.width > 105)
-        layer.enabled: true
-        layer.effect: MultiEffect { shadowEnabled: !root.gameMode && panel.isBackgroundActive; shadowBlur: 1.0; shadowColor: Qt.rgba(0,0,0,0.25); shadowVerticalOffset: 4; shadowHorizontalOffset: 0 }
+        layer.enabled: false
         anchors.top: (!Vars.pillPosition || Vars.pillPosition === "Top") ? parent.top : undefined
         anchors.bottom: Vars.pillPosition === "Bottom" ? parent.bottom : undefined
         anchors.left: Vars.pillPosition === "Left" ? parent.left : undefined
@@ -148,7 +147,7 @@ Item {
         opacity: isBackgroundActive || innerUI.opacity > 0 ? 1.0 : 0.0
         // visible: opacity > 0 // Removed to preserve Behavior when hidden
 
-        color: isBackgroundActive ? ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_container.r, Theme.surface_container.g, Theme.surface_container.b, Vars.panelOpacity) : Theme.surface_container) : "transparent"
+        color: Vars.tColorActive(isBackgroundActive, Theme.surface_container, Vars.panelOpacity)
         property real targetRad: root.expanded ? Vars.radiusExtraLarge : (MorphState.anyExpanded ? MorphState.targetRadius : height / 2)
         topLeftRadius: Vars.getTopLeftRadius(Vars.panelStyle, Vars.pillPosition, false, targetRad)
         topRightRadius: Vars.getTopRightRadius(Vars.panelStyle, Vars.pillPosition, false, targetRad)
@@ -200,7 +199,7 @@ Item {
                         radius: 22
                         color: Qt.rgba(Theme.primary.r, Theme.primary.g, Theme.primary.b, 0.15)
                         
-                        Text {
+                        QsText {
                             anchors.centerIn: parent
                             font.family: "Material Symbols Outlined"
                             font.pixelSize: 24
@@ -209,22 +208,22 @@ Item {
                         }
                     }
 
-                    Text {
+                    QsText {
                         text: "Authentication Required"
                         font.family: Vars.fontFamily
                         font.pixelSize: 20
-                        font.weight: 700
+                        setWeight: 700
                         color: Theme.on_surface
                     }
                 }
 
                 // Message text
-                Text {
+                QsText {
                     Layout.fillWidth: true
                     text: root.flow ? root.flow.message : ""
                     font.family: Vars.fontFamily
                     font.pixelSize: 14
-                    font.weight: 400
+                    setWeight: 400
                     color: Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.9)
                     wrapMode: Text.WordWrap
                     lineHeight: 1.4
@@ -232,12 +231,12 @@ Item {
                 }
 
                 // Action ID
-                Text {
+                QsText {
                     Layout.fillWidth: true
                     text: root.flow ? root.flow.actionId : ""
-                    font.family: "monospace"
+                    font.family: Vars.fontFamily
                     font.pixelSize: 12
-                    font.weight: 400
+                    setWeight: 400
                     color: Theme.on_surface_variant
                     opacity: 0.6
                     visible: root.flow && root.flow.actionId !== ""
@@ -286,7 +285,7 @@ Item {
                         anchors.rightMargin: 16
                         spacing: 12
 
-                        Text {
+                        QsText {
                             font.family: "Material Symbols Outlined"
                             font.pixelSize: 20
                             color: passwordInput.activeFocus ? Theme.primary : Theme.on_surface_variant
@@ -306,7 +305,7 @@ Item {
                             clip: true
                             focus: root.expanded
 
-                            Text {
+                            QsText {
                                 anchors.fill: parent
                                 verticalAlignment: Text.AlignVCenter
                                 text: root.flow && root.flow.inputPrompt ? root.flow.inputPrompt : "Password:"
@@ -328,7 +327,7 @@ Item {
                 }
 
                 // Error / Info message
-                Text {
+                QsText {
                     Layout.fillWidth: true
                     text: root.errorMessage
                     font.family: Vars.fontFamily
@@ -357,13 +356,13 @@ Item {
 
                         Behavior on color { ColorAnimation { duration: Vars.animationDuration } }
 
-                        Text {
+                        QsText {
                             id: authenticateLabel
                             anchors.centerIn: parent
                             text: "Authenticate"
                             font.family: Vars.fontFamily
                             font.pixelSize: 14
-                            font.weight: 600
+                            setWeight: 600
                             color: Theme.on_primary
                         }
 
@@ -392,13 +391,13 @@ Item {
 
                         Behavior on color { ColorAnimation { duration: Vars.animationDuration } }
 
-                        Text {
+                        QsText {
                             id: cancelLabel
                             anchors.centerIn: parent
                             text: "Cancel"
                             font.family: Vars.fontFamily
                             font.pixelSize: 14
-                            font.weight: 600
+                            setWeight: 600
                             color: Theme.on_surface_variant
                         }
 

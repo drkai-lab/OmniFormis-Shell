@@ -18,11 +18,11 @@ ColumnLayout {
     property var availableTiles: null
     property real baseCellWidth: 80
 
-    Text {
+    QsText {
         text: "Available Modules"
         font.family: Vars.fontFamily
         font.pixelSize: 14
-        font.weight: Font.DemiBold
+        setWeight: Font.DemiBold
         color: Theme.on_surface_variant
     }
 
@@ -77,7 +77,7 @@ ColumnLayout {
                 height: 64
                 radius: 16
                 
-                color: availDragArea.drag.active ? ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_container_highest.r, Theme.surface_container_highest.g, Theme.surface_container_highest.b, Vars.componentOpacity) : Theme.surface_container_highest) : ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_container_high.r, Theme.surface_container_high.g, Theme.surface_container_high.b, Vars.componentOpacity) : Theme.surface_container_high)
+                color: availDragArea.drag.active ? (Vars.tColor(Theme.surface_container_highest, Vars.componentOpacity)) : (Vars.tColor(Theme.surface_container_high, Vars.componentOpacity))
                 scale: availDragArea.drag.active ? 1.05 : 1.0
                 
                 Behavior on scale { NumberAnimation { duration: 200; easing.type: Easing.OutCubic } }
@@ -87,9 +87,9 @@ ColumnLayout {
                 border.width: 1
                 Behavior on border.color { ColorAnimation { duration: 250 } }
 
-                property string mIcon: moduleId === "wifi" ? availableDropArea.gridRoot.wifiIcon : moduleId === "bluetooth" ? availableDropArea.gridRoot.bluetoothIcon : moduleId === "audio" ? "\ue050" : moduleId === "display" ? "\ue30d" : moduleId === "peace" ? "\ue15c" : moduleId === "color" ? "palette" : moduleId === "wallpaper" ? "wallpaper" : moduleId === "overview" ? "grid_view" : moduleId === "game_mode" ? "sports_esports" : moduleId === "system_mode" ? (availableDropArea.gridRoot.systemModeIsDark ? "dark_mode" : "light_mode") : ""
+                property string mIcon: moduleId === "wifi" ? availableDropArea.gridRoot.wifiIcon : moduleId === "bluetooth" ? availableDropArea.gridRoot.bluetoothIcon : moduleId === "audio" ? "\ue050" : moduleId === "display" ? "\ue30d" : moduleId === "peace" ? "\ue15c" : moduleId === "color" ? "palette" : moduleId === "wallpaper" ? "wallpaper" : moduleId === "overview" ? "grid_view" : moduleId === "game_mode" ? "sports_esports" : moduleId === "system_mode" ? (availableDropArea.gridRoot.systemModeIsDark ? "dark_mode" : "light_mode") : moduleId === "game_library" ? "videogame_asset" : ""
                 
-                Text {
+                QsText {
                     anchors.centerIn: parent
                     width: 32
                     height: 32
@@ -107,7 +107,7 @@ ColumnLayout {
                     Behavior on color { ColorAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customEmphasizedDecelerate } }
                 }
 
-                Text {
+                QsText {
                     anchors.top: parent.top
                     anchors.left: parent.left
                     anchors.margins: 12
@@ -156,7 +156,7 @@ ColumnLayout {
 
         Rectangle {
             anchors.fill: parent
-            color: stashDropArea.containsDrag ? Qt.rgba(Theme.primary.r, Theme.primary.g, Theme.primary.b, 0.08) : ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface.r, Theme.surface.g, Theme.surface.b, Vars.componentOpacity) : Theme.surface)
+            color: stashDropArea.containsDrag ? Qt.rgba(Theme.primary.r, Theme.primary.g, Theme.primary.b, 0.08) : (Vars.tColor(Theme.surface, Vars.componentOpacity))
             border.color: Theme.outline_variant
             border.width: 1
             radius: 16

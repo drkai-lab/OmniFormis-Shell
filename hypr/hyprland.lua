@@ -30,6 +30,8 @@ hl.monitor({
     mode     = "2388x1668@60",
     position = "auto",
     scale    = "1",
+    bitdepth = 10,
+    cm       = "auto",
 })
 
 hl.monitor({
@@ -37,6 +39,18 @@ hl.monitor({
     mode     = "1920x1080@60",
     position = "auto",
     scale    = "1",
+    bitdepth = 10,
+    cm       = "auto",
+})
+
+hl.monitor({
+    output   = "DP-1",
+    mode     = "preferred",
+    position = "auto",
+    scale    = "1",
+    bitdepth = 10,
+    cm       = "auto",
+    icc      = "/home/boing/.local/share/icc/SxxBG40x.icm",
 })
 
 hl.monitor({
@@ -44,4 +58,6 @@ hl.monitor({
     mode     = "preferred",
     position = "auto",
     scale    = "1",
+    bitdepth = 10,
+    cm       = "auto",
 })

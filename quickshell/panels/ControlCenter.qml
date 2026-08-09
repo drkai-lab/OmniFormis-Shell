@@ -13,6 +13,7 @@ import Quickshell.Services.SystemTray
 import Quickshell.Hyprland
 import QtCore
 import "../theme/variables.js" as Vars
+import "../core/primitives" as Primitives
 import "ControlCenter" as CC
 
 Item {
@@ -80,6 +81,7 @@ Item {
     signal openWallpaperRequested()
     signal openPowerMenuRequested()
     signal openOverviewRequested()
+    signal openGameLibraryRequested()
     
     // Expose the visual panel for mask tracking in TopPills
     property alias panel: panel
@@ -123,12 +125,10 @@ Item {
         height: root.expanded ? 640 : 80
     }
 
-    Rectangle {
+    Primitives.SquircleMask {
         id: panel
         property bool isBackgroundActive: root.expanded || (MorphState.openCount === 0 && MorphState.activeItem === panel && panel.width > 105)
-        layer.enabled: true
-        layer.samples: 4
-        layer.effect: MultiEffect { shadowEnabled: !root.gameMode && panel.isBackgroundActive; shadowBlur: 1.0; shadowColor: Qt.rgba(0,0,0,0.25); shadowVerticalOffset: 4; shadowHorizontalOffset: 0 }
+        layer.enabled: false
         anchors.top: (!Vars.pillPosition || Vars.pillPosition === "Top") ? parent.top : undefined
         anchors.bottom: Vars.pillPosition === "Bottom" ? parent.bottom : undefined
         anchors.left: Vars.pillPosition === "Left" ? parent.left : undefined
@@ -151,7 +151,7 @@ Item {
             if (root.expanded) MorphState.updateDimensions(600, targetHeight, targetRad);
         }
         
-        color: isBackgroundActive ? ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface.r, Theme.surface.g, Theme.surface.b, Vars.panelOpacity) : Theme.surface) : "transparent"
+        color: Vars.tColorActive(isBackgroundActive, Theme.surface, Vars.panelOpacity)
         property real targetRad: root.expanded ? Vars.radiusExtraLarge : (MorphState.anyExpanded ? MorphState.targetRadius : height / 2)
         topLeftRadius: Vars.getTopLeftRadius(Vars.panelStyle, Vars.pillPosition, false, targetRad)
         topRightRadius: Vars.getTopRightRadius(Vars.panelStyle, Vars.pillPosition, false, targetRad)
@@ -161,7 +161,6 @@ Item {
         opacity: isBackgroundActive || expandedUI.opacity > 0 ? 1.0 : 0.0
         // visible: opacity > 0 // Removed to preserve Behavior when hidden
 
-        Behavior on radius { enabled: !root.gameMode; NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customExpressiveSpatialSlow } }
         Behavior on width { enabled: !root.gameMode; NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customExpressiveSpatialSlow } }
         Behavior on height { enabled: !root.gameMode; NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customExpressiveSpatialSlow } }
 
@@ -215,7 +214,7 @@ Item {
                             Layout.preferredHeight: 40
                             Layout.preferredWidth: logoLayout.implicitWidth + 16
                             radius: 20
-                            color: (Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_container_high.r, Theme.surface_container_high.g, Theme.surface_container_high.b, Vars.componentOpacity) : Theme.surface_container_high
+                            color: Vars.tColor(Theme.surface_container_high, Vars.componentOpacity)
                             clip: true
                             
                             RowLayout {
@@ -232,11 +231,11 @@ Item {
                                     smooth: true
                                     antialiasing: true
                                 }
-                                Text { 
+                                QsText { 
                                     text: (typeof globalOsIconPath !== "undefined" && globalOsIconPath !== "") ? "" : "Control Center"; 
                                     font.family: Vars.fontFamily; 
                                     font.pixelSize: 18; 
-                                    font.weight: Font.Bold; 
+                                    setWeight: Font.Bold; 
                                     color: Theme.on_surface;
                                     visible: text !== ""
                                 }
@@ -248,11 +247,11 @@ Item {
                                     color: Theme.primary
                                     visible: root.systemUptime !== ""
                                 }
-                                Text {
+                                QsText {
                                     text: root.systemUptime
                                     font.family: Vars.fontFamily
                                     font.pixelSize: 18
-                                    font.weight: Font.Medium
+                                    setWeight: Font.Medium
                                     color: Theme.primary
                                     visible: root.systemUptime !== ""
                                 }
@@ -343,7 +342,7 @@ Item {
                             Layout.preferredHeight: 40
                             Layout.preferredWidth: btnLayout.implicitWidth + 16
                             radius: 20
-                            color: (Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_container_high.r, Theme.surface_container_high.g, Theme.surface_container_high.b, Vars.componentOpacity) : Theme.surface_container_high
+                            color: Vars.tColor(Theme.surface_container_high, Vars.componentOpacity)
                             clip: true
                             
                             RowLayout {
@@ -355,7 +354,7 @@ Item {
                                 Rectangle {
                                     Layout.preferredWidth: 32; Layout.preferredHeight: 32; radius: 16
                                     color: editHover.pressed ? Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.12) : (editHover.containsMouse || root.isEditorMode ? Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.08) : "transparent")
-                                    Text { anchors.centerIn: parent; font.family: "Material Symbols Outlined"; font.pixelSize: 18; color: root.isEditorMode ? Theme.primary : Theme.on_surface; text: "edit" }
+                                    QsText { anchors.centerIn: parent; font.family: "Material Symbols Outlined"; font.pixelSize: 18; color: root.isEditorMode ? Theme.primary : Theme.on_surface; text: "edit" }
                                     MouseArea { 
                                         id: editHover; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; 
                                         onClicked: root.isEditorMode = !root.isEditorMode 
@@ -368,7 +367,7 @@ Item {
                                 Rectangle {
                                     Layout.preferredWidth: 32; Layout.preferredHeight: 32; radius: 16
                                     color: refreshHover.pressed ? Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.12) : (refreshHover.containsMouse ? Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.08) : "transparent")
-                                    Text { 
+                                    QsText { 
                                         id: refreshIcon
                                         anchors.centerIn: parent; font.family: "Material Symbols Outlined"; font.pixelSize: 18; color: Theme.on_surface; text: "refresh" 
                                         RotationAnimation {
@@ -395,7 +394,7 @@ Item {
                                 Rectangle {
                                     Layout.preferredWidth: 32; Layout.preferredHeight: 32; radius: 16
                                     color: settingsHover.pressed ? Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.12) : (settingsHover.containsMouse ? Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.08) : "transparent")
-                                    Text { 
+                                    QsText { 
                                         id: settingsIcon
                                         anchors.centerIn: parent; font.family: "Material Symbols Outlined"; font.pixelSize: 18; color: Theme.on_surface; text: "settings" 
                                         RotationAnimation {
@@ -422,7 +421,7 @@ Item {
                                 Rectangle {
                                     Layout.preferredWidth: 32; Layout.preferredHeight: 32; radius: 16
                                     color: powerHover.pressed ? Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.12) : (powerHover.containsMouse ? Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.08) : "transparent")
-                                    Text { anchors.centerIn: parent; font.family: "Material Symbols Outlined"; font.pixelSize: 18; color: Theme.on_surface; text: "power_settings_new" }
+                                    QsText { anchors.centerIn: parent; font.family: "Material Symbols Outlined"; font.pixelSize: 18; color: Theme.on_surface; text: "power_settings_new" }
                                     MouseArea { 
                                         id: powerHover; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; 
                                         onClicked: { root.openPowerMenuRequested() } 
@@ -442,6 +441,7 @@ Item {
                         onOpenSettingsRequested: { root.openSettingsRequested() }
                         onOpenWallpaperRequested: { root.openWallpaperRequested() }
                         onOpenOverviewRequested: { root.openOverviewRequested() }
+                        onOpenGameLibraryRequested: { root.openGameLibraryRequested() }
                     }
 
                     CC.Sliders { }
@@ -505,7 +505,7 @@ Item {
                 width: Math.max(150, menuColumn.implicitWidth + 8)
                 height: menuColumn.implicitHeight + 8
                 
-                color: (Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_container_highest.r, Theme.surface_container_highest.g, Theme.surface_container_highest.b, Vars.panelOpacity) : Theme.surface_container_highest
+                color: Vars.tColor(Theme.surface_container_highest, Vars.panelOpacity)
                 radius: Vars.radiusMedium
                 border.width: 1
                 border.color: Qt.rgba(Theme.outline.r, Theme.outline.g, Theme.outline.b, 0.2)
@@ -570,12 +570,12 @@ Item {
                                         smooth: true
                                     }
 
-                                    Text {
+                                    QsText {
                                         Layout.fillWidth: true
                                         text: entry && entry.text ? entry.text.replace(/&/g, "") : ""
                                         font.family: Vars.fontFamily
                                         font.pixelSize: 13
-                                        font.weight: Font.Medium
+                                        setWeight: Font.Medium
                                         color: entry && entry.enabled !== false ? Theme.on_surface : Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.4)
                                         elide: Text.ElideRight
                                     }

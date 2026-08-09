@@ -5,6 +5,7 @@ var radiusSmall = 8;
 var radiusMedium = 16;
 var radiusLarge = 24;
 var radiusExtraLarge = 38;
+var cornerPower = 2.0;
 
 var spacingSmall = 11;
 var spacingMedium = 16;
@@ -14,84 +15,63 @@ var paddingSmall = 8;
 var paddingMedium = 16;
 var paddingLarge = 24;
 
-var _radiusAmount = radiusAmount;
-var _radiusSmall = radiusSmall;
-var _radiusMedium = radiusMedium;
-var _radiusLarge = radiusLarge;
-var _radiusExtraLarge = radiusExtraLarge;
-
-Object.defineProperty(this, 'radiusAmount', { get: function () { return panelStyle === "Framed" ? 0 : _radiusAmount; }, set: function (v) { _radiusAmount = v; } });
-Object.defineProperty(this, 'radiusSmall', { get: function () { return panelStyle === "Framed" ? 0 : _radiusSmall; }, set: function (v) { _radiusSmall = v; } });
-Object.defineProperty(this, 'radiusMedium', { get: function () { return panelStyle === "Framed" ? 0 : _radiusMedium; }, set: function (v) { _radiusMedium = v; } });
-Object.defineProperty(this, 'radiusLarge', { get: function () { return panelStyle === "Framed" ? 0 : _radiusLarge; }, set: function (v) { _radiusLarge = v; } });
-Object.defineProperty(this, 'radiusExtraLarge', { get: function () { return panelStyle === "Framed" ? 0 : _radiusExtraLarge; }, set: function (v) { _radiusExtraLarge = v; } });
-
-var _spacingSmall = spacingSmall;
-var _spacingMedium = spacingMedium;
-var _spacingLarge = spacingLarge;
-
-Object.defineProperty(this, 'spacingSmall', { get: function () { return panelStyle === "Framed" ? 0 : _spacingSmall; }, set: function (v) { _spacingSmall = v; } });
-Object.defineProperty(this, 'spacingMedium', { get: function () { return panelStyle === "Framed" ? 0 : _spacingMedium; }, set: function (v) { _spacingMedium = v; } });
-Object.defineProperty(this, 'spacingLarge', { get: function () { return panelStyle === "Framed" ? 0 : _spacingLarge; }, set: function (v) { _spacingLarge = v; } });
-
-var _paddingSmall = paddingSmall;
-var _paddingMedium = paddingMedium;
-var _paddingLarge = paddingLarge;
-
-Object.defineProperty(this, 'paddingSmall', { get: function () { return panelStyle === "Framed" ? 0 : _paddingSmall; }, set: function (v) { _paddingSmall = v; } });
-Object.defineProperty(this, 'paddingMedium', { get: function () { return panelStyle === "Framed" ? 0 : _paddingMedium; }, set: function (v) { _paddingMedium = v; } });
-Object.defineProperty(this, 'paddingLarge', { get: function () { return panelStyle === "Framed" ? 0 : _paddingLarge; }, set: function (v) { _paddingLarge = v; } });
-
 var fontFamily = "Google Sans Flex";
+var fontWeight = 600;
+var fontItalic = false;
+var fontRounding = 100;
+var fontGrading = 0;
+var fontBaselineEnabled = true;
 var animationDuration = 240;
 var flickDeceleration = 1500;
 var maximumFlickVelocity = 3000;
 var _translucent = false;
-var _liquidGlass = false;
-
-Object.defineProperty(this, 'translucent', { get: function () { return gameMode ? false : _translucent; }, set: function (v) { _translucent = v; } });
-Object.defineProperty(this, 'liquidGlass', { get: function () { return gameMode ? false : _liquidGlass; }, set: function (v) { _liquidGlass = v; } });
-var liquidGlassPreset = "apple";
-var blurAmount = 27;
-var panelOpacity = 0.5;
-var componentOpacity = 0.3;
+var _liquidGlass = true;
+var blurAmount = 8;
+var panelOpacity = 0.7;
+var componentOpacity = 0.4;
+var currentBrightness = 1.0;
 
 var overviewGridRows = 2;
 var overviewGridColumns = 5;
-var overviewScale = 0.8;
+var overviewScale = 0.7;
+
+var gameLibraryRows = 2;
+var gameLibraryColumns = 4;
+var gameLibraryScale = 1.0;
 
 var wallpaperMaskEnabled = true;
-var wallpaperMaskScale = 1.05;
-var wallpaperMaskShape = "Pill";
-var wallpaperMaskColor = "surface_variant";
+var wallpaperMaskScale = 1;
+var wallpaperMaskShape = "6SidedCookie";
+var wallpaperMaskColor = "secondary";
 var wallpaperMaskOffsetX = 0;
-var wallpaperMaskOffsetY = 4;
+var wallpaperMaskOffsetY = 0;
 
-var clockShape = "Sunny";
-var clockShowTicks = false;
-var clockShowCenterDot = false;
+var clockShape = "9SidedCookie";
+var clockShowTicks = true;
+var clockShowCenterDot = true;
 
 var mediaPlayerShape = "12SidedCookie";
-var mediaPlayerArtScale = 1.05;
+var mediaPlayerArtScale = 1.25;
+var mediaPlayerWaveThickness = 2.5;
 
 var panelStyle = "Attached";
-var pillPosition = "Top";
+var pillPosition = "Bottom";
 var gameMode = false;
 
 var desktopClockEnabled = true;
 var desktopClockAnchorEnabled = true;
 var desktopClockAnchorPoint = "Center";
-var desktopClockAnchorCurve = 0;
+var desktopClockAnchorCurve = 1;
 
 var desktopCalenderEnabled = false;
 var desktopCalenderAnchorEnabled = false;
 var desktopCalenderAnchorPoint = "Center";
 var desktopCalenderAnchorCurve = 0;
 
-var desktopMediaPlayerEnabled = false;
-var desktopMediaPlayerAnchorEnabled = false;
+var desktopMediaPlayerEnabled = true;
+var desktopMediaPlayerAnchorEnabled = true;
 var desktopMediaPlayerAnchorPoint = "Center";
-var desktopMediaPlayerAnchorCurve = 0;
+var desktopMediaPlayerAnchorCurve = 2;
 
 var m3Standard = [0.2, 0.0, 0.0, 1.0];
 var m3StandardDecelerate = [0.0, 0.0, 0.0, 1.0];
@@ -112,37 +92,61 @@ var customExpressiveSpatialSlow = [0.39, 1.29, 0.35, 0.98];
 function getTopLeftRadius(style, pos, isGame, defRad) {
     var rad = (defRad !== undefined && defRad !== null) ? defRad : 24;
     if (isGame || !style || !pos) return rad;
-    if (style === "Framed") return 0;
     if (style === "Attached" && (pos === "Top" || pos === "Left")) return 0;
+    if (style === "Framed") return 0;
     return rad;
 }
 
 function getTopRightRadius(style, pos, isGame, defRad) {
     var rad = (defRad !== undefined && defRad !== null) ? defRad : 24;
     if (isGame || !style || !pos) return rad;
-    if (style === "Framed") return 0;
     if (style === "Attached" && (pos === "Top" || pos === "Right")) return 0;
+    if (style === "Framed") return 0;
     return rad;
 }
 
 function getBottomLeftRadius(style, pos, isGame, defRad) {
     var rad = (defRad !== undefined && defRad !== null) ? defRad : 24;
     if (isGame || !style || !pos) return rad;
-    if (style === "Framed") return 0;
     if (style === "Attached" && (pos === "Bottom" || pos === "Left")) return 0;
+    if (style === "Framed") return 0;
     return rad;
 }
 
 function getBottomRightRadius(style, pos, isGame, defRad) {
     var rad = (defRad !== undefined && defRad !== null) ? defRad : 24;
     if (isGame || !style || !pos) return rad;
-    if (style === "Framed") return 0;
     if (style === "Attached" && (pos === "Bottom" || pos === "Right")) return 0;
+    if (style === "Framed") return 0;
     return rad;
 }
 
 function fuzzyMatch(pattern, str) {
-    return fuzzyMatchScore(pattern, str) > 0;
+    if (!pattern) return true;
+    if (!str) return false;
+    pattern = pattern.toLowerCase();
+    str = str.toLowerCase();
+    
+    var words = pattern.split(/\s+/);
+    for (var w = 0; w < words.length; w++) {
+        var word = words[w];
+        if (!word) continue;
+        
+        var patternIdx = 0;
+        var found = false;
+        for (var i = 0; i < str.length; i++) {
+            if (str[i] === word[patternIdx]) {
+                patternIdx++;
+                if (patternIdx === word.length) {
+                    found = true;
+                    break;
+                }
+            }
+        }
+        if (!found) return false;
+    }
+    
+    return true;
 }
 
 function fuzzyMatchScore(pattern, str) {
@@ -150,23 +154,58 @@ function fuzzyMatchScore(pattern, str) {
     if (!str) return 0;
     pattern = pattern.toLowerCase();
     str = str.toLowerCase();
-
-    var patternIdx = 0;
-    var score = 0;
-    var firstMatchIndex = -1;
-    for (var i = 0; i < str.length; i++) {
-        if (str[i] === pattern[patternIdx]) {
-            if (firstMatchIndex === -1) firstMatchIndex = i;
-            score += (100 - i); // higher score for earlier matches
-            patternIdx++;
-            if (patternIdx === pattern.length) {
-                // Bonus for matching at the beginning of the word
-                if (firstMatchIndex === 0) score += 500;
-                return score;
+    
+    if (str === pattern) return 1000;
+    if (str.startsWith(pattern)) return 500;
+    
+    var words = pattern.split(/\s+/);
+    var totalScore = 0;
+    
+    for (var w = 0; w < words.length; w++) {
+        var word = words[w];
+        if (!word) continue;
+        
+        var patternIdx = 0;
+        var score = 0;
+        var consecutive = 0;
+        var found = false;
+        
+        for (var i = 0; i < str.length; i++) {
+            if (str[i] === word[patternIdx]) {
+                score += 10 + (consecutive * 5);
+                if (i === 0) score += 50;
+                consecutive++;
+                patternIdx++;
+                if (patternIdx === word.length) {
+                    found = true;
+                    totalScore += score;
+                    break;
+                }
+            } else {
+                consecutive = 0;
             }
         }
+        
+        if (!found) return 0;
     }
-    return 0;
+    
+    return totalScore;
+}
+
+// --- Centralized translucency helpers (replaces 120+ inline checks) ---
+
+function isTranslucent() {
+    return _translucent && !gameMode;
+}
+
+function tColor(baseColor, alpha) {
+    if (!isTranslucent()) return baseColor;
+    return Qt.rgba(baseColor.r, baseColor.g, baseColor.b, alpha);
+}
+
+function tColorActive(isActive, baseColor, alpha) {
+    if (!isActive) return "transparent";
+    return tColor(baseColor, alpha);
 }
 
 var notificationHistory = [];
@@ -174,7 +213,7 @@ var historyUpdated = 0;
 
 function pushNotification(modelData) {
     if (!modelData) return;
-
+    
     var uniqueId = modelData.seqId !== undefined ? modelData.seqId : (modelData.id !== undefined ? modelData.id : Math.random());
 
     for (var i = 0; i < notificationHistory.length; i++) {
@@ -182,7 +221,7 @@ function pushNotification(modelData) {
             return;
         }
     }
-
+    
     var actionsArray = [];
     if (modelData.actions) {
         for (var j = 0; j < modelData.actions.length; j++) {
@@ -192,7 +231,7 @@ function pushNotification(modelData) {
             });
         }
     }
-
+    
     var n = {
         seqId: uniqueId,
         appName: modelData.appName,
@@ -204,22 +243,22 @@ function pushNotification(modelData) {
         actions: actionsArray,
         expireTimeout: modelData.expireTimeout,
         defaultTimeout: modelData.defaultTimeout,
-        invokeAction: function (id) {
-            try { modelData.invokeAction(id); } catch (e) { }
+        invokeAction: function(id) {
+            try { modelData.invokeAction(id); } catch(e) {}
         },
-        dismiss: function () {
-            try { modelData.dismiss(); } catch (e) { }
+        dismiss: function() {
+            try { modelData.dismiss(); } catch(e) {}
             removeNotification(this.seqId);
         }
     };
-
+    
     notificationHistory.unshift(n);
     historyUpdated++;
 }
 
 function removeNotification(seqId) {
     var initialLen = notificationHistory.length;
-    notificationHistory = notificationHistory.filter(function (n) { return n.seqId !== seqId; });
+    notificationHistory = notificationHistory.filter(function(n) { return n.seqId !== seqId; });
     if (notificationHistory.length !== initialLen) {
         historyUpdated++;
     }

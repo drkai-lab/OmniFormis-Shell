@@ -33,7 +33,7 @@ ColumnLayout {
             id: searchBox
             Layout.fillWidth: true
             Layout.preferredHeight: 48
-            color: searchInput.activeFocus ? Theme.primary_container : ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_container_highest.r, Theme.surface_container_highest.g, Theme.surface_container_highest.b, Vars.componentOpacity) : Theme.surface_container_highest)
+            color: searchInput.activeFocus ? Theme.primary_container : (Vars.tColor(Theme.surface_container_highest, Vars.componentOpacity))
             border.color: searchInput.activeFocus ? Theme.primary : "transparent"
             border.width: searchInput.activeFocus ? 2 : 0
             radius: searchInput.activeFocus ? Vars.radiusLarge : Vars.radiusExtraLarge
@@ -46,7 +46,7 @@ ColumnLayout {
                 anchors.leftMargin: Vars.spacingMedium
                 anchors.rightMargin: Vars.spacingMedium
 
-                Text {
+                QsText {
                     text: "search"
                     font.family: "Material Symbols Outlined"
                     font.pixelSize: 20
@@ -64,7 +64,7 @@ ColumnLayout {
                     focus: true
                     selectByMouse: true
 
-                    Text {
+                    QsText {
                         text: "Search wallpapers..."
                         font.family: Vars.fontFamily
                         font.pixelSize: 14
@@ -87,7 +87,7 @@ ColumnLayout {
                     }
                 }
 
-                Text {
+                QsText {
                     text: "✕"
                     font.pixelSize: 14
                     color: searchInput.activeFocus ? Theme.on_primary_container : Theme.on_surface

@@ -4,7 +4,6 @@ import QtQuick.Effects
 import ".."
 import QtQuick.Layouts
 import Quickshell
-import Quickshell.Services.Pipewire
 import "../theme/variables.js" as Vars
 import "../core/primitives" as Primitives
 Item {
@@ -41,7 +40,7 @@ Item {
         height: osdBackground.height + 40
     }
     
-    property real smoothVolume: Pipewire.defaultAudioSink?.audio?.volume ?? 0
+    property real smoothBrightness: Vars.currentBrightness !== undefined ? Vars.currentBrightness : 1.0
 
     onPreventShowChanged: {
         if (preventShow) {
@@ -50,18 +49,18 @@ Item {
         }
     }
 
-    property string volumeIcon: {
-        let isMuted = Pipewire.defaultAudioSink?.audio?.muted ?? false;
-        let vol = Pipewire.defaultAudioSink?.audio?.volume ?? 0;
-
-        if (isMuted || vol <= 0.0)
-            return "\uE04F";
-        if (vol < 0.5)
-            return "\uE04D";
-        return "\uE050";
+    property string brightnessIcon: {
+        let b = Vars.currentBrightness !== undefined ? Vars.currentBrightness : 1.0;
+        if (b <= 0.0) return "brightness_1";
+        if (b <= 0.16) return "brightness_2";
+        if (b <= 0.33) return "brightness_3";
+        if (b <= 0.50) return "brightness_4";
+        if (b <= 0.66) return "brightness_5";
+        if (b <= 0.83) return "brightness_6";
+        return "brightness_7";
     }
 
-    Behavior on smoothVolume {
+    Behavior on smoothBrightness {
         enabled: !mainContainer.gameMode
         NumberAnimation {
             duration: Vars.animationDuration
@@ -70,15 +69,9 @@ Item {
         }
     }
 
-    PwObjectTracker {
-        objects: [Pipewire.defaultAudioSink]
-    }
+    property real actualBrightness: Vars.currentBrightness !== undefined ? Vars.currentBrightness : 1.0
 
-    property real actualVolume: Pipewire.defaultAudioSink?.audio?.volume ?? 0
-    property bool actualMuted: Pipewire.defaultAudioSink?.audio?.muted ?? false
-
-    onActualVolumeChanged: triggerShow()
-    onActualMutedChanged: triggerShow()
+    onActualBrightnessChanged: triggerShow()
 
     function triggerShow() {
         if (!preventShow) {
@@ -114,11 +107,9 @@ Item {
         }
 
         onWheel: wheel => {
-            if (Pipewire.defaultAudioSink?.audio) {
-                let delta = wheel.angleDelta.y > 0 ? 0.02 : -0.02;
-                let newVol = Math.max(0.0, Math.min(1.0, Pipewire.defaultAudioSink.audio.volume + delta));
-                Pipewire.defaultAudioSink.audio.volume = newVol;
-            }
+            let delta = wheel.angleDelta.y > 0 ? 0.02 : -0.02;
+            let newVol = Math.max(0.0, Math.min(1.0, (Vars.currentBrightness !== undefined ? Vars.currentBrightness : 1.0) + delta));
+            Vars.currentBrightness = newVol;
         }
     }
 
@@ -202,11 +193,9 @@ Item {
             }
         }
 
-        value: mainContainer.actualVolume
+        value: mainContainer.actualBrightness
         onMoved: {
-            if (Pipewire.defaultAudioSink?.audio) {
-                Pipewire.defaultAudioSink.audio.volume = value;
-            }
+            Vars.currentBrightness = value;
         }
 
         background: Item {
@@ -230,7 +219,7 @@ Item {
                     anchors.left: parent.left
                     anchors.leftMargin: 12
                     anchors.verticalCenter: parent.verticalCenter
-                    text: mainContainer.volumeIcon
+                    text: mainContainer.brightnessIcon
                     font.family: "Material Symbols Outlined"
                     font.pixelSize: 20
                     color: Theme.on_surface_variant
@@ -254,7 +243,7 @@ Item {
                     QsText {
                         x: 12
                         anchors.verticalCenter: parent.verticalCenter
-                        text: mainContainer.volumeIcon
+                        text: mainContainer.brightnessIcon
                         font.family: "Material Symbols Outlined"
                         font.pixelSize: 20
                         color: Theme.on_primary
@@ -291,7 +280,7 @@ Item {
                     anchors.bottom: parent.bottom
                     anchors.bottomMargin: 12
                     anchors.horizontalCenter: parent.horizontalCenter
-                    text: mainContainer.volumeIcon
+                    text: mainContainer.brightnessIcon
                     font.family: "Material Symbols Outlined"
                     font.pixelSize: 20
                     color: Theme.on_surface_variant
@@ -330,7 +319,7 @@ Item {
                         anchors.bottom: parent.bottom
                         anchors.bottomMargin: 12
                         anchors.horizontalCenter: parent.horizontalCenter
-                        text: mainContainer.volumeIcon
+                        text: mainContainer.brightnessIcon
                         font.family: "Material Symbols Outlined"
                         font.pixelSize: 20
                         color: Theme.on_primary

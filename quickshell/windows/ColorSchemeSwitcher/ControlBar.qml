@@ -27,11 +27,11 @@ RowLayout {
 
     RowLayout {
         spacing: 8
-        Text {
+        QsText {
             text: "Color Schemes"
             font.family: Vars.fontFamily
             font.pixelSize: 18
-            font.weight: Font.Bold
+            setWeight: Font.Bold
             color: Theme.on_surface
         }
     }
@@ -50,7 +50,7 @@ RowLayout {
             anchors.leftMargin: Vars.spacingMedium
             anchors.rightMargin: Vars.spacingMedium
 
-            Text {
+            QsText {
                 text: "search"
                 font.family: "Material Symbols Outlined"
                 font.pixelSize: 20
@@ -67,7 +67,7 @@ RowLayout {
                 focus: true
                 selectByMouse: true
 
-                Text {
+                QsText {
                     text: "Search themes..."
                     font.family: Vars.fontFamily
                     font.pixelSize: 14
@@ -85,7 +85,7 @@ RowLayout {
                 }
             }
 
-            Text {
+            QsText {
                 text: "✕"
                 font.pixelSize: 14
                 color: Theme.on_surface
@@ -113,13 +113,13 @@ RowLayout {
         }
         contentItem: RowLayout {
             spacing: Vars.spacingSmall
-            Text {
+            QsText {
                 text: root.currentMode === "dark" ? "dark_mode" : "light_mode"
                 font.family: "Material Symbols Outlined"
                 color: Theme.on_surface
                 font.pixelSize: 18
             }
-            Text {
+            QsText {
                 text: modeToggleBtn.text
                 font.family: Vars.fontFamily
                 color: Theme.on_surface
@@ -141,13 +141,13 @@ RowLayout {
         }
         contentItem: RowLayout {
             spacing: Vars.spacingSmall
-            Text {
+            QsText {
                 text: "refresh"
                 font.family: "Material Symbols Outlined"
                 color: (refreshBtn.down || refreshBtn.hovered) ? Theme.primary : Theme.on_surface
                 font.pixelSize: 18
             }
-            Text {
+            QsText {
                 text: refreshBtn.text
                 font.family: Vars.fontFamily
                 color: (refreshBtn.down || refreshBtn.hovered) ? Theme.primary : Theme.on_surface

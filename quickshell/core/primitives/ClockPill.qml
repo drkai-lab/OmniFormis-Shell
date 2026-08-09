@@ -4,6 +4,7 @@ import "../.."
 import Quickshell
 import QtQuick.Layouts
 import "../../theme/variables.js" as Vars
+import "." as Primitives
 
 Item {
     id: root
@@ -32,20 +33,12 @@ Item {
 
     // No physics strings or translation properties needed
 
-    Rectangle {
+    Primitives.SquircleMask {
         id: clockRect
-        layer.enabled: true
-        layer.effect: MultiEffect {
-            shadowEnabled: !root.gameMode
-            shadowBlur: 1.0
-            shadowColor: Qt.rgba(0, 0, 0, 0.25)
-            shadowVerticalOffset: 4
-            shadowHorizontalOffset: 0
-        }
         width: parent.width
         height: parent.height
         property real targetRad: Math.min(root.width, root.height) / 2
-        color: (Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface.r, Theme.surface.g, Theme.surface.b, 0.85) : Theme.surface
+        color: Vars.tColor(Theme.surface, Vars.panelOpacity)
         topLeftRadius: Vars.getTopLeftRadius(Vars.panelStyle, Vars.pillPosition, false, targetRad)
         topRightRadius: Vars.getTopRightRadius(Vars.panelStyle, Vars.pillPosition, false, targetRad)
         bottomLeftRadius: Vars.getBottomLeftRadius(Vars.panelStyle, Vars.pillPosition, false, targetRad)
@@ -110,22 +103,22 @@ Item {
             horizontalItemAlignment: Grid.AlignHCenter
             verticalItemAlignment: Grid.AlignVCenter
 
-            Text {
+            QsText {
                 id: clockText
                 font.family: Vars.fontFamily
                 font.pixelSize: 14
-                font.weight: 600
+                setWeight: 600
                 color: Theme.on_surface
                 text: root.timeString
                 horizontalAlignment: Text.AlignHCenter
                 lineHeight: root.isVertical ? 0.9 : 1.0
             }
 
-            Text {
+            QsText {
                 id: dateText
                 font.family: Vars.fontFamily
                 font.pixelSize: 14
-                font.weight: 600
+                setWeight: 600
                 color: Theme.on_surface
                 opacity: 0.7
                 text: root.dateString

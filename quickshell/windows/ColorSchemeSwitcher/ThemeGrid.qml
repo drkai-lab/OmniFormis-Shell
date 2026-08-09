@@ -122,20 +122,20 @@ GridView {
 
     Keys.onPressed: (event) => {
         if (root.vimKeysEnabled) {
-            if (event.key === Qt.Key_H) {
+            if (event.key === Qt.Key_H || event.key === Qt.Key_A) {
                 moveCurrentIndexLeft();
                 event.accepted = true;
-            } else if (event.key === Qt.Key_L) {
+            } else if (event.key === Qt.Key_L || event.key === Qt.Key_F) {
                 moveCurrentIndexRight();
                 event.accepted = true;
-            } else if (event.key === Qt.Key_K) {
+            } else if (event.key === Qt.Key_K || event.key === Qt.Key_D) {
                 if (currentIndex < 4) {
                     if (searchInput) searchInput.forceActiveFocus();
                 } else {
                     moveCurrentIndexUp();
                 }
                 event.accepted = true;
-            } else if (event.key === Qt.Key_J) {
+            } else if (event.key === Qt.Key_J || event.key === Qt.Key_S) {
                 moveCurrentIndexDown();
                 event.accepted = true;
             }
@@ -178,7 +178,7 @@ GridView {
                     
                     Behavior on Layout.margins { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customExpressiveSpatialSlow } }
 
-                    Text {
+                    QsText {
                         anchors.centerIn: parent
                         text: "palette"
                         font.family: "Material Symbols Outlined"
@@ -188,13 +188,13 @@ GridView {
                     }
                 }
 
-                Text {
+                QsText {
                     Layout.fillWidth: true
                     text: themeName
                     font.family: Vars.fontFamily
                     color: isCurrentFocus ? Theme.on_primary_container : themePrimary
                     font.pixelSize: 16
-                    font.weight: root.currentTheme === themeName ? Font.Bold : Font.Normal
+                    setWeight: root.currentTheme === themeName ? Font.Bold : Font.Normal
                     elide: Text.ElideRight
                     horizontalAlignment: Text.AlignHCenter
                     opacity: isCurrentFocus || root.currentTheme === themeName ? 1.0 : 0.6

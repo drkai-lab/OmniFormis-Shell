@@ -10,6 +10,7 @@ Launcher 1.0 windows/Launcher.qml
 ScreenShot 1.0 windows/ScreenShot.qml
 StatusBar 1.0 panels/StatusBar.qml
 VolumeOsd 1.0 popups/VolumeOsd.qml
+BrightnessOsd 1.0 popups/BrightnessOsd.qml
 WallpaperSwitcher 1.0 windows/WallpaperSwitcher.qml
 ColorSchemeSwitcher 1.0 windows/ColorSchemeSwitcher.qml
 EmojiPicker 1.0 windows/EmojiPicker.qml
@@ -24,6 +25,7 @@ singleton Theme 1.0 theme/Theme.qml
 PolkitAuth 1.0 daemons/PolkitAuth.qml
 PolkitDialog 1.0 popups/PolkitDialog.qml
 Overview 1.0 windows/Overview.qml
+GameLibrary 1.0 windows/GameLibrary.qml
 singleton HyprlandData 1.0 daemons/HyprlandData.qml
 ModuleStore 1.0 panels/ControlCenter/ModuleStore.qml
 WallpaperOverlay 1.0 desktop/WallpaperOverlay.qml
@@ -38,3 +40,4 @@ ScreenFrame 1.0 desktop/ScreenFrame.qml
 InvertedCorner 1.0 core/primitives/InvertedCorner.qml
 SearchBar 1.0 core/primitives/SearchBar.qml
 singleton LockScreen 1.0 LockScreen.qml
+QsText 1.0 core/primitives/QsText.qml

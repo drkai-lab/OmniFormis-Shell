@@ -41,10 +41,10 @@ Item {
             Layout.preferredHeight: 120
             Layout.topMargin: Vars.spacingSmall
             radius: Vars.radiusLarge
-            color: (Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_container_high.r, Theme.surface_container_high.g, Theme.surface_container_high.b, Vars.componentOpacity) : Theme.surface_container_high
+            color: Vars.tColor(Theme.surface_container_high, Vars.componentOpacity)
             visible: notificationsRoot.historyList.length === 0
             
-            Text {
+            QsText {
                 text: "No new notifications"
                 font.family: Vars.fontFamily; font.pixelSize: 14; color: Theme.on_surface_variant
                 anchors.centerIn: parent
@@ -149,7 +149,7 @@ Item {
                 color: snoozeHover.pressed ? Qt.tint(fabContainer.opaqueSecondary, Qt.rgba(Theme.on_secondary_container.r, Theme.on_secondary_container.g, Theme.on_secondary_container.b, 0.12)) : (snoozeHover.containsMouse ? Qt.tint(fabContainer.opaqueSecondary, Qt.rgba(Theme.on_secondary_container.r, Theme.on_secondary_container.g, Theme.on_secondary_container.b, 0.08)) : fabContainer.opaqueSecondary)
                 Behavior on color { ColorAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
                 
-                Text {
+                QsText {
                     anchors.centerIn: parent
                     text: "\ue8b5" // schedule/snooze icon
                     font.family: "Material Symbols Outlined"
@@ -176,12 +176,12 @@ Item {
                 color: clearAllHover.pressed ? Qt.tint(fabContainer.opaqueSurface, Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.12)) : (clearAllHover.containsMouse ? Qt.tint(fabContainer.opaqueSurface, Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.08)) : fabContainer.opaqueSurface)
                 Behavior on color { ColorAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
                 
-                Text {
+                QsText {
                     anchors.centerIn: parent
                     text: "Clear all"
                     font.family: Vars.fontFamily
                     font.pixelSize: 14
-                    font.weight: 600
+                    setWeight: 600
                     color: Theme.on_surface
                 }
                 MouseArea {
@@ -207,7 +207,7 @@ Item {
                 color: settingsHover.pressed ? Qt.tint(fabContainer.opaqueSecondary, Qt.rgba(Theme.on_secondary_container.r, Theme.on_secondary_container.g, Theme.on_secondary_container.b, 0.12)) : (settingsHover.containsMouse ? Qt.tint(fabContainer.opaqueSecondary, Qt.rgba(Theme.on_secondary_container.r, Theme.on_secondary_container.g, Theme.on_secondary_container.b, 0.08)) : fabContainer.opaqueSecondary)
                 Behavior on color { ColorAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
                 
-                Text {
+                QsText {
                     anchors.centerIn: parent
                     text: "\ue8b8" // settings icon
                     font.family: "Material Symbols Outlined"

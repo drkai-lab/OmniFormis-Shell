@@ -14,7 +14,7 @@ Item {
     
     property string pageTitle: "Task Manager"
     property string pageIcon: "\ue85c"
-    property string pageShape: "12SidedCookie"
+    property string pageShape: "Puffy"
     property color pageColor: Theme.primary
     property color pageOnColor: Theme.on_primary
     
@@ -26,8 +26,13 @@ Item {
     // Task Manager State
     property var processModel: []
     property var autostartModel: []
-    property string processFilter: "mem"
-    property string processSearchText: ""
+    property string processFilter: "cpu"
+    property string searchText: ""
+    onSearchTextChanged: {
+        if (rootTaskManager.currentTab === 1) {
+            psProc.running = true;
+        }
+    }
     
     onProcessFilterChanged: {
         if (currentTab === 1 && rootTaskManager.visible) psProc.running = true;
@@ -159,8 +164,8 @@ Item {
                     }
                 }
                 
-                if (rootTaskManager.processSearchText !== "") {
-                    let searchLower = rootTaskManager.processSearchText.toLowerCase();
+                if (rootTaskManager.searchText !== "") {
+                    let searchLower = rootTaskManager.searchText.toLowerCase();
                     // Split the search string and join with .* to create a fuzzy match regex (e.g. "ffx" -> /f.*f.*x/i)
                     let fuzzyRegex = new RegExp(searchLower.split('').join('.*'), 'i');
                     procs = procs.filter(p => fuzzyRegex.test(p.name) || p.pid.toString().includes(searchLower));
@@ -283,7 +288,7 @@ Item {
                     antialiasing: true
                 }
 
-                Text {
+                QsText {
                     anchors.centerIn: parent
                     text: rootTaskManager.pageIcon
                     font.family: "Material Symbols Outlined"
@@ -292,12 +297,12 @@ Item {
                 }
             }
 
-            Text {
+            QsText {
                 Layout.fillWidth: true
                 text: rootTaskManager.pageTitle
                 font.family: Vars.fontFamily
                 font.pixelSize: 18
-                font.weight: 600
+                setWeight: 600
                 color: Theme.on_surface
                 elide: Text.ElideRight
             }
@@ -310,7 +315,7 @@ Item {
             Layout.margins: Vars.spacingLarge
             Layout.bottomMargin: 0
             radius: 22
-            color: (Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_container.r, Theme.surface_container.g, Theme.surface_container.b, 0.25) : Theme.surface_container
+            color: Vars.tColor(Theme.surface_container, Vars.componentOpacity)
             
             RowLayout {
                 anchors.fill: parent
@@ -321,14 +326,14 @@ Item {
                     Layout.fillWidth: true
                     Layout.fillHeight: true
                     radius: 18
-                    color: rootTaskManager.currentTab === 0 ? ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.primary.r, Theme.primary.g, Theme.primary.b, 0.7) : Theme.primary) : "transparent"
+                    color: rootTaskManager.currentTab === 0 ? (Vars.tColor(Theme.primary, 0.7)) : "transparent"
                     Behavior on color { ColorAnimation { duration: Vars.animationDuration } }
-                    Text {
+                    QsText {
                         anchors.centerIn: parent
                         text: "System Monitoring"
                         font.family: Vars.fontFamily
                         font.pixelSize: 14
-                        font.weight: Font.Medium
+                        setWeight: Font.Medium
                         color: rootTaskManager.currentTab === 0 ? Theme.on_primary : Theme.on_surface_variant
                         Behavior on color { ColorAnimation { duration: Vars.animationDuration } }
                     }
@@ -339,14 +344,14 @@ Item {
                     Layout.fillWidth: true
                     Layout.fillHeight: true
                     radius: 18
-                    color: rootTaskManager.currentTab === 1 ? ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.primary.r, Theme.primary.g, Theme.primary.b, 0.7) : Theme.primary) : "transparent"
+                    color: rootTaskManager.currentTab === 1 ? (Vars.tColor(Theme.primary, 0.7)) : "transparent"
                     Behavior on color { ColorAnimation { duration: Vars.animationDuration } }
-                    Text {
+                    QsText {
                         anchors.centerIn: parent
                         text: "Task Manager"
                         font.family: Vars.fontFamily
                         font.pixelSize: 14
-                        font.weight: Font.Medium
+                        setWeight: Font.Medium
                         color: rootTaskManager.currentTab === 1 ? Theme.on_primary : Theme.on_surface_variant
                         Behavior on color { ColorAnimation { duration: Vars.animationDuration } }
                     }
@@ -377,11 +382,11 @@ Item {
                     
                     Item { Layout.preferredHeight: Vars.spacingSmall }
                     
-                    Text { text: "Resource Usage"; font.family: Vars.fontFamily; font.pixelSize: 18; font.weight: Font.Bold; color: Theme.on_surface }
+                    QsText { text: "Resource Usage"; font.family: Vars.fontFamily; font.pixelSize: 18; setWeight: Font.Bold; color: Theme.on_surface }
                     
                     // CPU Card
                     Rectangle {
-                        Layout.fillWidth: true; Layout.preferredHeight: 96; radius: 16; color: (Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_container.r, Theme.surface_container.g, Theme.surface_container.b, 0.25) : Theme.surface_container
+                        Layout.fillWidth: true; Layout.preferredHeight: 96; radius: 16; color: Vars.tColor(Theme.surface_container, Vars.componentOpacity)
                         RowLayout {
                             anchors.fill: parent; anchors.margins: 16; spacing: 16
                             Item { 
@@ -393,19 +398,19 @@ Item {
                                     property string currentPath: m3TaskManager.getPath("Pill")
                                     source: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><path d='" + currentPath + "' fill='" + pathColor + "'/></svg>"
                                 }
-                                Text { anchors.centerIn: parent; font.family: "Material Symbols Outlined"; font.pixelSize: 32; color: Qt.hsla(0.60, 0.40, 0.25, 1.0); text: "memory" } 
+                                QsText { anchors.centerIn: parent; font.family: "Material Symbols Outlined"; font.pixelSize: 32; color: Qt.hsla(0.60, 0.40, 0.25, 1.0); text: "memory" } 
                             }
                             ColumnLayout {
                                 Layout.fillWidth: true; spacing: 4
-                                Text { Layout.fillWidth: true; horizontalAlignment: Text.AlignLeft; text: "CPU Usage"; font.family: Vars.fontFamily; font.pixelSize: 16; color: Theme.on_surface; font.weight: Font.Medium }
-                                Text { Layout.fillWidth: true; horizontalAlignment: Text.AlignLeft; text: rootTaskManager.cpuUsage; font.family: Vars.fontFamily; font.pixelSize: 24; color: Qt.hsla(0.60, 0.60, 0.75, 1.0); font.weight: Font.Bold }
+                                QsText { Layout.fillWidth: true; horizontalAlignment: Text.AlignLeft; text: "CPU Usage"; font.family: Vars.fontFamily; font.pixelSize: 16; color: Theme.on_surface; setWeight: Font.Medium }
+                                QsText { Layout.fillWidth: true; horizontalAlignment: Text.AlignLeft; text: rootTaskManager.cpuUsage; font.family: Vars.fontFamily; font.pixelSize: 24; color: Qt.hsla(0.60, 0.60, 0.75, 1.0); setWeight: Font.Bold }
                             }
                         }
                     }
                     
                     // GPU Card
                     Rectangle {
-                        Layout.fillWidth: true; Layout.preferredHeight: 96; radius: 16; color: (Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_container.r, Theme.surface_container.g, Theme.surface_container.b, 0.25) : Theme.surface_container
+                        Layout.fillWidth: true; Layout.preferredHeight: 96; radius: 16; color: Vars.tColor(Theme.surface_container, Vars.componentOpacity)
                         RowLayout {
                             anchors.fill: parent; anchors.margins: 16; spacing: 16
                             Item { 
@@ -417,19 +422,19 @@ Item {
                                     property string currentPath: m3TaskManager.getPath("Slanted")
                                     source: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><path d='" + currentPath + "' fill='" + pathColor + "'/></svg>"
                                 }
-                                Text { anchors.centerIn: parent; font.family: "Material Symbols Outlined"; font.pixelSize: 32; color: Qt.hsla(0.80, 0.40, 0.25, 1.0); text: "developer_board" } 
+                                QsText { anchors.centerIn: parent; font.family: "Material Symbols Outlined"; font.pixelSize: 32; color: Qt.hsla(0.80, 0.40, 0.25, 1.0); text: "developer_board" } 
                             }
                             ColumnLayout {
                                 Layout.fillWidth: true; spacing: 4
-                                Text { Layout.fillWidth: true; horizontalAlignment: Text.AlignLeft; text: "GPU Usage"; font.family: Vars.fontFamily; font.pixelSize: 16; color: Theme.on_surface; font.weight: Font.Medium }
-                                Text { Layout.fillWidth: true; horizontalAlignment: Text.AlignLeft; text: rootTaskManager.gpuUsage; font.family: Vars.fontFamily; font.pixelSize: 24; color: Qt.hsla(0.80, 0.60, 0.75, 1.0); font.weight: Font.Bold }
+                                QsText { Layout.fillWidth: true; horizontalAlignment: Text.AlignLeft; text: "GPU Usage"; font.family: Vars.fontFamily; font.pixelSize: 16; color: Theme.on_surface; setWeight: Font.Medium }
+                                QsText { Layout.fillWidth: true; horizontalAlignment: Text.AlignLeft; text: rootTaskManager.gpuUsage; font.family: Vars.fontFamily; font.pixelSize: 24; color: Qt.hsla(0.80, 0.60, 0.75, 1.0); setWeight: Font.Bold }
                             }
                         }
                     }
                     
                     // RAM Card
                     Rectangle {
-                        Layout.fillWidth: true; Layout.preferredHeight: 96; radius: 16; color: (Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_container.r, Theme.surface_container.g, Theme.surface_container.b, 0.25) : Theme.surface_container
+                        Layout.fillWidth: true; Layout.preferredHeight: 96; radius: 16; color: Vars.tColor(Theme.surface_container, 0.25)
                         RowLayout {
                             anchors.fill: parent; anchors.margins: 16; spacing: 16
                             Item { 
@@ -441,12 +446,12 @@ Item {
                                     property string currentPath: m3TaskManager.getPath("Clamshell")
                                     source: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><path d='" + currentPath + "' fill='" + pathColor + "'/></svg>"
                                 }
-                                Text { anchors.centerIn: parent; font.family: "Material Symbols Outlined"; font.pixelSize: 32; color: Qt.hsla(0.38, 0.40, 0.25, 1.0); text: "storage" } 
+                                QsText { anchors.centerIn: parent; font.family: "Material Symbols Outlined"; font.pixelSize: 32; color: Qt.hsla(0.38, 0.40, 0.25, 1.0); text: "storage" } 
                             }
                             ColumnLayout {
                                 Layout.fillWidth: true; spacing: 4
-                                Text { Layout.fillWidth: true; horizontalAlignment: Text.AlignLeft; text: "RAM Usage"; font.family: Vars.fontFamily; font.pixelSize: 16; color: Theme.on_surface; font.weight: Font.Medium }
-                                Text { Layout.fillWidth: true; horizontalAlignment: Text.AlignLeft; text: rootTaskManager.ramUsage; font.family: Vars.fontFamily; font.pixelSize: 24; color: Qt.hsla(0.38, 0.60, 0.75, 1.0); font.weight: Font.Bold }
+                                QsText { Layout.fillWidth: true; horizontalAlignment: Text.AlignLeft; text: "RAM Usage"; font.family: Vars.fontFamily; font.pixelSize: 16; color: Theme.on_surface; setWeight: Font.Medium }
+                                QsText { Layout.fillWidth: true; horizontalAlignment: Text.AlignLeft; text: rootTaskManager.ramUsage; font.family: Vars.fontFamily; font.pixelSize: 24; color: Qt.hsla(0.38, 0.60, 0.75, 1.0); setWeight: Font.Bold }
                             }
                         }
                     }
@@ -475,7 +480,7 @@ Item {
                     Rectangle {
                         Layout.fillWidth: true
                         Layout.preferredHeight: startupLayout.implicitHeight + 40
-                        color: (Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_container_low.r, Theme.surface_container_low.g, Theme.surface_container_low.b, 0.2) : Theme.surface_container_low
+                        color: Vars.tColor(Theme.surface_container_low, 0.2)
                         radius: 32
                         
                         ColumnLayout {
@@ -486,8 +491,8 @@ Item {
                             ColumnLayout {
                                 Layout.fillWidth: true
                                 spacing: 4
-                                Text { text: "Startup Apps"; font.family: Vars.fontFamily; font.pixelSize: 22; font.weight: Font.Bold; color: Theme.on_surface }
-                                Text { text: "Enter the exact command to run on startup (not just the app name)"; font.family: Vars.fontFamily; font.pixelSize: 14; color: Theme.on_surface_variant }
+                                QsText { text: "Startup Apps"; font.family: Vars.fontFamily; font.pixelSize: 22; setWeight: Font.Bold; color: Theme.on_surface }
+                                QsText { text: "Enter the exact command to run on startup (not just the app name)"; font.family: Vars.fontFamily; font.pixelSize: 14; color: Theme.on_surface_variant }
                             }
                             
                             RowLayout {
@@ -498,7 +503,7 @@ Item {
                                 Rectangle {
                                     Layout.fillWidth: true
                                     Layout.fillHeight: true
-                                    color: (Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_container_high.r, Theme.surface_container_high.g, Theme.surface_container_high.b, 0.25) : Theme.surface_container_high
+                                    color: Vars.tColor(Theme.surface_container_high, 0.25)
                                     topLeftRadius: 28
                                     bottomLeftRadius: 28
                                     topRightRadius: 6
@@ -512,7 +517,9 @@ Item {
                                         font.pixelSize: 16
                                         color: Theme.on_surface
                                         clip: true
-                                        Text {
+                                        selectByMouse: true
+                                        MouseArea { anchors.fill: parent; cursorShape: Qt.IBeamCursor; onPressed: (mouse) => { parent.forceActiveFocus(); mouse.accepted = false; } }
+                                        QsText {
                                             anchors.verticalCenter: parent.verticalCenter
                                             text: "e.g., blanket or wl-paste ..."
                                             color: Theme.on_surface_variant
@@ -526,7 +533,7 @@ Item {
                                 Rectangle {
                                     Layout.preferredWidth: 90
                                     Layout.fillHeight: true
-                                    color: (Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.primary.r, Theme.primary.g, Theme.primary.b, 0.7) : Theme.primary
+                                    color: Vars.tColor(Theme.primary, 0.7)
                                     topLeftRadius: 6
                                     bottomLeftRadius: 6
                                     topRightRadius: 6
@@ -534,12 +541,12 @@ Item {
                                     
                                     scale: addHover.pressed ? 1.08 : 1.0
                                     Behavior on scale { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.OutBack } }
-                                    Text {
+                                    QsText {
                                         anchors.centerIn: parent
                                         text: "Add"
                                         font.family: Vars.fontFamily
                                         font.pixelSize: 16
-                                        font.weight: Font.Bold
+                                        setWeight: Font.Bold
                                         color: Theme.on_primary
                                     }
                                     MouseArea {
@@ -557,7 +564,7 @@ Item {
                                 Rectangle {
                                     Layout.preferredWidth: 90
                                     Layout.fillHeight: true
-                                    color: (Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_variant.r, Theme.surface_variant.g, Theme.surface_variant.b, 0.4) : Theme.surface_variant
+                                    color: Vars.tColor(Theme.surface_variant, 0.4)
                                     topLeftRadius: 6
                                     bottomLeftRadius: 6
                                     topRightRadius: 28
@@ -565,12 +572,12 @@ Item {
                                     
                                     scale: saveHover.pressed ? 1.08 : 1.0
                                     Behavior on scale { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.OutBack } }
-                                    Text {
+                                    QsText {
                                         anchors.centerIn: parent
                                         text: "Save"
                                         font.family: Vars.fontFamily
                                         font.pixelSize: 16
-                                        font.weight: Font.Bold
+                                        setWeight: Font.Bold
                                         color: Theme.on_surface_variant
                                     }
                                     MouseArea {
@@ -615,7 +622,7 @@ Item {
                                             id: contentRect
                                             width: dragArea.width; height: dragArea.height
                                             radius: 16
-                                            color: modelData.enabled ? ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_container_high.r, Theme.surface_container_high.g, Theme.surface_container_high.b, 0.25) : Theme.surface_container_high) : ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_container.r, Theme.surface_container.g, Theme.surface_container.b, 0.25) : Theme.surface_container)
+                                            color: modelData.enabled ? (Vars.tColor(Theme.surface_container_high, 0.25)) : (Vars.tColor(Theme.surface_container, 0.25))
                                             
                                             // Pop out effect when dragging
                                             scale: dragArea.drag.active ? 1.02 : 1.0
@@ -650,7 +657,7 @@ Item {
                                             RowLayout {
                                                 anchors.fill: parent; anchors.leftMargin: 16; anchors.rightMargin: 16; spacing: 12
                                                 
-                                                Text { 
+                                                QsText { 
                                                     text: "drag_indicator"
                                                     font.family: "Material Symbols Outlined"
                                                     font.pixelSize: 24
@@ -658,11 +665,11 @@ Item {
                                                     opacity: dragArea.drag.active ? 1.0 : 0.6
                                                 }
                                                 
-                                                Text { Layout.fillWidth: true; text: modelData.cmd; font.family: Vars.fontFamily; font.pixelSize: 16; color: Theme.on_surface }
+                                                QsText { Layout.fillWidth: true; text: modelData.cmd; font.family: Vars.fontFamily; font.pixelSize: 16; color: Theme.on_surface }
                                                 
                                                 Rectangle {
-                                                    width: 48; height: 48; radius: 24; color: toggleHover.containsMouse ? ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_variant.r, Theme.surface_variant.g, Theme.surface_variant.b, 0.4) : Theme.surface_variant) : "transparent"
-                                                    Text { 
+                                                    width: 48; height: 48; radius: 24; color: toggleHover.containsMouse ? (Vars.tColor(Theme.surface_variant, 0.4)) : "transparent"
+                                                    QsText { 
                                                         anchors.centerIn: parent; 
                                                         font.family: "Material Symbols Outlined"; 
                                                         font.pixelSize: 24; 
@@ -691,7 +698,7 @@ Item {
                     Rectangle {
                         Layout.fillWidth: true
                         Layout.preferredHeight: processesLayout.implicitHeight + 40
-                        color: (Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_container_low.r, Theme.surface_container_low.g, Theme.surface_container_low.b, 0.2) : Theme.surface_container_low
+                        color: Vars.tColor(Theme.surface_container_low, 0.2)
                         radius: 32
                         
                         ColumnLayout {
@@ -701,48 +708,9 @@ Item {
                             
                             RowLayout {
                                 Layout.fillWidth: true
-                                Text { text: "Top Processes"; font.family: Vars.fontFamily; font.pixelSize: 22; font.weight: Font.Bold; color: Theme.on_surface; Layout.fillWidth: true }
+                                QsText { text: "Top Processes"; font.family: Vars.fontFamily; font.pixelSize: 22; setWeight: Font.Bold; color: Theme.on_surface; Layout.fillWidth: true }
                                 
-                                // Search Bar
-                                Rectangle {
-                                    Layout.preferredWidth: 200
-                                    Layout.preferredHeight: 40
-                                    radius: 20
-                                    color: (Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_container_high.r, Theme.surface_container_high.g, Theme.surface_container_high.b, 0.25) : Theme.surface_container_high
-                                    
-                                    RowLayout {
-                                        anchors.fill: parent
-                                        anchors.leftMargin: 16; anchors.rightMargin: 16
-                                        spacing: 8
-                                        Text {
-                                            text: "search"
-                                            font.family: "Material Symbols Outlined"
-                                            font.pixelSize: 18
-                                            color: procSearchInput.activeFocus ? Theme.primary : Theme.on_surface_variant
-                                        }
-                                        TextInput {
-                                            id: procSearchInput
-                                            Layout.fillWidth: true; Layout.fillHeight: true
-                                            verticalAlignment: TextInput.AlignVCenter
-                                            font.family: Vars.fontFamily
-                                            font.pixelSize: 14
-                                            color: Theme.on_surface
-                                            clip: true
-                                            onTextChanged: {
-                                                rootTaskManager.processSearchText = text;
-                                                psProc.running = true; // refresh immediately on typing
-                                            }
-                                            Text {
-                                                anchors.verticalCenter: parent.verticalCenter
-                                                text: "Search..."
-                                                color: Theme.on_surface_variant
-                                                font.family: Vars.fontFamily
-                                                font.pixelSize: 14
-                                                visible: !procSearchInput.text && !procSearchInput.activeFocus
-                                            }
-                                        }
-                                    }
-                                }
+
                                 
                                 // Segmented Control Filter
                                 Rectangle {
@@ -757,19 +725,19 @@ Item {
                                         Rectangle {
                                             Layout.fillWidth: true; Layout.fillHeight: true
                                             property bool isSel: rootTaskManager.processFilter === "cpu"
-                                            color: isSel ? ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.primary.r, Theme.primary.g, Theme.primary.b, 0.7) : Theme.primary) : ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_container_high.r, Theme.surface_container_high.g, Theme.surface_container_high.b, 0.25) : Theme.surface_container_high)
+                                            color: isSel ? (Vars.tColor(Theme.primary, 0.7)) : (Vars.tColor(Theme.surface_container_high, 0.25))
                                             topLeftRadius: 20; bottomLeftRadius: 20
                                             topRightRadius: isSel ? 20 : 4; bottomRightRadius: isSel ? 20 : 4
                                             Behavior on topRightRadius { NumberAnimation { duration: 250; easing.type: Easing.OutCubic } }
                                             Behavior on bottomRightRadius { NumberAnimation { duration: 250; easing.type: Easing.OutCubic } }
                                             Behavior on color { ColorAnimation { duration: 250 } }
-                                            Text { anchors.centerIn: parent; text: "CPU"; font.pixelSize: 13; font.weight: Font.Bold; color: parent.isSel ? Theme.on_primary : Theme.on_surface_variant; Behavior on color { ColorAnimation { duration: 250 } } }
+                                            QsText { anchors.centerIn: parent; text: "CPU"; font.pixelSize: 13; setWeight: Font.Bold; color: parent.isSel ? Theme.on_primary : Theme.on_surface_variant; Behavior on color { ColorAnimation { duration: 250 } } }
                                             MouseArea { anchors.fill: parent; onClicked: rootTaskManager.processFilter = "cpu"; cursorShape: Qt.PointingHandCursor }
                                         }
                                         Rectangle {
                                             Layout.fillWidth: true; Layout.fillHeight: true
                                             property bool isSel: rootTaskManager.processFilter === "mem"
-                                            color: isSel ? ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.primary.r, Theme.primary.g, Theme.primary.b, 0.7) : Theme.primary) : ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_container_high.r, Theme.surface_container_high.g, Theme.surface_container_high.b, 0.25) : Theme.surface_container_high)
+                                            color: isSel ? (Vars.tColor(Theme.primary, 0.7)) : (Vars.tColor(Theme.surface_container_high, 0.25))
                                             topLeftRadius: isSel ? 20 : 4; bottomLeftRadius: isSel ? 20 : 4
                                             topRightRadius: isSel ? 20 : 4; bottomRightRadius: isSel ? 20 : 4
                                             Behavior on topLeftRadius { NumberAnimation { duration: 250; easing.type: Easing.OutCubic } }
@@ -777,19 +745,19 @@ Item {
                                             Behavior on topRightRadius { NumberAnimation { duration: 250; easing.type: Easing.OutCubic } }
                                             Behavior on bottomRightRadius { NumberAnimation { duration: 250; easing.type: Easing.OutCubic } }
                                             Behavior on color { ColorAnimation { duration: 250 } }
-                                            Text { anchors.centerIn: parent; text: "Mem"; font.pixelSize: 13; font.weight: Font.Bold; color: parent.isSel ? Theme.on_primary : Theme.on_surface_variant; Behavior on color { ColorAnimation { duration: 250 } } }
+                                            QsText { anchors.centerIn: parent; text: "Mem"; font.pixelSize: 13; setWeight: Font.Bold; color: parent.isSel ? Theme.on_primary : Theme.on_surface_variant; Behavior on color { ColorAnimation { duration: 250 } } }
                                             MouseArea { anchors.fill: parent; onClicked: rootTaskManager.processFilter = "mem"; cursorShape: Qt.PointingHandCursor }
                                         }
                                         Rectangle {
                                             Layout.fillWidth: true; Layout.fillHeight: true
                                             property bool isSel: rootTaskManager.processFilter === "gpu"
-                                            color: isSel ? ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.primary.r, Theme.primary.g, Theme.primary.b, 0.7) : Theme.primary) : ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_container_high.r, Theme.surface_container_high.g, Theme.surface_container_high.b, 0.25) : Theme.surface_container_high)
+                                            color: isSel ? (Vars.tColor(Theme.primary, 0.7)) : (Vars.tColor(Theme.surface_container_high, 0.25))
                                             topLeftRadius: isSel ? 20 : 4; bottomLeftRadius: isSel ? 20 : 4
                                             topRightRadius: 20; bottomRightRadius: 20
                                             Behavior on topLeftRadius { NumberAnimation { duration: 250; easing.type: Easing.OutCubic } }
                                             Behavior on bottomLeftRadius { NumberAnimation { duration: 250; easing.type: Easing.OutCubic } }
                                             Behavior on color { ColorAnimation { duration: 250 } }
-                                            Text { anchors.centerIn: parent; text: "GPU"; font.pixelSize: 13; font.weight: Font.Bold; color: parent.isSel ? Theme.on_primary : Theme.on_surface_variant; Behavior on color { ColorAnimation { duration: 250 } } }
+                                            QsText { anchors.centerIn: parent; text: "GPU"; font.pixelSize: 13; setWeight: Font.Bold; color: parent.isSel ? Theme.on_primary : Theme.on_surface_variant; Behavior on color { ColorAnimation { duration: 250 } } }
                                             MouseArea { anchors.fill: parent; onClicked: rootTaskManager.processFilter = "gpu"; cursorShape: Qt.PointingHandCursor }
                                         }
                                     }
@@ -800,21 +768,21 @@ Item {
                                 model: rootTaskManager.processModel
                                 delegate: Rectangle {
                                     Layout.fillWidth: true; Layout.preferredHeight: 72; radius: 24; 
-                                    color: (Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_container_high.r, Theme.surface_container_high.g, Theme.surface_container_high.b, 0.25) : Theme.surface_container_high
+                                    color: Vars.tColor(Theme.surface_container_high, 0.25)
                                     RowLayout {
                                         anchors.fill: parent; anchors.leftMargin: 24; anchors.rightMargin: 24; spacing: 16
                                         ColumnLayout {
                                             Layout.fillWidth: true; spacing: 4
-                                            Text { text: modelData.name; font.family: Vars.fontFamily; font.pixelSize: 18; font.weight: Font.Bold; color: Theme.on_surface; elide: Text.ElideRight; Layout.fillWidth: true }
-                                            Text { 
+                                            QsText { text: modelData.name; font.family: Vars.fontFamily; font.pixelSize: 18; setWeight: Font.Bold; color: Theme.on_surface; elide: Text.ElideRight; Layout.fillWidth: true }
+                                            QsText { 
                                                 text: "PID: " + modelData.pid + " • CPU: " + modelData.cpu + " • Mem: " + modelData.mem; 
                                                 font.family: Vars.fontFamily; font.pixelSize: 13; color: Theme.on_surface_variant 
                                             }
                                         }
                                         
                                         Rectangle {
-                                            width: 48; height: 48; radius: 24; color: killHover.containsMouse ? ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.error.r, Theme.error.g, Theme.error.b, 0.7) : Theme.error) : "transparent"
-                                            Text { anchors.centerIn: parent; font.family: "Material Symbols Outlined"; font.pixelSize: 24; color: killHover.containsMouse ? Theme.on_error : Theme.error; text: "close" }
+                                            width: 48; height: 48; radius: 24; color: killHover.containsMouse ? (Vars.tColor(Theme.error, 0.7)) : "transparent"
+                                            QsText { anchors.centerIn: parent; font.family: "Material Symbols Outlined"; font.pixelSize: 24; color: killHover.containsMouse ? Theme.on_error : Theme.error; text: "close" }
                                             MouseArea {
                                                 id: killHover; anchors.fill: parent; cursorShape: Qt.PointingHandCursor; hoverEnabled: true
                                                 onClicked: killProcessAction.createObject(rootTaskManager, { pidToKill: modelData.pid })

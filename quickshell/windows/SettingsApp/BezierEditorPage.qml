@@ -24,9 +24,10 @@ ColumnLayout {
     
     property string pageTitle: "Curve Editor"
     property string pageIcon: "\ue429"
-    property string pageShape: "Oval"
+    property string pageShape: "Puffy"
     property color pageColor: Theme.tertiary
     property color pageOnColor: Theme.on_tertiary
+    property string searchText: ""
     
     signal settingsChanged()
     
@@ -102,7 +103,7 @@ ColumnLayout {
                 antialiasing: true
             }
 
-            Text {
+            QsText {
                 anchors.centerIn: parent
                 text: rootPage.pageIcon
                 font.family: "Material Symbols Outlined"
@@ -111,12 +112,12 @@ ColumnLayout {
             }
         }
 
-        Text {
+        QsText {
             Layout.fillWidth: true
             text: rootPage.pageTitle
             font.family: Vars.fontFamily
             font.pixelSize: 18
-            font.weight: 600
+            setWeight: 600
             color: Theme.on_surface
             elide: Text.ElideRight
         }
@@ -290,7 +291,7 @@ ColumnLayout {
             Layout.alignment: Qt.AlignTop
             spacing: Vars.spacingMedium
 
-            Text {
+            QsText {
                 text: "Target Curve"
                 font.family: Vars.fontFamily
                 font.bold: true
@@ -304,10 +305,10 @@ ColumnLayout {
                 onActivated: function(index) { rootPage.targetCurve = model[index]; }
                 
                 background: Rectangle { color: Theme.surface_container_highest; radius: Vars.radiusSmall }
-                contentItem: Text { text: parent.displayText; font.family: Vars.fontFamily; color: Theme.on_surface; font.pixelSize: 14; verticalAlignment: Text.AlignVCenter; leftPadding: 10 }
+                contentItem: QsText { text: parent.displayText; font.family: Vars.fontFamily; color: Theme.on_surface; font.pixelSize: 14; verticalAlignment: Text.AlignVCenter; leftPadding: 10 }
             }
 
-            Text {
+            QsText {
                 text: "Reference Curve"
                 font.family: Vars.fontFamily
                 font.bold: true
@@ -322,10 +323,10 @@ ColumnLayout {
                 onActivated: function(index) { rootPage.referenceCurve = model[index]; curveCanvas.requestPaint(); }
                 
                 background: Rectangle { color: Theme.surface_container_highest; radius: Vars.radiusSmall }
-                contentItem: Text { text: parent.displayText; font.family: Vars.fontFamily; color: Theme.on_surface; font.pixelSize: 14; verticalAlignment: Text.AlignVCenter; leftPadding: 10 }
+                contentItem: QsText { text: parent.displayText; font.family: Vars.fontFamily; color: Theme.on_surface; font.pixelSize: 14; verticalAlignment: Text.AlignVCenter; leftPadding: 10 }
             }
 
-            Text {
+            QsText {
                 text: "Parameters"
                 font.family: Vars.fontFamily
                 font.bold: true
@@ -341,27 +342,31 @@ ColumnLayout {
                 RowLayout {
                     anchors.fill: parent
                     anchors.margins: 12
-                    Text { text: "X1:"; color: Theme.on_surface; font.family: Vars.fontFamily; font.bold: true }
+                    QsText { text: "X1:"; color: Theme.on_surface; font.family: Vars.fontFamily; font.bold: true }
                     TextInput { 
                         id: p1xInput
                         text: rootPage.p1x.toFixed(2)
                         color: Theme.on_surface_variant
                         Layout.fillWidth: true
                         font.family: Vars.fontFamily
+                        selectByMouse: true
                         validator: DoubleValidator { bottom: 0.0; top: 1.0; decimals: 2 }
                         onEditingFinished: rootPage.p1x = parseFloat(text)
                         Connections { target: rootPage; function onP1xChanged() { if (!p1xInput.activeFocus) p1xInput.text = rootPage.p1x.toFixed(2); } }
+                        MouseArea { anchors.fill: parent; cursorShape: Qt.IBeamCursor; onPressed: (mouse) => { parent.forceActiveFocus(); mouse.accepted = false; } }
                     }
-                    Text { text: "Y1:"; color: Theme.on_surface; font.family: Vars.fontFamily; font.bold: true }
+                    QsText { text: "Y1:"; color: Theme.on_surface; font.family: Vars.fontFamily; font.bold: true }
                     TextInput { 
                         id: p1yInput
                         text: rootPage.p1y.toFixed(2)
                         color: Theme.on_surface_variant
                         Layout.fillWidth: true
                         font.family: Vars.fontFamily
+                        selectByMouse: true
                         validator: DoubleValidator { decimals: 2 }
                         onEditingFinished: rootPage.p1y = parseFloat(text)
                         Connections { target: rootPage; function onP1yChanged() { if (!p1yInput.activeFocus) p1yInput.text = rootPage.p1y.toFixed(2); } }
+                        MouseArea { anchors.fill: parent; cursorShape: Qt.IBeamCursor; onPressed: (mouse) => { parent.forceActiveFocus(); mouse.accepted = false; } }
                     }
                 }
             }
@@ -374,27 +379,31 @@ ColumnLayout {
                 RowLayout {
                     anchors.fill: parent
                     anchors.margins: 12
-                    Text { text: "X2:"; color: Theme.on_surface; font.family: Vars.fontFamily; font.bold: true }
+                    QsText { text: "X2:"; color: Theme.on_surface; font.family: Vars.fontFamily; font.bold: true }
                     TextInput { 
                         id: p2xInput
                         text: rootPage.p2x.toFixed(2)
                         color: Theme.on_surface_variant
                         Layout.fillWidth: true
                         font.family: Vars.fontFamily
+                        selectByMouse: true
                         validator: DoubleValidator { bottom: 0.0; top: 1.0; decimals: 2 }
                         onEditingFinished: rootPage.p2x = parseFloat(text)
                         Connections { target: rootPage; function onP2xChanged() { if (!p2xInput.activeFocus) p2xInput.text = rootPage.p2x.toFixed(2); } }
+                        MouseArea { anchors.fill: parent; cursorShape: Qt.IBeamCursor; onPressed: (mouse) => { parent.forceActiveFocus(); mouse.accepted = false; } }
                     }
-                    Text { text: "Y2:"; color: Theme.on_surface; font.family: Vars.fontFamily; font.bold: true }
+                    QsText { text: "Y2:"; color: Theme.on_surface; font.family: Vars.fontFamily; font.bold: true }
                     TextInput { 
                         id: p2yInput
                         text: rootPage.p2y.toFixed(2)
                         color: Theme.on_surface_variant
                         Layout.fillWidth: true
                         font.family: Vars.fontFamily
+                        selectByMouse: true
                         validator: DoubleValidator { decimals: 2 }
                         onEditingFinished: rootPage.p2y = parseFloat(text)
                         Connections { target: rootPage; function onP2yChanged() { if (!p2yInput.activeFocus) p2yInput.text = rootPage.p2y.toFixed(2); } }
+                        MouseArea { anchors.fill: parent; cursorShape: Qt.IBeamCursor; onPressed: (mouse) => { parent.forceActiveFocus(); mouse.accepted = false; } }
                     }
                 }
             }
@@ -432,7 +441,7 @@ ColumnLayout {
                     anchors.bottom: parent.bottom; anchors.right: parent.right; anchors.margins: 8
                     width: 80; height: 32
                     background: Rectangle { color: Theme.surface_variant; radius: Vars.radiusSmall }
-                    contentItem: Text { text: "Test"; font.family: Vars.fontFamily; font.bold: true; color: Theme.on_surface; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
+                    contentItem: QsText { text: "Test"; font.family: Vars.fontFamily; font.bold: true; color: Theme.on_surface; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
                     onClicked: {
                         if (rootPage.testAnimObj) {
                             rootPage.testAnimObj.stop();
@@ -476,13 +485,13 @@ ColumnLayout {
                 Button {
                     Layout.fillWidth: true; height: 40
                     background: Rectangle { color: Theme.surface_container_highest; radius: Vars.radiusSmall }
-                    contentItem: Text { text: "Apply Target"; font.family: Vars.fontFamily; font.bold: true; color: Theme.on_surface; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
+                    contentItem: QsText { text: "Apply Target"; font.family: Vars.fontFamily; font.bold: true; color: Theme.on_surface; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
                     onClicked: applyCurve()
                 }
                 Button {
                     Layout.fillWidth: true; height: 40
                     background: Rectangle { color: Theme.primary; radius: Vars.radiusSmall }
-                    contentItem: Text { text: "Apply to All"; font.family: Vars.fontFamily; font.bold: true; color: Theme.on_primary; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
+                    contentItem: QsText { text: "Apply to All"; font.family: Vars.fontFamily; font.bold: true; color: Theme.on_primary; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
                     onClicked: applyToAll()
                 }
             }
@@ -500,12 +509,14 @@ ColumnLayout {
                         Layout.fillWidth: true; Layout.fillHeight: true
                         verticalAlignment: Text.AlignVCenter; leftPadding: 8
                         color: Theme.on_surface; font.family: Vars.fontFamily; text: "MyPreset"
+                        selectByMouse: true
+                        MouseArea { anchors.fill: parent; cursorShape: Qt.IBeamCursor; onPressed: (mouse) => { parent.forceActiveFocus(); mouse.accepted = false; } }
                     }
                     Button {
                         id: savePresetBtn
                         Layout.preferredWidth: 60; Layout.fillHeight: true
                         background: Rectangle { color: Theme.surface_variant; radius: Vars.radiusSmall }
-                        contentItem: Text { text: "Save"; font.family: Vars.fontFamily; color: Theme.on_surface; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
+                        contentItem: QsText { text: "Save"; font.family: Vars.fontFamily; color: Theme.on_surface; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
                         onClicked: {
                             // Ensure the current curve is in localEdits
                             localEdits[targetCurve] = [p1x, p1y, p2x, p2y];

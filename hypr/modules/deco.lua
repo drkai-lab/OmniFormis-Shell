@@ -43,18 +43,18 @@ hl.config({
         rounding_power = vars.rounding_power,
 
         -- Change transparency of focused and unfocused windows
-        active_opacity   = vars.GameMode and 1.0 or vars.active_opacity,
-        inactive_opacity = vars.GameMode and 1.0 or vars.inactive_opacity,
+        active_opacity   = vars.active_opacity,
+        inactive_opacity = vars.inactive_opacity,
 
         shadow = {
-            enabled      = vars.GameMode and false or vars.shadow_enabled,
+            enabled      = (not vars.GameMode) and vars.shadow_enabled,
             range        = vars.shadow_range,
             render_power = vars.shadow_render_power,
             color        = "rgba(000000e0)",
         }, -- ADDED COMMA
 
         blur = {
-            enabled   = vars.GameMode and false or vars.blur_enabled,
+            enabled   = (not vars.GameMode) and vars.blur_enabled,
             size      = vars.blur_size,
             passes    = vars.blur_passes,
             vibrancy  = vars.blur_vibrancy, 

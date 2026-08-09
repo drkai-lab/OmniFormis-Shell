@@ -5,7 +5,7 @@ import QtQuick.Layouts
 import Quickshell
 import Quickshell.Hyprland
 import "../theme/variables.js" as Vars
-
+import "../core/primitives" as Primitives
 Item {
     id: mainContainer
 
@@ -106,25 +106,18 @@ Item {
         }
     }
 
-    Rectangle {
+    Primitives.SquircleMask {
         id: bg
-        layer.enabled: true
-        layer.effect: MultiEffect {
-            shadowEnabled: !mainContainer.gameMode
-            shadowBlur: 1.0
-            shadowColor: Qt.rgba(0, 0, 0, 0.25)
-            shadowVerticalOffset: 4
-            shadowHorizontalOffset: 0
-        }
+        layer.enabled: false
         anchors.fill: parent
-        color: (Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface.r, Theme.surface.g, Theme.surface.b, Vars.panelOpacity) : Theme.surface
+        color: Vars.tColor(Theme.surface, Vars.panelOpacity)
         property real targetRad: Math.min(mainContainer.width, mainContainer.height) / 2
         topLeftRadius: Vars.getTopLeftRadius(Vars.panelStyle, Vars.pillPosition, false, targetRad)
         topRightRadius: Vars.getTopRightRadius(Vars.panelStyle, Vars.pillPosition, false, targetRad)
         bottomLeftRadius: Vars.getBottomLeftRadius(Vars.panelStyle, Vars.pillPosition, false, targetRad)
         bottomRightRadius: Vars.getBottomRightRadius(Vars.panelStyle, Vars.pillPosition, false, targetRad)
 
-        opacity: (overlayVisible && !mainContainer.forceHidePill) ? ((Vars._translucent && !Vars.gameMode) ? 0.85 : 1.0) : 0.0
+        opacity: (overlayVisible && !mainContainer.forceHidePill) ? (Vars.isTranslucent() ? 0.85 : 1.0) : 0.0
         visible: opacity > 0
         Behavior on opacity {
             enabled: !mainContainer.gameMode
@@ -156,12 +149,16 @@ Item {
 
         Repeater {
             model: 5
-            delegate: Rectangle {
+            delegate: Primitives.SquircleMask {
                 id: wsItem
                 readonly property int wsId: (mainContainer.currentPage * 5) + index + 1
                 property bool isFocused: Hyprland.focusedWorkspace?.id === wsId
 
-                radius: Math.min(width, height) / 2
+                property real targetRad: Math.min(width, height) / 2
+                topLeftRadius: targetRad
+                topRightRadius: targetRad
+                bottomLeftRadius: targetRad
+                bottomRightRadius: targetRad
                 implicitWidth: mainContainer.isVertical ? 32 : (isFocused ? 50 : 32)
                 implicitHeight: mainContainer.isVertical ? (isFocused ? 50 : 32) : 32
 
@@ -182,7 +179,7 @@ Item {
                     }
                 }
 
-                color: isFocused ? ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.primary.r, Theme.primary.g, Theme.primary.b, 0.85) : Theme.primary) : (wsMouseArea.pressed ? Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.12) : (wsMouseArea.containsMouse ? Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.08) : "transparent"))
+                color: isFocused ? Vars.tColor(Theme.primary, 0.85) : (wsMouseArea.pressed ? Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.12) : (wsMouseArea.containsMouse ? Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.08) : "transparent"))
 
                 Behavior on color {
                     enabled: !mainContainer.gameMode
@@ -193,10 +190,10 @@ Item {
                     }
                 }
 
-                Text {
+                QsText {
                     font.family: Vars.fontFamily
                     font.pixelSize: 14
-                    font.weight: isFocused ? 600 : 500
+                    setWeight: isFocused ? 600 : 500
                     anchors.centerIn: parent
                     text: wsId
 

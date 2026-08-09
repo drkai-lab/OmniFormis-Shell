@@ -169,7 +169,12 @@ Item {
             // Background behind preview
             Rectangle {
                 anchors.fill: parent
-                radius: Vars.radiusSmall
+                property real rOuter: Math.max(0, Vars.radiusExtraLarge - overviewPanel.bgPadding)
+                property real rInner: Vars.radiusSmall
+                topLeftRadius: (winItem.wsRow === 0 && winItem.wsCol === 0) ? rOuter : rInner
+                topRightRadius: (winItem.wsRow === 0 && winItem.wsCol === winItem.safeCols - 1) ? rOuter : rInner
+                bottomLeftRadius: (winItem.wsRow === winItem.safeRows - 1 && winItem.wsCol === 0) ? rOuter : rInner
+                bottomRightRadius: (winItem.wsRow === winItem.safeRows - 1 && winItem.wsCol === winItem.safeCols - 1) ? rOuter : rInner
                 color: Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.12)
                 border.width: 1
                 border.color: winItem.winData?.floating ? Theme.tertiary_container : Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.15)
@@ -199,14 +204,24 @@ Item {
                 layer.smooth: true
                 Rectangle {
                     anchors.fill: parent
-                    radius: Vars.radiusSmall
+                    property real rOuter: Math.max(0, Vars.radiusExtraLarge - overviewPanel.bgPadding)
+                    property real rInner: Vars.radiusSmall
+                    topLeftRadius: (winItem.wsRow === 0 && winItem.wsCol === 0) ? rOuter : rInner
+                    topRightRadius: (winItem.wsRow === 0 && winItem.wsCol === winItem.safeCols - 1) ? rOuter : rInner
+                    bottomLeftRadius: (winItem.wsRow === winItem.safeRows - 1 && winItem.wsCol === 0) ? rOuter : rInner
+                    bottomRightRadius: (winItem.wsRow === winItem.safeRows - 1 && winItem.wsCol === winItem.safeCols - 1) ? rOuter : rInner
                 }
             }
 
             // Simple Hover interaction overlay (ICONS COMPLETELY REMOVED)
             Rectangle {
                 anchors.fill: parent
-                radius: Vars.radiusSmall
+                property real rOuter: Math.max(0, Vars.radiusExtraLarge - overviewPanel.bgPadding)
+                property real rInner: Vars.radiusSmall
+                topLeftRadius: (winItem.wsRow === 0 && winItem.wsCol === 0) ? rOuter : rInner
+                topRightRadius: (winItem.wsRow === 0 && winItem.wsCol === winItem.safeCols - 1) ? rOuter : rInner
+                bottomLeftRadius: (winItem.wsRow === winItem.safeRows - 1 && winItem.wsCol === 0) ? rOuter : rInner
+                bottomRightRadius: (winItem.wsRow === winItem.safeRows - 1 && winItem.wsCol === winItem.safeCols - 1) ? rOuter : rInner
                 color: dragArea.containsMouse ? Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.12) : "transparent"
                 border.width: 1
                 border.color: Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.1)
@@ -298,7 +313,12 @@ Item {
         height: Math.round(overviewPanel.wsHeight)
         z: 99999
         color: "transparent"
-        radius: Vars.radiusSmall
+        property real rOuter: Math.max(0, Vars.radiusExtraLarge - overviewPanel.bgPadding)
+        property real rInner: Vars.radiusSmall
+        topLeftRadius: (activeRow === 0 && activeCol === 0) ? rOuter : rInner
+        topRightRadius: (activeRow === 0 && activeCol === safeCols - 1) ? rOuter : rInner
+        bottomLeftRadius: (activeRow === safeRows - 1 && activeCol === 0) ? rOuter : rInner
+        bottomRightRadius: (activeRow === safeRows - 1 && activeCol === safeCols - 1) ? rOuter : rInner
         border.width: 2
         border.color: Theme.primary
 

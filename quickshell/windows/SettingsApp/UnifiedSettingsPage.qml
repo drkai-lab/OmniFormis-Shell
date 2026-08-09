@@ -20,11 +20,13 @@ ColumnLayout {
     
     property string pageTitle: ""
     property string pageIcon: ""
-    property string pageShape: "Circle"
+    property string pageShape: "Puffy"
     property color pageColor: Theme.primary
     property color pageOnColor: Theme.on_primary
     onActiveCategoryChanged: applyFilter()
     property string copiedSliderValue: ""
+    property string searchText: ""
+    onSearchTextChanged: applyFilter()
 
     function prettyTitle(key) {
         var custom = {
@@ -39,6 +41,7 @@ ColumnLayout {
             "wallpaperMaskOffsetY": "Wallpaper Mask Y Offset",
             "mediaPlayerShape": "Media Player Widget Shape",
             "mediaPlayerArtScale": "Media Player Art Scale",
+            "mediaPlayerWaveThickness": "Media Player Wave Thickness",
             "gameMode": "Game Mode Optimization",
             "animationDuration": "Master Animation Duration",
             "flickDeceleration": "Scroll Deceleration Rate",
@@ -47,7 +50,13 @@ ColumnLayout {
             "panelOpacity": "Main Panel Opacity",
             "componentOpacity": "Inner Component Opacity",
             "radiusAmount": "Window Corner Radius Scale",
+            "cornerPower": "Window Corner Curve Power (Squircle)",
             "fontFamily": "Interface Font Family",
+            "fontWeight": "Interface Font Weight",
+            "fontItalic": "Interface Font Italic",
+            "fontRounding": "Interface Font Rounding",
+            "fontGrading": "Interface Font Grade",
+            "fontBaselineEnabled": "Relative Font Baseline Config",
             "pillPosition": "Panel Screen Position",
             "panelStyle": "Panel Visual Style",
             "gaps_in": "Inner Window Gaps",
@@ -64,7 +73,17 @@ ColumnLayout {
             "force_default_wallpaper": "Default Hyprland Wallpaper",
             "gesture_direction": "Swipe Gesture Direction",
             "AnimateStyle": "System Animation Style",
-            "Layout": "Window Tiling Layout"
+            "Layout": "Window Tiling Layout",
+            "radiusSmall": "Corner Radius (Small)",
+            "radiusMedium": "Corner Radius (Medium)",
+            "radiusLarge": "Corner Radius (Large)",
+            "radiusExtraLarge": "Corner Radius (Extra Large)",
+            "spacingSmall": "Spacing Gap (Small)",
+            "spacingMedium": "Spacing Gap (Medium)",
+            "spacingLarge": "Spacing Gap (Large)",
+            "paddingSmall": "Internal Padding (Small)",
+            "paddingMedium": "Internal Padding (Medium)",
+            "paddingLarge": "Internal Padding (Large)"
         };
         if (custom[key]) return custom[key];
         var str = key.replace(/_/g, " ").replace(/([A-Z])/g, " $1").replace(/\s+/g, " ").trim();
@@ -84,6 +103,7 @@ ColumnLayout {
             "wallpaperMaskOffsetY": "Vertical Y-axis pixel shift for positioning the wallpaper clipping mask.",
             "mediaPlayerShape": "Select the Material 3 cutout shape contour for the desktop audio player widget.",
             "mediaPlayerArtScale": "Scale zoom factor for album artwork displayed inside the desktop audio player.",
+            "mediaPlayerWaveThickness": "Thickness of the wavy timeline stroke inside the media player widget.",
             "gameMode": "Suspend heavy decorative shell animations and blur effects for optimal gaming performance.",
             "animationDuration": "Master transition duration in milliseconds for interface micro-animations.",
             "flickDeceleration": "Friction rate applied when coasting through scrollable UI flick views.",
@@ -92,7 +112,13 @@ ColumnLayout {
             "panelOpacity": "Global opacity level for main background panels and floating windows.",
             "componentOpacity": "Global opacity level for interactive components and lists inside panels.",
             "radiusAmount": "Master multiplication ratio applied to window and container corner roundings.",
+            "cornerPower": "Adjusts corner curvature (2.0 = standard circle, >2.0 = squircle/super-ellipse).",
             "fontFamily": "Primary typography font family used across Quickshell overlays and panels.",
+            "fontWeight": "Variable font weight or static font weight matching (100 to 900).",
+            "fontItalic": "Enable italic font style for the primary interface typography.",
+            "fontRounding": "Variable font rounding axis (ROND) for softer typography contours.",
+            "fontGrading": "Variable font grading axis (GRAD) for modifying visual weight without affecting text flow.",
+            "fontBaselineEnabled": "Make font weight, grade, and round settings act as a global additive baseline, preserving semantic boldness.",
             "pillPosition": "Select the edge of the display monitor where the shell control bar is docked.",
             "panelStyle": "Choose between Floating, Attached (flush), or Framed shell bar geometry.",
             "gaps_in": "Spacing distance in pixels between adjacent tiled windows on the workspace.",
@@ -108,7 +134,17 @@ ColumnLayout {
             "force_default_wallpaper": "Control display of standard anime backgrounds when starting the Hyprland compositor.",
             "gesture_direction": "Direction axes monitored when swiping with multi-touch workspace transitions.",
             "AnimateStyle": "Active motion choreography flavor defining easing mechanics and window transitions.",
-            "Layout": "Tiling layout algorithm arranging windows (Dwindle, Master, Scrolling, or Monocle)."
+            "Layout": "Tiling layout algorithm arranging windows (Dwindle, Master, Scrolling, or Monocle).",
+            "radiusSmall": "Configure the small rounding radius applied to minor UI components.",
+            "radiusMedium": "Configure the medium rounding radius applied to standard UI components.",
+            "radiusLarge": "Configure the large rounding radius applied to prominent UI containers.",
+            "radiusExtraLarge": "Configure the extra-large rounding radius applied to major interface elements.",
+            "spacingSmall": "Configure the small spacing gap between closely related elements.",
+            "spacingMedium": "Configure the medium spacing gap between standard elements.",
+            "spacingLarge": "Configure the large spacing gap between distinct sections.",
+            "paddingSmall": "Configure the small internal padding for minor UI components.",
+            "paddingMedium": "Configure the medium internal padding for standard UI components.",
+            "paddingLarge": "Configure the large internal padding for major UI containers."
         };
         if (descriptions[key]) return descriptions[key];
         if (!rawHelp || rawHelp === "Quickshell variable" || rawHelp === "Hyprland variable") {
@@ -122,7 +158,7 @@ ColumnLayout {
         var cmdArray = [];
         var isLive = false;
         if (isQs) {
-            var liveVars = ["clockShape", "clockShowTicks", "clockShowCenterDot", "wallpaperMaskShape", "wallpaperMaskScale", "wallpaperMaskColor", "wallpaperMaskEnabled", "wallpaperMaskOffsetX", "wallpaperMaskOffsetY", "mediaPlayerShape", "mediaPlayerArtScale", "gameMode"];
+            var liveVars = ["clockShape", "clockShowTicks", "clockShowCenterDot", "wallpaperMaskShape", "wallpaperMaskScale", "wallpaperMaskColor", "wallpaperMaskEnabled", "wallpaperMaskOffsetX", "wallpaperMaskOffsetY", "mediaPlayerShape", "mediaPlayerArtScale", "mediaPlayerWaveThickness", "gameMode", "fontWeight", "fontItalic", "fontRounding", "fontGrading", "fontBaselineEnabled"];
             isLive = liveVars.indexOf(key) !== -1 || key.startsWith("desktop");
             cmdArray = ["/home/boing/.local/bin/omniformis", "qs", "set", key, String(val)];
         } else {
@@ -178,7 +214,7 @@ ColumnLayout {
                 antialiasing: true
             }
 
-            Text {
+            QsText {
                 anchors.centerIn: parent
                 text: rootPage.pageIcon
                 font.family: "Material Symbols Outlined"
@@ -187,94 +223,18 @@ ColumnLayout {
             }
         }
 
-        Text {
+        QsText {
             Layout.fillWidth: true
             text: rootPage.pageTitle
             font.family: Vars.fontFamily
             font.pixelSize: 18
-            font.weight: 600
+            setWeight: 600
             color: Theme.on_surface
             elide: Text.ElideRight
         }
     }
 
-    RowLayout {
-        Layout.fillWidth: true
-        spacing: Vars.spacingMedium
 
-        SearchBar {
-            id: searchBar
-            Layout.fillWidth: true
-            placeholderText: "Search settings..."
-            showIcon: true
-            iconText: "search"
-            defaultHeight: 72
-            defaultColor: (Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_container.r, Theme.surface_container.g, Theme.surface_container.b, 0.5) : Theme.surface_container
-            
-            onTextChanged: applyFilter()
-            onDownPressed: {
-                settingsList.forceActiveFocus();
-            }
-        }
-
-        Button {
-            Layout.alignment: Qt.AlignVCenter
-            visible: rootPage.activeCategory === "Input"
-            onClicked: {
-                var proc = Qt.createQmlObject('import Quickshell.Io; Process { command: ["sh", "-c", "hyprctl devices -j | jq -r \\".keyboards[].name\\" | while read -r kb; do hyprctl switchxkblayout \\"$kb\\" next; done"]; onExited: destroy() }', rootPage);
-                proc.running = true;
-            }
-            background: Rectangle {
-                color: layoutBtnHover.containsMouse ? Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.1) : "transparent"
-                radius: Vars.radiusMedium
-                implicitHeight: 72
-                implicitWidth: layoutBtnContent.implicitWidth + Vars.spacingLarge * 2
-            }
-            contentItem: RowLayout {
-                id: layoutBtnContent
-                spacing: 8
-                Text { text: "keyboard"; font.family: "Material Symbols Outlined"; color: Theme.on_surface; font.pixelSize: 20 }
-                Text { text: "Switch Layout"; color: Theme.on_surface; font.family: Vars.fontFamily; font.bold: true }
-            }
-            MouseArea {
-                id: layoutBtnHover
-                anchors.fill: parent
-                hoverEnabled: true
-                cursorShape: Qt.PointingHandCursor
-                onClicked: {
-                    var proc = Qt.createQmlObject('import Quickshell.Io; Process { command: ["sh", "-c", "hyprctl devices -j | jq -r \\".keyboards[].name\\" | while read -r kb; do hyprctl switchxkblayout \\"$kb\\" next; done"]; onExited: destroy() }', rootPage);
-                    proc.running = true;
-                }
-            }
-        }
-
-        Button {
-            Layout.alignment: Qt.AlignVCenter
-            onClicked: loadSettings()
-            background: Rectangle {
-                color: refreshBtnHover.containsMouse ? Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.1) : "transparent"
-                radius: Vars.radiusMedium
-                implicitHeight: 72
-                implicitWidth: refreshBtnContent.implicitWidth + Vars.spacingLarge * 2
-            }
-            contentItem: Text {
-                id: refreshBtnContent
-                text: "Refresh"
-                color: Theme.on_surface
-                font.family: Vars.fontFamily
-                font.bold: true
-                horizontalAlignment: Text.AlignHCenter
-                verticalAlignment: Text.AlignVCenter
-            }
-            MouseArea {
-                id: refreshBtnHover
-                anchors.fill: parent
-                hoverEnabled: true
-                cursorShape: Qt.PointingHandCursor
-                onClicked: loadSettings()
-            }
-        }
-    }
 
     ListModel {
         id: settingsModel
@@ -336,17 +296,17 @@ ColumnLayout {
 
         Keys.onPressed: (event) => {
             if (settingsList.vimKeysEnabled) {
-                if (event.key === Qt.Key_J) {
+                if (event.key === Qt.Key_J || event.key === Qt.Key_S) {
                     incrementCurrentIndex();
                     event.accepted = true;
-                } else if (event.key === Qt.Key_K) {
+                } else if (event.key === Qt.Key_K || event.key === Qt.Key_D) {
                     if (currentIndex > 0) {
                         decrementCurrentIndex();
                     } else {
                         searchBar.forceActiveFocus();
                     }
                     event.accepted = true;
-                } else if (event.key === Qt.Key_L || event.key === Qt.Key_H) {
+                } else if (event.key === Qt.Key_L || event.key === Qt.Key_H || event.key === Qt.Key_F || event.key === Qt.Key_A) {
                     if (currentItem) currentItem.triggerAction();
                     event.accepted = true;
                 }
@@ -358,17 +318,43 @@ ColumnLayout {
         section.labelPositioning: ViewSection.InlineLabels
         section.delegate: Item {
             width: ListView.view.width
-            height: 50
+            height: 52
             z: 2
 
-            Text {
-                anchors.left: parent.left
-                anchors.verticalCenter: parent.verticalCenter
-                text: section
-                color: Theme.primary
-                font.pixelSize: 14
-                font.bold: true
-                font.family: Vars.fontFamily
+            RowLayout {
+                anchors {
+                    left: parent.left; right: parent.right
+                    verticalCenter: parent.verticalCenter
+                    leftMargin: 2; rightMargin: 2
+                }
+                spacing: 10
+
+                // Pill section badge
+                Rectangle {
+                    implicitWidth: sectionBadgeText.implicitWidth + 18
+                    implicitHeight: 24
+                    radius: 12
+                    color: Qt.rgba(Theme.primary.r, Theme.primary.g, Theme.primary.b, 0.12)
+                    Layout.alignment: Qt.AlignVCenter
+
+                    QsText {
+                        id: sectionBadgeText
+                        anchors.centerIn: parent
+                        text: section
+                        color: Theme.primary
+                        font.pixelSize: 11
+                        setWeight: 700
+                        font.family: Vars.fontFamily
+                        font.letterSpacing: 0.8
+                    }
+                }
+
+                // Divider
+                Rectangle {
+                    Layout.fillWidth: true
+                    height: 1
+                    color: Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.1)
+                }
             }
         }
 
@@ -576,7 +562,7 @@ ColumnLayout {
                         continue;
 
                     var key = line.substring(0, colonIdx).trim();
-                    if (key === "notificationHistory" || key === "historyUpdated" || key === "pillPosition" || key === "panelStyle" || key === "translucent" || key === "liquidGlass")
+                    if (key === "notificationHistory" || key === "historyUpdated" || key === "translucent" || key === "liquidGlass")
                         continue;
 
                     var valPart = line.substring(colonIdx + 1).trim();
@@ -598,7 +584,7 @@ ColumnLayout {
                         category = "Desktop";
                     } else if (key.startsWith("spacing") || key.startsWith("padding")) {
                         category = "Layout";
-                    } else if (key.startsWith("radius") || key === "blurAmount" || key === "panelOpacity" || key === "componentOpacity" || key === "fontFamily" || key === "liquidGlassPreset") {
+                    } else if (key.startsWith("radius") || key === "cornerPower" || key === "blurAmount" || key === "panelOpacity" || key === "componentOpacity" || key === "fontFamily" || key === "fontWeight" || key === "fontItalic" || key === "fontRounding" || key === "fontGrading" || key === "fontBaselineEnabled" || key === "liquidGlassPreset") {
                         category = "Theme";
                     } else if (key === "animationDuration" || key === "flickDeceleration" || key === "maximumFlickVelocity" || key.startsWith("custom") || key.startsWith("m3")) {
                         category = "Animations";
@@ -621,6 +607,11 @@ ColumnLayout {
                         min = 0.0;
                         max = 1.0;
                         step = 0.05;
+                    } else if (key === "cornerPower") {
+                        type = "slider";
+                        min = 2.0;
+                        max = 10.0;
+                        step = 0.1;
                     } else if (key.toLowerCase().includes("opacity")) {
                         type = "slider";
                         min = 0.0;
@@ -636,6 +627,26 @@ ColumnLayout {
                         min = 0.0;
                         max = 1.0;
                         step = 0.05;
+                    } else if (key === "mediaPlayerWaveThickness") {
+                        type = "slider";
+                        min = 1.0;
+                        max = 10.0;
+                        step = 0.5;
+                    } else if (key === "fontWeight") {
+                        type = "slider";
+                        min = 100;
+                        max = 1000;
+                        step = 100;
+                    } else if (key === "fontRounding") {
+                        type = "slider";
+                        min = 0;
+                        max = 100;
+                        step = 1;
+                    } else if (key === "fontGrading") {
+                        type = "slider";
+                        min = -200;
+                        max = 150;
+                        step = 1;
                     } else if (key.startsWith("radius") || key.startsWith("spacing") || key.startsWith("padding")) {
                         type = "slider";
                         min = 0;
@@ -646,6 +657,11 @@ ColumnLayout {
                         min = 0.1;
                         max = 2.0;
                         step = 0.05;
+                    } else if (key.includes("Rows") || key.includes("Columns")) {
+                        type = "slider";
+                        min = 1;
+                        max = 20;
+                        step = 1;
                     } else if (key === "wallpaperMaskOffsetX" || key === "wallpaperMaskOffsetY") {
                         type = "slider";
                         min = -500;
@@ -665,7 +681,7 @@ ColumnLayout {
                     } else if (key === "wallpaperMaskColor") {
                         type = "color";
                         enumsStr = "transparent|||background|||primary|||secondary|||tertiary|||surface_variant|||error";
-                    } else if (key === "wallpaperMaskEnabled") {
+                    } else if (key === "wallpaperMaskEnabled" || key === "fontItalic" || key === "fontBaselineEnabled") {
                         type = "bool";
                     } else if (key === "clockShape") {
                         type = "shape";
@@ -705,7 +721,7 @@ ColumnLayout {
     }
 
     function applyFilter() {
-        var term = searchBar.text.trim();
+        var term = rootPage.searchText.trim();
         settingsModel.clear();
         var filteredVars = [];
         for (var k = 0; k < rootPage.allVars.length; k++) {
@@ -789,14 +805,14 @@ ColumnLayout {
                     Rectangle {
                         anchors.fill: parent
                         radius: reloadFab.radius
-                        color: (Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.primary.r, Theme.primary.g, Theme.primary.b, 0.4) : Theme.primary
+                        color: Vars.tColor(Theme.primary, Vars.componentOpacity)
                         border.color: Theme.outline_variant
                         border.width: 1
                     }
                 }
             }
 
-            Text {
+            QsText {
                 id: fabIcon
                 anchors.centerIn: parent
                 text: "refresh"

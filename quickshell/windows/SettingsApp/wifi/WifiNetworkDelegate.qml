@@ -28,7 +28,7 @@ Item {
     property bool isSelected: modelData.connected || isPasswordMode
     property bool showForget: false
 
-    property color targetColor: modelData.connected ? ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.secondary_container.r, Theme.secondary_container.g, Theme.secondary_container.b, Vars.componentOpacity) : Theme.secondary_container) : (isSelected ? ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_container_high.r, Theme.surface_container_high.g, Theme.surface_container_high.b, Vars.componentOpacity) : Theme.surface_container_high) : (wifiMouse.containsMouse ? Qt.tint(((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_container.r, Theme.surface_container.g, Theme.surface_container.b, Vars.componentOpacity) : Theme.surface_container), Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.08)) : ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_container.r, Theme.surface_container.g, Theme.surface_container.b, Vars.componentOpacity) : Theme.surface_container)))
+    property color targetColor: modelData.connected ? (Vars.tColor(Theme.secondary_container, Vars.componentOpacity)) : (isSelected ? (Vars.tColor(Theme.surface_container_high, Vars.componentOpacity)) : (wifiMouse.containsMouse ? Qt.tint((Vars.tColor(Theme.surface_container, Vars.componentOpacity)), Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.08)) : (Vars.tColor(Theme.surface_container, Vars.componentOpacity))))
     Behavior on targetColor {
         ColorAnimation {
             duration: Vars.animationDuration
@@ -172,7 +172,7 @@ Item {
                     width: 40
                     height: 40
                     Layout.alignment: Qt.AlignVCenter
-                    Text {
+                    QsText {
                         anchors.centerIn: parent
                         font.family: modelData.connected ? filledIconFont.name : "Material Symbols Outlined"
                         font.pixelSize: 24
@@ -197,11 +197,11 @@ Item {
                         Layout.preferredHeight: 18
                     }
 
-                    Text {
+                    QsText {
                         text: modelData.connected ? "Connected" : "Available"
                         font.family: Vars.fontFamily
                         font.pixelSize: 11
-                        font.weight: 500
+                        setWeight: 500
                         color: Theme.on_surface_variant
                         Layout.fillWidth: true
                         horizontalAlignment: Text.AlignLeft
@@ -230,7 +230,7 @@ Item {
                         radius: 16
                         color: infoHover.containsMouse ? Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.08) : "transparent"
                         visible: (modelData.saved || modelData.known || modelData.connected) && !m3LoadingIndicator.running
-                        Text {
+                        QsText {
                             anchors.centerIn: parent
                             font.family: "Material Symbols Outlined"
                             font.pixelSize: 20
@@ -336,7 +336,7 @@ Item {
                             anchors.rightMargin: 4
                             spacing: 4
 
-                            Text {
+                            QsText {
                                 text: "\ue897"
                                 font.family: "Material Symbols Outlined"
                                 font.pixelSize: 20
@@ -354,6 +354,7 @@ Item {
                                 echoMode: pwdToggle.showPwd ? TextInput.Normal : TextInput.Password
                                 selectByMouse: true
                                 clip: true
+                                MouseArea { anchors.fill: parent; cursorShape: Qt.IBeamCursor; onPressed: (mouse) => { parent.forceActiveFocus(); mouse.accepted = false; } }
                                 Keys.onReturnPressed: wifiDelegate.submitPassword()
                                 onVisibleChanged: {
                                     if (visible && wifiDelegate.isPasswordMode) {
@@ -371,7 +372,7 @@ Item {
                                 height: 32
                                 radius: 16
                                 color: pwdToggleHover.containsMouse ? Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.08) : "transparent"
-                                Text {
+                                QsText {
                                     anchors.centerIn: parent
                                     font.family: "Material Symbols Outlined"
                                     font.pixelSize: 20
@@ -392,7 +393,7 @@ Item {
                                 height: 32
                                 radius: 16
                                 color: closeHover.containsMouse ? Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.08) : "transparent"
-                                Text {
+                                QsText {
                                     anchors.centerIn: parent
                                     font.family: "Material Symbols Outlined"
                                     font.pixelSize: 20
@@ -420,14 +421,14 @@ Item {
                     topRightRadius: 24
                     bottomRightRadius: 24
                     color: connectHover.containsMouse ? Qt.tint(Theme.primary, Qt.rgba(Theme.on_primary.r, Theme.on_primary.g, Theme.on_primary.b, 0.08)) : Theme.primary
-                    Text {
+                    QsText {
                         id: connectBtnTxt
                         anchors.centerIn: parent
                         text: "Connect"
                         color: Theme.on_primary
                         font.family: Vars.fontFamily
                         font.pixelSize: 14
-                        font.weight: 500
+                        setWeight: 500
                     }
                     MouseArea {
                         id: connectHover
@@ -463,13 +464,13 @@ Item {
         }
     }
 
-    Text {
+    QsText {
         id: animatedSsidLabel
         z: 10
         text: modelData.name
-        font.family: wifiDelegate.isPasswordMode ? "Google Sans Flefx" : Vars.fontFamily
+        font.family: Vars.fontFamily
         font.pixelSize: wifiDelegate.isPasswordMode ? 12 : 16
-        font.weight: wifiDelegate.isPasswordMode ? 800 : 400
+        setWeight: wifiDelegate.isPasswordMode ? 800 : 400
         color: wifiDelegate.isPasswordMode ? (wifiPwdInput.activeFocus ? Theme.primary : Theme.on_surface_variant) : Theme.on_surface
 
         x: wifiDelegate.isPasswordMode ? 40 : 76
@@ -498,7 +499,7 @@ Item {
     Rectangle {
         anchors.fill: parent
         radius: parent.isSelected ? 36 : 16
-        color: (Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_container_highest.r, Theme.surface_container_highest.g, Theme.surface_container_highest.b, Vars.componentOpacity) : Theme.surface_container_highest
+        color: Vars.tColor(Theme.surface_container_highest, Vars.componentOpacity)
         visible: wifiDelegate.showForget
         opacity: wifiDelegate.showForget ? 1.0 : 0.0
         Behavior on opacity {
@@ -513,7 +514,7 @@ Item {
             anchors.fill: parent
             anchors.margins: 16
             spacing: 16
-            Text {
+            QsText {
                 text: "Forget " + (modelData.name || "Network") + "?"
                 font.family: Vars.fontFamily
                 font.pixelSize: 16
@@ -528,7 +529,7 @@ Item {
                 color: "transparent"
                 border.color: Theme.outline
                 border.width: 1
-                Text {
+                QsText {
                     anchors.centerIn: parent
                     text: "Cancel"
                     color: Theme.on_surface
@@ -546,13 +547,13 @@ Item {
                 height: 32
                 radius: 16
                 color: Theme.error ? Theme.error : "#ffb4ab"
-                Text {
+                QsText {
                     anchors.centerIn: parent
                     text: "Forget"
                     color: Theme.on_error ? Theme.on_error : "#690005"
                     font.family: Vars.fontFamily
                     font.pixelSize: 14
-                    font.weight: 500
+                    setWeight: 500
                 }
                 MouseArea {
                     anchors.fill: parent

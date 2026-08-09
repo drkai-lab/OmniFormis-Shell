@@ -25,6 +25,7 @@ ColumnLayout {
     property string pageShape: "Puffy"
     property color pageColor: Theme.primary
     property color pageOnColor: Theme.on_primary
+    property string searchText: ""
 
     M3Shapes { id: m3Shapes }
 
@@ -44,7 +45,7 @@ ColumnLayout {
                 antialiasing: true
             }
 
-            Text {
+            QsText {
                 anchors.centerIn: parent
                 text: rootBluetoothPage.pageIcon
                 font.family: "Material Symbols Outlined"
@@ -53,12 +54,12 @@ ColumnLayout {
             }
         }
 
-        Text {
+        QsText {
             Layout.fillWidth: true
             text: rootBluetoothPage.pageTitle
             font.family: Vars.fontFamily
             font.pixelSize: 18
-            font.weight: 600
+            setWeight: 600
             color: Theme.on_surface
             elide: Text.ElideRight
         }
@@ -93,7 +94,7 @@ ColumnLayout {
                         id: btHeader
                         Layout.fillWidth: true; Layout.preferredHeight: 72
                         
-                        property color targetColor: btHeaderMouse.containsMouse ? Qt.tint(((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_container.r, Theme.surface_container.g, Theme.surface_container.b, Vars.componentOpacity) : Theme.surface_container), Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.08)) : ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_container.r, Theme.surface_container.g, Theme.surface_container.b, Vars.componentOpacity) : Theme.surface_container)
+                        property color targetColor: btHeaderMouse.containsMouse ? Qt.tint((Vars.tColor(Theme.surface_container, Vars.componentOpacity)), Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.08)) : (Vars.tColor(Theme.surface_container, Vars.componentOpacity))
                         Behavior on targetColor { ColorAnimation { duration: Vars.animationDuration } }
                         
                         property bool hasDeviceBelow: {
@@ -111,10 +112,11 @@ ColumnLayout {
                             opacity: parent.targetColor.a
                             Rectangle {
                                 anchors.fill: parent
-                                radius: 16
                                 color: Qt.rgba(parent.parent.targetColor.r, parent.parent.targetColor.g, parent.parent.targetColor.b, 1.0)
-                                Rectangle { width: 16; height: 16; color: parent.color; anchors.bottom: parent.bottom; anchors.left: parent.left; visible: rootBluetoothPage.adapterState && parent.parent.parent.hasDeviceBelow }
-                                Rectangle { width: 16; height: 16; color: parent.color; anchors.bottom: parent.bottom; anchors.right: parent.right; visible: rootBluetoothPage.adapterState && parent.parent.parent.hasDeviceBelow }
+                                topLeftRadius: 16
+                                topRightRadius: 16
+                                bottomLeftRadius: rootBluetoothPage.adapterState && parent.parent.parent.hasDeviceBelow ? 4 : 16
+                                bottomRightRadius: rootBluetoothPage.adapterState && parent.parent.parent.hasDeviceBelow ? 4 : 16
                             }
                         }
                         
@@ -124,11 +126,11 @@ ColumnLayout {
                         
                         RowLayout {
                             anchors.fill: parent; anchors.leftMargin: 20; anchors.rightMargin: 20
-                            Text { text: rootBluetoothPage.pageTitle; font.family: Vars.fontFamily; font.pixelSize: 16; font.weight: 500; color: Theme.on_surface; Layout.fillWidth: true }
+                            QsText { text: rootBluetoothPage.pageTitle; font.family: Vars.fontFamily; font.pixelSize: 16; setWeight: 500; color: Theme.on_surface; Layout.fillWidth: true }
                             
                             Rectangle {
                                 width: 52; height: 32; radius: 16
-                                color: rootBluetoothPage.adapterState ? ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.primary.r, Theme.primary.g, Theme.primary.b, Vars.componentOpacity) : Theme.primary) : ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_variant.r, Theme.surface_variant.g, Theme.surface_variant.b, Vars.componentOpacity) : Theme.surface_variant)
+                                color: rootBluetoothPage.adapterState ? (Vars.tColor(Theme.primary, Vars.componentOpacity)) : (Vars.tColor(Theme.surface_variant, Vars.componentOpacity))
                                 border.color: btHeader.activeFocus ? Theme.on_surface : "transparent"
                                 border.width: btHeader.activeFocus ? 2 : 0
                                 Rectangle {
@@ -137,7 +139,7 @@ ColumnLayout {
                                     anchors.verticalCenter: parent.verticalCenter
                                     anchors.left: parent.left; anchors.leftMargin: rootBluetoothPage.adapterState ? 24 : 4
                                     Behavior on anchors.leftMargin { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
-                                    Text { anchors.centerIn: parent; font.family: "Material Symbols Outlined"; font.pixelSize: 16; color: rootBluetoothPage.adapterState ? Theme.primary : Theme.surface_variant; text: rootBluetoothPage.adapterState ? "\ue5ca" : "\ue5cd" }
+                                    QsText { anchors.centerIn: parent; font.family: "Material Symbols Outlined"; font.pixelSize: 16; color: rootBluetoothPage.adapterState ? Theme.primary : Theme.surface_variant; text: rootBluetoothPage.adapterState ? "\ue5ca" : "\ue5cd" }
                                 }
                             }
                         }
@@ -148,12 +150,12 @@ ColumnLayout {
                     Rectangle {
                         Layout.fillWidth: true; Layout.preferredHeight: 120
                         visible: rootBluetoothPage.adapterState && (!rootBluetoothPage.adapter || rootBluetoothPage.adapter.devices.values.length === 0)
-                        radius: 16; color: (Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_container.r, Theme.surface_container.g, Theme.surface_container.b, Vars.componentOpacity) : Theme.surface_container
+                        radius: 16; color: Vars.tColor(Theme.surface_container, Vars.componentOpacity)
                         
                         ColumnLayout {
                             anchors.centerIn: parent; spacing: 8
-                            Text { text: "\ue322"; font.family: "Material Symbols Outlined"; font.pixelSize: 32; color: Theme.on_surface_variant; Layout.alignment: Qt.AlignHCenter } // Devices icon
-                            Text { text: "No saved devices"; font.family: Vars.fontFamily; font.pixelSize: 16; color: Theme.on_surface_variant; Layout.alignment: Qt.AlignHCenter }
+                            QsText { text: "\ue322"; font.family: "Material Symbols Outlined"; font.pixelSize: 32; color: Theme.on_surface_variant; Layout.alignment: Qt.AlignHCenter } // Devices icon
+                            QsText { text: "No saved devices"; font.family: Vars.fontFamily; font.pixelSize: 16; color: Theme.on_surface_variant; Layout.alignment: Qt.AlignHCenter }
                         }
                     }
 
@@ -170,7 +172,7 @@ ColumnLayout {
                         Layout.fillWidth: true; Layout.preferredHeight: 72
                         visible: rootBluetoothPage.adapterState
                         
-                        property color targetColor: btPairMouse.containsMouse ? Qt.tint(((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_container.r, Theme.surface_container.g, Theme.surface_container.b, Vars.componentOpacity) : Theme.surface_container), Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.08)) : ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_container.r, Theme.surface_container.g, Theme.surface_container.b, Vars.componentOpacity) : Theme.surface_container)
+                        property color targetColor: btPairMouse.containsMouse ? Qt.tint((Vars.tColor(Theme.surface_container, Vars.componentOpacity)), Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.08)) : (Vars.tColor(Theme.surface_container, Vars.componentOpacity))
                         Behavior on targetColor { ColorAnimation { duration: Vars.animationDuration } }
                         
                         Item {
@@ -179,15 +181,12 @@ ColumnLayout {
                             opacity: parent.targetColor.a
                             Rectangle {
                                 anchors.fill: parent
-                                radius: 16
                                 color: Qt.rgba(parent.parent.targetColor.r, parent.parent.targetColor.g, parent.parent.targetColor.b, 1.0)
                                 
-                                Rectangle { 
-                                    width: 16; height: 16; color: parent.color; anchors.top: parent.top; anchors.left: parent.left 
-                                }
-                                Rectangle { 
-                                    width: 16; height: 16; color: parent.color; anchors.top: parent.top; anchors.right: parent.right 
-                                }
+                                topLeftRadius: 4
+                                topRightRadius: 4
+                                bottomLeftRadius: 16
+                                bottomRightRadius: 16
                             }
                         }
                         
@@ -197,8 +196,8 @@ ColumnLayout {
                         
                         RowLayout {
                             anchors.fill: parent; anchors.leftMargin: 20; anchors.rightMargin: 20; spacing: 16
-                            Text { text: "\ue145"; font.family: "Material Symbols Outlined"; font.pixelSize: 24; color: Theme.on_surface }
-                            Text { text: "Pair new device"; font.family: Vars.fontFamily; font.pixelSize: 16; font.weight: 500; color: Theme.on_surface; Layout.fillWidth: true }
+                            QsText { text: "\ue145"; font.family: "Material Symbols Outlined"; font.pixelSize: 24; color: Theme.on_surface }
+                            QsText { text: "Pair new device"; font.family: Vars.fontFamily; font.pixelSize: 16; setWeight: 500; color: Theme.on_surface; Layout.fillWidth: true }
                         }
                         MouseArea { id: btPairMouse; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: { parent.forceActiveFocus(); btContent.isPairingMode = true; } }
                     }
@@ -216,7 +215,7 @@ ColumnLayout {
                         Layout.fillWidth: true; Layout.preferredHeight: 72
                         visible: rootBluetoothPage.adapterState
                         
-                        property color targetColor: discMouse.containsMouse ? Qt.tint(((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_container.r, Theme.surface_container.g, Theme.surface_container.b, Vars.componentOpacity) : Theme.surface_container), Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.08)) : ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_container.r, Theme.surface_container.g, Theme.surface_container.b, Vars.componentOpacity) : Theme.surface_container)
+                        property color targetColor: discMouse.containsMouse ? Qt.tint((Vars.tColor(Theme.surface_container, Vars.componentOpacity)), Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.08)) : (Vars.tColor(Theme.surface_container, Vars.componentOpacity))
                         Behavior on targetColor { ColorAnimation { duration: Vars.animationDuration } }
                         
                         Item {
@@ -225,15 +224,12 @@ ColumnLayout {
                             opacity: parent.targetColor.a
                             Rectangle {
                                 anchors.fill: parent
-                                radius: 16
                                 color: Qt.rgba(parent.parent.targetColor.r, parent.parent.targetColor.g, parent.parent.targetColor.b, 1.0)
                                 
-                                Rectangle { 
-                                    width: 16; height: 16; color: parent.color; anchors.bottom: parent.bottom; anchors.left: parent.left 
-                                }
-                                Rectangle { 
-                                    width: 16; height: 16; color: parent.color; anchors.bottom: parent.bottom; anchors.right: parent.right 
-                                }
+                                topLeftRadius: 16
+                                topRightRadius: 16
+                                bottomLeftRadius: 4
+                                bottomRightRadius: 4
                             }
                         }
                         
@@ -245,17 +241,17 @@ ColumnLayout {
                             anchors.fill: parent; anchors.leftMargin: 20; anchors.rightMargin: 20; spacing: 16
                             ColumnLayout {
                                 Layout.fillWidth: true; spacing: 2
-                                Text { text: "Discoverable"; font.family: Vars.fontFamily; font.pixelSize: 16; color: Theme.on_surface; Layout.fillWidth: true; horizontalAlignment: Text.AlignLeft }
-                                Text { text: "Allow nearby devices to find this one"; font.family: Vars.fontFamily; font.pixelSize: 13; color: Theme.on_surface_variant; Layout.fillWidth: true; horizontalAlignment: Text.AlignLeft }
+                                QsText { text: "Discoverable"; font.family: Vars.fontFamily; font.pixelSize: 16; color: Theme.on_surface; Layout.fillWidth: true; horizontalAlignment: Text.AlignLeft }
+                                QsText { text: "Allow nearby devices to find this one"; font.family: Vars.fontFamily; font.pixelSize: 13; color: Theme.on_surface_variant; Layout.fillWidth: true; horizontalAlignment: Text.AlignLeft }
                             }
                             Rectangle {
-                                width: 52; height: 32; radius: 16; color: rootBluetoothPage.adapter && rootBluetoothPage.adapter.discoverable ? ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.primary.r, Theme.primary.g, Theme.primary.b, Vars.componentOpacity) : Theme.primary) : ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_variant.r, Theme.surface_variant.g, Theme.surface_variant.b, Vars.componentOpacity) : Theme.surface_variant)
+                                width: 52; height: 32; radius: 16; color: rootBluetoothPage.adapter && rootBluetoothPage.adapter.discoverable ? (Vars.tColor(Theme.primary, Vars.componentOpacity)) : (Vars.tColor(Theme.surface_variant, Vars.componentOpacity))
                                 border.color: discCard.activeFocus ? Theme.on_surface : "transparent"; border.width: discCard.activeFocus ? 2 : 0
                                 Rectangle {
                                     width: 24; height: 24; radius: 12; color: rootBluetoothPage.adapter && rootBluetoothPage.adapter.discoverable ? Theme.on_primary : Theme.on_surface_variant
                                     anchors.verticalCenter: parent.verticalCenter; anchors.left: parent.left; anchors.leftMargin: rootBluetoothPage.adapter && rootBluetoothPage.adapter.discoverable ? 24 : 4
                                     Behavior on anchors.leftMargin { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
-                                    Text { anchors.centerIn: parent; font.family: "Material Symbols Outlined"; font.pixelSize: 16; color: rootBluetoothPage.adapter && rootBluetoothPage.adapter.discoverable ? Theme.primary : Theme.surface_variant; text: rootBluetoothPage.adapter && rootBluetoothPage.adapter.discoverable ? "\ue5ca" : "\ue5cd" }
+                                    QsText { anchors.centerIn: parent; font.family: "Material Symbols Outlined"; font.pixelSize: 16; color: rootBluetoothPage.adapter && rootBluetoothPage.adapter.discoverable ? Theme.primary : Theme.surface_variant; text: rootBluetoothPage.adapter && rootBluetoothPage.adapter.discoverable ? "\ue5ca" : "\ue5cd" }
                                 }
                             }
                         }
@@ -268,7 +264,7 @@ ColumnLayout {
                         Layout.fillWidth: true; Layout.preferredHeight: 72
                         visible: rootBluetoothPage.adapterState
                         
-                        property color targetColor: pairMouse.containsMouse ? Qt.tint(((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_container.r, Theme.surface_container.g, Theme.surface_container.b, Vars.componentOpacity) : Theme.surface_container), Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.08)) : ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_container.r, Theme.surface_container.g, Theme.surface_container.b, Vars.componentOpacity) : Theme.surface_container)
+                        property color targetColor: pairMouse.containsMouse ? Qt.tint((Vars.tColor(Theme.surface_container, Vars.componentOpacity)), Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.08)) : (Vars.tColor(Theme.surface_container, Vars.componentOpacity))
                         Behavior on targetColor { ColorAnimation { duration: Vars.animationDuration } }
                         
                         Item {
@@ -277,15 +273,12 @@ ColumnLayout {
                             opacity: parent.targetColor.a
                             Rectangle {
                                 anchors.fill: parent
-                                radius: 16
                                 color: Qt.rgba(parent.parent.targetColor.r, parent.parent.targetColor.g, parent.parent.targetColor.b, 1.0)
                                 
-                                Rectangle { 
-                                    width: 16; height: 16; color: parent.color; anchors.top: parent.top; anchors.left: parent.left 
-                                }
-                                Rectangle { 
-                                    width: 16; height: 16; color: parent.color; anchors.top: parent.top; anchors.right: parent.right 
-                                }
+                                topLeftRadius: 4
+                                topRightRadius: 4
+                                bottomLeftRadius: 16
+                                bottomRightRadius: 16
                             }
                         }
                         
@@ -297,17 +290,17 @@ ColumnLayout {
                             anchors.fill: parent; anchors.leftMargin: 20; anchors.rightMargin: 20; spacing: 16
                             ColumnLayout {
                                 Layout.fillWidth: true; spacing: 2
-                                Text { text: "Pairable"; font.family: Vars.fontFamily; font.pixelSize: 16; color: Theme.on_surface; Layout.fillWidth: true; horizontalAlignment: Text.AlignLeft }
-                                Text { text: "Allow devices like phones to pair to this PC (not needed for speakers)"; font.family: Vars.fontFamily; font.pixelSize: 13; color: Theme.on_surface_variant; Layout.fillWidth: true; horizontalAlignment: Text.AlignLeft }
+                                QsText { text: "Pairable"; font.family: Vars.fontFamily; font.pixelSize: 16; color: Theme.on_surface; Layout.fillWidth: true; horizontalAlignment: Text.AlignLeft }
+                                QsText { text: "Allow devices like phones to pair to this PC (not needed for speakers)"; font.family: Vars.fontFamily; font.pixelSize: 13; color: Theme.on_surface_variant; Layout.fillWidth: true; horizontalAlignment: Text.AlignLeft }
                             }
                             Rectangle {
-                                width: 52; height: 32; radius: 16; color: rootBluetoothPage.adapter && rootBluetoothPage.adapter.pairable ? ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.primary.r, Theme.primary.g, Theme.primary.b, Vars.componentOpacity) : Theme.primary) : ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_variant.r, Theme.surface_variant.g, Theme.surface_variant.b, Vars.componentOpacity) : Theme.surface_variant)
+                                width: 52; height: 32; radius: 16; color: rootBluetoothPage.adapter && rootBluetoothPage.adapter.pairable ? (Vars.tColor(Theme.primary, Vars.componentOpacity)) : (Vars.tColor(Theme.surface_variant, Vars.componentOpacity))
                                 border.color: pairCard.activeFocus ? Theme.on_surface : "transparent"; border.width: pairCard.activeFocus ? 2 : 0
                                 Rectangle {
                                     width: 24; height: 24; radius: 12; color: rootBluetoothPage.adapter && rootBluetoothPage.adapter.pairable ? Theme.on_primary : Theme.on_surface_variant
                                     anchors.verticalCenter: parent.verticalCenter; anchors.left: parent.left; anchors.leftMargin: rootBluetoothPage.adapter && rootBluetoothPage.adapter.pairable ? 24 : 4
                                     Behavior on anchors.leftMargin { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
-                                    Text { anchors.centerIn: parent; font.family: "Material Symbols Outlined"; font.pixelSize: 16; color: rootBluetoothPage.adapter && rootBluetoothPage.adapter.pairable ? Theme.primary : Theme.surface_variant; text: rootBluetoothPage.adapter && rootBluetoothPage.adapter.pairable ? "\ue5ca" : "\ue5cd" }
+                                    QsText { anchors.centerIn: parent; font.family: "Material Symbols Outlined"; font.pixelSize: 16; color: rootBluetoothPage.adapter && rootBluetoothPage.adapter.pairable ? Theme.primary : Theme.surface_variant; text: rootBluetoothPage.adapter && rootBluetoothPage.adapter.pairable ? "\ue5ca" : "\ue5cd" }
                                 }
                             }
                         }
@@ -323,10 +316,11 @@ ColumnLayout {
                 visible: btContent.isPairingMode
 
                 // Pairing Header Card
-                Rectangle {
+                Item {
+                    id: pairingHeader
                     Layout.fillWidth: true; Layout.preferredHeight: 72
-                    radius: 16; 
-                    color: (Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_container.r, Theme.surface_container.g, Theme.surface_container.b, Vars.componentOpacity) : Theme.surface_container
+                    
+                    property color targetColor: Vars.tColor(Theme.surface_container, Vars.componentOpacity)
                     
                     property bool hasDeviceBelow: {
                         if (!rootBluetoothPage.adapter || !rootBluetoothPage.adapter.devices.values) return false;
@@ -337,9 +331,20 @@ ColumnLayout {
                         return false;
                     }
                     
-                    // Square bottom corners for contiguous list
-                    Rectangle { width: 16; height: 16; color: parent.color; anchors.bottom: parent.bottom; anchors.left: parent.left; visible: parent.hasDeviceBelow }
-                    Rectangle { width: 16; height: 16; color: parent.color; anchors.bottom: parent.bottom; anchors.right: parent.right; visible: parent.hasDeviceBelow }
+                    Item {
+                        anchors.fill: parent
+                        layer.enabled: true
+                        opacity: pairingHeader.targetColor.a
+                        Rectangle {
+                            anchors.fill: parent
+                            color: Qt.rgba(pairingHeader.targetColor.r, pairingHeader.targetColor.g, pairingHeader.targetColor.b, 1.0)
+                            
+                            topLeftRadius: 16
+                            topRightRadius: 16
+                            bottomLeftRadius: pairingHeader.hasDeviceBelow ? 4 : 16
+                            bottomRightRadius: pairingHeader.hasDeviceBelow ? 4 : 16
+                        }
+                    }
                     
                     RowLayout {
                         anchors.fill: parent; anchors.leftMargin: 20; anchors.rightMargin: 20; spacing: 16
@@ -347,17 +352,17 @@ ColumnLayout {
                         // Back button
                         Rectangle {
                             width: 40; height: 40; radius: 20; color: backMouse.containsMouse ? Qt.tint(Theme.surface_container, Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.12)) : "transparent"
-                            Text { anchors.centerIn: parent; font.family: "Material Symbols Outlined"; font.pixelSize: 24; color: Theme.on_surface; text: "\ue5c4" }
+                            QsText { anchors.centerIn: parent; font.family: "Material Symbols Outlined"; font.pixelSize: 24; color: Theme.on_surface; text: "\ue5c4" }
                             MouseArea { id: backMouse; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: btContent.isPairingMode = false }
                         }
 
-                        Text { text: "Pair new device"; font.family: Vars.fontFamily; font.pixelSize: 16; font.weight: 500; color: Theme.on_surface; Layout.fillWidth: true }
+                        QsText { text: "Pair new device"; font.family: Vars.fontFamily; font.pixelSize: 16; setWeight: 500; color: Theme.on_surface; Layout.fillWidth: true }
                         
                         // Discovering Toggle
                         Rectangle {
                             width: 52; height: 32; radius: 16
                             property bool isDiscovering: rootBluetoothPage.adapter && rootBluetoothPage.adapter.discovering !== undefined ? rootBluetoothPage.adapter.discovering : false
-                            color: isDiscovering ? ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.primary.r, Theme.primary.g, Theme.primary.b, Vars.componentOpacity) : Theme.primary) : ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_variant.r, Theme.surface_variant.g, Theme.surface_variant.b, Vars.componentOpacity) : Theme.surface_variant)
+                            color: isDiscovering ? (Vars.tColor(Theme.primary, Vars.componentOpacity)) : (Vars.tColor(Theme.surface_variant, Vars.componentOpacity))
                             Rectangle {
                                 width: 24; height: 24; radius: 12
                                 color: parent.isDiscovering ? Theme.on_primary : Theme.on_surface_variant
@@ -372,7 +377,7 @@ ColumnLayout {
                                         running: parent.visible
                                     }
                                 }
-                                Text { 
+                                QsText { 
                                     anchors.centerIn: parent; font.family: "Material Symbols Outlined"; font.pixelSize: 16
                                     color: Theme.surface_variant
                                     text: "\ue5cd"

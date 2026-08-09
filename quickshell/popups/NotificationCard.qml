@@ -6,12 +6,12 @@ import QtQuick
 import QtQuick.Layouts
 import QtQuick.Effects
 import "../theme/variables.js" as Vars
-
+import "../core/primitives" as Primitives
 Item {
     id: rootCard
     required property var modelData
     property bool isPopup: false
-    property string fontName: "Rubik"
+    property string fontName: Vars.fontFamily
     
     // We bind height to the card container's height so the list layout reacts properly
     width: parent ? parent.width : 360
@@ -73,7 +73,7 @@ Item {
     }
 
     // Actual visual card
-    Rectangle {
+    Primitives.SquircleMask {
         id: container
         layer.enabled: !isPopup
         layer.effect: MultiEffect { shadowEnabled: true; shadowBlur: 1.0; shadowColor: Qt.rgba(0,0,0,0.25); shadowVerticalOffset: 4; shadowHorizontalOffset: 0 }
@@ -106,8 +106,7 @@ Item {
         Behavior on bottomLeftRadius { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
         Behavior on bottomRightRadius { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
         
-        color: isPopup ? (modelData.urgency === NotificationUrgency.Critical ? Theme.error : "transparent") : (modelData.urgency === NotificationUrgency.Critical ? Theme.error_container : ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_container_high.r, Theme.surface_container_high.g, Theme.surface_container_high.b, Vars.blurAmount / 100) : Theme.surface_container_high))
-        border.width: 0
+        color: isPopup ? (modelData.urgency === NotificationUrgency.Critical ? Theme.error : "transparent") : (modelData.urgency === NotificationUrgency.Critical ? Theme.error_container : (Vars.tColor(Theme.surface_container_high, Vars.componentOpacity)))
         clip: true
 
         // Spring animation for X (when released)
@@ -244,7 +243,7 @@ Item {
                         asynchronous: false
                     }
 
-                    Text {
+                    QsText {
                         anchors.centerIn: parent
                         visible: modelData.appIcon === "" || modelData.appIcon === undefined
                         text: {
@@ -264,12 +263,12 @@ Item {
                 }
 
                 // Summary (Title) moved to header
-                Text {
+                QsText {
                     text: modelData.summary || ""
                     color: rootCard.textColor
                     font.pixelSize: 16
                     font.family: rootCard.fontName
-                    font.weight: 600
+                    setWeight: 600
                     elide: Text.ElideRight
                     Layout.fillWidth: true
                     visible: text !== ""
@@ -282,7 +281,7 @@ Item {
                 spacing: Vars.spacingSmall
                 visible: (modelData.body !== "" && modelData.body !== undefined) || (modelData.image !== "" && modelData.image !== undefined)
 
-                Text {
+                QsText {
                     text: modelData.body || ""
                     color: rootCard.textColor
                     opacity: 0.8
@@ -338,14 +337,14 @@ Item {
                             ColorAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard }
                         }
 
-                        Text {
+                        QsText {
                             id: actionText
                             anchors.centerIn: parent
                             text: actionBtn.modelData.text || ""
                             color: rootCard.textColor
                             font.pixelSize: 13
                             font.family: rootCard.fontName
-                            font.weight: 600
+                            setWeight: 600
                         }
 
                         MouseArea {

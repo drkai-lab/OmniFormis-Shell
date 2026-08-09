@@ -10,7 +10,7 @@ import Quickshell.Hyprland
 import QtCore
 
 import "../theme/variables.js" as Vars
-
+import "../core/primitives" as Primitives
 Item {
     id: root
     
@@ -74,11 +74,10 @@ Item {
         height: root.expanded ? 360 : 80
     }
 
-    Rectangle {
+    Primitives.SquircleMask {
         id: panel
         property bool isBackgroundActive: root.expanded || (MorphState.openCount === 0 && MorphState.activeItem === panel && panel.width > 105)
-        layer.enabled: true
-        layer.effect: MultiEffect { shadowEnabled: !root.gameMode && panel.isBackgroundActive; shadowBlur: 1.0; shadowColor: Qt.rgba(0,0,0,0.25); shadowVerticalOffset: 4; shadowHorizontalOffset: 0 }
+        layer.enabled: false
         anchors.top: (!Vars.pillPosition || Vars.pillPosition === "Top") ? parent.top : undefined
         anchors.bottom: Vars.pillPosition === "Bottom" ? parent.bottom : undefined
         anchors.left: Vars.pillPosition === "Left" ? parent.left : undefined
@@ -89,7 +88,7 @@ Item {
         width: root.expanded ? 900 : (MorphState.anyExpanded ? MorphState.targetWidth : 100)
         height: root.expanded ? 550 : (MorphState.anyExpanded ? MorphState.targetHeight : 40)
         
-        color: isBackgroundActive ? ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface.r, Theme.surface.g, Theme.surface.b, Vars.panelOpacity) : Theme.surface) : "transparent"
+        color: Vars.tColorActive(isBackgroundActive, Theme.surface, Vars.panelOpacity)
         property real targetRad: root.expanded ? Vars.radiusExtraLarge : (MorphState.anyExpanded ? MorphState.targetRadius : height / 2)
         topLeftRadius: Vars.getTopLeftRadius(Vars.panelStyle, Vars.pillPosition, false, targetRad)
         topRightRadius: Vars.getTopRightRadius(Vars.panelStyle, Vars.pillPosition, false, targetRad)

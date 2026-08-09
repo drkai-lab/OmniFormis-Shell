@@ -5,6 +5,7 @@ var radiusSmall = 8;
 var radiusMedium = 16;
 var radiusLarge = 24;
 var radiusExtraLarge = 38;
+var cornerPower = 2.0;
 
 var spacingSmall = 11;
 var spacingMedium = 16;

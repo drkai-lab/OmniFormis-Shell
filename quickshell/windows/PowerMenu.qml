@@ -6,7 +6,7 @@ import Quickshell
 import Quickshell.Io
 import Quickshell.Hyprland
 import "../theme/variables.js" as Vars
-
+import "../core/primitives" as Primitives
 Item {
     id: root
     readonly property bool isVertical: Vars.pillPosition === "Left" || Vars.pillPosition === "Right"
@@ -111,7 +111,7 @@ Item {
     
     Keys.onPressed: (event) => {
         if (root.vimKeysEnabled) {
-            if (event.key === Qt.Key_H) {
+            if (event.key === Qt.Key_H || event.key === Qt.Key_A) {
                 if (!isVertical) {
                     if (Vars.pillPosition === "Right") {
                         currentIndex = (currentIndex + 1) % 5;
@@ -120,7 +120,7 @@ Item {
                     }
                     event.accepted = true;
                 }
-            } else if (event.key === Qt.Key_L) {
+            } else if (event.key === Qt.Key_L || event.key === Qt.Key_F) {
                 if (!isVertical) {
                     if (Vars.pillPosition === "Right") {
                         currentIndex = (currentIndex - 1 + 5) % 5;
@@ -129,12 +129,12 @@ Item {
                     }
                     event.accepted = true;
                 }
-            } else if (event.key === Qt.Key_K) {
+            } else if (event.key === Qt.Key_K || event.key === Qt.Key_D) {
                 if (isVertical) {
                     currentIndex = (currentIndex - 1 + 5) % 5;
                     event.accepted = true;
                 }
-            } else if (event.key === Qt.Key_J) {
+            } else if (event.key === Qt.Key_J || event.key === Qt.Key_S) {
                 if (isVertical) {
                     currentIndex = (currentIndex + 1) % 5;
                     event.accepted = true;
@@ -155,10 +155,10 @@ Item {
 
     function triggerAction() {
         if (currentIndex === 0) { LockScreen.lockScreen(); root.expanded = false; }
-        else if (currentIndex === 1) { suspendProcess.running = true; root.expanded = false; }
-        else if (currentIndex === 2) { logoutProcess.running = true; root.expanded = false; }
-        else if (currentIndex === 3) { rebootProcess.running = true; root.expanded = false; }
-        else if (currentIndex === 4) { shutdownProcess.running = true; root.expanded = false; }
+        else if (currentIndex === 1) { Quickshell.execDetached({command: ["systemctl", "suspend"]}); root.expanded = false; }
+        else if (currentIndex === 2) { Quickshell.execDetached({command: ["hyprctl", "dispatch", "hl.dsp.exit()"]}); root.expanded = false; }
+        else if (currentIndex === 3) { Quickshell.execDetached({command: ["systemctl", "reboot"]}); root.expanded = false; }
+        else if (currentIndex === 4) { Quickshell.execDetached({command: ["systemctl", "poweroff"]}); root.expanded = false; }
     }
 
     Item {
@@ -178,11 +178,10 @@ Item {
         height: root.expanded ? 200 : 80
     }
 
-    Rectangle {
+    Primitives.SquircleMask {
         id: panel
         property bool isBackgroundActive: root.expanded || (MorphState.openCount === 0 && MorphState.activeItem === panel && (isVertical ? panel.height > 105 : panel.width > 105))
-        layer.enabled: true
-        layer.effect: MultiEffect { shadowEnabled: !root.gameMode && panel.isBackgroundActive; shadowBlur: 1.0; shadowColor: Qt.rgba(0,0,0,0.25); shadowVerticalOffset: 4; shadowHorizontalOffset: 0 }
+        layer.enabled: false
         anchors.top: (!Vars.pillPosition || Vars.pillPosition === "Top") ? parent.top : undefined
         anchors.bottom: Vars.pillPosition === "Bottom" ? parent.bottom : undefined
         anchors.left: Vars.pillPosition === "Left" ? parent.left : undefined
@@ -193,7 +192,7 @@ Item {
         width: root.expanded ? (isVertical ? 96 : 432) : (MorphState.anyExpanded ? MorphState.targetWidth : (isVertical ? 40 : 100))
         height: root.expanded ? (isVertical ? 432 : 96) : (MorphState.anyExpanded ? MorphState.targetHeight : (isVertical ? 100 : 40))
         
-        color: isBackgroundActive ? ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface.r, Theme.surface.g, Theme.surface.b, Vars.panelOpacity) : Theme.surface) : "transparent"
+        color: Vars.tColorActive(isBackgroundActive, Theme.surface, Vars.panelOpacity)
         property real targetRad: root.expanded ? Vars.radiusExtraLarge : (MorphState.anyExpanded ? MorphState.targetRadius : height / 2)
         topLeftRadius: Vars.getTopLeftRadius(Vars.panelStyle, Vars.pillPosition, false, targetRad)
         topRightRadius: Vars.getTopRightRadius(Vars.panelStyle, Vars.pillPosition, false, targetRad)
@@ -241,9 +240,9 @@ Item {
             PowerMenuButton {
                 id: btn1
                 iconText: "\ue51c" // dark_mode / suspend
-                labelText: "Suspend"
+                labelText: "Sleep"
                 index: 1
-                onClicked: { suspendProcess.running = true; root.expanded = false; }
+                onClicked: { Quickshell.execDetached({command: ["systemctl", "suspend"]}); root.expanded = false; }
             }
             
             PowerMenuButton {
@@ -251,7 +250,7 @@ Item {
                 iconText: "\ue9ba" // logout
                 labelText: "Log Out"
                 index: 2
-                onClicked: { logoutProcess.running = true; root.expanded = false; }
+                onClicked: { Quickshell.execDetached({command: ["hyprctl", "dispatch", "hl.dsp.exit()"]}); root.expanded = false; }
             }
             
             PowerMenuButton {
@@ -259,7 +258,7 @@ Item {
                 iconText: "\ue5d5" // restart_alt
                 labelText: "Reboot"
                 index: 3
-                onClicked: { rebootProcess.running = true; root.expanded = false; }
+                onClicked: { Quickshell.execDetached({command: ["systemctl", "reboot"]}); root.expanded = false; }
             }
             
             PowerMenuButton {
@@ -267,7 +266,7 @@ Item {
                 iconText: "\ue8ac" // power_settings_new
                 labelText: "Power Off"
                 index: 4
-                onClicked: { shutdownProcess.running = true; root.expanded = false; }
+                onClicked: { Quickshell.execDetached({command: ["systemctl", "poweroff"]}); root.expanded = false; }
             }
         }
     }
@@ -282,11 +281,11 @@ Item {
         
         Layout.preferredWidth: 72
         Layout.preferredHeight: 72
-        radius: isActive ? height / 2 : Vars.radiusLarge 
+        radius: isActive ? width / 2 : Vars.radiusLarge 
         
         Behavior on radius { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
         
-        color: isActive ? ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.primary.r, Theme.primary.g, Theme.primary.b, 0.85) : Theme.primary) : Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.06)
+        color: isActive ? (Vars.tColor(Theme.primary, 0.85)) : Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.06)
         border.width: isActive ? 2 : 0
         border.color: isActive ? Theme.primary : "transparent"
         
@@ -300,7 +299,7 @@ Item {
             anchors.fill: parent
 
             // Outlined Icon
-            Text {
+            QsText {
                 anchors.centerIn: parent
                 text: btn.iconText
                 font.family: "Material Symbols Outlined"
@@ -315,7 +314,7 @@ Item {
             }
 
             // Filled Icon
-            Text {
+            QsText {
                 anchors.centerIn: parent
                 text: btn.iconText
                 font.family: filledIconFont.name
@@ -340,8 +339,4 @@ Item {
         }
     }
 
-    Process { id: shutdownProcess; command: ["systemctl", "poweroff"] }
-    Process { id: rebootProcess; command: ["systemctl", "reboot"] }
-    Process { id: suspendProcess; command: ["systemctl", "suspend"] }
-    Process { id: logoutProcess; command: ["hyprctl", "dispatch", "exit"] }
 }

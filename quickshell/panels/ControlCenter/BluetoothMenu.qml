@@ -40,16 +40,17 @@ ColumnLayout {
         Rectangle {
             width: 40; height: 40; radius: 20
             color: backHoverBt.pressed ? Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.12) : (backHoverBt.containsMouse ? Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.08) : "transparent")
-            Text { anchors.centerIn: parent; font.family: "Material Symbols Outlined"; font.pixelSize: 20; color: Theme.on_surface; text: "\ue5c4" }
+            QsText { anchors.centerIn: parent; font.family: "Material Symbols Outlined"; font.pixelSize: 20; color: Theme.on_surface; text: "\ue5c4" }
             MouseArea { id: backHoverBt; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: bluetoothMenu.backRequested() }
             Behavior on color { ColorAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
         }
-        Text { text: "Bluetooth Devices"; font.family: Vars.fontFamily; font.pixelSize: 24; font.weight: Font.Bold; color: Theme.on_surface; Layout.fillWidth: true }
+        QsText { text: "Bluetooth Devices"; font.family: Vars.fontFamily; font.pixelSize: 24; setWeight: Font.Bold; color: Theme.on_surface; Layout.fillWidth: true }
         
         // Master Toggle Switch
         Rectangle {
             width: 56; height: 32; radius: 16
-            color: adapterState ? ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.primary.r, Theme.primary.g, Theme.primary.b, Vars.componentOpacity) : Theme.primary) : ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_variant.r, Theme.surface_variant.g, Theme.surface_variant.b, Vars.componentOpacity) : Theme.surface_variant)
+            color: adapterState ? (Vars.tColor(Theme.primary, 0.8)) : (Vars.tColor(Theme.surface_variant, Vars.componentOpacity))
+            Behavior on color { ColorAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
             Rectangle {
                 width: 24; height: 24; radius: 12
                 color: adapterState ? Theme.on_primary : Theme.on_surface_variant
@@ -78,7 +79,7 @@ ColumnLayout {
                     Layout.fillWidth: true; Layout.preferredHeight: visible ? 64 : 0
                     radius: 16
                     Behavior on radius { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
-                    color: modelData.connected ? ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_container_highest.r, Theme.surface_container_highest.g, Theme.surface_container_highest.b, Vars.componentOpacity) : Theme.surface_container_highest) : (btMouse.pressed ? Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.12) : (btMouse.containsMouse ? Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.08) : ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_container_low.r, Theme.surface_container_low.g, Theme.surface_container_low.b, Vars.componentOpacity) : Theme.surface_container_low)))
+                    color: modelData.connected ? (Vars.tColor(Theme.surface_container_highest, Vars.componentOpacity)) : (btMouse.pressed ? Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.12) : (btMouse.containsMouse ? Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.08) : (Vars.tColor(Theme.surface_container_low, Vars.componentOpacity))))
                     Behavior on color { ColorAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
                     
                     RowLayout {
@@ -88,8 +89,8 @@ ColumnLayout {
                             Layout.preferredWidth: 40; Layout.preferredHeight: 40
                             radius: modelData.connected ? 12 : 20
                             Behavior on radius { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
-                            color: modelData.connected ? ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.primary.r, Theme.primary.g, Theme.primary.b, Vars.componentOpacity) : Theme.primary) : Qt.rgba(Theme.on_surface_variant.r, Theme.on_surface_variant.g, Theme.on_surface_variant.b, 0.1)
-                            Text {
+                            color: modelData.connected ? Theme.primary : Theme.surface_variant
+                            QsText {
                                 anchors.centerIn: parent
                                 font.family: modelData.connected ? filledIconFont.name : "Material Symbols Outlined"
                                 font.pixelSize: 22
@@ -101,12 +102,12 @@ ColumnLayout {
                         
                         ColumnLayout {
                             Layout.alignment: Qt.AlignLeft | Qt.AlignVCenter; spacing: 0
-                            Text { 
-                                text: modelData.name ? modelData.name : "Unknown Device"; font.family: Vars.fontFamily; font.pixelSize: 14; font.weight: Font.Bold
+                            QsText { 
+                                text: modelData.name ? modelData.name : "Unknown Device"; font.family: Vars.fontFamily; font.pixelSize: 14; setWeight: Font.Bold
                                 color: modelData.connected ? Theme.on_surface : Theme.on_surface_variant
                                 Behavior on color { ColorAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
                             }
-                            Text { 
+                            QsText { 
                                 text: modelData.connected ? "Connected" : "Paired"; font.family: Vars.fontFamily; font.pixelSize: 12; opacity: 0.8
                                 color: Theme.on_surface_variant
                                 Behavior on color { ColorAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }

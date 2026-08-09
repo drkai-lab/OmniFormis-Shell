@@ -5,6 +5,7 @@ import Quickshell
 import Quickshell.Wayland
 import Quickshell.Io
 import Quickshell.Hyprland
+import "theme/variables.js" as Vars
 
 ShellRoot {
     id: root
@@ -42,6 +43,7 @@ ShellRoot {
     property bool powerMenuVisible: false
     property bool overviewVisible: false
     property bool lensVisible: false
+    property bool gameLibraryVisible: false
 
     function callOnAllPills(methodName) {
         for (let i = 0; i < topPillsInstantiator.count; i++) {
@@ -56,6 +58,7 @@ ShellRoot {
         if (overviewVisible) {
             callOnAllPills("closeAll");
             screenshotVisible = false;
+            gameLibraryVisible = false;
         }
     }
 
@@ -64,6 +67,7 @@ ShellRoot {
             callOnAllPills("closeAll");
             overviewVisible = false;
             lensVisible = false;
+            gameLibraryVisible = false;
         }
     }
 
@@ -72,6 +76,16 @@ ShellRoot {
             callOnAllPills("closeAll");
             overviewVisible = false;
             screenshotVisible = false;
+            gameLibraryVisible = false;
+        }
+    }
+
+    onGameLibraryVisibleChanged: {
+        if (gameLibraryVisible) {
+            callOnAllPills("closeAll");
+            overviewVisible = false;
+            screenshotVisible = false;
+            lensVisible = false;
         }
     }
 
@@ -98,6 +112,12 @@ ShellRoot {
         name: "lens"
         description: "Circle to Search"
         onPressed: root.lensVisible = !root.lensVisible
+    }
+
+    GlobalShortcut {
+        name: "game_library"
+        description: "Toggle Game Library"
+        onPressed: root.gameLibraryVisible = !root.gameLibraryVisible
     }
 
     GlobalShortcut {
@@ -219,9 +239,15 @@ ShellRoot {
                 root.overviewVisible = false;
                 root.screenshotVisible = false;
                 root.lensVisible = false;
+                root.gameLibraryVisible = false;
             }
             onOpenOverviewRequested: {
+                console.log("[SHELL] onOpenOverviewRequested received. Setting overviewVisible = true");
                 root.overviewVisible = true;
+            }
+            onOpenGameLibraryRequested: {
+                console.log("[SHELL] onOpenGameLibraryRequested received. Setting gameLibraryVisible = true. Current:", root.gameLibraryVisible);
+                root.gameLibraryVisible = true;
             }
         }
     }
@@ -240,6 +266,13 @@ ShellRoot {
         visibleState: root.overviewVisible
         onCloseRequested: {
             root.overviewVisible = false;
+        }
+    }
+
+    GameLibrary {
+        visibleState: root.gameLibraryVisible
+        onCloseRequested: {
+            root.gameLibraryVisible = false;
         }
     }
 }

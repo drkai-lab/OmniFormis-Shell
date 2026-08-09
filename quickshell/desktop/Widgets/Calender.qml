@@ -48,7 +48,7 @@ Item {
     Rectangle {
         id: bg
         anchors.fill: parent
-        color: (Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_container_high.r, Theme.surface_container_high.g, Theme.surface_container_high.b, Vars.panelOpacity) : Theme.surface_container_high
+        color: Vars.tColor(Theme.surface_container_high, Vars.panelOpacity)
         radius: 24
         
         opacity: (Vars._translucent && !Vars.gameMode) ? 0.85 : 1.0
@@ -77,7 +77,7 @@ Item {
                     height: 32
                     radius: 16
                     color: prevMouse.pressed ? Theme.surface_variant : "transparent"
-                    Text {
+                    QsText {
                         anchors.centerIn: parent
                         text: "<"
                         color: Theme.on_surface
@@ -91,7 +91,7 @@ Item {
                 }
 
                 // Month/Year Label
-                Text {
+                QsText {
                     Layout.fillWidth: true
                     horizontalAlignment: Text.AlignHCenter
                     text: root.monthNames[root.currentMonth] + " " + root.currentYear
@@ -106,7 +106,7 @@ Item {
                     height: 32
                     radius: 16
                     color: nextMouse.pressed ? Theme.surface_variant : "transparent"
-                    Text {
+                    QsText {
                         anchors.centerIn: parent
                         text: ">"
                         color: Theme.on_surface
@@ -125,7 +125,7 @@ Item {
                 Layout.fillWidth: true
                 Repeater {
                     model: root.dayNames
-                    Text {
+                    QsText {
                         Layout.fillWidth: true
                         horizontalAlignment: Text.AlignHCenter
                         text: modelData
@@ -167,7 +167,7 @@ Item {
                         visible: isCurrentMonth // Hide cells outside the month (or keep visible and lower opacity)
                         color: isToday ? Theme.primary : (dayMouse.containsMouse ? Theme.surface_variant : "transparent")
 
-                        Text {
+                        QsText {
                             anchors.centerIn: parent
                             text: parent.dayNumber
                             color: parent.isToday ? Theme.on_primary : Theme.on_surface

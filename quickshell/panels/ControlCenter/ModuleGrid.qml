@@ -36,6 +36,7 @@ ColumnLayout {
     signal openSettingsRequested()
     signal openWallpaperRequested()
     signal openOverviewRequested()
+    signal openGameLibraryRequested()
     
     // External states for some modules
     property var audioNode: Pipewire.defaultAudioSink
@@ -85,7 +86,7 @@ ColumnLayout {
     }
 
     function getDefaultColSpan(moduleId) {
-        return (moduleId === "wifi" || moduleId === "bluetooth" || moduleId === "display" || moduleId === "color" || moduleId === "wallpaper" || moduleId === "overview") ? 2 : 1;
+        return (moduleId === "wifi" || moduleId === "bluetooth" || moduleId === "display" || moduleId === "color" || moduleId === "wallpaper" || moduleId === "overview" || moduleId === "game_library") ? 2 : 1;
     }
 
     function saveLayout() {
@@ -284,10 +285,11 @@ ColumnLayout {
             {"moduleId": "wallpaper", "colSpan": 1},
             {"moduleId": "overview", "colSpan": 1},
             {"moduleId": "game_mode", "colSpan": 1},
-            {"moduleId": "system_mode", "colSpan": 1}
+            {"moduleId": "system_mode", "colSpan": 1},
+            {"moduleId": "game_library", "colSpan": 1}
         ];
         
-        let validModules = ["wifi", "bluetooth", "audio", "display", "peace", "color", "wallpaper", "overview", "game_mode", "system_mode"];
+        let validModules = ["wifi", "bluetooth", "audio", "display", "peace", "color", "wallpaper", "overview", "game_mode", "system_mode", "game_library"];
         
         activeTiles.clear();
         availableTiles.clear();
@@ -386,7 +388,7 @@ ColumnLayout {
                 width: activeDelegateWrapper.width
                 height: activeDelegateWrapper.height
                 radius: isActive ? 16 : height / 2
-                color: dragArea.drag.active ? ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_container_highest.r, Theme.surface_container_highest.g, Theme.surface_container_highest.b, Vars.componentOpacity) : Theme.surface_container_highest) : (isActive ? ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.secondary_container.r, Theme.secondary_container.g, Theme.secondary_container.b, Vars.componentOpacity) : Theme.secondary_container) : ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_container_high.r, Theme.surface_container_high.g, Theme.surface_container_high.b, Vars.componentOpacity) : Theme.surface_container_high))
+                color: dragArea.drag.active ? (Vars.tColor(Theme.surface_container_highest, Vars.componentOpacity)) : (isActive ? (Vars.tColor(Theme.secondary_container, Vars.componentOpacity)) : (Vars.tColor(Theme.surface_container_high, Vars.componentOpacity)))
                 scale: dragArea.drag.active ? 1.05 : 1.0
                 
                 Behavior on radius { NumberAnimation { duration: 200; easing.type: Easing.OutCubic } }
@@ -405,9 +407,10 @@ ColumnLayout {
                                         (moduleId === "display" ? false : false) ||
                                         (moduleId === "peace" ? NotificationService.peaceMode : false) ||
                                         (moduleId === "game_mode" ? moduleGridRoot.gameMode : false) ||
-                                        (moduleId === "system_mode" ? moduleGridRoot.systemModeIsDark : false)
+                                        (moduleId === "system_mode" ? moduleGridRoot.systemModeIsDark : false) ||
+                                        (moduleId === "game_library" ? false : false)
                                         
-                property bool hasSubMenu: moduleId === "wifi" || moduleId === "bluetooth" || moduleId === "display" || moduleId === "color" || moduleId === "wallpaper" || moduleId === "overview"
+                property bool hasSubMenu: moduleId === "wifi" || moduleId === "bluetooth" || moduleId === "display" || moduleId === "color" || moduleId === "wallpaper" || moduleId === "overview" || moduleId === "game_library"
                                         
                 property string mIcon: moduleId === "wifi" ? moduleGridRoot.wifiIcon :
                                        moduleId === "bluetooth" ? moduleGridRoot.bluetoothIcon :
@@ -418,7 +421,8 @@ ColumnLayout {
                                        moduleId === "wallpaper" ? "wallpaper" :
                                        moduleId === "overview" ? "grid_view" : 
                                        moduleId === "game_mode" ? "sports_esports" :
-                                       moduleId === "system_mode" ? (moduleGridRoot.systemModeIsDark ? "dark_mode" : "light_mode") : ""
+                                       moduleId === "system_mode" ? (moduleGridRoot.systemModeIsDark ? "dark_mode" : "light_mode") :
+                                       moduleId === "game_library" ? "videogame_asset" : ""
                                        
                 property string mTitle: moduleId === "wifi" ? "Wi-Fi" :
                                         moduleId === "bluetooth" ? "Bluetooth" :
@@ -429,7 +433,8 @@ ColumnLayout {
                                         moduleId === "wallpaper" ? "Wallpaper" :
                                         moduleId === "overview" ? "Overview" : 
                                         moduleId === "game_mode" ? "Game Mode" : 
-                                        moduleId === "system_mode" ? "System Mode" : ""
+                                        moduleId === "system_mode" ? "System Mode" :
+                                        moduleId === "game_library" ? "Game Library" : ""
                                         
                 function getExpandedSubtitle() {
                     switch(moduleId) {
@@ -457,6 +462,8 @@ ColumnLayout {
                             return isActive ? "On" : "Off";
                         case "system_mode":
                             return moduleGridRoot.systemModeIsDark ? "Dark" : "Light";
+                        case "game_library":
+                            return "Steam Games";
                         default: 
                             return "";
                     }
@@ -469,6 +476,7 @@ ColumnLayout {
                     else if (moduleId === "color") activeDelegateWrapper.gridRoot.openColorSchemeRequested()
                     else if (moduleId === "wallpaper") activeDelegateWrapper.gridRoot.openWallpaperRequested()
                     else if (moduleId === "overview") activeDelegateWrapper.gridRoot.openOverviewRequested()
+                    else if (moduleId === "game_library") activeDelegateWrapper.gridRoot.openGameLibraryRequested()
                     else doToggle();
                 }
                 
@@ -494,7 +502,7 @@ ColumnLayout {
                         anchors.fill: parent
                         visible: activeDelegateWrapper.colSpan === 1
                         
-                        Text {
+                        QsText {
                             anchors.centerIn: parent
                             font.family: tileDelegate.isActive ? filledIconFont.name : "Material Symbols Outlined"
                             font.pixelSize: 24
@@ -534,7 +542,7 @@ ColumnLayout {
                                 Behavior on color { ColorAnimation { duration: 250; easing.type: Easing.OutCubic } }
                                 Behavior on radius { NumberAnimation { duration: 200; easing.type: Easing.OutCubic } }
                                 
-                                Text {
+                                QsText {
                                     anchors.centerIn: parent
                                     font.family: tileDelegate.isActive ? filledIconFont.name : "Material Symbols Outlined"
                                     font.pixelSize: 24
@@ -569,20 +577,20 @@ ColumnLayout {
                                 anchors.bottomMargin: 12
                                 spacing: 0
                                 
-                                Text {
+                                QsText {
                                     Layout.alignment: Qt.AlignLeft
                                     horizontalAlignment: Text.AlignLeft
                                     text: tileDelegate.mTitle
                                     font.family: Vars.fontFamily
                                     font.pixelSize: 15
-                                    font.weight: 600
+                                    setWeight: 600
                                     color: tileDelegate.isActive ? Theme.on_surface : Theme.on_surface_variant
                                     Behavior on color { ColorAnimation { duration: 250; easing.type: Easing.OutCubic } }
                                     elide: Text.ElideRight
                                     Layout.fillWidth: true
                                 }
                                 
-                                Text {
+                                QsText {
                                     Layout.alignment: Qt.AlignLeft
                                     horizontalAlignment: Text.AlignLeft
                                     color: Theme.on_surface_variant
@@ -655,7 +663,7 @@ ColumnLayout {
                         color: Theme.error
                         
                         
-                        Text { 
+                        QsText { 
                             anchors.centerIn: parent
                             text: "remove"
                             font.family: "Material Symbols Outlined"

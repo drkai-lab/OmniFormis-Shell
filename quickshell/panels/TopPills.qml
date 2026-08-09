@@ -1,4 +1,5 @@
 import QtQuick
+import QtQuick.Effects
 import ".."
 import QtQuick.Layouts
 import Quickshell
@@ -38,13 +39,27 @@ PanelWindow {
         onCleared: {
             console.log("[DEBUG] HyprlandFocusGrab onCleared fired! active:", active);
             if (active) {
+                // Delay close so screenshot tools (grimblast/slurp) that briefly
+                // steal focus don't cause panels to vanish before the capture frame.
+                focusLostCloseTimer.restart();
+            }
+        }
+    }
+
+    Timer {
+        id: focusLostCloseTimer
+        interval: 400
+        repeat: false
+        onTriggered: {
+            // Only close if focus grab is still gone (not a brief screenshot tool steal)
+            if (!globalFocusGrab.active && !_forceDropGrab) {
                 closeAll();
             }
         }
     }
 
     property string pillPos: Vars.pillPosition || "Top"
-    property int defaultEdgeMargin: (Vars.panelStyle === "Framed" || Vars.panelStyle === "Flat" || Vars.panelStyle === "Attached") ? 0 : currentSpacingSmall
+    property int defaultEdgeMargin: (Vars.panelStyle === "Flat" || Vars.panelStyle === "Attached") ? 0 : currentSpacingSmall
 
 
     signal popupOpened
@@ -54,6 +69,7 @@ PanelWindow {
         topWindow.pillHoverGrace = false;
     }
     signal openOverviewRequested
+    signal openGameLibraryRequested
 
     property bool gameMode: Vars.gameMode !== undefined ? Vars.gameMode : false
     Timer {
@@ -109,6 +125,7 @@ PanelWindow {
         if (item !== settingsAppItem) settingsAppItem.expanded = false;
         if (item !== workspacesItem) workspacesItem.cancelOverlay();
         if (item !== volumeOsdItem) volumeOsdItem.isVisible = false;
+        if (item !== brightnessOsdItem) brightnessOsdItem.isVisible = false;
     }
 
     function closeAll() {
@@ -157,6 +174,9 @@ PanelWindow {
         }
         Region {
             item: volumeOsdItem.panelMask
+        }
+        Region {
+            item: brightnessOsdItem.panelMask
         }
     }
 
@@ -598,7 +618,12 @@ PanelWindow {
 
         onOpenOverviewRequested: {
             closeAll();
-            topWindow.openOverviewRequested();
+            Qt.callLater(() => { topWindow.openOverviewRequested(); });
+        }
+
+        onOpenGameLibraryRequested: {
+            closeAll();
+            Qt.callLater(() => { topWindow.openGameLibraryRequested(); });
         }
     }
 
@@ -615,7 +640,23 @@ PanelWindow {
         anchors.bottomMargin: topWindow.pillPos === "Bottom" ? topWindow.defaultEdgeMargin : 0
         anchors.leftMargin: topWindow.pillPos === "Left" ? topWindow.defaultEdgeMargin : 0
         anchors.rightMargin: topWindow.pillPos === "Right" ? topWindow.defaultEdgeMargin : 0
-        preventShow: launcherItem.expanded || controlCenterItem.expanded || wallpaperSwitcherItem.expanded || colorSchemeSwitcherItem.expanded || powerMenuItem.expanded || polkitItem.expanded || notificationPopupItem.expanded || emojiPickerItem.expanded || settingsAppItem.expanded || launcherItem.panel.width > 105 || controlCenterItem.panel.width > 105 || powerMenuItem.panel.width > 105 || polkitItem.panel.width > 105 || notificationPopupItem.panel.width > 105 || emojiPickerItem.panel.width > 105 || wallpaperSwitcherItem.panel.width > 105 || colorSchemeSwitcherItem.panel.width > 105 || settingsAppItem.panel.width > 105
+        preventShow: launcherItem.expanded || controlCenterItem.expanded || wallpaperSwitcherItem.expanded || colorSchemeSwitcherItem.expanded || powerMenuItem.expanded || polkitItem.expanded || notificationPopupItem.expanded || emojiPickerItem.expanded || settingsAppItem.expanded || launcherItem.panel.width > 105 || controlCenterItem.panel.width > 105 || powerMenuItem.panel.width > 105 || polkitItem.panel.width > 105 || notificationPopupItem.panel.width > 105 || emojiPickerItem.panel.width > 105 || wallpaperSwitcherItem.panel.width > 105 || colorSchemeSwitcherItem.panel.width > 105 || settingsAppItem.panel.width > 105 || brightnessOsdItem.isVisible
+    }
+
+    BrightnessOsd {
+        id: brightnessOsdItem
+        gameMode: topWindow.gameMode
+        anchors.top: topWindow.pillPos === "Bottom" || topWindow.pillPos === "Right" || topWindow.pillPos === "Left" ? undefined : parent.top
+        anchors.bottom: topWindow.pillPos === "Bottom" ? parent.bottom : undefined
+        anchors.left: topWindow.pillPos === "Left" ? parent.left : undefined
+        anchors.right: topWindow.pillPos === "Right" ? parent.right : undefined
+        anchors.horizontalCenter: (topWindow.pillPos === "Left" || topWindow.pillPos === "Right") ? undefined : parent.horizontalCenter
+        anchors.verticalCenter: (topWindow.pillPos === "Left" || topWindow.pillPos === "Right") ? parent.verticalCenter : undefined
+        anchors.topMargin: topWindow.pillPos === "Bottom" || topWindow.pillPos === "Right" || topWindow.pillPos === "Left" ? 0 : topWindow.defaultEdgeMargin
+        anchors.bottomMargin: topWindow.pillPos === "Bottom" ? topWindow.defaultEdgeMargin : 0
+        anchors.leftMargin: topWindow.pillPos === "Left" ? topWindow.defaultEdgeMargin : 0
+        anchors.rightMargin: topWindow.pillPos === "Right" ? topWindow.defaultEdgeMargin : 0
+        preventShow: launcherItem.expanded || controlCenterItem.expanded || wallpaperSwitcherItem.expanded || colorSchemeSwitcherItem.expanded || powerMenuItem.expanded || polkitItem.expanded || notificationPopupItem.expanded || emojiPickerItem.expanded || settingsAppItem.expanded || launcherItem.panel.width > 105 || controlCenterItem.panel.width > 105 || powerMenuItem.panel.width > 105 || polkitItem.panel.width > 105 || notificationPopupItem.panel.width > 105 || emojiPickerItem.panel.width > 105 || wallpaperSwitcherItem.panel.width > 105 || colorSchemeSwitcherItem.panel.width > 105 || settingsAppItem.panel.width > 105 || volumeOsdItem.isVisible
     }
 
     WallpaperSwitcher {
@@ -734,7 +775,7 @@ PanelWindow {
     }
 
     Repeater {
-        model: [launcherItem, clockPill, workspacesItem, powerMenuItem, emojiPickerItem, colorSchemeSwitcherItem, wallpaperSwitcherItem, settingsAppItem, controlCenterItem, notificationPopupItem, polkitItem, volumeOsdItem]
+        model: [launcherItem, clockPill, workspacesItem, powerMenuItem, emojiPickerItem, colorSchemeSwitcherItem, wallpaperSwitcherItem, settingsAppItem, controlCenterItem, notificationPopupItem, polkitItem, volumeOsdItem, brightnessOsdItem]
         delegate: Item {
             property var targetPanel: modelData
             property bool hasPanel: !!(targetPanel?.panel)
@@ -745,8 +786,8 @@ PanelWindow {
             property string pos: Vars.pillPosition || "Top"
             
             InvertedCorner {
-                x: Math.round(parent.pos === "Right" ? (parent.px + parent.pw - width) : (parent.pos === "Left" ? parent.px : parent.px - width))
-                y: Math.round((parent.pos === "Right" || parent.pos === "Left") ? parent.py - height : (parent.pos === "Bottom" ? parent.py + parent.ph - height : parent.py))
+                x: parent.pos === "Right" ? (parent.px + parent.pw - width) : (parent.pos === "Left" ? parent.px : parent.px - width)
+                y: (parent.pos === "Right" || parent.pos === "Left") ? parent.py - height : (parent.pos === "Bottom" ? parent.py + parent.ph - height : parent.py)
                 side: parent.pos === "Right" ? "bottom-right" : (parent.pos === "Left" ? "bottom-left" : (parent.pos === "Bottom" ? "bottom-right" : "top-right"))
                 visible: Vars.panelStyle === "Attached" && opacity > 0 && parent.pw > 0 && parent.ph > 0
                 color: (parent.targetPanel && parent.targetPanel.panel) ? parent.targetPanel.panel.color : "transparent"
@@ -754,8 +795,8 @@ PanelWindow {
                 radius: Math.max(0, Math.min(currentRadiusExtraLarge, Math.min(parent.pw, parent.ph) / 2))
             }
             InvertedCorner {
-                x: Math.round((parent.pos === "Right" || parent.pos === "Left") ? (parent.pos === "Right" ? parent.px + parent.pw - width : parent.px) : parent.px + parent.pw)
-                y: Math.round((parent.pos === "Right" || parent.pos === "Left") ? parent.py + parent.ph : (parent.pos === "Bottom" ? parent.py + parent.ph - height : parent.py))
+                x: (parent.pos === "Right" || parent.pos === "Left") ? (parent.pos === "Right" ? parent.px + parent.pw - width : parent.px) : parent.px + parent.pw
+                y: (parent.pos === "Right" || parent.pos === "Left") ? parent.py + parent.ph : (parent.pos === "Bottom" ? parent.py + parent.ph - height : parent.py)
                 side: parent.pos === "Right" ? "top-right" : (parent.pos === "Left" ? "top-left" : (parent.pos === "Bottom" ? "bottom-left" : "top-left"))
                 visible: Vars.panelStyle === "Attached" && opacity > 0 && parent.pw > 0 && parent.ph > 0
                 color: (parent.targetPanel && parent.targetPanel.panel) ? parent.targetPanel.panel.color : "transparent"

@@ -16,9 +16,10 @@ Item {
 
     property string pageTitle: "About OmniFormis"
     property string pageIcon: "\ue88e"
-    property string pageShape: "4SidedCookie"
+    property string pageShape: "Puffy"
     property color pageColor: Theme.secondary
     property color pageOnColor: Theme.on_secondary
+    property string searchText: ""
 
     M3Shapes { id: m3Shapes }
 
@@ -87,7 +88,7 @@ Item {
                         antialiasing: true
                     }
 
-                    Text {
+                    QsText {
                         anchors.centerIn: parent
                         text: aboutPage.pageIcon
                         font.family: "Material Symbols Outlined"
@@ -96,12 +97,12 @@ Item {
                     }
                 }
 
-                Text {
+                QsText {
                     Layout.fillWidth: true
                     text: aboutPage.pageTitle
                     font.family: Vars.fontFamily
                     font.pixelSize: 18
-                    font.weight: 600
+                    setWeight: 600
                     color: Theme.on_surface
                     elide: Text.ElideRight
                 }
@@ -138,12 +139,12 @@ Item {
                         anchors.rightMargin: 20
                         spacing: 16
                         
-                        Text { text: "grid_view"; font.family: "Material Symbols Outlined"; font.pixelSize: 24; color: Theme.on_surface_variant }
+                        QsText { text: "grid_view"; font.family: "Material Symbols Outlined"; font.pixelSize: 24; color: Theme.on_surface_variant }
                         ColumnLayout {
                             Layout.fillWidth: true
                             spacing: 2
-                            Text { Layout.fillWidth: true; horizontalAlignment: Text.AlignLeft; text: "System Components"; font.family: Vars.fontFamily; font.pixelSize: 16; font.weight: Font.Medium; color: Theme.on_surface }
-                            Text { Layout.fillWidth: true; horizontalAlignment: Text.AlignLeft; text: "Powered by Quickshell & Hyprland"; font.family: Vars.fontFamily; font.pixelSize: 12; color: Theme.on_surface_variant; opacity: 0.9 }
+                            QsText { Layout.fillWidth: true; horizontalAlignment: Text.AlignLeft; text: "System Components"; font.family: Vars.fontFamily; font.pixelSize: 16; setWeight: Font.Medium; color: Theme.on_surface }
+                            QsText { Layout.fillWidth: true; horizontalAlignment: Text.AlignLeft; text: "Powered by Quickshell & Hyprland"; font.family: Vars.fontFamily; font.pixelSize: 12; color: Theme.on_surface_variant; opacity: 0.9 }
                         }
                     }
                 }
@@ -180,12 +181,12 @@ Item {
                         anchors.bottomMargin: 16
                         spacing: 16
                         
-                        Text { Layout.alignment: Qt.AlignTop; text: "memory"; font.family: "Material Symbols Outlined"; font.pixelSize: 24; color: Theme.on_surface_variant }
+                        QsText { Layout.alignment: Qt.AlignTop; text: "memory"; font.family: "Material Symbols Outlined"; font.pixelSize: 24; color: Theme.on_surface_variant }
                         ColumnLayout {
                             id: hardwareLayout
                             Layout.fillWidth: true
                             spacing: 4
-                            Text { Layout.fillWidth: true; horizontalAlignment: Text.AlignLeft; text: "Hardware & OS"; font.family: Vars.fontFamily; font.pixelSize: 16; font.weight: Font.Medium; color: Theme.on_surface }
+                            QsText { Layout.fillWidth: true; horizontalAlignment: Text.AlignLeft; text: "Hardware & OS"; font.family: Vars.fontFamily; font.pixelSize: 16; setWeight: Font.Medium; color: Theme.on_surface }
                             
                             Item { Layout.preferredHeight: 2 } // spacer
                             
@@ -193,40 +194,40 @@ Item {
                             RowLayout {
                                 Layout.fillWidth: true
                                 spacing: 8
-                                Text { text: "OS:"; font.family: Vars.fontFamily; font.pixelSize: 12; font.weight: Font.Medium; color: Theme.on_surface_variant; opacity: 0.8 }
-                                Text { Layout.fillWidth: true; text: aboutPage.osName; font.family: Vars.fontFamily; font.pixelSize: 12; color: Theme.on_surface_variant; opacity: 0.9; elide: Text.ElideRight }
+                                QsText { text: "OS:"; font.family: Vars.fontFamily; font.pixelSize: 12; setWeight: Font.Medium; color: Theme.on_surface_variant; opacity: 0.8 }
+                                QsText { Layout.fillWidth: true; text: aboutPage.osName; font.family: Vars.fontFamily; font.pixelSize: 12; color: Theme.on_surface_variant; opacity: 0.9; elide: Text.ElideRight }
                             }
                             
                             // Host Row
                             RowLayout {
                                 Layout.fillWidth: true
                                 spacing: 8
-                                Text { text: "PC:"; font.family: Vars.fontFamily; font.pixelSize: 12; font.weight: Font.Medium; color: Theme.on_surface_variant; opacity: 0.8 }
-                                Text { Layout.fillWidth: true; text: aboutPage.hostModel; font.family: Vars.fontFamily; font.pixelSize: 12; color: Theme.on_surface_variant; opacity: 0.9; elide: Text.ElideRight }
+                                QsText { text: "PC:"; font.family: Vars.fontFamily; font.pixelSize: 12; setWeight: Font.Medium; color: Theme.on_surface_variant; opacity: 0.8 }
+                                QsText { Layout.fillWidth: true; text: aboutPage.hostModel; font.family: Vars.fontFamily; font.pixelSize: 12; color: Theme.on_surface_variant; opacity: 0.9; elide: Text.ElideRight }
                             }
                             
                             // CPU Row
                             RowLayout {
                                 Layout.fillWidth: true
                                 spacing: 8
-                                Text { text: "CPU:"; font.family: Vars.fontFamily; font.pixelSize: 12; font.weight: Font.Medium; color: Theme.on_surface_variant; opacity: 0.8 }
-                                Text { Layout.fillWidth: true; text: aboutPage.cpuName; font.family: Vars.fontFamily; font.pixelSize: 12; color: Theme.on_surface_variant; opacity: 0.9; elide: Text.ElideRight }
+                                QsText { text: "CPU:"; font.family: Vars.fontFamily; font.pixelSize: 12; setWeight: Font.Medium; color: Theme.on_surface_variant; opacity: 0.8 }
+                                QsText { Layout.fillWidth: true; text: aboutPage.cpuName; font.family: Vars.fontFamily; font.pixelSize: 12; color: Theme.on_surface_variant; opacity: 0.9; elide: Text.ElideRight }
                             }
                             
                             // GPU Row
                             RowLayout {
                                 Layout.fillWidth: true
                                 spacing: 8
-                                Text { text: "GPU:"; font.family: Vars.fontFamily; font.pixelSize: 12; font.weight: Font.Medium; color: Theme.on_surface_variant; opacity: 0.8 }
-                                Text { Layout.fillWidth: true; text: aboutPage.gpuName; font.family: Vars.fontFamily; font.pixelSize: 12; color: Theme.on_surface_variant; opacity: 0.9; elide: Text.ElideRight }
+                                QsText { text: "GPU:"; font.family: Vars.fontFamily; font.pixelSize: 12; setWeight: Font.Medium; color: Theme.on_surface_variant; opacity: 0.8 }
+                                QsText { Layout.fillWidth: true; text: aboutPage.gpuName; font.family: Vars.fontFamily; font.pixelSize: 12; color: Theme.on_surface_variant; opacity: 0.9; elide: Text.ElideRight }
                             }
                             
                             // RAM Row
                             RowLayout {
                                 Layout.fillWidth: true
                                 spacing: 8
-                                Text { text: "RAM:"; font.family: Vars.fontFamily; font.pixelSize: 12; font.weight: Font.Medium; color: Theme.on_surface_variant; opacity: 0.8 }
-                                Text { Layout.fillWidth: true; text: aboutPage.memName; font.family: Vars.fontFamily; font.pixelSize: 12; color: Theme.on_surface_variant; opacity: 0.9; elide: Text.ElideRight }
+                                QsText { text: "RAM:"; font.family: Vars.fontFamily; font.pixelSize: 12; setWeight: Font.Medium; color: Theme.on_surface_variant; opacity: 0.8 }
+                                QsText { Layout.fillWidth: true; text: aboutPage.memName; font.family: Vars.fontFamily; font.pixelSize: 12; color: Theme.on_surface_variant; opacity: 0.9; elide: Text.ElideRight }
                             }
                         }
                     }
@@ -254,12 +255,12 @@ Item {
                         anchors.rightMargin: 20
                         spacing: 16
                         
-                        Text { text: "engineering"; font.family: "Material Symbols Outlined"; font.pixelSize: 24; color: Theme.on_surface_variant }
+                        QsText { text: "engineering"; font.family: "Material Symbols Outlined"; font.pixelSize: 24; color: Theme.on_surface_variant }
                         ColumnLayout {
                             Layout.fillWidth: true
                             spacing: 2
-                            Text { Layout.fillWidth: true; horizontalAlignment: Text.AlignLeft; text: "Developer"; font.family: Vars.fontFamily; font.pixelSize: 16; font.weight: Font.Medium; color: Theme.on_surface }
-                            Text { Layout.fillWidth: true; horizontalAlignment: Text.AlignLeft; text: "Created by boing"; font.family: Vars.fontFamily; font.pixelSize: 12; color: Theme.on_surface_variant; opacity: 0.9 }
+                            QsText { Layout.fillWidth: true; horizontalAlignment: Text.AlignLeft; text: "Developer"; font.family: Vars.fontFamily; font.pixelSize: 16; setWeight: Font.Medium; color: Theme.on_surface }
+                            QsText { Layout.fillWidth: true; horizontalAlignment: Text.AlignLeft; text: "Created by boing"; font.family: Vars.fontFamily; font.pixelSize: 12; color: Theme.on_surface_variant; opacity: 0.9 }
                         }
                     }
                 }

@@ -1,32 +1,32 @@
 return {
     colors = {
-        background = "#141318",
-        foreground = "#e5e1e9",
-        cursor_bg = "#e5e1e9",
-        cursor_border = "#e5e1e9",
-        cursor_fg = "#c9c5d0",
-        selection_bg = "#c8c3dc",
-        selection_fg = "#302e41",
-        split = "#c8c3dc",
+        background = "#12140e",
+        foreground = "#e3e3d8",
+        cursor_bg = "#e3e3d8",
+        cursor_border = "#e3e3d8",
+        cursor_fg = "#c5c8b9",
+        selection_bg = "#c1caab",
+        selection_fg = "#2b331d",
+        split = "#c1caab",
         ansi = {
-            "#ddd8e0",
-            "#100635",
-            "#504886",
-            "#8a4364",
-            "#5d5791",
-            "#7b5265",
-            "#e3dbfd",
-            "#47464f"
+            "#dadbcf",
+            "#212d04",
+            "#5e7337",
+            "#2d726a",
+            "#4f6629",
+            "#396661",
+            "#e1eebe",
+            "#45483d"
         },
         brights = {
-            "#e5e1ec",
-            "#4f46a2",
-            "#655aa6",
-            "#ac547d",
-            "#7771aa",
-            "#99677e",
-            "#e4dfff",
-            "#1c1b20"
+            "#e2e4d4",
+            "#52711e",
+            "#7b9648",
+            "#3c968c",
+            "#6b8a38",
+            "#4b8780",
+            "#d3f29a",
+            "#1a1c15"
         }
     }
 }

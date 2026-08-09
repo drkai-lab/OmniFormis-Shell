@@ -159,48 +159,18 @@ GridView {
     }
 
     Keys.onPressed: (event) => {
-        if (event.text === "s" || event.key === Qt.Key_S) {
-            moveCurrentIndexDown();
-            scrollToCurrentIndex();
-            event.accepted = true;
-            return;
-        }
-
-        if (event.text === "d" || event.key === Qt.Key_D) {
-            if (currentIndex < 3) {
-                requestFocusSearch();
-            } else {
-                moveCurrentIndexUp();
-                scrollToCurrentIndex();
-            }
-            event.accepted = true;
-            return;
-        }
-
-        if (event.text === "a" || event.key === Qt.Key_A) {
-            moveCurrentIndexLeft();
-            scrollToCurrentIndex();
-            event.accepted = true;
-            return;
-        }
-
-        if (event.text === "f" || event.key === Qt.Key_F) {
-            moveCurrentIndexRight();
-            scrollToCurrentIndex();
-            event.accepted = true;
-            return;
-        }
-
         if (vimKeysEnabled) {
-            if (event.key === Qt.Key_H) {
+            if (event.key === Qt.Key_H || event.text === "a" || event.key === Qt.Key_A) {
                 moveCurrentIndexLeft();
                 scrollToCurrentIndex();
                 event.accepted = true;
-            } else if (event.key === Qt.Key_L) {
+                return;
+            } else if (event.key === Qt.Key_L || event.text === "f" || event.key === Qt.Key_F) {
                 moveCurrentIndexRight();
                 positionViewAtIndex(currentIndex, GridView.Contain);
                 event.accepted = true;
-            } else if (event.key === Qt.Key_K) {
+                return;
+            } else if (event.key === Qt.Key_K || event.text === "d" || event.key === Qt.Key_D) {
                 if (currentIndex < 3) {
                     requestFocusSearch();
                 } else {
@@ -208,10 +178,12 @@ GridView {
                     positionViewAtIndex(currentIndex, GridView.Contain);
                 }
                 event.accepted = true;
-            } else if (event.key === Qt.Key_J) {
+                return;
+            } else if (event.key === Qt.Key_J || event.text === "s" || event.key === Qt.Key_S) {
                 moveCurrentIndexDown();
                 positionViewAtIndex(currentIndex, GridView.Contain);
                 event.accepted = true;
+                return;
             }
         }
     }
@@ -230,9 +202,9 @@ GridView {
         Rectangle {
             anchors.fill: parent
             anchors.margins: isCurrentFocus ? 0 : Vars.spacingSmall
-            radius: isCurrentFocus ? Vars.radiusLarge : Vars.radiusMedium
+            radius: Vars.radiusMedium
 
-            color: isCurrentFocus ? Theme.primary_container : (tileMouseArea.containsMouse ? ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_container_highest.r, Theme.surface_container_highest.g, Theme.surface_container_highest.b, Vars.componentOpacity) : Theme.surface_container_highest) : ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_container_low.r, Theme.surface_container_low.g, Theme.surface_container_low.b, Vars.componentOpacity) : Theme.surface_container_low))
+            color: isCurrentFocus ? Theme.primary_container : (tileMouseArea.containsMouse ? (Vars.tColor(Theme.surface_container_highest, Vars.componentOpacity)) : (Vars.tColor(Theme.surface_container_low, Vars.componentOpacity)))
 
             Rectangle {
                 id: tileMask
@@ -290,6 +262,7 @@ GridView {
                             source: "file://" + filePath
                             fillMode: Image.PreserveAspectCrop
                             asynchronous: true
+                            cache: false
                             sourceSize.width: 600
                             sourceSize.height: 600
                             opacity: status === Image.Ready ? 1.0 : 0.0
@@ -308,6 +281,7 @@ GridView {
                             source: "file://" + filePath
                             fillMode: Image.PreserveAspectCrop
                             asynchronous: true
+                            cache: false
                             playing: tileMouseArea.containsMouse || delegateItem.isCurrentFocus
                             paused: !tileMouseArea.containsMouse && !delegateItem.isCurrentFocus
                         }
@@ -322,7 +296,7 @@ GridView {
                         radius: Math.floor(Vars.radiusSmall / 2)
                         color: Theme.primary
                         visible: filePath.toLowerCase().endsWith(".gif")
-                        Text {
+                        QsText {
                             anchors.centerIn: parent
                             text: "GIF"
                             font.family: Vars.fontFamily

@@ -5,7 +5,7 @@ import QtQuick.Layouts
 import Quickshell
 import Quickshell.Services.Notifications
 import "../theme/variables.js" as Vars
-
+import "../core/primitives" as Primitives
 Item {
     id: root
 
@@ -70,7 +70,7 @@ Item {
         height: panel.height + 40
     }
 
-    Rectangle {
+    Primitives.SquircleMask {
         id: panel
         layer.enabled: true
         layer.effect: MultiEffect { shadowEnabled: true; shadowBlur: 1.0; shadowColor: Qt.rgba(0,0,0,0.25); shadowVerticalOffset: 4; shadowHorizontalOffset: 0 }
@@ -93,7 +93,6 @@ Item {
             } 
         }
 
-        Behavior on radius { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customExpressiveSpatialSlow } }
         Behavior on width { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customExpressiveSpatialSlow } }
         Behavior on height { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customExpressiveSpatialSlow } }
 

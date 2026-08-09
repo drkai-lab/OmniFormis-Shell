@@ -7,12 +7,20 @@ import Quickshell.Io
 import Quickshell.Hyprland
 import Quickshell.Networking
 import Quickshell.Bluetooth
+import QtCore
 import "../theme/variables.js" as Vars
+import "../core/primitives" as Primitives
 import "SettingsApp"
 import ".."
 
 Item {
     id: root
+
+    Settings {
+        id: settings
+        category: "SettingsApp"
+        property int sidebarWidth: 280
+    }
     
     Layout.preferredWidth: 100
     Layout.preferredHeight: 40
@@ -39,34 +47,102 @@ Item {
     signal detachToggled(bool isFloating)
     
     property string currentSection: "quick"
+    property string globalSearchText: globalSearchBar.text
     
     // Extracted navigation properties mapped from the sidebar
-    readonly property var navItems: [
+    readonly property var baseNavItems: [
         // Presets & Quick Settings
-        { id: "quick", name: "Quick & Presets", subtitle: "Presets, wallpaper, panel style & position", icon: "\ue41d", section: "Presets & Customization", isFirst: true, isLast: true, hue: 0.80, shape: "Sunny" },
+        { id: "quick", name: "Quick & Presets", subtitle: "Presets, wallpaper, panel style & position", icon: "\ue41d", section: "Presets & Customization", hue: 0.80, shape: "Puffy" },
 
         // Connections
-        { id: "wifi", name: "Wi-Fi", subtitle: "Wi-Fi, ethernet", icon: root.wifiIcon, section: "Connections", isFirst: true, isLast: false, hue: 0.60, shape: "Circle" },
-        { id: "bluetooth", name: "Connected devices", subtitle: "Bluetooth, devices, pairing", icon: root.bluetoothIcon, section: "Connections", isFirst: false, isLast: true, hue: 0.65, shape: "Square" },
+        { id: "wifi", name: "Wi-Fi", subtitle: "Wi-Fi, ethernet", icon: root.wifiIcon, section: "Connections", hue: 0.60, shape: "Puffy" },
+        { id: "bluetooth", name: "Connected devices", subtitle: "Bluetooth, devices, pairing", icon: root.bluetoothIcon, section: "Connections", hue: 0.65, shape: "Puffy" },
         
         // System & Input
-        { id: "General", name: "System & Apps", subtitle: "Default apps, environment, gaming", icon: "\ue8b8", section: "System & Input", isFirst: true, isLast: false, hue: 0.70, shape: "4SidedCookie" },
-        { id: "Input", name: "Input Devices", subtitle: "Keyboard layout, mouse, gestures", icon: "\ue312", section: "System & Input", isFirst: false, isLast: false, hue: 0.75, shape: "Pill" },
-        { id: "Keybinds", name: "Shortcuts & Modifiers", subtitle: "System shortcuts, hotkeys, modifiers", icon: "\ue31c", section: "System & Input", isFirst: false, isLast: true, hue: 0.80, shape: "6SidedCookie" },
+        { id: "General", name: "System & Apps", subtitle: "Default apps, environment, gaming", icon: "\ue8b8", section: "System & Input", hue: 0.70, shape: "Puffy" },
+        { id: "Input", name: "Input Devices", subtitle: "Keyboard layout, mouse, gestures", icon: "\ue312", section: "System & Input", hue: 0.75, shape: "Puffy" },
+        { id: "Keybinds", name: "Shortcuts & Modifiers", subtitle: "System shortcuts, hotkeys, modifiers", icon: "\ue31c", section: "System & Input", hue: 0.80, shape: "Puffy" },
 
         // Desktop & Windows
-        { id: "Desktop", name: "Desktop & Widgets", subtitle: "Wallpaper mask, clock, calendar, overview", icon: "\ue871", section: "Desktop & Windows", isFirst: true, isLast: false, hue: 0.85, shape: "Clamshell" },
-        { id: "Layout", name: "Window Gaps & Layout", subtitle: "Window gaps, border size, spacing, padding", icon: "\ue8f1", section: "Desktop & Windows", isFirst: false, isLast: true, hue: 0.90, shape: "Bun" },
+        { id: "Desktop", name: "Desktop & Widgets", subtitle: "Wallpaper mask, clock, calendar, overview", icon: "\ue871", section: "Desktop & Windows", hue: 0.85, shape: "Puffy" },
+        { id: "Layout", name: "Window Gaps & Layout", subtitle: "Window gaps, border size, spacing, padding", icon: "\ue8f1", section: "Desktop & Windows", hue: 0.90, shape: "Puffy" },
 
         // Appearance & Animations
-        { id: "Theme", name: "Visuals & Effects", subtitle: "Rounding, opacity, blur, shadow, font family", icon: "\ue3b7", section: "Appearance & Animations", isFirst: true, isLast: false, hue: 0.95, shape: "Flower" },
-        { id: "Animations", name: "Animation & Physics", subtitle: "Animation style, durations, scroll physics", icon: "\ue410", section: "Appearance & Animations", isFirst: false, isLast: false, hue: 0.00, shape: "VerySunny" },
-        { id: "bezier", name: "Curve Editor", subtitle: "Interactive custom bezier creator", icon: "\ue71c", section: "Appearance & Animations", isFirst: false, isLast: true, hue: 0.06, shape: "Oval" },
+        { id: "Theme", name: "Visuals & Effects", subtitle: "Rounding, opacity, blur, shadow, font family", icon: "\ue3b7", section: "Appearance & Animations", hue: 0.95, shape: "Puffy" },
+        { id: "Animations", name: "Animation & Physics", subtitle: "Animation style, durations, scroll physics", icon: "\ue410", section: "Appearance & Animations", hue: 0.00, shape: "Puffy" },
+        { id: "bezier", name: "Curve Editor", subtitle: "Interactive custom bezier creator", icon: "\ue71c", section: "Appearance & Animations", hue: 0.06, shape: "Puffy" },
         
         // System Monitor & Info
-        { id: "taskmanager", name: "Task Manager", subtitle: "System resources, processes", icon: "\ue85c", section: "System Info", isFirst: true, isLast: false, hue: 0.12, shape: "12SidedCookie" },
-        { id: "about", name: "About", subtitle: "Omniformis Shell info", icon: "\ue88e", section: "System Info", isFirst: false, isLast: true, hue: 0.18, shape: "8LeafClover" }
+        { id: "taskmanager", name: "Task Manager", subtitle: "System resources, processes", icon: "\ue85c", section: "System Info", hue: 0.12, shape: "Puffy" },
+        { id: "about", name: "About", subtitle: "Omniformis Shell info", icon: "\ue88e", section: "System Info", hue: 0.18, shape: "Puffy" }
     ]
+
+    function navMatchesSearch(navItem, searchText) {
+        if (!searchText) return true;
+        var terms = searchText.toLowerCase().trim().replace(/-/g, "").split(/\s+/);
+        if (terms.length === 0 || terms[0] === "") return true;
+
+        var searchableText = navItem.name + " " + navItem.subtitle + " " + navItem.id;
+
+        var unifiedCategories = ["General", "Input", "Keybinds", "Desktop", "Layout", "Theme", "Animations"];
+        if (unifiedCategories.includes(navItem.id)) {
+            var vars = unifiedPage.allVars;
+            if (vars) {
+                for (var i = 0; i < vars.length; i++) {
+                    var v = vars[i];
+                    if (v.category === navItem.id) {
+                        if (v.key) searchableText += " " + v.key;
+                        if (v.title) searchableText += " " + v.title;
+                        if (v.help) searchableText += " " + v.help;
+                    }
+                }
+            }
+        }
+        
+        searchableText = searchableText.toLowerCase().replace(/-/g, "");
+        for (var t = 0; t < terms.length; t++) {
+            if (!searchableText.includes(terms[t])) {
+                return false;
+            }
+        }
+        
+        return true;
+    }
+
+    function filterNavItems(searchText) {
+        var filtered = [];
+        var currentSectionGroups = {};
+        
+        // First pass: collect matching items
+        for (var i = 0; i < baseNavItems.length; i++) {
+            var item = baseNavItems[i];
+            if (navMatchesSearch(item, searchText)) {
+                filtered.push(Object.assign({}, item));
+            }
+        }
+        
+        // Second pass: compute isFirst and isLast by section
+        for (var j = 0; j < filtered.length; j++) {
+            var cur = filtered[j];
+            var sec = cur.section;
+            if (!currentSectionGroups[sec]) {
+                currentSectionGroups[sec] = [];
+            }
+            currentSectionGroups[sec].push(cur);
+        }
+        
+        for (var s in currentSectionGroups) {
+            var group = currentSectionGroups[s];
+            for (var k = 0; k < group.length; k++) {
+                group[k].isFirst = (k === 0);
+                group[k].isLast = (k === group.length - 1);
+            }
+        }
+        
+        return filtered;
+    }
+
+    property var navItems: filterNavItems(globalSearchText)
 
     property var currentNavItem: navItems ? (navItems.find(i => i.id === currentSection) || navItems[0]) : null
     property int currentNavIndex: navItems ? Math.max(0, navItems.findIndex(i => i.id === currentSection)) : 0
@@ -110,7 +186,7 @@ Item {
     signal closeRequested()
     onExpandedChanged: {
         if (expanded) {
-            MorphState.notifyOpened(root.isFloatingInstance ? root.width : 1320, root.isFloatingInstance ? root.height : 740, panel.targetRad, panel);
+            MorphState.notifyOpened(root.isFloatingInstance ? root.width : 1440, root.isFloatingInstance ? root.height : 740, panel.targetRad, panel);
             root.forceActiveFocus();
         } else {
             MorphState.notifyClosed();
@@ -136,22 +212,21 @@ Item {
         height: root.expanded ? 540 : 80
     }
     
-    Rectangle {
+    Primitives.SquircleMask {
         id: panel
         property bool isBackgroundActive: root.expanded || (MorphState.openCount === 0 && MorphState.activeItem === panel && panel.width > 105)
-        layer.enabled: true
-        layer.effect: MultiEffect { shadowEnabled: !root.gameMode && panel.isBackgroundActive; shadowBlur: 1.0; shadowColor: Qt.rgba(0,0,0,0.25); shadowVerticalOffset: 4; shadowHorizontalOffset: 0 }
+        layer.enabled: false
         anchors.top: (!Vars.pillPosition || Vars.pillPosition === "Top" || root.isFloatingInstance) ? parent.top : undefined
         anchors.bottom: (!root.isFloatingInstance && Vars.pillPosition === "Bottom") ? parent.bottom : undefined
         anchors.left: (!root.isFloatingInstance && Vars.pillPosition === "Left") ? parent.left : undefined
         anchors.right: (!root.isFloatingInstance && Vars.pillPosition === "Right") ? parent.right : undefined
-        anchors.horizontalCenter: (!root.isFloatingInstance && (Vars.pillPosition === "Left" || Vars.pillPosition === "Right")) ? undefined : parent.horizontalCenter
+        anchors.horizontalCenter: (!root.isFloatingInstance && (Vars.pillPosition !== "Left" && Vars.pillPosition !== "Right")) ? parent.horizontalCenter : undefined
         anchors.verticalCenter: (!root.isFloatingInstance && (Vars.pillPosition === "Left" || Vars.pillPosition === "Right")) ? parent.verticalCenter : undefined
         
-        width: root.expanded ? (root.isFloatingInstance ? root.width : 1320) : (MorphState.anyExpanded ? MorphState.targetWidth : 100)
+        width: root.expanded ? (root.isFloatingInstance ? root.width : 1440) : (MorphState.anyExpanded ? MorphState.targetWidth : 100)
         height: root.expanded ? (root.isFloatingInstance ? root.height : 740) : (MorphState.anyExpanded ? MorphState.targetHeight : 40)
         
-        color: isBackgroundActive ? ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_container_low.r, Theme.surface_container_low.g, Theme.surface_container_low.b, Vars.panelOpacity) : Theme.surface_container_low) : "transparent"
+        color: Vars.tColorActive(isBackgroundActive, Theme.surface_container_low, Vars.panelOpacity)
         property real targetRad: root.expanded ? Vars.radiusExtraLarge : (MorphState.anyExpanded ? MorphState.targetRadius : height / 2)
         topLeftRadius: root.isFloatingInstance ? Vars.radiusExtraLarge : Vars.getTopLeftRadius(Vars.panelStyle, Vars.pillPosition, false, targetRad)
         topRightRadius: root.isFloatingInstance ? Vars.radiusExtraLarge : Vars.getTopRightRadius(Vars.panelStyle, Vars.pillPosition, false, targetRad)
@@ -179,87 +254,129 @@ Item {
             clip: true
             Behavior on opacity { enabled: !root.gameMode; NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: root.expanded ? Vars.customEmphasizedDecelerate : Vars.customEmphasizedAccelerate } }
 
-            Loader {
+            property alias sidebarWidth: settings.sidebarWidth
+
+            RowLayout {
                 anchors.fill: parent
-                active: root.expanded || parent.opacity > 0
-                asynchronous: false
-                sourceComponent: RowLayout {
-                anchors.fill: parent
-                spacing: Vars.spacingLarge
+                spacing: 0
 
                 // Sidebar
-                ColumnLayout {
-                    Layout.preferredWidth: 280
-                    Layout.maximumWidth: 280
+                Item {
+                    Layout.preferredWidth: innerUI.sidebarWidth
+                    Layout.minimumWidth: 200
+                    Layout.maximumWidth: 600
                     Layout.fillHeight: true
-                    spacing: Vars.spacingMedium
+                    clip: true
 
-                    // Header
-                    RowLayout {
-                        Layout.fillWidth: true
+                    ColumnLayout {
+                        anchors.fill: parent
                         spacing: Vars.spacingMedium
 
-                        Rectangle {
-                            width: 48; height: 48; radius: Vars.radiusMedium
-                            color: backHover.pressed ? Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.12) : (backHover.containsMouse ? Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.08) : "transparent")
-                            Text { anchors.centerIn: parent; font.family: "Material Symbols Outlined"; font.pixelSize: 20; color: Theme.on_surface; text: "\ue5cd" }
-                            MouseArea { id: backHover; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: root.expanded = false }
-                            Behavior on color { ColorAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
-                        }
-                        
-                        Rectangle {
-                            width: 48; height: 48; radius: Vars.radiusMedium
-                            color: detachHover.pressed ? Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.12) : (detachHover.containsMouse ? Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.08) : "transparent")
-                            Text { anchors.centerIn: parent; font.family: "Material Symbols Outlined"; font.pixelSize: 20; color: Theme.on_surface; text: root.isFloatingInstance ? "\ue5ce" : "\ue89b" }
-                            MouseArea { 
-                                id: detachHover; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; 
-                                onClicked: {
-                                    root.expanded = false; 
-                                    root.detachToggled(!root.isFloatingInstance);
-                                }
+                        RowLayout {
+                            Layout.fillWidth: true
+                            spacing: 4
+
+                            Primitives.SearchBar {
+                                id: globalSearchBar
+                                Layout.fillWidth: true
+                                placeholderText: "Search settings..."
+                                showIcon: true
+                                iconText: "search"
+                                defaultHeight: 48
+                                defaultColor: globalSearchBar.isActiveFocus ? Vars.tColor(Theme.primary_container, Vars.componentOpacity) : Vars.tColor(Theme.surface_container, Vars.componentOpacity)
+                                
+                                topLeftRadius: Vars.radiusMedium
+                                bottomLeftRadius: Vars.radiusMedium
+                                topRightRadius: Vars.radiusSmall
+                                bottomRightRadius: Vars.radiusSmall
                             }
-                            Behavior on color { ColorAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
+
+                            // Detach Button (Floating)
+                            Rectangle {
+                                width: 48; height: 48
+                                color: detachHover.pressed ? Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.12) : (detachHover.containsMouse ? Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.08) : Vars.tColor(Theme.surface_container, Vars.componentOpacity))
+                                
+                                topLeftRadius: Vars.radiusSmall
+                                bottomLeftRadius: Vars.radiusSmall
+                                topRightRadius: Vars.radiusSmall
+                                bottomRightRadius: Vars.radiusSmall
+
+                                QsText { anchors.centerIn: parent; font.family: "Material Symbols Outlined"; font.pixelSize: 20; color: Theme.on_surface; text: root.isFloatingInstance ? "\ue5ce" : "\ue89b" }
+                                MouseArea {
+                                    id: detachHover; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor;
+                                    onClicked: { root.expanded = false; root.detachToggled(!root.isFloatingInstance); }
+                                }
+                                Behavior on color { ColorAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
+                            }
+
+                            // Close Button
+                            Rectangle {
+                                width: 48; height: 48
+                                color: backHover.pressed ? Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.12) : (backHover.containsMouse ? Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.08) : Vars.tColor(Theme.surface_container, Vars.componentOpacity))
+                                
+                                topLeftRadius: Vars.radiusSmall
+                                bottomLeftRadius: Vars.radiusSmall
+                                topRightRadius: Vars.radiusMedium
+                                bottomRightRadius: Vars.radiusMedium
+
+                                QsText { anchors.centerIn: parent; font.family: "Material Symbols Outlined"; font.pixelSize: 20; color: Theme.on_surface; text: "\ue5cd" }
+                                MouseArea { id: backHover; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: root.expanded = false }
+                                Behavior on color { ColorAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
+                            }
                         }
-                        
-                        Text {
-                            text: "Settings"
-                            font.family: Vars.fontFamily
-                            font.pixelSize: 24
-                            font.weight: 700
-                            color: Theme.on_surface
-                        }
-                    }
 
-                    Item { Layout.preferredHeight: Vars.spacingSmall }
+                        Item { Layout.preferredHeight: Vars.spacingSmall }
 
-                    // Navigation Items
-                    Flickable {
-                        Layout.fillWidth: true
-                        Layout.fillHeight: true
-                        contentHeight: sidebar.implicitHeight
-                        clip: true
-                        interactive: true
-                        // boundsBehavior: Flickable.StopAtBounds
+                        Flickable {
+                            Layout.fillWidth: true
+                            Layout.fillHeight: true
+                            contentHeight: sidebar.implicitHeight
+                            clip: true
+                            interactive: true
 
-                        SettingsSidebar {
-                            id: sidebar
-                            width: parent.width
-                            currentSection: root.currentSection
-                            navItems: root.navItems
-                            onCurrentSectionChanged: {
-                                if (root.currentSection !== currentSection) {
-                                    root.currentSection = currentSection
+                            SettingsSidebar {
+                                id: sidebar
+                                width: parent.width
+                                currentSection: root.currentSection
+                                navItems: root.navItems
+                                onCurrentSectionChanged: {
+                                    if (root.currentSection !== currentSection) {
+                                        root.currentSection = currentSection
+                                    }
                                 }
                             }
                         }
                     }
                 }
 
-                // Vertical Divider
-                Rectangle {
+                // Draggable Divider
+                Item {
+                    Layout.preferredWidth: Vars.spacingLarge
                     Layout.fillHeight: true
-                    Layout.preferredWidth: 1
-                    color: Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.2)
+
+                    Rectangle {
+                        anchors.centerIn: parent
+                        width: 2
+                        height: parent.height
+                        color: dividerArea.pressed ? Theme.primary : (dividerArea.containsMouse ? Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.4) : Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.2))
+                        Behavior on color { ColorAnimation { duration: 150 } }
+                    }
+
+                    MouseArea {
+                        id: dividerArea
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        cursorShape: Qt.SizeHorCursor
+                        property real pressX: 0
+                        property int pressWidth: 0
+                        onPressed: (mouse) => { pressX = mapToItem(innerUI, mouse.x, 0).x; pressWidth = innerUI.sidebarWidth; }
+                        onPositionChanged: (mouse) => {
+                            if (pressed) {
+                                var dx = mapToItem(innerUI, mouse.x, 0).x - pressX;
+                                innerUI.sidebarWidth = Math.min(600, Math.max(200, pressWidth + dx));
+                            }
+                        }
+                    }
                 }
 
                 // Content Area
@@ -273,10 +390,9 @@ Item {
                         if (root.currentSection === "bluetooth") return 4;
                         if (root.currentSection === "about") return 5;
                         if (root.currentSection === "taskmanager") return 6;
-                        return 1; // "General", "Input", "Keybinds", "Desktop", "Layout", "Theme", "Animations" map to UnifiedSettingsPage
+                        return 1;
                     }
 
-                    // 0: Quick Page & Presets
                     QuickPage {
                         id: quickPage
                         Layout.fillWidth: true
@@ -286,12 +402,9 @@ Item {
                         pageShape: root.currentNavItem ? root.currentNavItem.shape : "Circle"
                         pageColor: root.currentNavColor
                         pageOnColor: root.currentNavOnColor
-                        onOpenWallpaperSwitcher: {
-                            root.openWallpaperSwitcherRequested();
-                        }
+                        onOpenWallpaperSwitcher: { root.openWallpaperSwitcherRequested(); }
                     }
 
-                    // 1: Unified Settings (Hyprland + Quickshell)
                     UnifiedSettingsPage {
                         id: unifiedPage
                         activeCategory: (root.currentSection === "General" || root.currentSection === "Input" || root.currentSection === "Keybinds" || root.currentSection === "Desktop" || root.currentSection === "Layout" || root.currentSection === "Theme" || root.currentSection === "Animations") ? root.currentSection : "General"
@@ -302,9 +415,9 @@ Item {
                         pageShape: root.currentNavItem ? root.currentNavItem.shape : "Circle"
                         pageColor: root.currentNavColor
                         pageOnColor: root.currentNavOnColor
+                        searchText: root.globalSearchText
                     }
 
-                    // 1: Bezier Editor
                     BezierEditorPage {
                         id: bezierPage
                         Layout.fillWidth: true
@@ -314,12 +427,10 @@ Item {
                         pageShape: root.currentNavItem ? root.currentNavItem.shape : "Circle"
                         pageColor: root.currentNavColor
                         pageOnColor: root.currentNavOnColor
-                        onSettingsChanged: {
-                            unifiedPage.loadSettings();
-                        }
+                        searchText: root.globalSearchText
+                        onSettingsChanged: { unifiedPage.loadSettings(); }
                     }
 
-                    // 2: Wi-Fi Settings
                     WifiPage {
                         id: wifiPage
                         wifiDevice: root.wifiDevice
@@ -331,9 +442,9 @@ Item {
                         pageShape: root.currentNavItem ? root.currentNavItem.shape : "Circle"
                         pageColor: root.currentNavColor
                         pageOnColor: root.currentNavOnColor
+                        searchText: root.globalSearchText
                     }
 
-                    // 3: Bluetooth Settings
                     BluetoothPage {
                         id: bluetoothPage
                         adapter: root.adapter
@@ -344,9 +455,9 @@ Item {
                         pageShape: root.currentNavItem ? root.currentNavItem.shape : "Circle"
                         pageColor: root.currentNavColor
                         pageOnColor: root.currentNavOnColor
+                        searchText: root.globalSearchText
                     }
-                    
-                    // 4: About Page
+
                     AboutPage {
                         id: aboutPage
                         Layout.fillWidth: true
@@ -356,9 +467,9 @@ Item {
                         pageShape: root.currentNavItem ? root.currentNavItem.shape : "Circle"
                         pageColor: root.currentNavColor
                         pageOnColor: root.currentNavOnColor
+                        searchText: root.globalSearchText
                     }
-                    
-                    // 5: Task Manager Page
+
                     TaskManagerPage {
                         id: taskManagerPage
                         Layout.fillWidth: true
@@ -368,8 +479,8 @@ Item {
                         pageShape: root.currentNavItem ? root.currentNavItem.shape : "Circle"
                         pageColor: root.currentNavColor
                         pageOnColor: root.currentNavOnColor
+                        searchText: root.globalSearchText
                     }
-                }
                 }
             }
         }

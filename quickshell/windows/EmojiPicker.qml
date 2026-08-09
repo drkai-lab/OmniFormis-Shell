@@ -7,7 +7,7 @@ import Quickshell
 import Quickshell.Hyprland
 import Quickshell.Io
 import "../theme/variables.js" as Vars
-
+import "../core/primitives" as Primitives
 Item {
     id: root
     
@@ -120,11 +120,10 @@ Item {
         height: root.expanded ? 490 : 80
     }
 
-    Rectangle {
+    Primitives.SquircleMask {
         id: panel
         property bool isBackgroundActive: root.expanded || (MorphState.openCount === 0 && MorphState.activeItem === panel && panel.width > 105)
-        layer.enabled: true
-        layer.effect: MultiEffect { shadowEnabled: !root.gameMode && panel.isBackgroundActive; shadowBlur: 1.0; shadowColor: Qt.rgba(0,0,0,0.25); shadowVerticalOffset: 4; shadowHorizontalOffset: 0 }
+        layer.enabled: false
         anchors.top: (!Vars.pillPosition || Vars.pillPosition === "Top") ? parent.top : undefined
         anchors.bottom: Vars.pillPosition === "Bottom" ? parent.bottom : undefined
         anchors.left: Vars.pillPosition === "Left" ? parent.left : undefined
@@ -138,7 +137,7 @@ Item {
         opacity: isBackgroundActive || innerUI.opacity > 0 ? 1.0 : 0.0
         // visible: opacity > 0 // Removed to preserve Behavior when hidden
         
-        color: isBackgroundActive ? ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_container_high.r, Theme.surface_container_high.g, Theme.surface_container_high.b, Vars.panelOpacity) : Theme.surface_container_high) : "transparent"
+        color: Vars.tColorActive(isBackgroundActive, Theme.surface_container_high, Vars.panelOpacity)
         property real targetRad: root.expanded ? Vars.radiusExtraLarge : (MorphState.anyExpanded ? MorphState.targetRadius : height / 2)
         topLeftRadius: Vars.getTopLeftRadius(Vars.panelStyle, Vars.pillPosition, false, targetRad)
         topRightRadius: Vars.getTopRightRadius(Vars.panelStyle, Vars.pillPosition, false, targetRad)
@@ -146,7 +145,6 @@ Item {
         bottomRightRadius: Vars.getBottomRightRadius(Vars.panelStyle, Vars.pillPosition, false, targetRad)
         // clip removed for shadow
 
-        Behavior on radius { enabled: !root.gameMode; NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customExpressiveSpatialSlow } }
         Behavior on width { enabled: !root.gameMode; NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customExpressiveSpatialSlow } }
         Behavior on height { enabled: !root.gameMode; NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customExpressiveSpatialSlow } }
 
@@ -171,11 +169,11 @@ Item {
                     Rectangle {
                         width: 40; height: 40; radius: Vars.radiusMedium
                         color: backHover.pressed ? Qt.rgba(Theme.on_primary.r, Theme.on_primary.g, Theme.on_primary.b, 0.12) : (backHover.containsMouse ? Qt.rgba(Theme.on_primary.r, Theme.on_primary.g, Theme.on_primary.b, 0.08) : "transparent")
-                        Text { anchors.centerIn: parent; font.family: "Material Symbols Outlined"; font.pixelSize: 20; color: Theme.on_primary; text: "\ue5cd" }
+                        QsText { anchors.centerIn: parent; font.family: "Material Symbols Outlined"; font.pixelSize: 20; color: Theme.on_primary; text: "\ue5cd" }
                         MouseArea { id: backHover; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: root.expanded = false }
                         Behavior on color { ColorAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
                     }
-                    Text { text: "Emoji Picker"; font.family: Vars.fontFamily; font.pixelSize: 20; font.weight: 600; color: Theme.on_primary }
+                    QsText { text: "Emoji Picker"; font.family: Vars.fontFamily; font.pixelSize: 20; setWeight: 600; color: Theme.on_primary }
                 }
 
                 SearchBar {
@@ -227,13 +225,13 @@ Item {
                     
                     Keys.onPressed: (event) => {
                         if (root.vimKeysEnabled) {
-                            if (event.key === Qt.Key_H) {
+                            if (event.key === Qt.Key_H || event.key === Qt.Key_A) {
                                 moveCurrentIndexLeft();
                                 event.accepted = true;
-                            } else if (event.key === Qt.Key_L) {
+                            } else if (event.key === Qt.Key_L || event.key === Qt.Key_F) {
                                 moveCurrentIndexRight();
                                 event.accepted = true;
-                            } else if (event.key === Qt.Key_K) {
+                            } else if (event.key === Qt.Key_K || event.key === Qt.Key_D) {
                                 if (currentIndex < Math.floor(width / cellWidth)) {
                                     innerUI.visible = true;
             searchBar.forceActiveFocus();
@@ -242,7 +240,7 @@ Item {
                                     moveCurrentIndexUp();
                                 }
                                 event.accepted = true;
-                            } else if (event.key === Qt.Key_J) {
+                            } else if (event.key === Qt.Key_J || event.key === Qt.Key_S) {
                                 moveCurrentIndexDown();
                                 event.accepted = true;
                             }
@@ -280,7 +278,7 @@ Item {
 
                             Behavior on color { ColorAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
                             
-                            Text {
+                            QsText {
                                 anchors.centerIn: parent
                                 text: modelData.char
                                 font.pixelSize: 26

@@ -153,7 +153,7 @@ ListView {
             return;
         }
 
-        if (event.text === "s" || event.key === Qt.Key_S || (root.vimKeysEnabled && (event.text === "j" || event.key === Qt.Key_J))) {
+        if (root.vimKeysEnabled && (event.text === "s" || event.key === Qt.Key_S || event.text === "j" || event.key === Qt.Key_J)) {
             if (currentIndex === -1 && count > 0) {
                 currentIndex = 0;
                 scrollToCurrentIndex();
@@ -165,7 +165,7 @@ ListView {
             return;
         }
 
-        if (event.text === "d" || event.key === Qt.Key_D || (root.vimKeysEnabled && (event.text === "k" || event.key === Qt.Key_K))) {
+        if (root.vimKeysEnabled && (event.text === "d" || event.key === Qt.Key_D || event.text === "k" || event.key === Qt.Key_K)) {
             if (currentIndex <= 0) {
                 root.focusSearchBar();
             } else {
@@ -176,13 +176,13 @@ ListView {
             return;
         }
         
-        if (root.vimKeysEnabled && (event.text === "l" || event.key === Qt.Key_L)) {
+        if (root.vimKeysEnabled && (event.text === "l" || event.key === Qt.Key_L || event.text === "f" || event.key === Qt.Key_F)) {
             if (currentItem) currentItem.triggerSelection();
             event.accepted = true;
             return;
         }
         
-        if (root.vimKeysEnabled && (event.text === "h" || event.key === Qt.Key_H)) {
+        if (root.vimKeysEnabled && (event.text === "h" || event.key === Qt.Key_H || event.text === "a" || event.key === Qt.Key_A)) {
             root.focusSearchBar();
             event.accepted = true;
             return;
@@ -282,8 +282,8 @@ ListView {
         Rectangle {
             anchors.fill: parent
             anchors.margins: isCurrent ? 0 : 2
-            color: isCurrent ? ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.primary_container.r, Theme.primary_container.g, Theme.primary_container.b, Vars.componentOpacity) : Theme.primary_container) : (itemMouseArea.containsMouse ? ((Vars._translucent && !Vars.gameMode) ? Qt.rgba(Theme.surface_container_highest.r, Theme.surface_container_highest.g, Theme.surface_container_highest.b, Vars.componentOpacity) : Theme.surface_container_highest) : "transparent")
-            radius: isCurrent ? Vars.radiusLarge : Vars.radiusMedium
+            color: isCurrent ? (Vars.tColor(Theme.primary_container, Vars.componentOpacity)) : (itemMouseArea.containsMouse ? (Vars.tColor(Theme.surface_container_highest, Vars.componentOpacity)) : "transparent")
+            radius: Vars.radiusMedium
             border.color: Theme.primary
             border.width: 0
 
@@ -346,6 +346,9 @@ ListView {
                     anchors.fill: parent
                     source: (itemData.clipImagePath !== undefined && itemData.clipImagePath !== "") ? "file://" + itemData.clipImagePath : (itemData.icon ? "image://icon/" + itemData.icon : "image://icon/application-x-executable")
                     fillMode: Image.PreserveAspectCrop
+                    sourceSize.width: 48
+                    sourceSize.height: 48
+                    cache: false
                     asynchronous: false
                     visible: (itemData.isFile !== true && itemData.isMath !== true && itemData.isSetting !== true && itemData.isClipboard !== true && itemData.isClearAll !== true) || (itemData.isClipboard === true && itemData.clipImagePath !== undefined && itemData.clipImagePath !== "")
                     
@@ -353,7 +356,7 @@ ListView {
                     Behavior on opacity { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customExpressiveSpatialSlow } }
                 }
 
-                Text {
+                QsText {
                     anchors.centerIn: parent
                     font.family: "Material Symbols Outlined"
                     font.pixelSize: 24
@@ -371,11 +374,11 @@ ListView {
                 }
             }
 
-            Text {
+            QsText {
                 Layout.fillWidth: true
                 font.family: Vars.fontFamily
                 font.pixelSize: 14
-                font.weight: isCurrent ? Font.DemiBold : Font.Medium
+                setWeight: isCurrent ? Font.DemiBold : Font.Medium
                 text: itemData.name
                 
                 color: itemData.isClearAll ? Theme.error : (isCurrent ? Theme.on_primary_container : Theme.on_surface)
