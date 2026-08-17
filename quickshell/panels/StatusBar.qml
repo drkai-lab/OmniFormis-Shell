@@ -5,7 +5,7 @@ import QtQuick.Layouts
 import Quickshell
 import Quickshell.Services.SystemTray
 
-import "../theme/variables.js" as Vars
+import "../theme"
 
 // Blanket Style: A single unified unibody pill to hold all tray icons
 Rectangle {
@@ -14,7 +14,8 @@ Rectangle {
     signal openTrayMenuRequested(var menu)
     color: Vars.tColor(Theme.surface_container_high, Vars.panelOpacity)
     property bool isVertical: Vars.pillPosition === "Left" || Vars.pillPosition === "Right"
-    radius: Math.min(width, height) / 2
+    radius: Vars.radiusLarge
+    antialiasing: true
     
     // THE FIX: Only show this pill if there is actually an app in the tray!
     visible: SystemTray.items ? (SystemTray.items.length > 0 || SystemTray.items.count > 0) : false
@@ -41,7 +42,8 @@ Rectangle {
                 
                 // Blanket Style: Transparent normally, soft accent circle on hover
                 color: itemMouseArea.pressed ? Qt.rgba(Theme.on_primary.r, Theme.on_primary.g, Theme.on_primary.b, 0.12) : (itemMouseArea.containsMouse ? Qt.rgba(Theme.on_primary.r, Theme.on_primary.g, Theme.on_primary.b, 0.08) : "transparent")
-                radius: height / 2
+                radius: Vars.radiusSmall
+                antialiasing: true
 
                 Behavior on color {
                     ColorAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard }

@@ -5,7 +5,7 @@ import Quickshell.Services.Notifications
 import QtQuick
 import QtQuick.Layouts
 import QtQuick.Effects
-import "../theme/variables.js" as Vars
+import "../theme"
 import "../core/primitives" as Primitives
 Item {
     id: rootCard
@@ -76,6 +76,7 @@ Item {
     Primitives.SquircleMask {
         id: container
         layer.enabled: !isPopup
+        layer.samples: 32
         layer.effect: MultiEffect { shadowEnabled: true; shadowBlur: 1.0; shadowColor: Qt.rgba(0,0,0,0.25); shadowVerticalOffset: 4; shadowHorizontalOffset: 0 }
         width: parent.width
         height: cardContent.implicitHeight + 24
@@ -232,6 +233,7 @@ Item {
                     Layout.preferredWidth: 32
                     Layout.preferredHeight: 32
                     radius: width / 2
+                    antialiasing: true
                     Layout.alignment: Qt.AlignVCenter
                     color: modelData.urgency === NotificationUrgency.Critical ? Theme.error_container : Theme.primary_container
 
@@ -299,6 +301,7 @@ Item {
                     Layout.preferredWidth: 40
                     Layout.preferredHeight: 40
                     radius: Vars.radiusSmall
+                    antialiasing: true
                     color: Theme.primary_container
                     clip: true
                     visible: modelData.image !== "" && modelData.image !== undefined
@@ -328,7 +331,8 @@ Item {
 
                         Layout.preferredHeight: 36
                         Layout.preferredWidth: actionText.width + 32
-                        radius: height / 2 // Pill shape for M3 actions
+                        radius: Vars.radiusSmall // Styled to match r2 = r1 - p spacing
+                        antialiasing: true
                         color: actionHover.pressed ? Qt.rgba(rootCard.textColor.r, rootCard.textColor.g, rootCard.textColor.b, 0.12) : (actionHover.containsMouse ? Qt.rgba(rootCard.textColor.r, rootCard.textColor.g, rootCard.textColor.b, 0.08) : "transparent")
                         border.color: rootCard.textColor
                         border.width: 1
@@ -367,6 +371,7 @@ Item {
                 Layout.fillWidth: true
                 height: 3
                 radius: Math.floor(Vars.radiusSmall / 5)
+                antialiasing: true
                 color: Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.2)
                 Layout.topMargin: 2
                 visible: rootCard.modelData.urgency !== NotificationUrgency.Critical && isPopup
@@ -376,6 +381,7 @@ Item {
                     height: parent.height
                     width: parent.width
                     radius: Math.floor(Vars.radiusSmall / 5)
+                    antialiasing: true
                     color: rootCard.modelData.urgency === NotificationUrgency.Critical
                            ? Theme.error : Theme.on_surface
                     opacity: 0.8

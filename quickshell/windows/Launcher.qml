@@ -6,7 +6,7 @@ import QtQuick.Layouts
 import Quickshell
 import Quickshell.Hyprland
 import Quickshell.Io
-import "../theme/variables.js" as Vars
+import "../theme"
 import "../core/primitives" as Primitives
 Item {
     id: root
@@ -42,12 +42,22 @@ Item {
         searchBar.forceActiveFocus();
     }
 
+    property string debouncedSearchText: ""
+    onSearchTextChanged: searchDebounceTimer.restart()
+    
+    Timer {
+        id: searchDebounceTimer
+        interval: 150 // Debounce delay in ms
+        repeat: false
+        onTriggered: root.debouncedSearchText = root.searchText
+    }
+
     signal appLaunched()
     signal openSettingsRequested()
 
     LC.LauncherModel {
         id: launcherModel
-        filterText: searchBar.text
+        filterText: root.debouncedSearchText
     }
 
 
@@ -57,6 +67,7 @@ Item {
         if (!expanded) {
             MorphState.notifyClosed();
             searchBar.text = "";
+            root.debouncedSearchText = "";
         } else {
             MorphState.notifyOpened(500, panel.targetHeight, panel.targetRad, panel);
             launcherModel.refreshClipboard();
@@ -89,6 +100,7 @@ Item {
         id: panel
         property bool isBackgroundActive: root.expanded || (MorphState.openCount === 0 && MorphState.activeItem === panel && panel.width > 105)
         layer.enabled: false
+        layer.samples: 32
         anchors.top: (!Vars.pillPosition || Vars.pillPosition === "Top") ? parent.top : undefined
         anchors.bottom: Vars.pillPosition === "Bottom" ? parent.bottom : undefined
         anchors.left: Vars.pillPosition === "Left" ? parent.left : undefined
@@ -109,7 +121,7 @@ Item {
         // visible: opacity > 0 // Removed to preserve Behavior when hidden
         
         color: Vars.tColorActive(isBackgroundActive, Theme.surface, Vars.panelOpacity)
-        property real targetRad: root.expanded ? Vars.radiusExtraLarge : (MorphState.anyExpanded ? MorphState.targetRadius : height / 2)
+        property real targetRad: root.expanded ? Vars.radiusLarge : (MorphState.anyExpanded ? MorphState.targetRadius : height / 2)
         topLeftRadius: Vars.getTopLeftRadius(Vars.panelStyle, Vars.pillPosition, false, targetRad)
         topRightRadius: Vars.getTopRightRadius(Vars.panelStyle, Vars.pillPosition, false, targetRad)
         bottomLeftRadius: Vars.getBottomLeftRadius(Vars.panelStyle, Vars.pillPosition, false, targetRad)
@@ -130,7 +142,7 @@ Item {
         Item {
             id: innerUI
             anchors.fill: parent
-            anchors.margins: Vars.spacingLarge
+            anchors.margins: Vars.spacingMedium
             
             opacity: root.expanded ? 1.0 : 0.0
             visible: root.expanded || opacity > 0
@@ -142,14 +154,23 @@ Item {
                 anchors.right: parent.right
                 anchors.top: parent.top
                 anchors.bottom: parent.bottom
-                spacing: Vars.spacingMedium
-
-                // Header removed per user request
+                spacing: 6
 
                 SearchBar {
                     id: searchBar
                     expanded: root.expanded
                     placeholderText: "Search apps..."
+                    showIcon: true
+                    containerPadding: Vars.spacingMedium
+                    outerTopLeftRadius: panel.topLeftRadius
+                    outerTopRightRadius: panel.topRightRadius
+                    outerBottomLeftRadius: appList.count > 0 ? (4 + Vars.spacingMedium) : panel.bottomLeftRadius
+                    outerBottomRightRadius: appList.count > 0 ? (4 + Vars.spacingMedium) : panel.bottomRightRadius
+                    
+                    Behavior on outerTopLeftRadius { enabled: !root.gameMode; NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customExpressiveSpatialSlow } }
+                    Behavior on outerTopRightRadius { enabled: !root.gameMode; NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customExpressiveSpatialSlow } }
+                    Behavior on outerBottomLeftRadius { enabled: !root.gameMode; NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customExpressiveSpatialSlow } }
+                    Behavior on outerBottomRightRadius { enabled: !root.gameMode; NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customExpressiveSpatialSlow } }
                     onDownPressed: {
                         if (appList.count > 0 && appList.currentIndex === -1) {
                             appList.currentIndex = 0;
@@ -175,6 +196,11 @@ Item {
                     launcherModel: launcherModel
                     searchText: searchBar.text
                     model: launcherModel.filteredModel
+                    outerTopLeftRadius: panel.topLeftRadius
+                    outerTopRightRadius: panel.topRightRadius
+                    outerBottomLeftRadius: panel.bottomLeftRadius
+                    outerBottomRightRadius: panel.bottomRightRadius
+                    containerPadding: Vars.spacingMedium
                     
                     onAppLaunched: root.appLaunched()
                     onEscapePressed: root.expanded = false

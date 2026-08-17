@@ -5,7 +5,7 @@ import Quickshell
 import Quickshell.Io
 import "../.."
 import "../.." // For M3Shapes
-import "../../theme/variables.js" as Vars
+import "../../theme"
 
 Item {
     id: rootTaskManager
@@ -315,6 +315,7 @@ Item {
             Layout.margins: Vars.spacingLarge
             Layout.bottomMargin: 0
             radius: 22
+            antialiasing: true
             color: Vars.tColor(Theme.surface_container, Vars.componentOpacity)
             
             RowLayout {
@@ -326,7 +327,8 @@ Item {
                     Layout.fillWidth: true
                     Layout.fillHeight: true
                     radius: 18
-                    color: rootTaskManager.currentTab === 0 ? (Vars.tColor(Theme.primary, 0.7)) : "transparent"
+                    antialiasing: true
+                    color: rootTaskManager.currentTab === 0 ? (Vars.tColorSelected(Theme.primary)) : "transparent"
                     Behavior on color { ColorAnimation { duration: Vars.animationDuration } }
                     QsText {
                         anchors.centerIn: parent
@@ -344,7 +346,8 @@ Item {
                     Layout.fillWidth: true
                     Layout.fillHeight: true
                     radius: 18
-                    color: rootTaskManager.currentTab === 1 ? (Vars.tColor(Theme.primary, 0.7)) : "transparent"
+                    antialiasing: true
+                    color: rootTaskManager.currentTab === 1 ? (Vars.tColorSelected(Theme.primary)) : "transparent"
                     Behavior on color { ColorAnimation { duration: Vars.animationDuration } }
                     QsText {
                         anchors.centerIn: parent
@@ -434,7 +437,7 @@ Item {
                     
                     // RAM Card
                     Rectangle {
-                        Layout.fillWidth: true; Layout.preferredHeight: 96; radius: 16; color: Vars.tColor(Theme.surface_container, 0.25)
+                        Layout.fillWidth: true; Layout.preferredHeight: 96; radius: 16; color: Vars.tColor(Theme.surface_container, Vars.componentOpacity)
                         RowLayout {
                             anchors.fill: parent; anchors.margins: 16; spacing: 16
                             Item { 
@@ -480,8 +483,9 @@ Item {
                     Rectangle {
                         Layout.fillWidth: true
                         Layout.preferredHeight: startupLayout.implicitHeight + 40
-                        color: Vars.tColor(Theme.surface_container_low, 0.2)
+                        color: Vars.tColor(Theme.surface_container_low, Vars.componentOpacity)
                         radius: 32
+                        antialiasing: true
                         
                         ColumnLayout {
                             id: startupLayout
@@ -503,7 +507,7 @@ Item {
                                 Rectangle {
                                     Layout.fillWidth: true
                                     Layout.fillHeight: true
-                                    color: Vars.tColor(Theme.surface_container_high, 0.25)
+                                    color: Vars.tColor(Theme.surface_container_high, Vars.componentOpacity)
                                     topLeftRadius: 28
                                     bottomLeftRadius: 28
                                     topRightRadius: 6
@@ -533,7 +537,7 @@ Item {
                                 Rectangle {
                                     Layout.preferredWidth: 90
                                     Layout.fillHeight: true
-                                    color: Vars.tColor(Theme.primary, 0.7)
+                                    color: Vars.tColorSelected(Theme.primary)
                                     topLeftRadius: 6
                                     bottomLeftRadius: 6
                                     topRightRadius: 6
@@ -564,7 +568,7 @@ Item {
                                 Rectangle {
                                     Layout.preferredWidth: 90
                                     Layout.fillHeight: true
-                                    color: Vars.tColor(Theme.surface_variant, 0.4)
+                                    color: Vars.tColor(Theme.surface_variant, Vars.componentOpacity)
                                     topLeftRadius: 6
                                     bottomLeftRadius: 6
                                     topRightRadius: 28
@@ -622,7 +626,8 @@ Item {
                                             id: contentRect
                                             width: dragArea.width; height: dragArea.height
                                             radius: 16
-                                            color: modelData.enabled ? (Vars.tColor(Theme.surface_container_high, 0.25)) : (Vars.tColor(Theme.surface_container, 0.25))
+                                            antialiasing: true
+                                            color: modelData.enabled ? (Vars.tColor(Theme.surface_container_high, Vars.componentOpacity)) : (Vars.tColor(Theme.surface_container, Vars.componentOpacity))
                                             
                                             // Pop out effect when dragging
                                             scale: dragArea.drag.active ? 1.02 : 1.0
@@ -698,8 +703,9 @@ Item {
                     Rectangle {
                         Layout.fillWidth: true
                         Layout.preferredHeight: processesLayout.implicitHeight + 40
-                        color: Vars.tColor(Theme.surface_container_low, 0.2)
+                        color: Vars.tColor(Theme.surface_container_low, Vars.componentOpacity)
                         radius: 32
+                        antialiasing: true
                         
                         ColumnLayout {
                             id: processesLayout
@@ -717,6 +723,7 @@ Item {
                                     Layout.preferredWidth: 200
                                     Layout.preferredHeight: 40
                                     radius: 20
+                                    antialiasing: true
                                     color: "transparent"
                                     
                                     RowLayout {
@@ -725,7 +732,7 @@ Item {
                                         Rectangle {
                                             Layout.fillWidth: true; Layout.fillHeight: true
                                             property bool isSel: rootTaskManager.processFilter === "cpu"
-                                            color: isSel ? (Vars.tColor(Theme.primary, 0.7)) : (Vars.tColor(Theme.surface_container_high, 0.25))
+                                            color: isSel ? (Vars.tColorSelected(Theme.primary)) : (Vars.tColor(Theme.surface_container_high, Vars.componentOpacity))
                                             topLeftRadius: 20; bottomLeftRadius: 20
                                             topRightRadius: isSel ? 20 : 4; bottomRightRadius: isSel ? 20 : 4
                                             Behavior on topRightRadius { NumberAnimation { duration: 250; easing.type: Easing.OutCubic } }
@@ -737,7 +744,7 @@ Item {
                                         Rectangle {
                                             Layout.fillWidth: true; Layout.fillHeight: true
                                             property bool isSel: rootTaskManager.processFilter === "mem"
-                                            color: isSel ? (Vars.tColor(Theme.primary, 0.7)) : (Vars.tColor(Theme.surface_container_high, 0.25))
+                                            color: isSel ? (Vars.tColorSelected(Theme.primary)) : (Vars.tColor(Theme.surface_container_high, Vars.componentOpacity))
                                             topLeftRadius: isSel ? 20 : 4; bottomLeftRadius: isSel ? 20 : 4
                                             topRightRadius: isSel ? 20 : 4; bottomRightRadius: isSel ? 20 : 4
                                             Behavior on topLeftRadius { NumberAnimation { duration: 250; easing.type: Easing.OutCubic } }
@@ -751,7 +758,7 @@ Item {
                                         Rectangle {
                                             Layout.fillWidth: true; Layout.fillHeight: true
                                             property bool isSel: rootTaskManager.processFilter === "gpu"
-                                            color: isSel ? (Vars.tColor(Theme.primary, 0.7)) : (Vars.tColor(Theme.surface_container_high, 0.25))
+                                            color: isSel ? (Vars.tColorSelected(Theme.primary)) : (Vars.tColor(Theme.surface_container_high, Vars.componentOpacity))
                                             topLeftRadius: isSel ? 20 : 4; bottomLeftRadius: isSel ? 20 : 4
                                             topRightRadius: 20; bottomRightRadius: 20
                                             Behavior on topLeftRadius { NumberAnimation { duration: 250; easing.type: Easing.OutCubic } }
@@ -768,7 +775,7 @@ Item {
                                 model: rootTaskManager.processModel
                                 delegate: Rectangle {
                                     Layout.fillWidth: true; Layout.preferredHeight: 72; radius: 24; 
-                                    color: Vars.tColor(Theme.surface_container_high, 0.25)
+                                    color: Vars.tColor(Theme.surface_container_high, Vars.componentOpacity)
                                     RowLayout {
                                         anchors.fill: parent; anchors.leftMargin: 24; anchors.rightMargin: 24; spacing: 16
                                         ColumnLayout {

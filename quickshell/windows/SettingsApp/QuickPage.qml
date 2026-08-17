@@ -7,7 +7,7 @@ import Quickshell
 import Quickshell.Io
 import QtCore
 import "../.."
-import "../../theme/variables.js" as Vars
+import "../../theme"
 
 Flickable {
     id: quickPageRoot
@@ -183,6 +183,7 @@ Flickable {
                 desktopClockEnabled: Vars.desktopClockEnabled,
                 desktopCalenderEnabled: Vars.desktopCalenderEnabled,
                 desktopMediaPlayerEnabled: Vars.desktopMediaPlayerEnabled,
+                desktopMediaPlayerAnchorExpandFix: Vars.desktopMediaPlayerAnchorExpandFix,
                 liquidGlass: (Vars._liquidGlass && !Vars.gameMode),
                 liquidGlassPreset: Vars.liquidGlassPreset
             };
@@ -345,6 +346,7 @@ Flickable {
                 border.color: pathInput.activeFocus ? Theme.primary : "transparent"
                 border.width: pathInput.activeFocus ? 2 : 0
                 radius: pathInput.activeFocus ? Vars.radiusLarge : Vars.radiusExtraLarge
+                antialiasing: true
 
                 Behavior on color { ColorAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
                 Behavior on radius { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customExpressiveSpatialSlow } }
@@ -409,6 +411,7 @@ Flickable {
                         id: wpCard
                         anchors.fill: parent
                         radius: 28
+                        antialiasing: true
                         color: Qt.rgba(0.08, 0.09, 0.10, 1.0)
                         border.color: Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.12)
                         border.width: 1
@@ -426,6 +429,7 @@ Flickable {
                             mipmap: true
 
                             layer.enabled: true
+                            layer.samples: 32
                             layer.smooth: true
                             layer.effect: MultiEffect {
                                 maskEnabled: true
@@ -440,10 +444,12 @@ Flickable {
                             anchors.fill: parent
                             visible: false
                             layer.enabled: true
+                            layer.samples: 32
                             layer.smooth: true
                             Rectangle {
                                 anchors.fill: parent
                                 radius: 28
+                                antialiasing: true
                             }
                         }
 
@@ -465,6 +471,7 @@ Flickable {
                         width: 54
                         height: 54
                         radius: 18 // M3 Squircle curvature
+                        antialiasing: true
                         anchors.right: parent.right
                         anchors.bottom: parent.bottom
                         anchors.margins: 22
@@ -473,6 +480,7 @@ Flickable {
                         color: fabHover.pressed ? Qt.darker(Theme.secondary_container, 1.15) : (fabHover.containsMouse ? Qt.tint(Theme.secondary_container, Qt.rgba(Theme.on_secondary_container.r, Theme.on_secondary_container.g, Theme.on_secondary_container.b, 0.12)) : Qt.rgba(Theme.secondary_container.r, Theme.secondary_container.g, Theme.secondary_container.b, 0.85))
                         
                         layer.enabled: true
+                        layer.samples: 32
                         layer.effect: MultiEffect {
                             shadowEnabled: true
                             shadowBlur: 1.2
@@ -491,6 +499,7 @@ Flickable {
                             font.pixelSize: 24
                             color: Theme.on_secondary_container
                             layer.enabled: true
+                            layer.samples: 32
                             layer.smooth: true
                             scale: fabHover.pressed ? 0.92 : 1.0
                             Behavior on scale { NumberAnimation { duration: 150 } }
@@ -536,11 +545,12 @@ Flickable {
                             Behavior on bottomLeftRadius { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
                             Behavior on topRightRadius { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
                             Behavior on bottomRightRadius { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
-                            color: isSelected ? (Vars.tColor(Theme.secondary_container, Vars.componentOpacity)) : (lightHover.containsMouse ? (Vars.tColor(Theme.surface_container_highest, Vars.componentOpacity)) : (Vars.tColor(Theme.surface_container_high, Vars.componentOpacity)))
+                            color: isSelected ? (Vars.tColorSelected(Theme.secondary_container)) : (lightHover.containsMouse ? (Vars.tColor(Theme.surface_container_highest, Vars.componentOpacity)) : (Vars.tColor(Theme.surface_container_high, Vars.componentOpacity)))
                             border.width: 0
 
                             Behavior on color { ColorAnimation { duration: 180 } }
                             layer.enabled: true
+                            layer.samples: 32
                             layer.smooth: true
                             scale: lightHover.pressed ? 1.08 : 1.0
                             Behavior on scale { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.OutBack } }
@@ -594,11 +604,12 @@ Flickable {
                             Behavior on bottomLeftRadius { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
                             Behavior on topRightRadius { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
                             Behavior on bottomRightRadius { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
-                            color: isSelected ? (Vars.tColor(Theme.secondary_container, Vars.componentOpacity)) : (darkHover.containsMouse ? (Vars.tColor(Theme.surface_container_highest, Vars.componentOpacity)) : (Vars.tColor(Theme.surface_container_high, Vars.componentOpacity)))
+                            color: isSelected ? (Vars.tColorSelected(Theme.secondary_container)) : (darkHover.containsMouse ? (Vars.tColor(Theme.surface_container_highest, Vars.componentOpacity)) : (Vars.tColor(Theme.surface_container_high, Vars.componentOpacity)))
                             border.width: 0
 
                             Behavior on color { ColorAnimation { duration: 180 } }
                             layer.enabled: true
+                            layer.samples: 32
                             layer.smooth: true
                             scale: darkHover.pressed ? 1.08 : 1.0
                             Behavior on scale { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.OutBack } }
@@ -678,10 +689,11 @@ Flickable {
                                 Behavior on bottomLeftRadius { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
                                 Behavior on bottomRightRadius { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
 
-                                color: isSelected ? (Vars.tColor(Theme.secondary_container, Vars.componentOpacity)) : (schemeHover.containsMouse ? (Vars.tColor(Theme.surface_container_highest, Vars.componentOpacity)) : (Vars.tColor(Theme.surface_container_high, Vars.componentOpacity)))
+                                color: isSelected ? (Vars.tColorSelected(Theme.secondary_container)) : (schemeHover.containsMouse ? (Vars.tColor(Theme.surface_container_highest, Vars.componentOpacity)) : (Vars.tColor(Theme.surface_container_high, Vars.componentOpacity)))
                                 border.width: 0
 
                                 layer.enabled: true
+                                layer.samples: 32
                                 layer.smooth: true
                                 scale: schemeHover.pressed ? 1.08 : 1.0
                                 Behavior on scale { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.OutBack } }
@@ -783,10 +795,11 @@ Flickable {
                                 topRightRadius: isSelected ? 19 : (hasRight ? 6 : 19)
                                 bottomRightRadius: isSelected ? 19 : (hasRight ? 6 : 19)
 
-                                color: isSelected ? (Vars.tColor(Theme.secondary_container, Vars.componentOpacity)) : (styleModeHover.containsMouse ? (Vars.tColor(Theme.surface_container_highest, Vars.componentOpacity)) : (Vars.tColor(Theme.surface_container_high, Vars.componentOpacity)))
+                                color: isSelected ? (Vars.tColorSelected(Theme.secondary_container)) : (styleModeHover.containsMouse ? (Vars.tColor(Theme.surface_container_highest, Vars.componentOpacity)) : (Vars.tColor(Theme.surface_container_high, Vars.componentOpacity)))
                                 border.width: 0
 
                                 layer.enabled: true
+                                layer.samples: 32
                                 layer.smooth: true
                                 scale: styleModeHover.pressed ? 1.08 : 1.0
                                 Behavior on scale { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.OutBack } }
@@ -884,10 +897,11 @@ Flickable {
                                 topRightRadius: isSelected ? 19 : (hasRight ? 6 : 19)
                                 bottomRightRadius: isSelected ? 19 : (hasRight ? 6 : 19)
 
-                                color: isSelected ? (Vars.tColor(Theme.secondary_container, Vars.componentOpacity)) : (transHover.containsMouse ? (Vars.tColor(Theme.surface_container_highest, Vars.componentOpacity)) : (Vars.tColor(Theme.surface_container_high, Vars.componentOpacity)))
+                                color: isSelected ? (Vars.tColorSelected(Theme.secondary_container)) : (transHover.containsMouse ? (Vars.tColor(Theme.surface_container_highest, Vars.componentOpacity)) : (Vars.tColor(Theme.surface_container_high, Vars.componentOpacity)))
                                 border.width: 0
 
                                 layer.enabled: true
+                                layer.samples: 32
                                 layer.smooth: true
                                 scale: transHover.pressed ? 1.08 : 1.0
                                 Behavior on scale { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.OutBack } }
@@ -937,6 +951,7 @@ Flickable {
                         width: 4
                         height: 4
                         radius: 2
+                        antialiasing: true
                         color: Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.15)
                     }
                 }
@@ -996,10 +1011,11 @@ Flickable {
                             topRightRadius: isSelected ? 19 : (hasRight ? 6 : 19)
                             bottomRightRadius: isSelected ? 19 : (hasRight ? 6 : 19)
 
-                            color: isSelected ? (Vars.tColor(Theme.secondary_container, Vars.componentOpacity)) : (posHover.containsMouse ? (Vars.tColor(Theme.surface_container_highest, Vars.componentOpacity)) : (Vars.tColor(Theme.surface_container_high, Vars.componentOpacity)))
+                            color: isSelected ? (Vars.tColorSelected(Theme.secondary_container)) : (posHover.containsMouse ? (Vars.tColor(Theme.surface_container_highest, Vars.componentOpacity)) : (Vars.tColor(Theme.surface_container_high, Vars.componentOpacity)))
                             border.width: 0
 
                             layer.enabled: true
+                            layer.samples: 32
                             layer.smooth: true
                             scale: posHover.pressed ? 1.08 : 1.0
                             Behavior on scale { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.OutBack } }
@@ -1085,10 +1101,11 @@ Flickable {
                             topRightRadius: isSelected ? 19 : (hasRight ? 6 : 19)
                             bottomRightRadius: isSelected ? 19 : (hasRight ? 6 : 19)
 
-                            color: isSelected ? (Vars.tColor(Theme.secondary_container, Vars.componentOpacity)) : (styleHover.containsMouse ? (Vars.tColor(Theme.surface_container_highest, Vars.componentOpacity)) : (Vars.tColor(Theme.surface_container_high, Vars.componentOpacity)))
+                            color: isSelected ? (Vars.tColorSelected(Theme.secondary_container)) : (styleHover.containsMouse ? (Vars.tColor(Theme.surface_container_highest, Vars.componentOpacity)) : (Vars.tColor(Theme.surface_container_high, Vars.componentOpacity)))
                             border.width: 0
 
                             layer.enabled: true
+                            layer.samples: 32
                             layer.smooth: true
                             scale: styleHover.pressed ? 1.08 : 1.0
                             Behavior on scale { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.OutBack } }
@@ -1182,10 +1199,11 @@ Flickable {
                                 topRightRadius: isSelected ? 19 : (hasRight ? 6 : 19)
                                 bottomRightRadius: isSelected ? 19 : (hasRight ? 6 : 19)
 
-                                color: isSelected ? (Vars.tColor(Theme.secondary_container, Vars.componentOpacity)) : (presetHover.containsMouse ? (Vars.tColor(Theme.surface_container_highest, Vars.componentOpacity)) : (Vars.tColor(Theme.surface_container_high, Vars.componentOpacity)))
+                                color: isSelected ? (Vars.tColorSelected(Theme.secondary_container)) : (presetHover.containsMouse ? (Vars.tColor(Theme.surface_container_highest, Vars.componentOpacity)) : (Vars.tColor(Theme.surface_container_high, Vars.componentOpacity)))
                                 border.width: 0
 
                                 layer.enabled: true
+                                layer.samples: 32
                                 layer.smooth: true
                                 scale: presetHover.pressed ? 1.08 : 1.0
                                 Behavior on scale { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.OutBack } }
@@ -1297,6 +1315,7 @@ Flickable {
                     Layout.preferredHeight: 44
                     Layout.preferredWidth: 44
                     radius: 14
+                    antialiasing: true
                     color: createHover.pressed ? Qt.darker(Theme.secondary_container, 1.15) : (createHover.containsMouse ? Qt.tint(Theme.secondary_container, Qt.rgba(Theme.on_secondary_container.r, Theme.on_secondary_container.g, Theme.on_secondary_container.b, 0.12)) : Theme.secondary_container)
 
                     Behavior on color { ColorAnimation { duration: 150 } }
@@ -1315,6 +1334,7 @@ Flickable {
                         font.pixelSize: 24
                         color: Theme.on_secondary_container
                         layer.enabled: true
+                        layer.samples: 32
                         layer.smooth: true
                         scale: createHover.pressed ? 1.08 : 1.0
                         Behavior on scale { NumberAnimation { duration: 150; easing.type: Easing.OutBack } }
@@ -1363,6 +1383,7 @@ Flickable {
                             id: cardBase
                             anchors.fill: parent
                             radius: 24
+                            antialiasing: true
                             color: Vars.tColor(Theme.surface_container_low, Vars.componentOpacity)
                             border.color: Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.08)
                             border.width: 1
@@ -1409,6 +1430,7 @@ Flickable {
                                 anchors.fill: parent
                                 visible: false
                                 layer.enabled: true
+                                layer.samples: 32
                                 layer.smooth: true
 
                                 Image {
@@ -1426,6 +1448,7 @@ Flickable {
                                 Rectangle {
                                     anchors.fill: parent
                                     radius: 24
+                                    antialiasing: true
                                     color: "white"
                                     visible: !cardBase.wpMaskEnabled
                                 }
@@ -1512,6 +1535,7 @@ Flickable {
                                             color: applyHover.containsMouse ? Theme.primary : Qt.rgba(Theme.primary.r, Theme.primary.g, Theme.primary.b, 0.2)
                                             Behavior on color { ColorAnimation { duration: 150 } }
                                             layer.enabled: true
+                                            layer.samples: 32
                                             layer.smooth: true
                                             scale: applyHover.pressed ? 1.08 : 1.0
                                             Behavior on scale { NumberAnimation { duration: 150; easing.type: Easing.OutBack } }
@@ -1549,6 +1573,7 @@ Flickable {
                                             color: delHover.containsMouse ? Theme.error : Qt.rgba(Theme.error.r, Theme.error.g, Theme.error.b, 0.18)
                                             Behavior on color { ColorAnimation { duration: 150 } }
                                             layer.enabled: true
+                                            layer.samples: 32
                                             layer.smooth: true
                                             scale: delHover.pressed ? 1.08 : 1.0
                                             Behavior on scale { NumberAnimation { duration: 150; easing.type: Easing.OutBack } }

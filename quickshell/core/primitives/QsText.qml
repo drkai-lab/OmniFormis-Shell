@@ -1,12 +1,13 @@
 import QtQuick
-import "../../theme/variables.js" as Vars
+import "../../theme"
 
 Text {
     property int setWeight: 400
     property int setGrade: 0
     property int setRound: 0
 
-    renderType: Text.NativeRendering
+    renderType: Text.QtRendering
+    antialiasing: true
     font.hintingPreference: Font.PreferNoHinting
     font.family: Vars.fontFamily
     font.italic: Vars.fontItalic

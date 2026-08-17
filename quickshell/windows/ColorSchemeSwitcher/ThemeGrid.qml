@@ -6,7 +6,7 @@ import "../../theme"
 import "../.."
 import Quickshell
 import Quickshell.Io
-import "../../theme/variables.js" as Vars
+import "../../theme"
 
 GridView {
     id: root
@@ -70,6 +70,7 @@ GridView {
             anchors.fill: parent
             anchors.margins: Vars.spacingSmall
             radius: Vars.radiusMedium
+            antialiasing: true
             color: root.activeFocus ? Theme.primary_container : "transparent"
             border.color: Theme.primary_container
             border.width: root.activeFocus ? 2 : 0
@@ -157,6 +158,7 @@ GridView {
             anchors.fill: parent
             anchors.margins: Vars.spacingSmall
             radius: Vars.radiusMedium
+            antialiasing: true
 
             color: root.currentTheme === themeName ? Qt.rgba(Qt.color(themePrimary).r, Qt.color(themePrimary).g, Qt.color(themePrimary).b, 0.12) : (tileMouseArea.containsMouse ? Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.08) : "transparent")
             border.color: themePrimary

@@ -110,6 +110,7 @@ Item {
     Rectangle {
         anchors.fill: parent
         radius: width / 2
+        antialiasing: true
         color: root.backgroundColor
     }
 

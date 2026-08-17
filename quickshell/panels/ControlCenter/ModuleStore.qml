@@ -1,7 +1,7 @@
 import QtQuick
 import QtQuick.Layouts
 import Quickshell
-import "../../theme/variables.js" as Vars
+import "../../theme"
 import "../.."
 import QtCore
 import QtQml.Models
@@ -76,6 +76,7 @@ ColumnLayout {
                 width: moduleStashContainer.baseCellWidth
                 height: 64
                 radius: 16
+                antialiasing: true
                 
                 color: availDragArea.drag.active ? (Vars.tColor(Theme.surface_container_highest, Vars.componentOpacity)) : (Vars.tColor(Theme.surface_container_high, Vars.componentOpacity))
                 scale: availDragArea.drag.active ? 1.05 : 1.0
@@ -160,6 +161,7 @@ ColumnLayout {
             border.color: Theme.outline_variant
             border.width: 1
             radius: 16
+            antialiasing: true
             
             Behavior on color { ColorAnimation { duration: 200; easing.type: Easing.OutCubic } }
 

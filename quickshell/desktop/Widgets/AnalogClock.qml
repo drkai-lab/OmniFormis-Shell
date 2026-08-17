@@ -4,7 +4,7 @@ import QtQuick.Layouts
 import QtQuick.Shapes
 import "../../"
 import Quickshell
-import "../../theme/variables.js" as Vars
+import "../../theme"
 
 Item {
     id: root
@@ -26,6 +26,7 @@ Item {
     property int hours: 0
     property int minutes: 0
     property int seconds: 0
+    property string dateString: ""
 
     // Current clock shape — read from Vars and polled for live updates
     property string currentClockShape: Vars.clockShape !== undefined ? Vars.clockShape : "Sunny"
@@ -33,6 +34,10 @@ Item {
     property bool currentShowCenterDot: Vars.clockShowCenterDot !== undefined ? Vars.clockShowCenterDot : true
     property int currentAnimDuration: Vars.animationDuration !== undefined ? Vars.animationDuration : 240
     property bool currentTranslucent: (Vars._translucent && !Vars.gameMode) !== undefined ? (Vars._translucent && !Vars.gameMode) : false
+
+    property bool currentShowDate: Vars.clockShowDate !== undefined ? Vars.clockShowDate : true
+    property string currentSecondHandStyle: Vars.clockSecondHandStyle !== undefined ? Vars.clockSecondHandStyle : "Orbiting Dot"
+    property real currentHandThickness: Vars.clockHandThickness !== undefined ? Vars.clockHandThickness : 15
 
     Timer {
         interval: 100
@@ -54,6 +59,15 @@ Item {
             var trans = (Vars._translucent && !Vars.gameMode) !== undefined ? (Vars._translucent && !Vars.gameMode) : false;
             if (root.currentTranslucent !== trans)
                 root.currentTranslucent = trans;
+            var showDate = Vars.clockShowDate !== undefined ? Vars.clockShowDate : true;
+            if (root.currentShowDate !== showDate)
+                root.currentShowDate = showDate;
+            var style = Vars.clockSecondHandStyle !== undefined ? Vars.clockSecondHandStyle : "Orbiting Dot";
+            if (root.currentSecondHandStyle !== style)
+                root.currentSecondHandStyle = style;
+            var thick = Vars.clockHandThickness !== undefined ? Vars.clockHandThickness : 15;
+            if (root.currentHandThickness !== thick)
+                root.currentHandThickness = thick;
         }
     }
 
@@ -67,6 +81,8 @@ Item {
             root.hours = d.getHours();
             root.minutes = d.getMinutes();
             root.seconds = d.getSeconds();
+            var days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+            root.dateString = days[d.getDay()] + " " + d.getDate();
         }
         Component.onCompleted: triggered()
     }
@@ -88,7 +104,7 @@ Item {
         property string pathColor: "rgb(" + Math.round(bg.r * 255) + "," + Math.round(bg.g * 255) + "," + Math.round(bg.b * 255) + ")"
         property color bc: Theme.outline_variant
         property string outlineColor: "rgb(" + Math.round(bc.r * 255) + "," + Math.round(bc.g * 255) + "," + Math.round(bc.b * 255) + ")"
-        property real pathOpacity: root.currentTranslucent ? 0.85 : 1.0
+        property real pathOpacity: root.currentTranslucent ? Vars.panelOpacity : 1.0
 
         property string currentPathName: root.currentClockShape
         property string currentPath: m3.getPath(currentPathName)
@@ -129,6 +145,7 @@ Item {
         }
 
         layer.enabled: true
+        layer.samples: 32
         layer.effect: MultiEffect {
             shadowEnabled: !root.gameMode
             shadowBlur: 1.0
@@ -165,14 +182,17 @@ Item {
                     }
 
                     Rectangle {
-                        width: 15
+                        width: root.currentHandThickness
                         height: dial.height * 0.20
                         color: Theme.primary
                         radius: width / 2 // Cleaner way to ensure a perfect pill shape
+                        antialiasing: true
 
                         anchors.bottom: parent.verticalCenter
                         anchors.bottomMargin: -(width / 2) // Pushes the pivot into the center of the curve
                         anchors.horizontalCenter: parent.horizontalCenter
+                        
+                        Behavior on width { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.OutCubic } }
                     }
                 }
 
@@ -190,14 +210,17 @@ Item {
                     }
 
                     Rectangle {
-                        width: 15
+                        width: root.currentHandThickness
                         height: dial.height * 0.30
                         color: Theme.secondary
                         radius: width / 2 // Cleaner way to ensure a perfect pill shape
+                        antialiasing: true
 
                         anchors.bottom: parent.verticalCenter
                         anchors.bottomMargin: -(width / 2) // THE FIX
                         anchors.horizontalCenter: parent.horizontalCenter
+                        
+                        Behavior on width { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.OutCubic } }
                     }
                 }
 
@@ -208,6 +231,7 @@ Item {
                     width: 12
                     height: 12
                     radius: width / 2
+                    antialiasing: true
                     color: Theme.on_surface
                     anchors.centerIn: parent
                     z: 10
@@ -234,6 +258,7 @@ Item {
                                 height: index % 3 == 0 ? 20 : 10
                                 color: index % 3 == 0 ? Theme.on_surface : Theme.on_surface_variant
                                 radius: width / 2
+                                antialiasing: true
                                 anchors.top: parent.top
                                 anchors.topMargin: 0
                                 anchors.horizontalCenter: parent.horizontalCenter
@@ -241,12 +266,12 @@ Item {
                         }
                     }
                 }
-                // Expressive Second Hand (Orbiting Dot)
+                // Expressive Second Hand (Orbiting Dot) or Traditional Line
                 Item {
                     // 360 degrees / 60 seconds = 6 degrees per tick
                     rotation: root.seconds * 6
-
-                    // Keeps the snappy tick animation
+                    visible: root.currentSecondHandStyle !== "Hidden"
+                    
                     Behavior on rotation {
                         RotationAnimation {
                             direction: RotationAnimation.Shortest
@@ -255,10 +280,13 @@ Item {
                         }
                     }
 
+                    // Orbiting Dot
                     Rectangle {
+                        visible: root.currentSecondHandStyle === "Orbiting Dot"
                         width: 16 // Size of the dot
                         height: 16
                         radius: 100 // Fully rounded circle
+                        antialiasing: true
                         color: Theme.tertiary
 
                         // Push the dot outward from the 0x0 center pivot
@@ -266,7 +294,62 @@ Item {
                         anchors.bottomMargin: dial.height * 0.40 // Distance from the center
                         anchors.horizontalCenter: parent.horizontalCenter
 
+                    }
+                    
+                    // Traditional Line
+                    Rectangle {
+                        visible: root.currentSecondHandStyle === "Traditional Line"
+                        width: Math.max(2, root.currentHandThickness * 0.3)
+                        height: dial.height * 0.38
+                        color: Theme.tertiary
+                        radius: width / 2
                         antialiasing: true
+
+                        anchors.bottom: parent.verticalCenter
+                        anchors.bottomMargin: -(width / 2) // Center pivot
+                        anchors.horizontalCenter: parent.horizontalCenter
+
+                    }
+                }
+                
+                // Orbiting Date Text (180 degrees from Second Dot)
+                Item {
+                    rotation: (root.seconds * 6) + 180
+                    visible: root.currentShowDate
+
+                    Behavior on rotation {
+                        RotationAnimation {
+                            direction: RotationAnimation.Shortest
+                            duration: 200
+                            easing.type: Easing.OutBack
+                        }
+                    }
+
+                    Repeater {
+                        model: root.dateString.length
+                        Item {
+                            // 7 degrees of separation per character to form a clean curve
+                            property real charSpacing: 7
+                            property real totalAngle: (root.dateString.length - 1) * charSpacing
+                            rotation: (index * charSpacing) - (totalAngle / 2)
+                            anchors.centerIn: parent
+                            
+                            QsText {
+                                text: root.dateString[index]
+                                font.pixelSize: 18 // Increased font size
+                                setWeight: 800 // Bold
+                                color: Theme.on_surface
+                                opacity: 1.0 // Fully opaque as requested
+                                layer.enabled: false // Disable layer to prevent pixelation when rotated
+                                layer.samples: 32
+                                antialiasing: true
+                                
+                                // Push the characters outward from the center along the circumference
+                                anchors.bottom: parent.verticalCenter
+                                anchors.bottomMargin: dial.height * 0.45 // Decreased distance
+                                anchors.horizontalCenter: parent.horizontalCenter
+                            }
+                        }
                     }
                 }
             }

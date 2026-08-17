@@ -8,7 +8,7 @@ import Quickshell.Io
 import Quickshell.Hyprland
 import QtCore
 
-import "../theme/variables.js" as Vars
+import "../theme"
 import "../core/primitives" as Primitives
 import "WallpaperSwitcher"
 
@@ -94,6 +94,7 @@ Item {
         id: panel
         property bool isBackgroundActive: root.expanded || (MorphState.openCount === 0 && MorphState.activeItem === panel && panel.width > 105)
         layer.enabled: true
+        layer.samples: 32
         layer.effect: MultiEffect {
             shadowEnabled: !root.gameMode && panel.isBackgroundActive
             shadowBlur: 1.0

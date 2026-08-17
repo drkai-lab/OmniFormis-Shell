@@ -8,7 +8,7 @@ import Quickshell.Hyprland
 import Quickshell.Networking
 import Quickshell.Bluetooth
 import QtCore
-import "../theme/variables.js" as Vars
+import "../theme"
 import "../core/primitives" as Primitives
 import "SettingsApp"
 import ".."
@@ -216,6 +216,7 @@ Item {
         id: panel
         property bool isBackgroundActive: root.expanded || (MorphState.openCount === 0 && MorphState.activeItem === panel && panel.width > 105)
         layer.enabled: false
+        layer.samples: 32
         anchors.top: (!Vars.pillPosition || Vars.pillPosition === "Top" || root.isFloatingInstance) ? parent.top : undefined
         anchors.bottom: (!root.isFloatingInstance && Vars.pillPosition === "Bottom") ? parent.bottom : undefined
         anchors.left: (!root.isFloatingInstance && Vars.pillPosition === "Left") ? parent.left : undefined
@@ -285,10 +286,11 @@ Item {
                                 defaultHeight: 48
                                 defaultColor: globalSearchBar.isActiveFocus ? Vars.tColor(Theme.primary_container, Vars.componentOpacity) : Vars.tColor(Theme.surface_container, Vars.componentOpacity)
                                 
-                                topLeftRadius: Vars.radiusMedium
-                                bottomLeftRadius: Vars.radiusMedium
-                                topRightRadius: Vars.radiusSmall
-                                bottomRightRadius: Vars.radiusSmall
+                                containerPadding: Vars.spacingLarge
+                                outerTopLeftRadius: panel.topLeftRadius
+                                outerBottomLeftRadius: panel.bottomLeftRadius
+                                topRightRadius: 4
+                                bottomRightRadius: 4
                             }
 
                             // Detach Button (Floating)
@@ -296,10 +298,10 @@ Item {
                                 width: 48; height: 48
                                 color: detachHover.pressed ? Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.12) : (detachHover.containsMouse ? Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.08) : Vars.tColor(Theme.surface_container, Vars.componentOpacity))
                                 
-                                topLeftRadius: Vars.radiusSmall
-                                bottomLeftRadius: Vars.radiusSmall
-                                topRightRadius: Vars.radiusSmall
-                                bottomRightRadius: Vars.radiusSmall
+                                topLeftRadius: 4
+                                bottomLeftRadius: 4
+                                topRightRadius: 4
+                                bottomRightRadius: 4
 
                                 QsText { anchors.centerIn: parent; font.family: "Material Symbols Outlined"; font.pixelSize: 20; color: Theme.on_surface; text: root.isFloatingInstance ? "\ue5ce" : "\ue89b" }
                                 MouseArea {
@@ -314,10 +316,12 @@ Item {
                                 width: 48; height: 48
                                 color: backHover.pressed ? Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.12) : (backHover.containsMouse ? Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.08) : Vars.tColor(Theme.surface_container, Vars.componentOpacity))
                                 
-                                topLeftRadius: Vars.radiusSmall
-                                bottomLeftRadius: Vars.radiusSmall
-                                topRightRadius: Vars.radiusMedium
-                                bottomRightRadius: Vars.radiusMedium
+                                topLeftRadius: 4
+                                bottomLeftRadius: 4
+                                property real r2Right: Math.max(0, panel.topRightRadius - Vars.spacingLarge)
+                                property real r2BottomRight: Math.max(0, panel.bottomRightRadius - Vars.spacingLarge)
+                                topRightRadius: r2Right
+                                bottomRightRadius: r2BottomRight
 
                                 QsText { anchors.centerIn: parent; font.family: "Material Symbols Outlined"; font.pixelSize: 20; color: Theme.on_surface; text: "\ue5cd" }
                                 MouseArea { id: backHover; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: root.expanded = false }

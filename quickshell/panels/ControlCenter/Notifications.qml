@@ -2,7 +2,7 @@ import QtQuick
 import QtQuick.Layouts
 import QtQuick.Effects
 import Quickshell
-import "../../theme/variables.js" as Vars
+import "../../theme"
 import "../.."
 
 Item {
@@ -41,6 +41,7 @@ Item {
             Layout.preferredHeight: 120
             Layout.topMargin: Vars.spacingSmall
             radius: Vars.radiusLarge
+            antialiasing: true
             color: Vars.tColor(Theme.surface_container_high, Vars.componentOpacity)
             visible: notificationsRoot.historyList.length === 0
             
@@ -103,8 +104,8 @@ Item {
     Rectangle {
         id: fabContainer
         
-        property color opaqueSecondary: Qt.rgba(Theme.secondary_container.r, Theme.secondary_container.g, Theme.secondary_container.b, 1.0)
-        property color opaqueSurface: Qt.rgba(Theme.surface_container_highest.r, Theme.surface_container_highest.g, Theme.surface_container_highest.b, 1.0)
+        property color opaqueSecondary: Vars.tColor(Theme.secondary_container, Vars.componentOpacity)
+        property color opaqueSurface: Vars.tColor(Theme.surface_container_highest, Vars.componentOpacity)
 
         
         function getFlickable(item) {
@@ -143,7 +144,9 @@ Item {
 
                 Layout.preferredHeight: 48
                 radius: 24
+                antialiasing: true
                 layer.enabled: true
+                layer.samples: 32
                 layer.effect: MultiEffect { shadowEnabled: true; shadowBlur: 1.0; shadowColor: Qt.rgba(0,0,0,0.25); shadowVerticalOffset: 4; shadowHorizontalOffset: 0 }
                 
                 color: snoozeHover.pressed ? Qt.tint(fabContainer.opaqueSecondary, Qt.rgba(Theme.on_secondary_container.r, Theme.on_secondary_container.g, Theme.on_secondary_container.b, 0.12)) : (snoozeHover.containsMouse ? Qt.tint(fabContainer.opaqueSecondary, Qt.rgba(Theme.on_secondary_container.r, Theme.on_secondary_container.g, Theme.on_secondary_container.b, 0.08)) : fabContainer.opaqueSecondary)
@@ -170,7 +173,9 @@ Item {
                 Layout.fillWidth: true
                 Layout.preferredHeight: 48
                 radius: 24
+                antialiasing: true
                 layer.enabled: true
+                layer.samples: 32
                 layer.effect: MultiEffect { shadowEnabled: true; shadowBlur: 1.0; shadowColor: Qt.rgba(0,0,0,0.25); shadowVerticalOffset: 4; shadowHorizontalOffset: 0 }
                 
                 color: clearAllHover.pressed ? Qt.tint(fabContainer.opaqueSurface, Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.12)) : (clearAllHover.containsMouse ? Qt.tint(fabContainer.opaqueSurface, Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.08)) : fabContainer.opaqueSurface)
@@ -201,7 +206,9 @@ Item {
 
                 Layout.preferredHeight: 48
                 radius: 24
+                antialiasing: true
                 layer.enabled: true
+                layer.samples: 32
                 layer.effect: MultiEffect { shadowEnabled: true; shadowBlur: 1.0; shadowColor: Qt.rgba(0,0,0,0.25); shadowVerticalOffset: 4; shadowHorizontalOffset: 0 }
                 
                 color: settingsHover.pressed ? Qt.tint(fabContainer.opaqueSecondary, Qt.rgba(Theme.on_secondary_container.r, Theme.on_secondary_container.g, Theme.on_secondary_container.b, 0.12)) : (settingsHover.containsMouse ? Qt.tint(fabContainer.opaqueSecondary, Qt.rgba(Theme.on_secondary_container.r, Theme.on_secondary_container.g, Theme.on_secondary_container.b, 0.08)) : fabContainer.opaqueSecondary)

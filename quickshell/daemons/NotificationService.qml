@@ -4,7 +4,7 @@ import QtQuick
 import ".."
 import Quickshell
 import Quickshell.Services.Notifications
-import "../theme/variables.js" as Vars
+import "../theme"
 
 Singleton {
     id: root

@@ -6,7 +6,7 @@ import Quickshell
 import Quickshell.Io
 import Quickshell.Bluetooth
 import "../../.."
-import "../../../theme/variables.js" as Vars
+import "../../../theme"
 import "../../../core/primitives" as Primitives
 import ".."
 
@@ -106,17 +106,23 @@ ColumnLayout {
                             return false;
                         }
                         
+                        property bool firstDeviceConnected: rootBluetoothPage.adapter && rootBluetoothPage.adapter.devices.values && rootBluetoothPage.adapter.devices.values.length > 0 && rootBluetoothPage.adapter.devices.values[0].connected
+                        
                         Item {
                             anchors.fill: parent
                             layer.enabled: true
+                            layer.samples: 32
                             opacity: parent.targetColor.a
                             Rectangle {
                                 anchors.fill: parent
                                 color: Qt.rgba(parent.parent.targetColor.r, parent.parent.targetColor.g, parent.parent.targetColor.b, 1.0)
                                 topLeftRadius: 16
                                 topRightRadius: 16
-                                bottomLeftRadius: rootBluetoothPage.adapterState && parent.parent.parent.hasDeviceBelow ? 4 : 16
-                                bottomRightRadius: rootBluetoothPage.adapterState && parent.parent.parent.hasDeviceBelow ? 4 : 16
+                                bottomLeftRadius: rootBluetoothPage.adapterState && parent.parent.parent.hasDeviceBelow ? (parent.parent.parent.firstDeviceConnected ? 16 : 4) : 16
+                                bottomRightRadius: rootBluetoothPage.adapterState && parent.parent.parent.hasDeviceBelow ? (parent.parent.parent.firstDeviceConnected ? 16 : 4) : 16
+                                
+                                Behavior on bottomLeftRadius { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customExpressiveSpatialSlow } }
+                                Behavior on bottomRightRadius { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customExpressiveSpatialSlow } }
                             }
                         }
                         
@@ -130,7 +136,7 @@ ColumnLayout {
                             
                             Rectangle {
                                 width: 52; height: 32; radius: 16
-                                color: rootBluetoothPage.adapterState ? (Vars.tColor(Theme.primary, Vars.componentOpacity)) : (Vars.tColor(Theme.surface_variant, Vars.componentOpacity))
+                                color: rootBluetoothPage.adapterState ? Theme.primary : Theme.surface_variant
                                 border.color: btHeader.activeFocus ? Theme.on_surface : "transparent"
                                 border.width: btHeader.activeFocus ? 2 : 0
                                 Rectangle {
@@ -151,6 +157,7 @@ ColumnLayout {
                         Layout.fillWidth: true; Layout.preferredHeight: 120
                         visible: rootBluetoothPage.adapterState && (!rootBluetoothPage.adapter || rootBluetoothPage.adapter.devices.values.length === 0)
                         radius: 16; color: Vars.tColor(Theme.surface_container, Vars.componentOpacity)
+                        antialiasing: true
                         
                         ColumnLayout {
                             anchors.centerIn: parent; spacing: 8
@@ -175,18 +182,24 @@ ColumnLayout {
                         property color targetColor: btPairMouse.containsMouse ? Qt.tint((Vars.tColor(Theme.surface_container, Vars.componentOpacity)), Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.08)) : (Vars.tColor(Theme.surface_container, Vars.componentOpacity))
                         Behavior on targetColor { ColorAnimation { duration: Vars.animationDuration } }
                         
+                        property bool lastDeviceConnected: rootBluetoothPage.adapter && rootBluetoothPage.adapter.devices.values && rootBluetoothPage.adapter.devices.values.length > 0 && rootBluetoothPage.adapter.devices.values[rootBluetoothPage.adapter.devices.values.length - 1].connected
+                        
                         Item {
                             anchors.fill: parent
                             layer.enabled: true
+                            layer.samples: 32
                             opacity: parent.targetColor.a
                             Rectangle {
                                 anchors.fill: parent
                                 color: Qt.rgba(parent.parent.targetColor.r, parent.parent.targetColor.g, parent.parent.targetColor.b, 1.0)
                                 
-                                topLeftRadius: 4
-                                topRightRadius: 4
+                                topLeftRadius: parent.parent.parent.lastDeviceConnected ? 16 : 4
+                                topRightRadius: parent.parent.parent.lastDeviceConnected ? 16 : 4
                                 bottomLeftRadius: 16
                                 bottomRightRadius: 16
+                                
+                                Behavior on topLeftRadius { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customExpressiveSpatialSlow } }
+                                Behavior on topRightRadius { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customExpressiveSpatialSlow } }
                             }
                         }
                         
@@ -221,6 +234,7 @@ ColumnLayout {
                         Item {
                             anchors.fill: parent
                             layer.enabled: true
+                            layer.samples: 32
                             opacity: parent.targetColor.a
                             Rectangle {
                                 anchors.fill: parent
@@ -245,7 +259,7 @@ ColumnLayout {
                                 QsText { text: "Allow nearby devices to find this one"; font.family: Vars.fontFamily; font.pixelSize: 13; color: Theme.on_surface_variant; Layout.fillWidth: true; horizontalAlignment: Text.AlignLeft }
                             }
                             Rectangle {
-                                width: 52; height: 32; radius: 16; color: rootBluetoothPage.adapter && rootBluetoothPage.adapter.discoverable ? (Vars.tColor(Theme.primary, Vars.componentOpacity)) : (Vars.tColor(Theme.surface_variant, Vars.componentOpacity))
+                                width: 52; height: 32; radius: 16; color: rootBluetoothPage.adapter && rootBluetoothPage.adapter.discoverable ? Theme.primary : Theme.surface_variant
                                 border.color: discCard.activeFocus ? Theme.on_surface : "transparent"; border.width: discCard.activeFocus ? 2 : 0
                                 Rectangle {
                                     width: 24; height: 24; radius: 12; color: rootBluetoothPage.adapter && rootBluetoothPage.adapter.discoverable ? Theme.on_primary : Theme.on_surface_variant
@@ -270,6 +284,7 @@ ColumnLayout {
                         Item {
                             anchors.fill: parent
                             layer.enabled: true
+                            layer.samples: 32
                             opacity: parent.targetColor.a
                             Rectangle {
                                 anchors.fill: parent
@@ -294,7 +309,7 @@ ColumnLayout {
                                 QsText { text: "Allow devices like phones to pair to this PC (not needed for speakers)"; font.family: Vars.fontFamily; font.pixelSize: 13; color: Theme.on_surface_variant; Layout.fillWidth: true; horizontalAlignment: Text.AlignLeft }
                             }
                             Rectangle {
-                                width: 52; height: 32; radius: 16; color: rootBluetoothPage.adapter && rootBluetoothPage.adapter.pairable ? (Vars.tColor(Theme.primary, Vars.componentOpacity)) : (Vars.tColor(Theme.surface_variant, Vars.componentOpacity))
+                                width: 52; height: 32; radius: 16; color: rootBluetoothPage.adapter && rootBluetoothPage.adapter.pairable ? Theme.primary : Theme.surface_variant
                                 border.color: pairCard.activeFocus ? Theme.on_surface : "transparent"; border.width: pairCard.activeFocus ? 2 : 0
                                 Rectangle {
                                     width: 24; height: 24; radius: 12; color: rootBluetoothPage.adapter && rootBluetoothPage.adapter.pairable ? Theme.on_primary : Theme.on_surface_variant
@@ -334,6 +349,7 @@ ColumnLayout {
                     Item {
                         anchors.fill: parent
                         layer.enabled: true
+                        layer.samples: 32
                         opacity: pairingHeader.targetColor.a
                         Rectangle {
                             anchors.fill: parent
@@ -362,7 +378,7 @@ ColumnLayout {
                         Rectangle {
                             width: 52; height: 32; radius: 16
                             property bool isDiscovering: rootBluetoothPage.adapter && rootBluetoothPage.adapter.discovering !== undefined ? rootBluetoothPage.adapter.discovering : false
-                            color: isDiscovering ? (Vars.tColor(Theme.primary, Vars.componentOpacity)) : (Vars.tColor(Theme.surface_variant, Vars.componentOpacity))
+                            color: isDiscovering ? Theme.primary : Theme.surface_variant
                             Rectangle {
                                 width: 24; height: 24; radius: 12
                                 color: parent.isDiscovering ? Theme.on_primary : Theme.on_surface_variant
@@ -393,6 +409,44 @@ ColumnLayout {
                                     }
                                 }
                             }
+                        }
+                    }
+                }
+
+                // Empty state
+                Rectangle {
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: 200
+                    visible: !pairingHeader.hasDeviceBelow
+                    radius: 16
+                    antialiasing: true
+                    color: "transparent"
+                    
+                    Primitives.LoadingIndicator {
+                        width: 96
+                        height: 96
+                        anchors.centerIn: parent
+                        running: rootBluetoothPage.adapter && rootBluetoothPage.adapter.discovering && !pairingHeader.hasDeviceBelow
+                        visible: running
+                    }
+                    
+                    ColumnLayout {
+                        anchors.centerIn: parent
+                        spacing: 8
+                        visible: !(rootBluetoothPage.adapter && rootBluetoothPage.adapter.discovering)
+                        QsText {
+                            text: "\ue1a7"
+                            font.family: "Material Symbols Outlined"
+                            font.pixelSize: 32
+                            color: Theme.on_surface_variant
+                            Layout.alignment: Qt.AlignHCenter
+                        }
+                        QsText {
+                            text: "No devices found"
+                            font.family: Vars.fontFamily
+                            font.pixelSize: 16
+                            color: Theme.on_surface_variant
+                            Layout.alignment: Qt.AlignHCenter
                         }
                     }
                 }

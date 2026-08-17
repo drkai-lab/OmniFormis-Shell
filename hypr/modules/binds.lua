@@ -4,9 +4,8 @@ require("modules.quickshellBinds")
 
 -- Modifiers
 local MM = kvars.MM
-local SM = kvars.SM
-local TM = kvars.TM
 local QM = kvars.QM
+local TM = kvars.TM
 
 -- Keys and Programs
 local BrowserKey = kvars.BrowserKey
@@ -73,25 +72,26 @@ end
 --------------------------------------------------------------------------------
 
 -- 1. Triggers when long pressing the combination
--- hl.bind(SM .. " + Alt_L", hl.dsp.exec_cmd("hexecute"), { long_press = true })
+-- hl.bind(QM .. " + Alt_L", hl.dsp.exec_cmd("hexecute"), { long_press = true })
 
 --------------------------------------------------------------------------------
 -- ## Shell keybinds
 --------------------------------------------------------------------------------
 
 -- Media Controls
-hl.bind(MM .." + " .. SM .. " + " .. MediaPlayPauseKey, hl.dsp.exec_cmd("playerctl play-pause"))
+hl.bind(MM .." + " .. QM .. " + " .. MediaPlayPauseKey, hl.dsp.exec_cmd("playerctl play-pause"))
 hl.bind("XF86AudioPlay", hl.dsp.exec_cmd("playerctl play-pause"))
 hl.bind("XF86AudioPause", hl.dsp.exec_cmd("playerctl play-pause"))
-hl.bind(MM .. " + " .. SM .. " + " .. MediaNextKey, hl.dsp.exec_cmd("playerctl next"))
+hl.bind(MM .. " + " .. QM .. " + " .. MediaNextKey, hl.dsp.exec_cmd("playerctl next"))
 hl.bind("XF86AudioNext", hl.dsp.exec_cmd("playerctl next"))
-hl.bind(MM .." + " .. SM .. " + " .. MediaPrevKey, hl.dsp.exec_cmd("playerctl previous"))
+hl.bind(MM .." + " .. QM .. " + " .. MediaPrevKey, hl.dsp.exec_cmd("playerctl previous"))
 hl.bind("XF86AudioPrev", hl.dsp.exec_cmd("playerctl previous"))
 hl.bind("XF86AudioStop", hl.dsp.exec_cmd("playerctl pause"))
 
--- Kill/restart shell
-hl.bind(QM .." + " .. MM .. " + " .. TM .. " + " .. ShellRestartKey, hl.dsp.exec_cmd("omniformis qs kill"))
-hl.bind(QM .." + " .. MM .. " + " .. SM .. " + " .. ShellRestartKey, hl.dsp.exec_cmd("omniformis qs kill; sleep .1; omniformis qs start -d"))
+-- Quickshell management (Kill, Launch, Reload)
+hl.bind(QM .." + " .. MM .. " + " .. TM .. " + " .. ShellRestartKey, hl.dsp.exec_cmd("omniformis kill"))
+hl.bind(QM .." + " .. MM .. " + " .. QM .. " + " .. ShellRestartKey, hl.dsp.exec_cmd("omniformis launch -d"))
+hl.bind(MM .. " + " .. TM .. " + " .. ShellRestartKey, hl.dsp.exec_cmd("omniformis reload"))
 
 --------------------------------------------------------------------------------
 -- ## Workspaces Loops (Programmatic & Scriptless)
@@ -108,59 +108,65 @@ for i = 0, 9 do
     hl.bind(QM .. " + " .. MM .. " + " .. key, function() workspace_action("workspace", ws, true) end)
     
     -- Move window to workspace #
-    hl.bind(MM .. " + " .. SM .. " + " .. key, function() workspace_action("movetoworkspace", ws, false) end)
+    hl.bind(MM .. " + " .. QM .. " + " .. key, function() workspace_action("movetoworkspace", ws, false) end)
     
     -- Move window to workspace group #
-    hl.bind(QM .. " + " .. MM .. " + " .. SM .. " + " .. key, function() workspace_action("movetoworkspace", ws, true) end)
+    hl.bind(QM .. " + " .. MM .. " + " .. QM .. " + " .. key, function() workspace_action("movetoworkspace", ws, true) end)
 end
 
--- Go to workspace -1/+1 directional navigation
-hl.bind(MM .. " + mouse_down", hl.dsp.focus({ workspace = "r-1" }))
-hl.bind(MM .. " + mouse_up", hl.dsp.focus({ workspace = "r+1" }))
-hl.bind(MM .. " + Page_Up", hl.dsp.focus({ workspace = "r-1" }))
-hl.bind(MM .. " + Page_Down", hl.dsp.focus({ workspace = "r+1" }))
+-- Go to workspace -1/+1 directional navigation (Swapped to monitor-relative 'm' to stop boundary errors)
+hl.bind(MM .. " + mouse_down", hl.dsp.focus({ workspace = "m-1" }))
+hl.bind(MM .. " + mouse_up", hl.dsp.focus({ workspace = "m+1" }))
+hl.bind(MM .. " + Page_Up", hl.dsp.focus({ workspace = "m-1" }))
+hl.bind(MM .. " + Page_Down", hl.dsp.focus({ workspace = "m+1" }))
 
-hl.bind(MM .. " + Prior", hl.dsp.focus({ workspace = "r-1" }))
-hl.bind(MM .. " + Next", hl.dsp.focus({ workspace = "r+1" }))
+hl.bind(MM .. " + Prior", hl.dsp.focus({ workspace = "m-1" }))
+hl.bind(MM .. " + Next", hl.dsp.focus({ workspace = "m+1" }))
 
 -- Go to workspace group -1/+1
-hl.bind(QM .. " + " .. MM .. " + mouse_down", hl.dsp.focus({ workspace = "e-10" }))
-hl.bind(QM .. " + " .. MM .. " + mouse_up", hl.dsp.focus({ workspace = "e+10" }))
+hl.bind(QM .. " + " .. MM .. " + mouse_down", hl.dsp.focus({ workspace = "r-10" }))
+hl.bind(QM .. " + " .. MM .. " + mouse_up", hl.dsp.focus({ workspace = "r+10" }))
 
 --------------------------------------------------------------------------------
 -- ## Move Window Utilities
 --------------------------------------------------------------------------------
 
-hl.bind(MM .. " + " .. SM .. " + Page_Up", hl.dsp.window.move({ workspace = "e-1" }))
-hl.bind(MM .. " + " .. SM .. " + Page_Down", hl.dsp.window.move({ workspace = "e+1" }))
-hl.bind(MM .. " + " .. SM .. " + mouse_down", hl.dsp.window.move({ workspace = "e-1" }))
-hl.bind(MM .. " + " .. SM .. " + mouse_up", hl.dsp.window.move({ workspace = "e+1" }))
-hl.bind(QM .. " + " .. MM .. " + " .. TM .. " + right", hl.dsp.window.move({ workspace = "e+1" }))
-hl.bind(QM .. " + " .. MM .. " + " .. TM .. " + left", hl.dsp.window.move({ workspace = "e-1" }))
+hl.bind(MM .. " + " .. QM .. " + Page_Up", hl.dsp.window.move({ workspace = "m-1" }))
+hl.bind(MM .. " + " .. QM .. " + Page_Down", hl.dsp.window.move({ workspace = "m+1" }))
+hl.bind(MM .. " + " .. QM .. " + mouse_down", hl.dsp.window.move({ workspace = "m-1" }))
+hl.bind(MM .. " + " .. QM .. " + mouse_up", hl.dsp.window.move({ workspace = "m+1" }))
+hl.bind(QM .. " + " .. MM .. " + " .. TM .. " + right", hl.dsp.window.move({ workspace = "m+1" }))
+hl.bind(QM .. " + " .. MM .. " + " .. TM .. " + left", hl.dsp.window.move({ workspace = "m-1" }))
 
 -- Move window to/from special workspace
 hl.bind(QM .. " + " .. MM .. " + " .. TM .. " + up", hl.dsp.window.move({ workspace = "special:scratchboard" }))
-hl.bind(QM .. " + " .. MM .. " + " .. TM .. " + down", hl.dsp.window.move({ workspace = "e+0" }))
-hl.bind(MM .. " + " .. SM .. " + " .. ScratchboardKey, hl.dsp.window.move({ workspace = "special:scratchboard" }))
+hl.bind(QM .. " + " .. MM .. " + " .. TM .. " + down", hl.dsp.window.move({ workspace = "+0" }))
+hl.bind(MM .. " + " .. QM .. " + " .. ScratchboardKey, hl.dsp.window.move({ workspace = "special:scratchboard" }))
 
 -- Move the active window out of its current group
 hl.bind(MM .. " + " .. TM .. " + " .. GroupToggleKey, hl.dsp.window.move({ out_of_group = true, window = "active" }))
+
 --------------------------------------------------------------------------------
 -- ## Window Groups
 --------------------------------------------------------------------------------
 
-hl.bind(SM .. " + " .. GroupTabKey, hl.dsp.group.next())
-hl.bind(TM .. " + " .. SM .." + " .. GroupTabKey, hl.dsp.group.prev())
+hl.bind(QM .. " + " .. GroupTabKey, hl.dsp.group.next())
+hl.bind(TM .. " + " .. QM .." + " .. GroupTabKey, hl.dsp.group.prev())
 for i = 0, 5 do
     local key = tostring(i)
     -- Maps 0 to tab 5, otherwise matches the index number
     local ws = (i == 0) and 5 or i
     
     -- Switch to a specific window inside the group by its index (1-based)
-    hl.bind(SM .. " + " .. key, hl.dsp.group.active({ index = ws }), { desc = "Jump to group tab " .. ws })
+    hl.bind(QM .. " + " .. key, hl.dsp.group.active({ index = ws }), { desc = "Jump to group tab " .. ws })
 end
-hl.bind(QM .. " + " .. TM .. " + " .. SM .. " + " .. GroupTabKey, hl.dsp.exec_cmd("hyprctl dispatch changegroupactive b"))
+
+-- Replaced hyprctl string with native dispatch
+hl.bind(QM .. " + " .. TM .. " + " .. QM .. " + " .. GroupTabKey, function() 
+    hl.dispatch("changegroupactive", "b") 
+end)
 hl.bind(MM .. " + " .. GroupToggleKey, hl.dsp.group.toggle())
+
 -- Move the active window out of its current group
 hl.bind(MM .. " + " .. TM .. " + " .. GroupToggleKey, hl.dsp.window.move({ out_of_group = true, window = "active" }))
 
@@ -174,10 +180,13 @@ hl.bind(MM .. " + mouse:273", hl.dsp.window.resize(), { mouse = true })
 
 -- Alignment and Toggles
 hl.bind(QM .." + " .. MM .. " + " .. CenterWindowKey, hl.dsp.window.center())
-hl.bind(QM .. " + " .. MM .. " + " .. SM .. " + " .. CenterWindowKey, function()
-    hl.dispatch(hl.dsp.exec_cmd("hyprctl dispatch resizeactive exact 55% 70%"))
-    hl.dispatch(hl.dsp.exec_cmd("hyprctl dispatch centerwindow 1"))
+
+-- Replaced hyprctl strings with native dispatch logic
+hl.bind(QM .. " + " .. MM .. " + " .. QM .. " + " .. CenterWindowKey, function()
+    hl.dispatch("resizeactive", "exact 55% 70%")
+    hl.dispatch("centerwindow", "1")
 end)
+
 hl.bind(MM .. " + " .. PinKey, hl.dsp.window.pin())
 hl.bind(MM .. " + " .. TM .. " + " .. FullscreenKey, hl.dsp.window.fullscreen({mode = "fullscreen"}))
 hl.bind(MM .. " + " .. FullscreenKey, hl.dsp.window.fullscreen({mode = "maximized"}))
@@ -185,16 +194,17 @@ hl.bind(MM .. " + " .. FloatKey, hl.dsp.window.float("active"))
 hl.bind(MM .. " + " .. CloseKey, hl.dsp.window.close("active"))
 
 --------------------------------------------------------------------------------
--- ## Special System Workspace TargetMM .. "+"s
+-- ## Special System Workspace Targets
 --------------------------------------------------------------------------------
 
 hl.bind(MM .. " + " .. MusicWorkspaceKey, hl.dsp.workspace.toggle_special("music"))
 hl.bind(MM .. " + " .. ScratchboardKey, hl.dsp.workspace.toggle_special("scratchboard"))
 
 -- Toggle SysInfo workspace and launch the dynamic app via app2unit
+-- Removed hyprctl client check. Singleton logic should be handled by app2unit script.
 hl.bind(QM .. " + " .. TM .. " + " .. SysInfoWorkspaceKey, function()
     hl.dispatch(hl.dsp.workspace.toggle_special("sysinfo"))
-    hl.dispatch(hl.dsp.exec_cmd("bash -c 'hyprctl clients | grep -q \"special:sysinfo\" || app2unit -- " .. Term .. " -e " .. SysInfo .. "'"))
+    hl.dispatch(hl.dsp.exec_cmd("app2unit -- " .. Term .. " -e " .. SysInfo))
 end)
 
 --------------------------------------------------------------------------------
@@ -212,12 +222,14 @@ hl.bind(MM .. " + " .. FilesKey, hl.dsp.exec_cmd("app2unit -- " .. Files))
 
 hl.bind("Print", hl.dsp.exec_cmd("grim - | satty --filename -"))
 hl.bind(MM .. " + " .. TM .. " + " .. ScreenshotKey, hl.dsp.exec_cmd("bash -c 'geom=$(slurp) && sleep 0.1 && grim -g \"$geom\" - | satty --filename -'"))
-hl.bind(MM .. " + " .. TM .. " + " .. SM .. " + " .. ScreenshotKey, hl.dsp.exec_cmd("bash -c 'geom=$(slurp) && sleep 0.1 && grim -g \"$geom\" - | satty --filename -'"))
---[[ hl.bind(MM .. " + " .. SM .. " + R", hl.dsp.exec_cmd("caelestia record -s"))
+hl.bind(MM .. " + " .. TM .. " + " .. QM .. " + " .. ScreenshotKey, hl.dsp.exec_cmd("bash -c 'geom=$(slurp) && sleep 0.1 && grim -g \"$geom\" - | satty --filename -'"))
+--[[ hl.bind(MM .. " + " .. QM .. " + R", hl.dsp.exec_cmd("caelestia record -s"))
 hl.bind(QM .. " + " .. TM .. " + R", hl.dsp.exec_cmd("caelestia record"))
-hl.bind(MM .. " + " .. TM .. " + " .. SM .. " + R", hl.dsp.exec_cmd("caelestia record -r")) ]]
+hl.bind(MM .. " + " .. TM .. " + " .. QM .. " + R", hl.dsp.exec_cmd("caelestia record -r")) ]]
 hl.bind(MM .. " + " .. TM .. " + " .. ColorPickerKey, hl.dsp.exec_cmd("hyprpicker -a"))
 
+-- OmniAction Context Menu (Triggers on currently copied file)
+hl.bind(MM .. " + O", hl.dsp.exec_cmd("'/run/media/boing/Games/pc backup/SideProjects/OmniMenu/omniaction_clip.sh'"))
 --------------------------------------------------------------------------------
 -- ## System Volume Inputs
 --------------------------------------------------------------------------------
@@ -225,17 +237,17 @@ hl.bind(MM .. " + " .. TM .. " + " .. ColorPickerKey, hl.dsp.exec_cmd("hyprpicke
 hl.bind("XF86AudioMicMute", hl.dsp.exec_cmd("wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle"))
 hl.bind("XF86AudioMute", hl.dsp.exec_cmd("wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"))
 hl.bind(MM .. " + " .. TM .. " + " .. VolumeMuteKey, hl.dsp.exec_cmd("wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"))
-hl.bind("XF86AudioRaiseVolume", hl.dsp.exec_cmd("wpctl set-mute @DEFALT_AUDIO_SINK@ -1; wpctl set-volume -l 1 @DEFAULT_AUDIO_SINK@ 5%+"))
+hl.bind("XF86AudioRaiseVolume", hl.dsp.exec_cmd("wpctl set-mute @DEFAULT_AUDIO_SINK@ 0; wpctl set-volume -l 1 @DEFAULT_AUDIO_SINK@ 5%+"))
 hl.bind("XF86AudioLowerVolume", hl.dsp.exec_cmd("wpctl set-mute @DEFAULT_AUDIO_SINK@ 0; wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-"))
 
 --------------------------------------------------------------------------------
 -- ## Display Brightness Inputs (DDC/CI)
 --------------------------------------------------------------------------------
 
-hl.bind(SM .. " + " .. "XF86AudioRaiseVolume", hl.dsp.exec_cmd("ddcutil setvcp 10 + 5"))
-hl.bind(SM .. " + " .. "XF86AudioLowerVolume", hl.dsp.exec_cmd("ddcutil setvcp 10 - 5"))
-hl.bind(SM .. " + mouse_up", hl.dsp.exec_cmd("ddcutil setvcp 10 + 5"))
-hl.bind(SM .. " + mouse_down", hl.dsp.exec_cmd("ddcutil setvcp 10 - 5"))
+hl.bind(QM .. " + " .. "XF86AudioRaiseVolume", hl.dsp.exec_cmd("ddcutil setvcp 10 + 5"))
+hl.bind(QM .. " + " .. "XF86AudioLowerVolume", hl.dsp.exec_cmd("ddcutil setvcp 10 - 5"))
+hl.bind(QM .. " + mouse_up", hl.dsp.exec_cmd("ddcutil setvcp 10 + 5"))
+hl.bind(QM .. " + mouse_down", hl.dsp.exec_cmd("ddcutil setvcp 10 - 5"))
 
 --------------------------------------------------------------------------------
 -- ## Power Management

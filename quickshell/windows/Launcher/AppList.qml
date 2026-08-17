@@ -4,7 +4,7 @@ import Quickshell
 import "../.."
 import "../../theme"
 import "../.."
-import "../../theme/variables.js" as Vars
+import "../../theme"
 import Quickshell.Io
 
 ListView {
@@ -16,6 +16,11 @@ ListView {
     
     property var launcherModel
     property alias searchText: searchInputTextObj.text
+    property real outerTopLeftRadius: Vars.radiusExtraLarge
+    property real outerTopRightRadius: Vars.radiusExtraLarge
+    property real outerBottomLeftRadius: Vars.radiusExtraLarge
+    property real outerBottomRightRadius: Vars.radiusExtraLarge
+    property real containerPadding: Vars.spacingLarge
     
     QtObject {
         id: searchInputTextObj
@@ -278,17 +283,32 @@ ListView {
         }
 
         property bool isCurrent: delegateItem.ListView.isCurrentItem && root.activeFocus
+        property bool isEffectivelyLast: index === root.count - 1
+        property bool isEffectivelyFirst: index === 0
+        
+        property real r2TopLeft: Math.max(0, root.outerTopLeftRadius - root.containerPadding)
+        property real r2TopRight: Math.max(0, root.outerTopRightRadius - root.containerPadding)
+        property real r2BottomLeft: Math.max(0, root.outerBottomLeftRadius - root.containerPadding)
+        property real r2BottomRight: Math.max(0, root.outerBottomRightRadius - root.containerPadding)
         
         Rectangle {
             anchors.fill: parent
-            anchors.margins: isCurrent ? 0 : 2
-            color: isCurrent ? (Vars.tColor(Theme.primary_container, Vars.componentOpacity)) : (itemMouseArea.containsMouse ? (Vars.tColor(Theme.surface_container_highest, Vars.componentOpacity)) : "transparent")
-            radius: Vars.radiusMedium
+            anchors.margins: 0
+            color: isCurrent ? (Vars.tColorSelected(Theme.primary_container)) : (itemMouseArea.containsMouse ? (Vars.tColor(Theme.surface_container_highest, Vars.componentOpacity)) : (Vars.tColor(Theme.surface_container_high, Vars.componentOpacity)))
+            
+            topLeftRadius: isCurrent ? height / 2 : 4
+            topRightRadius: isCurrent ? height / 2 : 4
+            bottomLeftRadius: isCurrent ? height / 2 : (isEffectivelyLast ? r2BottomLeft : 4)
+            bottomRightRadius: isCurrent ? height / 2 : (isEffectivelyLast ? r2BottomRight : 4)
+            
             border.color: Theme.primary
             border.width: 0
 
             Behavior on color { ColorAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
-            Behavior on radius { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customExpressiveSpatialSlow } }
+            Behavior on topLeftRadius { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customExpressiveSpatialSlow } }
+            Behavior on topRightRadius { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customExpressiveSpatialSlow } }
+            Behavior on bottomLeftRadius { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customExpressiveSpatialSlow } }
+            Behavior on bottomRightRadius { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customExpressiveSpatialSlow } }
             Behavior on anchors.margins { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customExpressiveSpatialSlow } }
         }
 
@@ -340,6 +360,7 @@ ListView {
                 Layout.preferredHeight: 28
                 color: "transparent"
                 radius: Vars.radiusSmall
+                antialiasing: true
                 clip: true
 
                 Image {

@@ -5,7 +5,7 @@ import QtQuick.Layouts
 import Quickshell
 import Quickshell.Io
 import Quickshell.Hyprland
-import "../theme/variables.js" as Vars
+import "../theme"
 import "../core/primitives" as Primitives
 Item {
     id: root
@@ -182,6 +182,7 @@ Item {
         id: panel
         property bool isBackgroundActive: root.expanded || (MorphState.openCount === 0 && MorphState.activeItem === panel && (isVertical ? panel.height > 105 : panel.width > 105))
         layer.enabled: false
+        layer.samples: 32
         anchors.top: (!Vars.pillPosition || Vars.pillPosition === "Top") ? parent.top : undefined
         anchors.bottom: Vars.pillPosition === "Bottom" ? parent.bottom : undefined
         anchors.left: Vars.pillPosition === "Left" ? parent.left : undefined
@@ -282,10 +283,11 @@ Item {
         Layout.preferredWidth: 72
         Layout.preferredHeight: 72
         radius: isActive ? width / 2 : Vars.radiusLarge 
+        antialiasing: true
         
         Behavior on radius { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
         
-        color: isActive ? (Vars.tColor(Theme.primary, 0.85)) : Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.06)
+        color: isActive ? (Vars.tColorSelected(Theme.primary)) : Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.06)
         border.width: isActive ? 2 : 0
         border.color: isActive ? Theme.primary : "transparent"
         

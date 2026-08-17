@@ -14,10 +14,12 @@ Rectangle {
     width: 400
     height: 600
     radius: 24
+    antialiasing: true
     color: Theme.surface
     anchors.centerIn: parent
 
     layer.enabled: true
+    layer.samples: 32
     layer.effect: MultiEffect {
         shadowEnabled: true
         shadowOpacity: 0.15
@@ -188,6 +190,7 @@ Rectangle {
             width: 120
             height: 120
             radius: 60
+            antialiasing: true
             color: "transparent"
             border.color: Theme.outline_variant
             border.width: 2
@@ -196,6 +199,7 @@ Rectangle {
                 anchors.fill: parent
                 anchors.margins: 2
                 radius: width / 2
+                antialiasing: true
                 color: "transparent"
 
                 Image {
@@ -263,6 +267,7 @@ Rectangle {
             Layout.fillWidth: true
             Layout.preferredHeight: 52
             radius: 26
+            antialiasing: true
             color: authError ? Theme.error_container : Theme.surface_container_highest
             border.color: passwordInput.activeFocus ? root.accentPrimary : "transparent"
             border.width: 2
@@ -523,6 +528,7 @@ Rectangle {
                     Layout.fillWidth: true
                     Layout.preferredHeight: 44
                     radius: currentUserIndex === index ? 14 : 22
+                    antialiasing: true
                     color: currentUserIndex === index ? root.accentPrimary : root.surfaceDim
                     Behavior on color { ColorAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.m3Standard } }
                     Behavior on radius { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.m3Standard } }
@@ -597,6 +603,7 @@ Rectangle {
                         Layout.fillWidth: true
                         Layout.preferredHeight: 44
                         radius: currentSessionIndex === index ? 14 : 22
+                        antialiasing: true
                         color: currentSessionIndex === index ? root.accentPrimary : root.surfaceDim
                         Behavior on color { ColorAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.m3Standard } }
                         Behavior on radius { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.m3Standard } }
@@ -646,6 +653,7 @@ Rectangle {
             Layout.fillWidth: true
             Layout.preferredHeight: 48
             radius: 24
+            antialiasing: true
             color: root.accentPrimary
 
             QsText {

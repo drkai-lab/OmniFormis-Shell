@@ -4,7 +4,7 @@ import QtQuick.Controls
 import QtQuick.Effects
 import Quickshell
 import "../.."
-import "../../theme/variables.js" as Vars
+import "../../theme"
 import QtCore
 
 ColumnLayout {
@@ -37,6 +37,7 @@ ColumnLayout {
             border.color: searchInput.activeFocus ? Theme.primary : "transparent"
             border.width: searchInput.activeFocus ? 2 : 0
             radius: searchInput.activeFocus ? Vars.radiusLarge : Vars.radiusExtraLarge
+            antialiasing: true
 
             Behavior on color { ColorAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
             Behavior on radius { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customExpressiveSpatialSlow } }

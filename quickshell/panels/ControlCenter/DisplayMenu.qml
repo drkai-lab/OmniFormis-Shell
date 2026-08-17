@@ -4,7 +4,7 @@ import Quickshell
 import Quickshell.Hyprland
 import Quickshell.Io
 import QtCore
-import "../../theme/variables.js" as Vars
+import "../../theme"
 import "../.."
 
 ColumnLayout {
@@ -57,6 +57,7 @@ ColumnLayout {
                     property bool isScaleActive: Hyprland.focusedMonitor && Math.abs(Hyprland.focusedMonitor.scale - modelData) < 0.01
                     Layout.fillWidth: true; Layout.preferredHeight: 64
                     radius: isScaleActive ? 16 : 32
+                    antialiasing: true
                     Behavior on radius { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
                     color: isScaleActive ? Theme.primary : (dispMouse.pressed ? Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.12) : (dispMouse.containsMouse ? Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.08) : Theme.surface_container_low))
                     Behavior on color { ColorAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
@@ -67,6 +68,7 @@ ColumnLayout {
                         Rectangle {
                             Layout.preferredWidth: 40; Layout.preferredHeight: 40
                             radius: isScaleActive ? 12 : 20
+                            antialiasing: true
                             Behavior on radius { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
                             color: isScaleActive ? Theme.on_primary : Qt.rgba(Theme.on_surface_variant.r, Theme.on_surface_variant.g, Theme.on_surface_variant.b, 0.1)
                             QsText {

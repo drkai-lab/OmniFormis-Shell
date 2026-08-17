@@ -2,7 +2,7 @@ import QtQuick
 import QtQuick.Layouts
 import Quickshell
 import "../../theme"
-import "../../theme/variables.js" as Vars
+import "../../theme"
 
 Rectangle {
     id: root
@@ -22,6 +22,11 @@ Rectangle {
     property color defaultTextColor: Theme.on_surface
     property color activeTextColor: Theme.on_primary_container
     property color defaultPlaceholderColor: Theme.on_surface_variant
+    property real outerTopLeftRadius: Vars.radiusExtraLarge
+    property real outerTopRightRadius: Vars.radiusExtraLarge
+    property real outerBottomLeftRadius: Vars.radiusExtraLarge
+    property real outerBottomRightRadius: Vars.radiusExtraLarge
+    property real containerPadding: Vars.spacingLarge
 
     signal downPressed(var event)
     signal returnPressed(var event)
@@ -38,14 +43,17 @@ Rectangle {
         color: searchInput.activeFocus ? activeColor : defaultColor
         border.color: searchInput.activeFocus ? Theme.primary : "transparent"
         border.width: searchInput.activeFocus ? 2 : 0
-        radius: searchInput.activeFocus ? Vars.radiusLarge : Vars.radiusExtraLarge
-        topLeftRadius: root.topLeftRadius !== 0 ? root.topLeftRadius : radius
-        topRightRadius: root.topRightRadius !== 0 ? root.topRightRadius : radius
-        bottomLeftRadius: root.bottomLeftRadius !== 0 ? root.bottomLeftRadius : radius
-        bottomRightRadius: root.bottomRightRadius !== 0 ? root.bottomRightRadius : radius
+        
+        topLeftRadius: Math.max(0, root.outerTopLeftRadius - root.containerPadding)
+        topRightRadius: Math.max(0, root.outerTopRightRadius - root.containerPadding)
+        bottomLeftRadius: Math.max(0, root.outerBottomLeftRadius - root.containerPadding)
+        bottomRightRadius: Math.max(0, root.outerBottomRightRadius - root.containerPadding)
 
         Behavior on color { ColorAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
-        Behavior on radius { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customExpressiveSpatialSlow } }
+        Behavior on topLeftRadius { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customExpressiveSpatialSlow } }
+        Behavior on topRightRadius { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customExpressiveSpatialSlow } }
+        Behavior on bottomLeftRadius { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customExpressiveSpatialSlow } }
+        Behavior on bottomRightRadius { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customExpressiveSpatialSlow } }
 
         MouseArea {
             anchors.fill: parent

@@ -12,7 +12,7 @@ import Quickshell.Services.Mpris
 import Quickshell.Services.SystemTray
 import Quickshell.Hyprland
 import QtCore
-import "../theme/variables.js" as Vars
+import "../theme"
 import "../core/primitives" as Primitives
 import "ControlCenter" as CC
 
@@ -129,6 +129,7 @@ Item {
         id: panel
         property bool isBackgroundActive: root.expanded || (MorphState.openCount === 0 && MorphState.activeItem === panel && panel.width > 105)
         layer.enabled: false
+        layer.samples: 32
         anchors.top: (!Vars.pillPosition || Vars.pillPosition === "Top") ? parent.top : undefined
         anchors.bottom: Vars.pillPosition === "Bottom" ? parent.bottom : undefined
         anchors.left: Vars.pillPosition === "Left" ? parent.left : undefined
@@ -214,6 +215,7 @@ Item {
                             Layout.preferredHeight: 40
                             Layout.preferredWidth: logoLayout.implicitWidth + 16
                             radius: 20
+                            antialiasing: true
                             color: Vars.tColor(Theme.surface_container_high, Vars.componentOpacity)
                             clip: true
                             
@@ -244,6 +246,7 @@ Item {
                                     Layout.preferredHeight: 4
                                     Layout.alignment: Qt.AlignVCenter
                                     radius: 2
+                                    antialiasing: true
                                     color: Theme.primary
                                     visible: root.systemUptime !== ""
                                 }
@@ -260,6 +263,7 @@ Item {
                                     Layout.preferredHeight: 4
                                     Layout.alignment: Qt.AlignVCenter
                                     radius: 2
+                                    antialiasing: true
                                     color: Theme.primary
                                     visible: trayRepeater.count > 0
                                 }
@@ -283,6 +287,7 @@ Item {
                                             
                                             color: itemMouseArea.pressed ? Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.12) : (itemMouseArea.containsMouse ? Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.08) : "transparent")
                                             radius: height / 2
+                                            antialiasing: true
 
                                             Behavior on color {
                                                 ColorAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard }
@@ -342,6 +347,7 @@ Item {
                             Layout.preferredHeight: 40
                             Layout.preferredWidth: btnLayout.implicitWidth + 16
                             radius: 20
+                            antialiasing: true
                             color: Vars.tColor(Theme.surface_container_high, Vars.componentOpacity)
                             clip: true
                             
@@ -445,7 +451,26 @@ Item {
                     }
 
                     CC.Sliders { }
-                    CC.MediaPlayer { }
+                    Item {
+                        Layout.fillWidth: true
+                        Layout.preferredHeight: Vars.mediaPlayerExpandOverlaps ? (mediaPlayer.isVertical ? 300 : 180) : mediaPlayer.Layout.preferredHeight
+                        Layout.preferredWidth: Vars.mediaPlayerExpandOverlaps ? -1 : mediaPlayer.Layout.preferredWidth
+                        
+                        z: mediaPlayer.isExpanded ? 100 : 1
+                        
+                        Behavior on Layout.preferredHeight { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.OutCubic } }
+                        Behavior on Layout.preferredWidth { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.OutCubic } }
+                        
+                        CC.MediaPlayer {
+                            id: mediaPlayer
+                            forceVerticalExpansion: true
+                            width: Vars.mediaPlayerExpandOverlaps ? (isExpanded && isHorizontalExpansion ? 900 : parent.width) : parent.width
+                            height: Vars.mediaPlayerExpandOverlaps ? (isExpanded && !isHorizontalExpansion ? 650 : parent.height) : parent.height
+                            
+                            Behavior on height { enabled: Vars.mediaPlayerExpandOverlaps; NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.OutCubic } }
+                            Behavior on width { enabled: Vars.mediaPlayerExpandOverlaps; NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.OutCubic } }
+                        }
+                    }
                     CC.Notifications { }
                 }
             }
@@ -507,12 +532,13 @@ Item {
                 
                 color: Vars.tColor(Theme.surface_container_highest, Vars.panelOpacity)
                 radius: Vars.radiusMedium
+                antialiasing: true
                 border.width: 1
                 border.color: Qt.rgba(Theme.outline.r, Theme.outline.g, Theme.outline.b, 0.2)
                 clip: true
                 
                 layer.enabled: !root.gameMode
-                layer.samples: 4
+                layer.samples: 32
                 layer.effect: MultiEffect { shadowEnabled: true; shadowBlur: 1.0; shadowColor: Qt.rgba(0,0,0,0.35); shadowVerticalOffset: 6; shadowHorizontalOffset: 0 }
 
                 transformOrigin: Item.Top
@@ -553,6 +579,7 @@ Item {
                                 visible: entry && !entry.isSeparator
                                 color: entryMouseArea.pressed ? Qt.rgba(Theme.primary.r, Theme.primary.g, Theme.primary.b, 0.18) : (entryMouseArea.containsMouse ? Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.08) : "transparent")
                                 radius: Vars.radiusSmall || 4
+                                antialiasing: true
                                 Behavior on color { ColorAnimation { duration: 120 } }
 
                                 RowLayout {

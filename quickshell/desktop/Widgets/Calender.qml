@@ -2,7 +2,7 @@ import QtQuick
 import QtQuick.Layouts
 import QtQuick.Effects
 import "../../" 
-import "../../theme/variables.js" as Vars
+import "../../theme"
 Item {
     id: root
     width: 320
@@ -50,10 +50,12 @@ Item {
         anchors.fill: parent
         color: Vars.tColor(Theme.surface_container_high, Vars.panelOpacity)
         radius: 24
+        antialiasing: true
         
         opacity: (Vars._translucent && !Vars.gameMode) ? 0.85 : 1.0
         
         layer.enabled: true
+        layer.samples: 32
         layer.effect: MultiEffect {
             shadowEnabled: true
             shadowBlur: 1.0
@@ -76,6 +78,7 @@ Item {
                     width: 32
                     height: 32
                     radius: 16
+                    antialiasing: true
                     color: prevMouse.pressed ? Theme.surface_variant : "transparent"
                     QsText {
                         anchors.centerIn: parent
@@ -105,6 +108,7 @@ Item {
                     width: 32
                     height: 32
                     radius: 16
+                    antialiasing: true
                     color: nextMouse.pressed ? Theme.surface_variant : "transparent"
                     QsText {
                         anchors.centerIn: parent
@@ -153,6 +157,7 @@ Item {
                         Layout.fillHeight: true
                         Layout.preferredHeight: width // Keeps the cells perfectly square
                         radius: width / 2 // Makes them circular
+                        antialiasing: true
 
                         // --- Cell Logic ---
                         property int firstDay: root.getFirstDayOfMonth(root.currentMonth, root.currentYear)

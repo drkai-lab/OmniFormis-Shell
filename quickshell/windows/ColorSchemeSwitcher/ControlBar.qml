@@ -5,7 +5,7 @@ import "../.."
 import "../../theme"
 import "../.."
 import Quickshell
-import "../../theme/variables.js" as Vars
+import "../../theme"
 
 RowLayout {
     id: root
@@ -44,6 +44,7 @@ RowLayout {
         border.color: searchInput.activeFocus ? Theme.primary : Theme.outline
         border.width: searchInput.activeFocus ? 2 : 1
         radius: Vars.radiusMedium
+        antialiasing: true
 
         RowLayout {
             anchors.fill: parent
@@ -110,6 +111,7 @@ RowLayout {
             color: modeToggleBtn.down ? Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.12) : (modeToggleBtn.hovered ? Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.08) : "transparent")
             border.width: 0
             radius: Vars.radiusMedium
+            antialiasing: true
         }
         contentItem: RowLayout {
             spacing: Vars.spacingSmall
@@ -138,6 +140,7 @@ RowLayout {
             color: refreshBtn.down ? Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.12) : (refreshBtn.hovered ? Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.08) : "transparent")
             border.width: 0
             radius: Vars.radiusMedium
+            antialiasing: true
         }
         contentItem: RowLayout {
             spacing: Vars.spacingSmall

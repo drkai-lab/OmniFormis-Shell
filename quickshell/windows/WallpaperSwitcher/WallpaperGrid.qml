@@ -3,7 +3,7 @@ import QtQuick.Layouts
 import QtQuick.Controls
 import QtQuick.Effects
 import "../.."
-import "../../theme/variables.js" as Vars
+import "../../theme"
 import Quickshell.Io
 
 GridView {
@@ -203,19 +203,23 @@ GridView {
             anchors.fill: parent
             anchors.margins: isCurrentFocus ? 0 : Vars.spacingSmall
             radius: Vars.radiusMedium
+            antialiasing: true
 
-            color: isCurrentFocus ? Theme.primary_container : (tileMouseArea.containsMouse ? (Vars.tColor(Theme.surface_container_highest, Vars.componentOpacity)) : (Vars.tColor(Theme.surface_container_low, Vars.componentOpacity)))
+            color: isCurrentFocus ? (Vars.tColorSelected(Theme.primary_container)) : (tileMouseArea.containsMouse ? (Vars.tColor(Theme.surface_container_highest, Vars.componentOpacity)) : (Vars.tColor(Theme.surface_container_low, Vars.componentOpacity)))
 
             Rectangle {
                 id: tileMask
                 anchors.fill: parent
                 radius: parent.radius
+                antialiasing: true
                 color: "black"
                 visible: false
                 layer.enabled: true
+                layer.samples: 32
             }
 
             layer.enabled: true
+            layer.samples: 32
             layer.effect: MultiEffect {
                 maskEnabled: true
                 maskSource: tileMask
@@ -294,6 +298,7 @@ GridView {
                         width: 32
                         height: 18
                         radius: Math.floor(Vars.radiusSmall / 2)
+                        antialiasing: true
                         color: Theme.primary
                         visible: filePath.toLowerCase().endsWith(".gif")
                         QsText {
@@ -311,6 +316,7 @@ GridView {
             Rectangle {
                 anchors.fill: parent
                 radius: parent.radius
+                antialiasing: true
                 color: "transparent"
                 border.color: isCurrentFocus ? Theme.primary : (rootRef && rootRef.currentWallpaper === filePath ? Theme.primary : Theme.outline_variant)
                 border.width: isCurrentFocus || (rootRef && rootRef.currentWallpaper === filePath) ? 2 : 1

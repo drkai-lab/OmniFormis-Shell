@@ -3,7 +3,7 @@ import Quickshell
 import Quickshell.Wayland
 import ".."
 
-import "../theme/variables.js" as Vars
+import "../theme"
 
 Item {
     id: root

@@ -1,7 +1,7 @@
 import QtQuick
 import QtQuick.Shapes
 import QtQuick.Effects
-import "../../theme/variables.js" as Vars
+import "../../theme"
 import "../.."
 
 Item {
@@ -53,11 +53,13 @@ Item {
         width: root.radius * 4
         height: root.radius * 4
         radius: root.radius * 2
+        antialiasing: true
         color: "transparent"
         border.color: root.color
         border.width: root.radius
-        antialiasing: true
         smooth: true
+        layer.enabled: true
+        layer.samples: 32
         
         property real holeCenterX: root.isRightSolid ? 0 : root.radius
         property real holeCenterY: root.isBottomSolid ? 0 : root.radius
@@ -75,6 +77,8 @@ Item {
         visible: root.power > 2.0
         antialiasing: true
         smooth: true
+        layer.enabled: true
+        layer.samples: 32
 
         ShapePath {
             fillColor: root.color

@@ -3,7 +3,7 @@ import ".."
 import Quickshell
 import Quickshell.Hyprland
 import Quickshell.Services.Polkit
-import "../theme/variables.js" as Vars
+import "../theme"
 
 Scope {
     id: root

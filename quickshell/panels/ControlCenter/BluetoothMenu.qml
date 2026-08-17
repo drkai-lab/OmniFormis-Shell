@@ -2,7 +2,7 @@ import QtQuick
 import QtQuick.Layouts
 import Quickshell
 import Quickshell.Bluetooth
-import "../../theme/variables.js" as Vars
+import "../../theme"
 import "../.."
 
 ColumnLayout {
@@ -49,7 +49,7 @@ ColumnLayout {
         // Master Toggle Switch
         Rectangle {
             width: 56; height: 32; radius: 16
-            color: adapterState ? (Vars.tColor(Theme.primary, 0.8)) : (Vars.tColor(Theme.surface_variant, Vars.componentOpacity))
+            color: adapterState ? (Vars.tColorSelected(Theme.primary)) : (Vars.tColor(Theme.surface_variant, Vars.componentOpacity))
             Behavior on color { ColorAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
             Rectangle {
                 width: 24; height: 24; radius: 12
@@ -78,8 +78,9 @@ ColumnLayout {
                     visible: modelData.paired || modelData.connected
                     Layout.fillWidth: true; Layout.preferredHeight: visible ? 64 : 0
                     radius: 16
+                    antialiasing: true
                     Behavior on radius { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
-                    color: modelData.connected ? (Vars.tColor(Theme.surface_container_highest, Vars.componentOpacity)) : (btMouse.pressed ? Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.12) : (btMouse.containsMouse ? Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.08) : (Vars.tColor(Theme.surface_container_low, Vars.componentOpacity))))
+                    color: modelData.connected ? (Vars.tColorSelected(Theme.secondary_container)) : (btMouse.pressed ? Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.12) : (btMouse.containsMouse ? Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.08) : (Vars.tColor(Theme.surface_container_low, Vars.componentOpacity))))
                     Behavior on color { ColorAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
                     
                     RowLayout {
@@ -88,6 +89,7 @@ ColumnLayout {
                         Rectangle {
                             Layout.preferredWidth: 40; Layout.preferredHeight: 40
                             radius: modelData.connected ? 12 : 20
+                            antialiasing: true
                             Behavior on radius { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard } }
                             color: modelData.connected ? Theme.primary : Theme.surface_variant
                             QsText {

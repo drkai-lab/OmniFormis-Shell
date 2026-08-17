@@ -4,7 +4,7 @@ import QtQuick.Effects
 import ".."
 import QtQuick.Layouts
 import Quickshell
-import "../theme/variables.js" as Vars
+import "../theme"
 import "../core/primitives" as Primitives
 Item {
     id: mainContainer
@@ -13,7 +13,7 @@ Item {
     width: osdBackground.width
     height: osdBackground.height
 
-    property int trackHeight: 38
+    property int trackHeight: 48
     property int gap: 4
     property int handleWidth: 4
 
@@ -126,6 +126,7 @@ Item {
         color: Theme.surface
         
         layer.enabled: false
+        layer.samples: 32
 
         opacity: mainContainer.isVisible ? ((Vars._translucent && !Vars.gameMode) ? Vars.panelOpacity : 1.0) : 0.0
         visible: opacity > 0
@@ -161,8 +162,8 @@ Item {
         anchors.centerIn: parent
 
         orientation: mainContainer.isVertical ? Qt.Vertical : Qt.Horizontal
-        width: mainContainer.isVertical ? 44 : (mainContainer.isVisible ? 320 : 100)
-        height: mainContainer.isVertical ? (mainContainer.isVisible ? 320 : 100) : 44
+        width: mainContainer.isVertical ? 48 : (mainContainer.isVisible ? 320 : 100)
+        height: mainContainer.isVertical ? (mainContainer.isVisible ? 320 : 100) : 48
         padding: 0
 
         opacity: mainContainer.isVisible ? 1.0 : 0.0
@@ -335,6 +336,7 @@ Item {
             width: mainContainer.isVertical ? (mainContainer.trackHeight + 8) : mainContainer.handleWidth
             height: mainContainer.isVertical ? mainContainer.handleWidth : (mainContainer.trackHeight + 8)
             radius: Math.min(width, height) / 2
+            antialiasing: true
             color: Theme.primary
         }
     }

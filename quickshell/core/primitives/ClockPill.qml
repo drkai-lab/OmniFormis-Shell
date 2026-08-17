@@ -3,7 +3,7 @@ import QtQuick.Effects
 import "../.."
 import Quickshell
 import QtQuick.Layouts
-import "../../theme/variables.js" as Vars
+import "../../theme"
 import "." as Primitives
 
 Item {

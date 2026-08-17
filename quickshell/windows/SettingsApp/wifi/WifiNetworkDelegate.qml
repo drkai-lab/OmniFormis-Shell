@@ -6,7 +6,7 @@ import Quickshell
 import Quickshell.Io
 import Quickshell.Networking
 import "../../.."
-import "../../../theme/variables.js" as Vars
+import "../../../theme"
 import "../../../core/primitives" as Primitives
 
 Item {
@@ -28,7 +28,7 @@ Item {
     property bool isSelected: modelData.connected || isPasswordMode
     property bool showForget: false
 
-    property color targetColor: modelData.connected ? (Vars.tColor(Theme.secondary_container, Vars.componentOpacity)) : (isSelected ? (Vars.tColor(Theme.surface_container_high, Vars.componentOpacity)) : (wifiMouse.containsMouse ? Qt.tint((Vars.tColor(Theme.surface_container, Vars.componentOpacity)), Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.08)) : (Vars.tColor(Theme.surface_container, Vars.componentOpacity))))
+    property color targetColor: modelData.connected ? (Vars.tColorSelected(Theme.primary_container)) : (isSelected ? (Vars.tColorSelected(Theme.primary_container, 0.75)) : (wifiMouse.containsMouse ? (Vars.tColor(Theme.surface_container_highest, Vars.componentOpacity)) : (Vars.tColor(Theme.surface_container_high, Vars.componentOpacity))))
     Behavior on targetColor {
         ColorAnimation {
             duration: Vars.animationDuration
@@ -67,79 +67,29 @@ Item {
     Item {
         anchors.fill: parent
         layer.enabled: true
+        layer.samples: 32
         opacity: parent.targetColor.a
         Rectangle {
             anchors.fill: parent
-            radius: parent.parent.isSelected ? 36 : 16
-            Behavior on radius {
-                NumberAnimation {
-                    duration: Vars.animationDuration
-                    easing.type: Easing.BezierSpline
-                    easing.bezierCurve: Vars.customExpressiveSpatialSlow
-                }
-            }
             color: Qt.rgba(parent.parent.targetColor.r, parent.parent.targetColor.g, parent.parent.targetColor.b, 1.0)
+            
+            property bool isFirst: index === 0
+            property bool isLast: rootPage.wifiDevice && rootPage.wifiDevice.networks && rootPage.wifiDevice.networks.values ? index === rootPage.wifiDevice.networks.values.length - 1 : true
+            property real baseRadius: Vars.radiusLarge
+            property real edgeRadius: 4
+            
+            property bool networkAboveConnected: index > 0 && rootPage.wifiDevice && rootPage.wifiDevice.networks.values && rootPage.wifiDevice.networks.values[index - 1].connected
+            property bool networkBelowConnected: index < (rootPage.wifiDevice && rootPage.wifiDevice.networks.values ? rootPage.wifiDevice.networks.values.length - 1 : 0) && rootPage.wifiDevice.networks.values[index + 1].connected
+            
+            topLeftRadius: parent.parent.isSelected ? height / 2 : (networkAboveConnected ? baseRadius : edgeRadius)
+            topRightRadius: parent.parent.isSelected ? height / 2 : (networkAboveConnected ? baseRadius : edgeRadius)
+            bottomLeftRadius: parent.parent.isSelected ? height / 2 : (networkBelowConnected ? baseRadius : edgeRadius)
+            bottomRightRadius: parent.parent.isSelected ? height / 2 : (networkBelowConnected ? baseRadius : edgeRadius)
 
-            Rectangle {
-                width: parent.radius
-                height: parent.radius
-                color: parent.color
-                anchors.top: parent.top
-                anchors.left: parent.left
-                opacity: parent.parent.parent.isSelected ? 0.0 : 1.0
-                Behavior on opacity {
-                    NumberAnimation {
-                        duration: Vars.animationDuration
-                        easing.type: Easing.BezierSpline
-                        easing.bezierCurve: Vars.customExpressiveSpatialSlow
-                    }
-                }
-            }
-            Rectangle {
-                width: parent.radius
-                height: parent.radius
-                color: parent.color
-                anchors.top: parent.top
-                anchors.right: parent.right
-                opacity: parent.parent.parent.isSelected ? 0.0 : 1.0
-                Behavior on opacity {
-                    NumberAnimation {
-                        duration: Vars.animationDuration
-                        easing.type: Easing.BezierSpline
-                        easing.bezierCurve: Vars.customExpressiveSpatialSlow
-                    }
-                }
-            }
-            Rectangle {
-                width: parent.radius
-                height: parent.radius
-                color: parent.color
-                anchors.bottom: parent.bottom
-                anchors.left: parent.left
-                opacity: parent.parent.parent.isSelected ? 0.0 : 1.0
-                Behavior on opacity {
-                    NumberAnimation {
-                        duration: Vars.animationDuration
-                        easing.type: Easing.BezierSpline
-                        easing.bezierCurve: Vars.customExpressiveSpatialSlow
-                    }
-                }
-            }
-            Rectangle {
-                width: parent.radius
-                height: parent.radius
-                color: parent.color
-                anchors.bottom: parent.bottom
-                anchors.right: parent.right
-                opacity: parent.parent.parent.isSelected ? 0.0 : 1.0
-                Behavior on opacity {
-                    NumberAnimation {
-                        duration: Vars.animationDuration
-                        easing.type: Easing.BezierSpline
-                        easing.bezierCurve: Vars.customExpressiveSpatialSlow
-                    }
-                }
-            }
+            Behavior on topLeftRadius { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customExpressiveSpatialSlow } }
+            Behavior on topRightRadius { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customExpressiveSpatialSlow } }
+            Behavior on bottomLeftRadius { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customExpressiveSpatialSlow } }
+            Behavior on bottomRightRadius { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customExpressiveSpatialSlow } }
         }
     }
 
@@ -202,7 +152,7 @@ Item {
                         font.family: Vars.fontFamily
                         font.pixelSize: 11
                         setWeight: 500
-                        color: Theme.on_surface_variant
+                        color: modelData.connected ? Theme.on_primary_container : Theme.on_surface_variant
                         Layout.fillWidth: true
                         horizontalAlignment: Text.AlignLeft
                     }
@@ -228,6 +178,7 @@ Item {
                         height: 32
                         anchors.centerIn: parent
                         radius: 16
+                        antialiasing: true
                         color: infoHover.containsMouse ? Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.08) : "transparent"
                         visible: (modelData.saved || modelData.known || modelData.connected) && !m3LoadingIndicator.running
                         QsText {
@@ -371,6 +322,7 @@ Item {
                                 width: 32
                                 height: 32
                                 radius: 16
+                                antialiasing: true
                                 color: pwdToggleHover.containsMouse ? Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.08) : "transparent"
                                 QsText {
                                     anchors.centerIn: parent
@@ -392,6 +344,7 @@ Item {
                                 width: 32
                                 height: 32
                                 radius: 16
+                                antialiasing: true
                                 color: closeHover.containsMouse ? Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.08) : "transparent"
                                 QsText {
                                     anchors.centerIn: parent
@@ -471,7 +424,7 @@ Item {
         font.family: Vars.fontFamily
         font.pixelSize: wifiDelegate.isPasswordMode ? 12 : 16
         setWeight: wifiDelegate.isPasswordMode ? 800 : 400
-        color: wifiDelegate.isPasswordMode ? (wifiPwdInput.activeFocus ? Theme.primary : Theme.on_surface_variant) : Theme.on_surface
+        color: wifiDelegate.isPasswordMode ? (wifiPwdInput.activeFocus ? Theme.primary : Theme.on_surface_variant) : (modelData.connected ? Theme.on_primary_container : Theme.on_surface)
 
         x: wifiDelegate.isPasswordMode ? 40 : 76
         y: wifiDelegate.isPasswordMode ? 4 : 20
@@ -498,7 +451,6 @@ Item {
     // Forget Overlay
     Rectangle {
         anchors.fill: parent
-        radius: parent.isSelected ? 36 : 16
         color: Vars.tColor(Theme.surface_container_highest, Vars.componentOpacity)
         visible: wifiDelegate.showForget
         opacity: wifiDelegate.showForget ? 1.0 : 0.0
@@ -509,6 +461,23 @@ Item {
                 easing.bezierCurve: Vars.customExpressiveSpatialSlow
             }
         }
+        
+        property bool isLast: rootPage.wifiDevice && rootPage.wifiDevice.networks && rootPage.wifiDevice.networks.values ? index === rootPage.wifiDevice.networks.values.length - 1 : true
+        property real baseRadius: Vars.radiusLarge
+        property real edgeRadius: 4
+        
+        property bool networkAboveConnected: index > 0 && rootPage.wifiDevice && rootPage.wifiDevice.networks.values && rootPage.wifiDevice.networks.values[index - 1].connected
+        property bool networkBelowConnected: index < (rootPage.wifiDevice && rootPage.wifiDevice.networks.values ? rootPage.wifiDevice.networks.values.length - 1 : 0) && rootPage.wifiDevice.networks.values[index + 1].connected
+        
+        topLeftRadius: wifiDelegate.isSelected ? height / 2 : (networkAboveConnected ? baseRadius : edgeRadius)
+        topRightRadius: wifiDelegate.isSelected ? height / 2 : (networkAboveConnected ? baseRadius : edgeRadius)
+        bottomLeftRadius: wifiDelegate.isSelected ? height / 2 : (networkBelowConnected ? baseRadius : edgeRadius)
+        bottomRightRadius: wifiDelegate.isSelected ? height / 2 : (networkBelowConnected ? baseRadius : edgeRadius)
+
+        Behavior on topLeftRadius { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customExpressiveSpatialSlow } }
+        Behavior on topRightRadius { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customExpressiveSpatialSlow } }
+        Behavior on bottomLeftRadius { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customExpressiveSpatialSlow } }
+        Behavior on bottomRightRadius { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customExpressiveSpatialSlow } }
 
         RowLayout {
             anchors.fill: parent
@@ -526,6 +495,7 @@ Item {
                 width: 80
                 height: 32
                 radius: 16
+                antialiasing: true
                 color: "transparent"
                 border.color: Theme.outline
                 border.width: 1
@@ -546,6 +516,7 @@ Item {
                 width: 80
                 height: 32
                 radius: 16
+                antialiasing: true
                 color: Theme.error ? Theme.error : "#ffb4ab"
                 QsText {
                     anchors.centerIn: parent

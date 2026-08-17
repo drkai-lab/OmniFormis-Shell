@@ -6,7 +6,7 @@ import Quickshell
 import Quickshell.Io
 import Quickshell.Bluetooth
 import "../../.."
-import "../../../theme/variables.js" as Vars
+import "../../../theme"
 import "../../../core/primitives" as Primitives
 
 Item {
@@ -18,7 +18,7 @@ Item {
     property bool showForget: false
     visible: !(modelData.paired || modelData.connected)
     
-    property color targetColor: isSelected ? (Vars.tColor(Theme.secondary_container, Vars.componentOpacity)) : (btPairItemMouse.containsMouse ? Qt.tint((Vars.tColor(Theme.surface_container, Vars.componentOpacity)), Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.08)) : (Vars.tColor(Theme.surface_container, Vars.componentOpacity)))
+    property color targetColor: isSelected ? (Vars.tColorSelected(Theme.secondary_container)) : (btPairItemMouse.containsMouse ? Qt.tint((Vars.tColor(Theme.surface_container, Vars.componentOpacity)), Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.08)) : (Vars.tColor(Theme.surface_container, Vars.componentOpacity)))
     Behavior on targetColor { ColorAnimation { duration: Vars.animationDuration } }
     
     property bool hasDeviceBelow: {
@@ -33,13 +33,14 @@ Item {
     Item {
         anchors.fill: parent
         layer.enabled: true
+        layer.samples: 32
         opacity: parent.targetColor.a
         Rectangle {
             anchors.fill: parent
             color: Qt.rgba(parent.parent.targetColor.r, parent.parent.targetColor.g, parent.parent.targetColor.b, 1.0)
             
-            property real baseRadius: parent.parent.isSelected ? 36 : 16
-            property real edgeRadius: parent.parent.isSelected ? 36 : 4
+            property real baseRadius: Vars.radiusLarge
+            property real edgeRadius: 4
             
             topLeftRadius: edgeRadius
             topRightRadius: edgeRadius
@@ -126,8 +127,8 @@ Item {
     Rectangle {
         anchors.fill: parent
         
-        property real baseRadius: parent.isSelected ? 36 : 16
-        property real edgeRadius: parent.isSelected ? 36 : 4
+        property real baseRadius: Vars.radiusLarge
+        property real edgeRadius: 4
         
         topLeftRadius: edgeRadius
         topRightRadius: edgeRadius

@@ -6,7 +6,7 @@ import QtQuick.Effects
 import ".."
 import QtCore
 import "Variables"
-import "../theme/variables.js" as Vars
+import "../theme"
 
 PanelWindow {
     id: root
@@ -124,17 +124,11 @@ PanelWindow {
                 NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard }
             }
 
-            width: Math.min(root.width, root.height) * root.currentMaskScale
+            width: Math.min(root.width, root.height)
             height: width
+            scale: root.currentMaskScale
 
-            Behavior on width {
-                NumberAnimation {
-                    duration: Vars.animationDuration
-                    easing.type: Easing.BezierSpline
-                    easing.bezierCurve: Vars.customStandard
-                }
-            }
-            Behavior on height {
+            Behavior on scale {
                 NumberAnimation {
                     duration: Vars.animationDuration
                     easing.type: Easing.BezierSpline
@@ -188,6 +182,7 @@ PanelWindow {
             id: maskContainer
             anchors.fill: parent
             layer.enabled: true
+            layer.samples: 32
             layer.smooth: true
             visible: false
 
@@ -196,6 +191,7 @@ PanelWindow {
                 y: maskBounds.y
                 width: maskBounds.width
                 height: maskBounds.height
+                scale: maskBounds.scale
 
                 Item {
                     anchors.centerIn: parent
@@ -237,6 +233,7 @@ PanelWindow {
             id: bgRect
             anchors.fill: parent
             layer.enabled: true
+            layer.samples: 32
             visible: false
             antialiasing: true
             color: {
@@ -289,6 +286,7 @@ PanelWindow {
             id: shadowStrokeContainer
             anchors.fill: parent
             layer.enabled: true
+            layer.samples: 32
             visible: false
 
             Item {
@@ -296,6 +294,7 @@ PanelWindow {
                 y: maskBounds.y
                 width: maskBounds.width
                 height: maskBounds.height
+                scale: maskBounds.scale
 
                 Item {
                     anchors.centerIn: parent
@@ -338,6 +337,7 @@ PanelWindow {
             id: maskContainer2
             anchors.fill: parent
             layer.enabled: true
+            layer.samples: 32
             layer.smooth: true
             visible: false
 
@@ -346,6 +346,7 @@ PanelWindow {
                 y: maskBounds.y
                 width: maskBounds.width
                 height: maskBounds.height
+                scale: maskBounds.scale
 
                 Item {
                     anchors.centerIn: parent
@@ -434,6 +435,7 @@ PanelWindow {
             id: borderStrokeContainer
             anchors.fill: parent
             layer.enabled: true
+            layer.samples: 32
             visible: false
 
             Item {
@@ -441,6 +443,7 @@ PanelWindow {
                 y: maskBounds.y
                 width: maskBounds.width
                 height: maskBounds.height
+                scale: maskBounds.scale
 
                 Item {
                     anchors.centerIn: parent

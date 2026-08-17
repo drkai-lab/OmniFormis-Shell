@@ -6,7 +6,7 @@ import QtQuick.Shapes
 import Quickshell
 import Quickshell.Io
 import "../.."
-import "../../theme/variables.js" as Vars
+import "../../theme"
 
 Item {
     id: delegateRoot
@@ -44,6 +44,7 @@ Item {
     Behavior on scale { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.OutBack } }
     
     layer.enabled: true
+    layer.samples: 32
     layer.smooth: true
     
     Item {
@@ -57,10 +58,10 @@ Item {
             anchors.fill: parent
             color: Qt.rgba(parent.parent.targetColor.r, parent.parent.targetColor.g, parent.parent.targetColor.b, 1.0)
             
-            topLeftRadius: parent.isEffectivelyFirst ? Vars.radiusMedium : 4
-            topRightRadius: parent.isEffectivelyFirst ? Vars.radiusMedium : 4
-            bottomLeftRadius: parent.isEffectivelyLast ? Vars.radiusMedium : 4
-            bottomRightRadius: parent.isEffectivelyLast ? Vars.radiusMedium : 4
+            topLeftRadius: parent.isEffectivelyFirst ? Vars.radiusLarge : 4
+            topRightRadius: parent.isEffectivelyFirst ? Vars.radiusLarge : 4
+            bottomLeftRadius: parent.isEffectivelyLast ? Vars.radiusLarge : 4
+            bottomRightRadius: parent.isEffectivelyLast ? Vars.radiusLarge : 4
 
             Behavior on topLeftRadius { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customExpressiveSpatialSlow } }
             Behavior on topRightRadius { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customExpressiveSpatialSlow } }
@@ -134,7 +135,8 @@ Item {
             width: 52
             height: 32
             radius: 16
-            color: delegateRoot.itemVal === "true" ? (Vars.tColor(Theme.primary, 0.8)) : (Vars.tColor(Theme.surface_variant, Vars.componentOpacity))
+            antialiasing: true
+            color: delegateRoot.itemVal === "true" ? (Vars.tColorSelected(Theme.primary)) : (Vars.tColor(Theme.surface_variant, Vars.componentOpacity))
             border.color: delegateRoot.activeFocus ? Theme.on_surface : "transparent"
             border.width: delegateRoot.activeFocus ? 2 : 0
             Behavior on color {
@@ -149,6 +151,7 @@ Item {
                 width: 24
                 height: 24
                 radius: 12
+                antialiasing: true
                 color: delegateRoot.itemVal === "true" ? Theme.on_primary : Theme.on_surface_variant
                 anchors.verticalCenter: parent.verticalCenter
                 anchors.left: parent.left
@@ -165,7 +168,7 @@ Item {
                     anchors.centerIn: parent
                     font.family: "Material Symbols Outlined"
                     font.pixelSize: 16
-                    color: delegateRoot.itemVal === "true" ? (Vars.tColor(Theme.primary, 0.8)) : (Vars.tColor(Theme.surface_variant, Vars.componentOpacity))
+                    color: delegateRoot.itemVal === "true" ? (Vars.tColorSelected(Theme.primary)) : (Vars.tColor(Theme.surface_variant, Vars.componentOpacity))
                     text: delegateRoot.itemVal === "true" ? "\ue5ca" : "\ue5cd"
                 }
             }
@@ -190,6 +193,7 @@ Item {
             Layout.preferredWidth: Math.max(150, Math.min(450, tInput.implicitWidth + 32))
             height: 32
             radius: Vars.radiusSmall
+            antialiasing: true
             color: Vars.tColor(Theme.surface_container_highest, Vars.componentOpacity)
             border.color: tInput.activeFocus ? Theme.primary : "transparent"
             border.width: 1
@@ -237,6 +241,7 @@ Item {
                 width: 80
                 height: 32
                 radius: Vars.radiusSmall
+                antialiasing: true
                 color: Vars.tColor(Theme.surface_container_highest, Vars.componentOpacity)
                 border.color: numInput.activeFocus ? Theme.primary : "transparent"
                 border.width: 1
@@ -278,6 +283,7 @@ Item {
                 width: 32
                 height: 32
                 radius: Vars.radiusSmall
+                antialiasing: true
                 color: numMinusHover.containsMouse ? (Vars.tColor(Theme.surface_container_high, Vars.componentOpacity)) : (Vars.tColor(Theme.surface_container_highest, Vars.componentOpacity))
                 QsText {
                     anchors.centerIn: parent
@@ -310,6 +316,7 @@ Item {
                 width: 32
                 height: 32
                 radius: Vars.radiusSmall
+                antialiasing: true
                 color: numPlusHover.containsMouse ? (Vars.tColor(Theme.surface_container_high, Vars.componentOpacity)) : (Vars.tColor(Theme.surface_container_highest, Vars.componentOpacity))
                 QsText {
                     anchors.centerIn: parent
@@ -375,6 +382,10 @@ Item {
 
             onMoved: {
                 var rounded = Number((value).toFixed(3));
+                if (isCentered && Math.abs(rounded) <= Math.abs(computedMax - delegateRoot.itemMin) * 0.02) {
+                    rounded = 0;
+                    value = 0;
+                }
                 settingsModel.setProperty(delegateRoot.delegateIndex, "val", rounded.toString());
                 if (delegateRoot.itemSource === "Quickshell" || delegateRoot.itemSource === "quickshell") {
                     try {
@@ -388,6 +399,10 @@ Item {
             onPressedChanged: {
                 if (!pressed) {
                     var rounded = Number((value).toFixed(3));
+                    if (isCentered && Math.abs(rounded) <= Math.abs(computedMax - delegateRoot.itemMin) * 0.02) {
+                        rounded = 0;
+                        value = 0;
+                    }
                     rootPage.updateVariable(delegateRoot.itemKey, rounded.toString(), delegateRoot.itemSource);
                 }
             }
@@ -412,9 +427,11 @@ Item {
                         implicitWidth: 220
                         color: Vars.tColor(Theme.surface_container_highest, Vars.componentOpacity)
                         radius: 12
+                        antialiasing: true
                         border.color: Theme.outline_variant
                         border.width: 1
                         layer.enabled: true
+                        layer.samples: 32
                         layer.effect: MultiEffect {
                             shadowEnabled: true
                             shadowBlur: 1.0
@@ -491,6 +508,7 @@ Item {
                         background: Rectangle {
                             color: parent.highlighted ? Qt.rgba(Theme.primary.r, Theme.primary.g, Theme.primary.b, 0.12) : "transparent"
                             radius: 8
+                            antialiasing: true
                             anchors.fill: parent
                             anchors.margins: 4
                             Behavior on color { ColorAnimation { duration: 150 } }
@@ -532,6 +550,7 @@ Item {
                         background: Rectangle {
                             color: parent.highlighted ? Qt.rgba(Theme.primary.r, Theme.primary.g, Theme.primary.b, 0.12) : "transparent"
                             radius: 8
+                            antialiasing: true
                             anchors.fill: parent
                             anchors.margins: 4
                             Behavior on color { ColorAnimation { duration: 150 } }
@@ -573,6 +592,7 @@ Item {
                         background: Rectangle {
                             color: parent.highlighted ? Qt.rgba(Theme.error.r, Theme.error.g, Theme.error.b, 0.12) : "transparent"
                             radius: 8
+                            antialiasing: true
                             anchors.fill: parent
                             anchors.margins: 4
                             Behavior on color { ColorAnimation { duration: 150 } }
@@ -621,6 +641,7 @@ Item {
                         width: m3Slider.dotSize
                         height: m3Slider.dotSize
                         radius: m3Slider.dotSize / 2
+                        antialiasing: true
                         color: Theme.on_surface_variant
                         anchors.verticalCenter: parent.verticalCenter
                         x: m3Slider.leftRadiusLarge - m3Slider.dotSize / 2
@@ -640,6 +661,7 @@ Item {
                     height: parent.height
                     color: Theme.primary
                     radius: m3Slider.leftRadiusSmall
+                    antialiasing: true
                     visible: width > 2
                 }
 
@@ -663,6 +685,7 @@ Item {
                         width: m3Slider.dotSize
                         height: m3Slider.dotSize
                         radius: m3Slider.dotSize / 2
+                        antialiasing: true
                         color: Theme.on_surface_variant
                         anchors.verticalCenter: parent.verticalCenter
                         x: parent.width - m3Slider.leftRadiusLarge - m3Slider.dotSize / 2
@@ -680,6 +703,7 @@ Item {
                         width: 4
                         height: 4
                         radius: 2
+                        antialiasing: true
 
                         property bool inColoredArea: parent.isLeftOfCenter ? (tickPos >= parent.handlePos + m3Slider.handleWidth / 2 && tickPos <= parent.centerX) : (tickPos >= parent.centerX && tickPos <= parent.handlePos + m3Slider.handleWidth / 2)
                         color: inColoredArea ? (Vars.tColor(Theme.surface_container_highest, Vars.componentOpacity)) : (Vars.tColor(Theme.primary, Vars.componentOpacity))
@@ -728,6 +752,7 @@ Item {
                             width: m3Slider.dotSize
                             height: m3Slider.dotSize
                             radius: m3Slider.dotSize / 2
+                            antialiasing: true
                             color: Theme.on_surface_variant
                             anchors.verticalCenter: parent.verticalCenter
                             x: parent.width - m3Slider.leftRadiusLarge - m3Slider.dotSize / 2
@@ -745,6 +770,7 @@ Item {
                             width: 4
                             height: 4
                             radius: 2
+                            antialiasing: true
 
                             property bool inColoredArea: tickPos <= parent.handlePos + m3Slider.handleWidth / 2
                             color: inColoredArea ? (Vars.tColor(Theme.surface_container_highest, Vars.componentOpacity)) : (Vars.tColor(Theme.primary, Vars.componentOpacity))
@@ -760,6 +786,7 @@ Item {
                 height: m3Slider.handleHeight
                 color: Theme.primary
                 radius: width / 2
+                antialiasing: true
             }
         }
 
@@ -795,10 +822,11 @@ Item {
                         height: 32
                         width: chipText.implicitWidth + 24
 
-                        topLeftRadius: isSelected ? height / 2 : (hasLeft ? 4 : height / 2)
-                        bottomLeftRadius: isSelected ? height / 2 : (hasLeft ? 4 : height / 2)
-                        topRightRadius: isSelected ? height / 2 : (hasRight ? 4 : height / 2)
-                        bottomRightRadius: isSelected ? height / 2 : (hasRight ? 4 : height / 2)
+                        property real baseRadius: Vars.radiusLarge
+                        topLeftRadius: isSelected ? baseRadius : (hasLeft ? 4 : baseRadius)
+                        bottomLeftRadius: isSelected ? baseRadius : (hasLeft ? 4 : baseRadius)
+                        topRightRadius: isSelected ? baseRadius : (hasRight ? 4 : baseRadius)
+                        bottomRightRadius: isSelected ? baseRadius : (hasRight ? 4 : baseRadius)
 
                         Behavior on topLeftRadius { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customExpressiveSpatialSlow } }
                         Behavior on bottomLeftRadius { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customExpressiveSpatialSlow } }
@@ -808,7 +836,7 @@ Item {
                         scale: chipMouse.pressed ? 1.08 : 1.0
                         Behavior on scale { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.OutBack } }
 
-                        color: isSelected ? (Vars.tColor(Theme.primary, 0.8)) : (Vars.tColor(Theme.surface_container_highest, Vars.componentOpacity))
+                        color: isSelected ? (Vars.tColorSelected(Theme.primary)) : (Vars.tColor(Theme.surface_container_highest, Vars.componentOpacity))
 
                         Behavior on color { ColorAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customExpressiveSpatialSlow } }
 
@@ -861,7 +889,7 @@ Item {
                     Behavior on topRightRadius { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customExpressiveSpatialSlow } }
                     Behavior on bottomRightRadius { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customExpressiveSpatialSlow } }
 
-                    color: isSelected ? (Vars.tColor(Theme.primary, Vars.componentOpacity + 0.3)) : (Vars.tColor(Theme.surface_container_highest, Vars.componentOpacity))
+                    color: isSelected ? (Vars.tColorSelected(Theme.primary)) : (Vars.tColor(Theme.surface_container_highest, Vars.componentOpacity))
                     Behavior on color { ColorAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customExpressiveSpatialSlow } }
 
                     Shape {
@@ -870,7 +898,7 @@ Item {
                         anchors.centerIn: parent
                         scale: 0.24
                         layer.enabled: true
-                        layer.samples: 8
+                        layer.samples: 32
                         layer.mipmap: true
                         layer.smooth: true
                         antialiasing: true
@@ -923,6 +951,7 @@ Item {
                         height: 32
                         width: 32
                         radius: height / 2
+                        antialiasing: true
                         border.width: isSelected ? 2 : (modelData === "transparent" ? 1 : 0)
                         border.color: isSelected ? Theme.on_surface : Theme.outline
 

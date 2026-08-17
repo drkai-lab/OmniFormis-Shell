@@ -1,7 +1,7 @@
 import QtQuick
 import Quickshell
 import Quickshell.Wayland
-import "../theme/variables.js" as Vars
+import "../theme"
 import ".."
 
 PanelWindow {
@@ -48,6 +48,7 @@ PanelWindow {
     Item {
         anchors.fill: parent
         layer.enabled: (Vars._translucent && !Vars.gameMode) || false
+        layer.samples: 32
 
         Rectangle {
             anchors.fill: parent
@@ -55,6 +56,7 @@ PanelWindow {
             border.color: Theme.surface
             border.width: 0
             radius: Vars.radiusExtraLarge
+            antialiasing: true
         }
 
         InvertedCorner {
@@ -62,6 +64,7 @@ PanelWindow {
             anchors.left: parent.left
             side: "top-left"
             radius: Vars.radiusExtraLarge
+            antialiasing: true
             color: Vars.tColor(Theme.surface, Vars.panelOpacity)
         }
 
@@ -70,6 +73,7 @@ PanelWindow {
             anchors.right: parent.right
             side: "top-right"
             radius: Vars.radiusExtraLarge
+            antialiasing: true
             color: Vars.tColor(Theme.surface, Vars.panelOpacity)
         }
 
@@ -78,6 +82,7 @@ PanelWindow {
             anchors.left: parent.left
             side: "bottom-left"
             radius: Vars.radiusExtraLarge
+            antialiasing: true
             color: Vars.tColor(Theme.surface, Vars.panelOpacity)
         }
 
@@ -86,6 +91,7 @@ PanelWindow {
             anchors.right: parent.right
             side: "bottom-right"
             radius: Vars.radiusExtraLarge
+            antialiasing: true
             color: Vars.tColor(Theme.surface, Vars.panelOpacity)
         }
     }

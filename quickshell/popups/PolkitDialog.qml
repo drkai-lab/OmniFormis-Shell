@@ -5,7 +5,7 @@ import QtQuick.Layouts
 import Quickshell
 import Quickshell.Services.Polkit
 import Quickshell.Hyprland
-import "../theme/variables.js" as Vars
+import "../theme"
 import "../core/primitives" as Primitives
 Item {
     id: root
@@ -129,6 +129,7 @@ Item {
         id: panel
         property bool isBackgroundActive: root.expanded || (MorphState.openCount === 0 && MorphState.activeItem === panel && panel.width > 105)
         layer.enabled: false
+        layer.samples: 32
         anchors.top: (!Vars.pillPosition || Vars.pillPosition === "Top") ? parent.top : undefined
         anchors.bottom: Vars.pillPosition === "Bottom" ? parent.bottom : undefined
         anchors.left: Vars.pillPosition === "Left" ? parent.left : undefined
@@ -197,6 +198,7 @@ Item {
                         Layout.preferredWidth: 44
                         Layout.preferredHeight: 44
                         radius: 22
+                        antialiasing: true
                         color: Qt.rgba(Theme.primary.r, Theme.primary.g, Theme.primary.b, 0.15)
                         
                         QsText {
@@ -249,6 +251,7 @@ Item {
                     Layout.fillWidth: true
                     Layout.preferredHeight: 48
                     radius: Vars.radiusLarge
+                    antialiasing: true
                     color: root.authError
                         ? Theme.error_container
                         : (passwordInput.activeFocus ? Theme.surface_container_highest : Qt.rgba(Theme.surface_container_highest.r, Theme.surface_container_highest.g, Theme.surface_container_highest.b, 0.5))
@@ -350,6 +353,7 @@ Item {
                         Layout.preferredWidth: authenticateLabel.implicitWidth + 48
                         Layout.preferredHeight: 40
                         radius: 20
+                        antialiasing: true
                         color: authenticateArea.containsMouse
                             ? Qt.lighter(Theme.primary, 1.08)
                             : Theme.primary
@@ -385,6 +389,7 @@ Item {
                         Layout.preferredWidth: cancelLabel.implicitWidth + 32
                         Layout.preferredHeight: 40
                         radius: 20
+                        antialiasing: true
                         color: cancelArea.containsMouse
                             ? Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.08)
                             : "transparent"

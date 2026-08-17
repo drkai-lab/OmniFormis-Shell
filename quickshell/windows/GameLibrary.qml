@@ -8,7 +8,7 @@ import Quickshell.Hyprland
 import Quickshell.Widgets
 import Quickshell.Io
 import "../theme"
-import "../theme/variables.js" as Vars
+import "../theme"
 import "../core/primitives" as Primitives
 import "../daemons"
 import ".."
@@ -150,6 +150,7 @@ Item {
                 id: panelBackground
                 property bool isBackgroundActive: overviewContainer.visibleState || (MorphState.openCount === 0 && MorphState.activeItem === panelBackground && panelBackground.width > 105)
                 layer.enabled: true
+                layer.samples: 32
                 
                 anchors.top: (!Vars.pillPosition || Vars.pillPosition === "Top") ? parent.top : undefined
                 anchors.bottom: Vars.pillPosition === "Bottom" ? parent.bottom : undefined
@@ -302,6 +303,7 @@ Item {
                                 Rectangle {
                                     anchors.fill: parent
                                     radius: Vars.radiusMedium
+                                    antialiasing: true
                                     color: Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.05)
                                     visible: modelData.banner === ""
                                 }
@@ -340,6 +342,7 @@ Item {
                                     Rectangle {
                                         anchors.fill: parent
                                         radius: Vars.radiusMedium
+                                        antialiasing: true
                                         color: Theme.on_surface
                                         opacity: keyboardFocusHandler.selectedIndex === index ? 0.15 : 0
                                         Behavior on opacity { NumberAnimation { duration: 150 } }
@@ -348,6 +351,7 @@ Item {
                                     Rectangle {
                                         anchors.fill: parent
                                         radius: Vars.radiusMedium
+                                        antialiasing: true
                                         color: "transparent"
                                         border.color: Theme.on_surface
                                         border.width: 2
@@ -361,6 +365,7 @@ Item {
                                         Rectangle {
                                             anchors.fill: parent
                                             radius: Vars.radiusMedium
+                                            antialiasing: true
                                             color: Qt.rgba(Theme.surface.r, Theme.surface.g, Theme.surface.b, 0.7)
                                         }
                                         Primitives.LoadingIndicator {
@@ -392,6 +397,7 @@ Item {
                         width: 56
                         height: 56
                         radius: 28
+                        antialiasing: true
                         color: Theme.primary
                         anchors.bottom: parent.bottom
                         anchors.right: parent.right
@@ -409,6 +415,7 @@ Item {
                         Rectangle {
                             anchors.fill: parent
                             radius: 28
+                            antialiasing: true
                             color: Theme.on_primary
                             opacity: fabMouse.containsMouse ? 0.12 : 0
                             Behavior on opacity { NumberAnimation { duration: 150 } }
@@ -437,6 +444,7 @@ Item {
                 color: panelBackground.color
                 opacity: panelBackground.opacity
                 radius: Math.max(0, Math.min(Vars.radiusExtraLarge, Math.min(panelBackground.width, panelBackground.height) / 2))
+                antialiasing: true
             }
 
             InvertedCorner {
@@ -447,6 +455,7 @@ Item {
                 color: panelBackground.color
                 opacity: panelBackground.opacity
                 radius: Math.max(0, Math.min(Vars.radiusExtraLarge, Math.min(panelBackground.width, panelBackground.height) / 2))
+                antialiasing: true
             }
 
             InvertedCorner {
@@ -457,6 +466,7 @@ Item {
                 color: panelBackground.color
                 opacity: panelBackground.opacity
                 radius: Math.max(0, Math.min(Vars.radiusExtraLarge, Math.min(panelBackground.width, panelBackground.height) / 2))
+                antialiasing: true
             }
 
             InvertedCorner {
@@ -467,6 +477,7 @@ Item {
                 color: panelBackground.color
                 opacity: panelBackground.opacity
                 radius: Math.max(0, Math.min(Vars.radiusExtraLarge, Math.min(panelBackground.width, panelBackground.height) / 2))
+                antialiasing: true
             }
 
             InvertedCorner {
@@ -477,6 +488,7 @@ Item {
                 color: panelBackground.color
                 opacity: panelBackground.opacity
                 radius: Math.max(0, Math.min(Vars.radiusExtraLarge, Math.min(panelBackground.width, panelBackground.height) / 2))
+                antialiasing: true
             }
 
             InvertedCorner {
@@ -487,6 +499,7 @@ Item {
                 color: panelBackground.color
                 opacity: panelBackground.opacity
                 radius: Math.max(0, Math.min(Vars.radiusExtraLarge, Math.min(panelBackground.width, panelBackground.height) / 2))
+                antialiasing: true
             }
 
             InvertedCorner {
@@ -497,6 +510,7 @@ Item {
                 color: panelBackground.color
                 opacity: panelBackground.opacity
                 radius: Math.max(0, Math.min(Vars.radiusExtraLarge, Math.min(panelBackground.width, panelBackground.height) / 2))
+                antialiasing: true
             }
 
             InvertedCorner {
@@ -507,6 +521,7 @@ Item {
                 color: panelBackground.color
                 opacity: panelBackground.opacity
                 radius: Math.max(0, Math.min(Vars.radiusExtraLarge, Math.min(panelBackground.width, panelBackground.height) / 2))
+                antialiasing: true
             }
             
             property string gameListText: "[]"

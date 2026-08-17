@@ -2,7 +2,7 @@ import QtQuick
 import QtQuick.Layouts
 import QtQuick.Shapes
 import "../.."
-import "../../theme/variables.js" as Vars
+import "../../theme"
 import Quickshell.Networking
 import Quickshell.Bluetooth
 
@@ -71,10 +71,11 @@ ColumnLayout {
                 property bool isSelected: rootSidebar.currentSection === modelData.id
                 
                 // Determine target color (which may contain alpha)
-                property color targetColor: isSelected ? (Vars.tColor(Theme.secondary_container, Vars.componentOpacity)) : (navHover.containsMouse ? Qt.tint((Vars.tColor(Theme.surface_container_high, Vars.componentOpacity)), Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.08)) : (Vars.tColor(Theme.surface_container_high, Vars.componentOpacity)))
+                property color targetColor: isSelected ? (Vars.tColorSelected(Theme.primary_container)) : (navHover.containsMouse ? (Vars.tColor(Theme.surface_container_highest, Vars.componentOpacity)) : (Vars.tColor(Theme.surface_container_high, Vars.componentOpacity)))
                 Behavior on targetColor { ColorAnimation { duration: Vars.animationDuration } }
 
                 layer.enabled: true
+                layer.samples: 32
                 layer.smooth: true
                 scale: navHover.pressed ? 1.08 : 1.0
                 Behavior on scale { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.OutBack } }
@@ -83,19 +84,20 @@ ColumnLayout {
                 Item {
                     anchors.fill: parent
                     layer.enabled: true
+                    layer.samples: 32
                     opacity: delegateItem.targetColor.a
 
                     Rectangle {
                         anchors.fill: parent
                         color: Qt.rgba(delegateItem.targetColor.r, delegateItem.targetColor.g, delegateItem.targetColor.b, 1.0)
                         
-                        property real baseRadius: delegateItem.isSelected ? height / 2 : 16
-                        property real edgeRadius: delegateItem.isSelected ? height / 2 : 4
+                        property real baseRadius: Vars.radiusLarge
+                        property real edgeRadius: 4
                         
-                        topLeftRadius: modelData.isFirst ? baseRadius : edgeRadius
-                        topRightRadius: modelData.isFirst ? baseRadius : edgeRadius
-                        bottomLeftRadius: modelData.isLast ? baseRadius : edgeRadius
-                        bottomRightRadius: modelData.isLast ? baseRadius : edgeRadius
+                        topLeftRadius: delegateItem.isSelected ? height / 2 : (modelData.isFirst ? baseRadius : edgeRadius)
+                        topRightRadius: delegateItem.isSelected ? height / 2 : (modelData.isFirst ? baseRadius : edgeRadius)
+                        bottomLeftRadius: delegateItem.isSelected ? height / 2 : (modelData.isLast ? baseRadius : edgeRadius)
+                        bottomRightRadius: delegateItem.isSelected ? height / 2 : (modelData.isLast ? baseRadius : edgeRadius)
 
                         Behavior on topLeftRadius { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customExpressiveSpatialSlow } }
                         Behavior on topRightRadius { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customExpressiveSpatialSlow } }
@@ -171,7 +173,7 @@ ColumnLayout {
                             font.family: Vars.fontFamily
                             font.pixelSize: 16
                             setWeight: delegateItem.isSelected ? 500 : 400
-                            color: delegateItem.isSelected ? Theme.on_secondary_container : Theme.on_surface
+                            color: delegateItem.isSelected ? Theme.on_primary_container : Theme.on_surface
                             Layout.fillWidth: true
                             horizontalAlignment: Text.AlignLeft
                             elide: Text.ElideRight
@@ -180,7 +182,7 @@ ColumnLayout {
                             text: modelData.subtitle
                             font.family: Vars.fontFamily
                             font.pixelSize: 12
-                            color: delegateItem.isSelected ? Theme.on_secondary_container : Theme.on_surface_variant
+                            color: delegateItem.isSelected ? Theme.on_primary_container : Theme.on_surface_variant
                             Layout.fillWidth: true
                             horizontalAlignment: Text.AlignLeft
                             opacity: 0.9

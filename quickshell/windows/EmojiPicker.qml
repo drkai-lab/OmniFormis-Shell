@@ -6,7 +6,7 @@ import QtQuick.Controls
 import Quickshell
 import Quickshell.Hyprland
 import Quickshell.Io
-import "../theme/variables.js" as Vars
+import "../theme"
 import "../core/primitives" as Primitives
 Item {
     id: root
@@ -124,6 +124,7 @@ Item {
         id: panel
         property bool isBackgroundActive: root.expanded || (MorphState.openCount === 0 && MorphState.activeItem === panel && panel.width > 105)
         layer.enabled: false
+        layer.samples: 32
         anchors.top: (!Vars.pillPosition || Vars.pillPosition === "Top") ? parent.top : undefined
         anchors.bottom: Vars.pillPosition === "Bottom" ? parent.bottom : undefined
         anchors.left: Vars.pillPosition === "Left" ? parent.left : undefined
@@ -181,6 +182,12 @@ Item {
                     expanded: root.expanded
                     placeholderText: "Search emojis..."
                     defaultHeight: 44
+                    containerPadding: Vars.spacingLarge
+                    outerTopLeftRadius: panel.topLeftRadius
+                    outerTopRightRadius: panel.topRightRadius
+                    outerBottomLeftRadius: panel.bottomLeftRadius
+                    outerBottomRightRadius: panel.bottomRightRadius
+
                     onDownPressed: {
                         if (emojiGridView.count > 0 && emojiGridView.currentIndex === -1) {
                             emojiGridView.currentIndex = 0;
@@ -273,6 +280,7 @@ Item {
                             anchors.margins: 4
                             color: itemMouseArea.containsMouse || isCurrent ? Qt.rgba(Theme.on_primary.r, Theme.on_primary.g, Theme.on_primary.b, 0.08) : "transparent"
                             radius: Vars.radiusMedium
+                            antialiasing: true
                             border.color: isCurrent ? Theme.on_primary : "transparent"
                             border.width: isCurrent ? 2 : 0
 

@@ -4,7 +4,7 @@ import QtQuick.Controls
 import Quickshell
 import Quickshell.Services.Pipewire
 import Quickshell.Io
-import "../../theme/variables.js" as Vars
+import "../../theme"
 import "../.."
 
 ColumnLayout {
@@ -142,6 +142,7 @@ ColumnLayout {
             width: sliders.handleWidth
             height: sliders.trackHeight + 8
             radius: width / 2
+            antialiasing: true
             color: Theme.primary
         }
     }
@@ -242,6 +243,7 @@ ColumnLayout {
             width: sliders.handleWidth
             height: sliders.trackHeight + 8
             radius: width / 2
+            antialiasing: true
             color: Theme.primary
         }
     }

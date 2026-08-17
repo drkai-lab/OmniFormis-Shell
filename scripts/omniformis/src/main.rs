@@ -35,6 +35,15 @@ enum Commands {
         #[command(subcommand)]
         cmd: HyprCommands,
     },
+    /// Kill Quickshell processes
+    Kill,
+    /// Launch Quickshell
+    Launch {
+        #[arg(short, long)]
+        detached: bool,
+    },
+    /// Reload Quickshell
+    Reload,
 }
 
 #[derive(Subcommand)]
@@ -75,6 +84,13 @@ enum QsCommands {
         #[arg(short, long)]
         detached: bool,
     },
+    /// Launch Quickshell
+    Launch {
+        #[arg(short, long)]
+        detached: bool,
+    },
+    /// Reload Quickshell
+    Reload,
 }
 
 #[derive(Subcommand)]
@@ -108,7 +124,9 @@ fn main() {
             QsCommands::Set { key, value } => qs::set(&key, &value),
             QsCommands::List => qs::list(),
             QsCommands::Kill => qs::kill(),
-            QsCommands::Start { detached } => qs::start(detached),
+            QsCommands::Start { detached } => qs::launch(detached),
+            QsCommands::Launch { detached } => qs::launch(detached),
+            QsCommands::Reload => qs::reload(),
         },
         Commands::Bezier { cmd } => match cmd {
             BezierCommands::Save { name, payload } => bezier::save(&name, payload),
@@ -120,5 +138,8 @@ fn main() {
             HyprCommands::Set { key, value } => hypr::set(&key, &value),
             HyprCommands::List => hypr::list(),
         },
+        Commands::Kill => qs::kill(),
+        Commands::Launch { detached } => qs::launch(detached),
+        Commands::Reload => qs::reload(),
     }
 }

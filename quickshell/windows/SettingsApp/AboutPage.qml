@@ -3,7 +3,7 @@ import QtQuick.Layouts
 import Quickshell
 import Quickshell.Io
 import "../.."
-import "../../theme/variables.js" as Vars
+import "../../theme"
 
 Item {
     id: aboutPage
@@ -122,7 +122,8 @@ Item {
                     Layout.fillWidth: true
                     Layout.preferredHeight: 72
                     radius: 16
-                    color: Theme.surface_container
+                    antialiasing: true
+                    color: Vars.tColor(Theme.surface_container, Vars.componentOpacity)
                     
                     Rectangle {
                         width: parent.radius; height: parent.radius; color: parent.color
@@ -154,7 +155,8 @@ Item {
                     Layout.fillWidth: true
                     Layout.preferredHeight: hardwareLayout.implicitHeight + 32
                     radius: 16
-                    color: Theme.surface_container
+                    antialiasing: true
+                    color: Vars.tColor(Theme.surface_container, Vars.componentOpacity)
                     
                     Rectangle {
                         width: parent.radius; height: parent.radius; color: parent.color
@@ -238,7 +240,8 @@ Item {
                     Layout.fillWidth: true
                     Layout.preferredHeight: 72
                     radius: 16
-                    color: Theme.surface_container
+                    antialiasing: true
+                    color: Vars.tColor(Theme.surface_container, Vars.componentOpacity)
                     
                     Rectangle {
                         width: parent.radius; height: parent.radius; color: parent.color

@@ -1,7 +1,7 @@
 import QtQuick
 import QtQuick.Shapes
 import QtQuick.Effects
-import "../../theme/variables.js" as Vars
+import "../../theme"
 Item {
     id: root
     property real topLeftRadius: 0
@@ -10,6 +10,8 @@ Item {
     property real bottomRightRadius: 0
     property real power: Vars.cornerPower
     property color color: "black"
+    property color borderColor: "transparent"
+    property real borderWidth: 0
 
     property var _points: []
 
@@ -87,6 +89,8 @@ Item {
     Rectangle {
         anchors.fill: parent
         color: root.color
+        border.color: root.borderColor
+        border.width: root.borderWidth
         topLeftRadius: root.topLeftRadius
         topRightRadius: root.topRightRadius
         bottomLeftRadius: root.bottomLeftRadius
@@ -94,6 +98,8 @@ Item {
         visible: root.power <= 2.0
         antialiasing: true
         smooth: true
+        layer.enabled: true
+        layer.samples: 32
     }
     
 
@@ -103,11 +109,13 @@ Item {
         visible: root.power > 2.0
         antialiasing: true
         smooth: true
+        layer.enabled: true
+        layer.samples: 32
         
         ShapePath {
             fillColor: root.color
-            strokeColor: "transparent"
-            strokeWidth: 0
+            strokeColor: root.borderColor
+            strokeWidth: root.borderWidth
             PathPolyline { path: root._points }
         }
     }

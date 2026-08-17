@@ -4,7 +4,7 @@ import Quickshell.Io
 import "../.."
 import "../../theme"
 import "../.."
-import "../../theme/variables.js" as Vars
+import "../../theme"
 
 Item {
     id: rootModel

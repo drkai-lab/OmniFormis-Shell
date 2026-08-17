@@ -2,10 +2,7 @@
 
 var radiusAmount = 0.5;
 var radiusSmall = 8;
-var radiusMedium = 16;
-var radiusLarge = 24;
-var radiusExtraLarge = 38;
-var cornerPower = 2.0;
+var cornerPower = 2;
 
 var spacingSmall = 11;
 var spacingMedium = 16;
@@ -16,7 +13,7 @@ var paddingMedium = 16;
 var paddingLarge = 24;
 
 var fontFamily = "Google Sans Flex";
-var fontWeight = 600;
+var fontWeight = 500;
 var fontItalic = false;
 var fontRounding = 100;
 var fontGrading = 0;
@@ -24,11 +21,11 @@ var fontBaselineEnabled = true;
 var animationDuration = 240;
 var flickDeceleration = 1500;
 var maximumFlickVelocity = 3000;
-var _translucent = false;
-var _liquidGlass = true;
-var blurAmount = 8;
-var panelOpacity = 0.7;
-var componentOpacity = 0.4;
+var _translucent = true;
+var _liquidGlass = false;
+var blurAmount = 17;
+var panelOpacity = 0.6;
+var componentOpacity = 0.5;
 var currentBrightness = 1.0;
 
 var overviewGridRows = 2;
@@ -41,18 +38,27 @@ var gameLibraryScale = 1.0;
 
 var wallpaperMaskEnabled = true;
 var wallpaperMaskScale = 1;
-var wallpaperMaskShape = "6SidedCookie";
-var wallpaperMaskColor = "secondary";
-var wallpaperMaskOffsetX = 0;
+var wallpaperMaskShape = "4SidedCookie";
+var wallpaperMaskColor = "primary";
+var wallpaperMaskOffsetX = 6;
 var wallpaperMaskOffsetY = 0;
 
-var clockShape = "9SidedCookie";
-var clockShowTicks = true;
-var clockShowCenterDot = true;
+var clockShape = "Sunny";
+var clockShowTicks = false;
+var clockShowCenterDot = false;
+var clockShowDate = true;
+var clockSecondHandStyle = "Orbiting Dot";
+var clockHandThickness = 18;
 
-var mediaPlayerShape = "12SidedCookie";
-var mediaPlayerArtScale = 1.25;
-var mediaPlayerWaveThickness = 2.5;
+var mediaPlayerShape = "6SidedCookie";
+var mediaPlayerArtScale = 2;
+var mediaPlayerArtOffsetX = 0;
+var mediaPlayerArtOffsetY = 59;
+var mediaPlayerWaveThickness = 10;
+var mediaPlayerOrientation = "Vertical";
+var mediaPlayerLyricsExpansion = "Horizontal";
+var mediaPlayerLyricsAutoScroll = true;
+var mediaPlayerExpandOverlaps = true;
 
 var panelStyle = "Attached";
 var pillPosition = "Bottom";
@@ -61,7 +67,7 @@ var gameMode = false;
 var desktopClockEnabled = true;
 var desktopClockAnchorEnabled = true;
 var desktopClockAnchorPoint = "Center";
-var desktopClockAnchorCurve = 1;
+var desktopClockAnchorCurve = 3;
 
 var desktopCalenderEnabled = false;
 var desktopCalenderAnchorEnabled = false;
@@ -71,7 +77,8 @@ var desktopCalenderAnchorCurve = 0;
 var desktopMediaPlayerEnabled = true;
 var desktopMediaPlayerAnchorEnabled = true;
 var desktopMediaPlayerAnchorPoint = "Center";
-var desktopMediaPlayerAnchorCurve = 2;
+var desktopMediaPlayerAnchorCurve = 0;
+var desktopMediaPlayerAnchorExpandFix = true;
 
 var m3Standard = [0.2, 0.0, 0.0, 1.0];
 var m3StandardDecelerate = [0.0, 0.0, 0.0, 1.0];
@@ -206,6 +213,12 @@ function tColor(baseColor, alpha) {
 function tColorActive(isActive, baseColor, alpha) {
     if (!isActive) return "transparent";
     return tColor(baseColor, alpha);
+}
+
+function tColorSelected(baseColor, alpha) {
+    if (!isTranslucent()) return baseColor;
+    var targetAlpha = (alpha !== undefined && alpha !== null) ? alpha : 0.90;
+    return Qt.rgba(baseColor.r, baseColor.g, baseColor.b, targetAlpha);
 }
 
 var notificationHistory = [];

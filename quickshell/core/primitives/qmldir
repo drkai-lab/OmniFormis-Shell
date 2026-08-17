@@ -2,3 +2,7 @@ module Primitives
 LoadingIndicator 1.0 LoadingIndicator.qml
 SearchBar 1.0 SearchBar.qml
 QsText 1.0 QsText.qml
+SquircleMask 1.0 SquircleMask.qml
+ClockPill 1.0 ClockPill.qml
+InvertedCorner 1.0 InvertedCorner.qml
+M3Shapes 1.0 M3Shapes.qml

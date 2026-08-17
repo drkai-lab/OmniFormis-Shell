@@ -6,7 +6,7 @@ import Quickshell
 import Quickshell.Wayland
 import Quickshell.Hyprland
 import Quickshell.Io
-import "../theme/variables.js" as Vars
+import "../theme"
 
 PanelWindow {
     id: topWindow
@@ -793,6 +793,7 @@ PanelWindow {
                 color: (parent.targetPanel && parent.targetPanel.panel) ? parent.targetPanel.panel.color : "transparent"
                 opacity: (parent.targetPanel && parent.targetPanel.panel ? parent.targetPanel.panel.opacity : 1.0) * (parent.targetPanel ? parent.targetPanel.opacity : 1.0)
                 radius: Math.max(0, Math.min(currentRadiusExtraLarge, Math.min(parent.pw, parent.ph) / 2))
+                antialiasing: true
             }
             InvertedCorner {
                 x: (parent.pos === "Right" || parent.pos === "Left") ? (parent.pos === "Right" ? parent.px + parent.pw - width : parent.px) : parent.px + parent.pw
@@ -802,6 +803,7 @@ PanelWindow {
                 color: (parent.targetPanel && parent.targetPanel.panel) ? parent.targetPanel.panel.color : "transparent"
                 opacity: (parent.targetPanel && parent.targetPanel.panel ? parent.targetPanel.panel.opacity : 1.0) * (parent.targetPanel ? parent.targetPanel.opacity : 1.0)
                 radius: Math.max(0, Math.min(currentRadiusExtraLarge, Math.min(parent.pw, parent.ph) / 2))
+                antialiasing: true
             }
         }
     }

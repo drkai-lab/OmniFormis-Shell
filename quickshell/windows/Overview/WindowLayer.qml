@@ -8,7 +8,8 @@ import "../.."
 import Quickshell.Wayland
 import Quickshell.Hyprland
 import Quickshell.Widgets
-import "../../theme/variables.js" as Vars
+import "../../theme"
+import "../../core/primitives" as Primitives
 
 Item {
     id: root
@@ -166,65 +167,67 @@ Item {
             Drag.hotSpot.x: width / 2
             Drag.hotSpot.y: height / 2
 
-            // Background behind preview
-            Rectangle {
-                anchors.fill: parent
-                property real rOuter: Math.max(0, Vars.radiusExtraLarge - overviewPanel.bgPadding)
-                property real rInner: Vars.radiusSmall
-                topLeftRadius: (winItem.wsRow === 0 && winItem.wsCol === 0) ? rOuter : rInner
-                topRightRadius: (winItem.wsRow === 0 && winItem.wsCol === winItem.safeCols - 1) ? rOuter : rInner
-                bottomLeftRadius: (winItem.wsRow === winItem.safeRows - 1 && winItem.wsCol === 0) ? rOuter : rInner
-                bottomRightRadius: (winItem.wsRow === winItem.safeRows - 1 && winItem.wsCol === winItem.safeCols - 1) ? rOuter : rInner
-                color: Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.12)
-                border.width: 1
-                border.color: winItem.winData?.floating ? Theme.tertiary_container : Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.15)
+            function getWinRadius(isOuterCorner, offsetX, offsetY) {
+                if (!isOuterCorner) return Vars.radiusSmall;
+                let offsetMargin = Math.max(0, Math.max(offsetX, offsetY));
+                let p = (overviewPanel ? overviewPanel.bgPadding : 12) + offsetMargin;
+                return Math.max(Vars.radiusSmall, Vars.radiusExtraLarge - p);
             }
 
-            // Live screen capture - FORCED ON for all workspaces
+            property real topLeftRadius: getWinRadius(wsRow === 0 && wsCol === 0, x - cellX, y - cellY)
+            property real topRightRadius: getWinRadius(wsRow === 0 && wsCol === safeCols - 1, (cellX + safeWsWidth) - (x + width), y - cellY)
+            property real bottomLeftRadius: getWinRadius(wsRow === safeRows - 1 && wsCol === 0, x - cellX, (cellY + (overviewPanel ? overviewPanel.wsHeight : 100)) - (y + height))
+            property real bottomRightRadius: getWinRadius(wsRow === safeRows - 1 && wsCol === safeCols - 1, (cellX + safeWsWidth) - (x + width), (cellY + (overviewPanel ? overviewPanel.wsHeight : 100)) - (y + height))
+
+            // Background behind preview
+            Primitives.SquircleMask {
+                anchors.fill: parent
+                topLeftRadius: winItem.topLeftRadius
+                topRightRadius: winItem.topRightRadius
+                bottomLeftRadius: winItem.bottomLeftRadius
+                bottomRightRadius: winItem.bottomRightRadius
+                color: Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.12)
+            }
+
+            Primitives.SquircleMask {
+                id: previewMask
+                anchors.fill: parent
+                topLeftRadius: winItem.topLeftRadius
+                topRightRadius: winItem.topRightRadius
+                bottomLeftRadius: winItem.bottomLeftRadius
+                bottomRightRadius: winItem.bottomRightRadius
+                color: "white"
+                z: -1
+                layer.enabled: true
+                layer.samples: 32
+                layer.smooth: true
+            }
+
+            // Live screen capture
             ScreencopyView {
                 id: preview
                 anchors.fill: parent
                 captureSource: (overviewContainer && overviewContainer.visibleState) ? winItem.modelData : null
                 live: overviewContainer && overviewContainer.visibleState
                 layer.enabled: true
+                layer.samples: 32
                 layer.smooth: true
                 layer.effect: MultiEffect {
                     maskEnabled: true
                     maskSource: previewMask
-                    maskThresholdMin: 0.5
+                    maskThresholdMin: 0.0
                     maskSpreadAtMin: 1.0
                 }
             }
 
-            Item {
-                id: previewMask
+            // Simple Hover interaction overlay
+            Primitives.SquircleMask {
                 anchors.fill: parent
-                visible: false
-                layer.enabled: true
-                layer.smooth: true
-                Rectangle {
-                    anchors.fill: parent
-                    property real rOuter: Math.max(0, Vars.radiusExtraLarge - overviewPanel.bgPadding)
-                    property real rInner: Vars.radiusSmall
-                    topLeftRadius: (winItem.wsRow === 0 && winItem.wsCol === 0) ? rOuter : rInner
-                    topRightRadius: (winItem.wsRow === 0 && winItem.wsCol === winItem.safeCols - 1) ? rOuter : rInner
-                    bottomLeftRadius: (winItem.wsRow === winItem.safeRows - 1 && winItem.wsCol === 0) ? rOuter : rInner
-                    bottomRightRadius: (winItem.wsRow === winItem.safeRows - 1 && winItem.wsCol === winItem.safeCols - 1) ? rOuter : rInner
-                }
-            }
-
-            // Simple Hover interaction overlay (ICONS COMPLETELY REMOVED)
-            Rectangle {
-                anchors.fill: parent
-                property real rOuter: Math.max(0, Vars.radiusExtraLarge - overviewPanel.bgPadding)
-                property real rInner: Vars.radiusSmall
-                topLeftRadius: (winItem.wsRow === 0 && winItem.wsCol === 0) ? rOuter : rInner
-                topRightRadius: (winItem.wsRow === 0 && winItem.wsCol === winItem.safeCols - 1) ? rOuter : rInner
-                bottomLeftRadius: (winItem.wsRow === winItem.safeRows - 1 && winItem.wsCol === 0) ? rOuter : rInner
-                bottomRightRadius: (winItem.wsRow === winItem.safeRows - 1 && winItem.wsCol === winItem.safeCols - 1) ? rOuter : rInner
+                topLeftRadius: winItem.topLeftRadius
+                topRightRadius: winItem.topRightRadius
+                bottomLeftRadius: winItem.bottomLeftRadius
+                bottomRightRadius: winItem.bottomRightRadius
                 color: dragArea.containsMouse ? Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.12) : "transparent"
-                border.width: 1
-                border.color: Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.1)
             }
 
             MouseArea {

@@ -41,6 +41,8 @@ var clockShowCenterDot = true;
 
 var mediaPlayerShape = "12SidedCookie";
 var mediaPlayerArtScale = 1.0;
+var mediaPlayerArtOffsetX = 0;
+var mediaPlayerArtOffsetY = 0;
 
 var panelStyle = "Floating";
 var pillPosition = "Top";

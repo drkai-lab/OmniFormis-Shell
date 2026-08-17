@@ -1,28 +1,28 @@
 {
   "checksum": ":)",
-  "wallpaper": "/home/boing/Pictures/Wallpapers/Wallpapers-Bank/Concept-Japanese house.png",
+  "wallpaper": "/home/boing/Pictures/Wallpapers/Wallpapers-Bank/Dynamic-Wallpapers/Light/Mountain_light.png",
   "alpha": "100",
   "special": {
-    "background": "#12140e",
-    "foreground": "#e3e3d8",
-    "cursor": "#b5d087"
+    "background": "#141318",
+    "foreground": "#e5e1e9",
+    "cursor": "#c7bfff"
   },
   "colors": {
-    "color0": "#12140e",
-    "color1": "#fafac1",
-    "color2": "#c7d89d",
-    "color3": "#95dbd1",
-    "color4": "#b5d087",
-    "color5": "#a0d0c9",
-    "color6": "#445626",
-    "color7": "#c5c8b9",
-    "color8": "#45483d",
-    "color9": "#b8dd7a",
-    "color10": "#b2c979",
-    "color11": "#6fcec0",
-    "color12": "#9ec262",
-    "color13": "#7ebfb6",
-    "color14": "#39520e",
-    "color15": "#e3e3d8"
+    "color0": "#141318",
+    "color1": "#e5cffb",
+    "color2": "#c2bae6",
+    "color3": "#f3b1cd",
+    "color4": "#c7bfff",
+    "color5": "#ecb8ce",
+    "color6": "#3c3469",
+    "color7": "#c9c5d0",
+    "color8": "#47464f",
+    "color9": "#c7bfff",
+    "color10": "#a294d8",
+    "color11": "#ec85b1",
+    "color12": "#9a8cff",
+    "color13": "#e190b2",
+    "color14": "#3f3680",
+    "color15": "#e5e1e9"
   }
 }

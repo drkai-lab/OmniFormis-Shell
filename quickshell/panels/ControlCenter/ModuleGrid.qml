@@ -6,7 +6,7 @@ import Quickshell.Networking
 import Quickshell.Bluetooth
 import Quickshell.Services.Pipewire
 import Quickshell.Hyprland
-import "../../theme/variables.js" as Vars
+import "../../theme"
 import "../.."
 
 ColumnLayout {
@@ -388,7 +388,8 @@ ColumnLayout {
                 width: activeDelegateWrapper.width
                 height: activeDelegateWrapper.height
                 radius: isActive ? 16 : height / 2
-                color: dragArea.drag.active ? (Vars.tColor(Theme.surface_container_highest, Vars.componentOpacity)) : (isActive ? (Vars.tColor(Theme.secondary_container, Vars.componentOpacity)) : (Vars.tColor(Theme.surface_container_high, Vars.componentOpacity)))
+                antialiasing: true
+                color: dragArea.drag.active ? (Vars.tColor(Theme.surface_container_highest, Vars.componentOpacity)) : (isActive ? (Vars.tColorSelected(Theme.secondary_container)) : (Vars.tColor(Theme.surface_container_high, Vars.componentOpacity)))
                 scale: dragArea.drag.active ? 1.05 : 1.0
                 
                 Behavior on radius { NumberAnimation { duration: 200; easing.type: Easing.OutCubic } }
@@ -538,6 +539,7 @@ ColumnLayout {
                                 anchors.fill: parent
                                 anchors.margins: 8
                                 radius: Math.max(4, tileDelegate.radius - 8)
+                                antialiasing: true
                                 color: tileDelegate.isActive ? Theme.primary : Theme.surface_variant
                                 Behavior on color { ColorAnimation { duration: 250; easing.type: Easing.OutCubic } }
                                 Behavior on radius { NumberAnimation { duration: 200; easing.type: Easing.OutCubic } }
@@ -686,6 +688,7 @@ ColumnLayout {
                         width: 4
                         height: 32
                         radius: 2
+                        antialiasing: true
                         anchors.verticalCenter: parent.verticalCenter
                         anchors.right: parent.right
                         anchors.rightMargin: 4
@@ -765,6 +768,7 @@ ColumnLayout {
                         color: moduleGridRoot.isEditorMode ? Theme.surface_variant : "transparent"
                         opacity: moduleGridRoot.isEditorMode ? 0.3 : 0
                         radius: 16
+                        antialiasing: true
                         border.color: cellDrop.containsDrag ? Theme.primary : "transparent"
                         border.width: 2
                         Behavior on opacity { NumberAnimation { duration: 250 } }

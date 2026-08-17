@@ -24,7 +24,7 @@ local vars = {
     -- Set keyboard layout
     kb_layout = "us,us",
     -- Set keyboard variant
-    kb_variant = ",colemak_dh",
+    kb_variant = "colemak_dh,",
     -- Set keyboard options
     kb_options = "grp:alt_shift_toggle,caps:escape",
     -- Set follow mouse mode
@@ -97,7 +97,7 @@ local vars = {
     -- Set gap size for single window
     singleWindowGapsOut = 30,
     -- Enable special workspace gaps rule
-    enableSpecialWorkspaceGaps = true,
+    enableSpecialWorkspaceGaps = false,
 
     -- Shadows
     -- Enable window shadows
@@ -109,7 +109,7 @@ local vars = {
 
     -- Blur
     -- Enable blur
-    blur_enabled = false,
+    blur_enabled = true,
     -- Set blur size
     blur_size = 4,
     -- Set number of blur passes
@@ -118,7 +118,7 @@ local vars = {
     blur_vibrancy = 0.1696,
 
     -- Liquid Glass
-    liquidGlass = true,
+    liquidGlass = false,
     liquidGlassPreset = "apple",
 
     -- Groupbar

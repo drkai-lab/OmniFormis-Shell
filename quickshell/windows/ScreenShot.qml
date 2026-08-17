@@ -4,7 +4,7 @@ import Quickshell
 import Quickshell.Wayland
 import Quickshell.Hyprland
 import Quickshell.Io
-import "../theme/variables.js" as Vars
+import "../theme"
 
 
 PanelWindow {
@@ -157,6 +157,7 @@ PanelWindow {
         border.color: Theme.primary
         border.width: 2
         radius: Vars.radiusSmall
+        antialiasing: true
         
         property bool isDragging: false
         visible: isDragging && !root.isLensMode

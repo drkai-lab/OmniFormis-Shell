@@ -4,7 +4,7 @@ import Quickshell.Wayland
 import QtCore
 import "../.."
 import "../../panels/ControlCenter" as CC
-import "../../theme/variables.js" as Vars
+import "../../theme"
 
 PanelWindow {
     id: window
@@ -17,6 +17,7 @@ PanelWindow {
     property real maskScale: Vars.wallpaperMaskScale !== undefined ? Vars.wallpaperMaskScale : 1.05
     property int maskOffsetX: Vars.wallpaperMaskOffsetX !== undefined ? Vars.wallpaperMaskOffsetX : 0
     property int maskOffsetY: Vars.wallpaperMaskOffsetY !== undefined ? Vars.wallpaperMaskOffsetY : 0
+    property bool anchorExpandFix: Vars.desktopMediaPlayerAnchorExpandFix !== undefined ? Vars.desktopMediaPlayerAnchorExpandFix : false
 
     Timer {
         interval: 100
@@ -31,6 +32,7 @@ PanelWindow {
             if (Vars.wallpaperMaskScale !== undefined && window.maskScale !== Vars.wallpaperMaskScale) window.maskScale = Vars.wallpaperMaskScale;
             if (Vars.wallpaperMaskOffsetX !== undefined && window.maskOffsetX !== Vars.wallpaperMaskOffsetX) window.maskOffsetX = Vars.wallpaperMaskOffsetX;
             if (Vars.wallpaperMaskOffsetY !== undefined && window.maskOffsetY !== Vars.wallpaperMaskOffsetY) window.maskOffsetY = Vars.wallpaperMaskOffsetY;
+            if (Vars.desktopMediaPlayerAnchorExpandFix !== undefined && window.anchorExpandFix !== Vars.desktopMediaPlayerAnchorExpandFix) window.anchorExpandFix = Vars.desktopMediaPlayerAnchorExpandFix;
         }
     }
 
@@ -70,8 +72,9 @@ PanelWindow {
             
             var widgetX = targetX;
             var pt = window.anchorPoint;
-            if (pt === "TopCenter" || pt === "Center" || pt === "BottomCenter") widgetX -= playerContainer.width / 2;
-            else if (pt === "TopRight" || pt === "MiddleRight" || pt === "BottomRight") widgetX -= playerContainer.width;
+            var refWidth = window.anchorExpandFix ? ((player.isVertical ? 300 : 500) + 48) : playerContainer.width;
+            if (pt === "TopCenter" || pt === "Center" || pt === "BottomCenter") widgetX -= refWidth / 2;
+            else if (pt === "TopRight" || pt === "MiddleRight" || pt === "BottomRight") widgetX -= refWidth;
             return widgetX;
         }
         return playerSettings.posX;
@@ -86,8 +89,9 @@ PanelWindow {
             
             var widgetY = targetY;
             var pt = window.anchorPoint;
-            if (pt === "MiddleLeft" || pt === "Center" || pt === "MiddleRight") widgetY -= playerContainer.height / 2;
-            else if (pt === "BottomLeft" || pt === "BottomCenter" || pt === "BottomRight") widgetY -= playerContainer.height;
+            var refHeight = window.anchorExpandFix ? ((player.isVertical ? 300 : 180) + 48) : playerContainer.height;
+            if (pt === "MiddleLeft" || pt === "Center" || pt === "MiddleRight") widgetY -= refHeight / 2;
+            else if (pt === "BottomLeft" || pt === "BottomCenter" || pt === "BottomRight") widgetY -= refHeight;
             return widgetY;
         }
         return playerSettings.posY;
@@ -95,11 +99,13 @@ PanelWindow {
 
     Item {
         id: playerContainer
-        width: 548 // 500 + 48 for shadows
-        height: 228 // 180 + 48 for shadows
+        width: (player.isExpanded && player.isHorizontalExpansion ? 900 : 500) + 48
+        height: (player.isExpanded && !player.isHorizontalExpansion ? 650 : (player.isVertical ? 300 : 180)) + 48
         x: computedX
         y: computedY
         
+        Behavior on width { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.OutCubic } }
+        Behavior on height { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.OutCubic } }
         Behavior on x { enabled: window.anchorEnabled; NumberAnimation { duration: 500; easing.type: Easing.OutCubic } }
         Behavior on y { enabled: window.anchorEnabled; NumberAnimation { duration: 500; easing.type: Easing.OutCubic } }
 

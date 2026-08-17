@@ -3,7 +3,7 @@ import QtQuick.Layouts
 import QtQuick.Controls
 import Quickshell.Io
 import "../.."
-import "../../theme/variables.js" as Vars
+import "../../theme"
 
 ColumnLayout {
     id: rootPage
@@ -133,8 +133,9 @@ ColumnLayout {
             Layout.preferredWidth: 350
             Layout.preferredHeight: 350
             Layout.alignment: Qt.AlignVCenter
-            color: Theme.surface_container_highest
+            color: Vars.tColor(Theme.surface_container_highest, Vars.componentOpacity)
             radius: Vars.radiusMedium
+            antialiasing: true
             border.color: Theme.outline_variant
             border.width: 1
             clip: true
@@ -304,7 +305,7 @@ ColumnLayout {
                 model: ["customStandard", "customStandardDecelerate", "customStandardAccelerate", "customEmphasizedDecelerate", "customEmphasizedAccelerate", "customExpressiveSpatialFast", "customExpressiveSpatialSlow"]
                 onActivated: function(index) { rootPage.targetCurve = model[index]; }
                 
-                background: Rectangle { color: Theme.surface_container_highest; radius: Vars.radiusSmall }
+                background: Rectangle { color: Vars.tColor(Theme.surface_container_highest, Vars.componentOpacity); radius: Vars.radiusSmall }
                 contentItem: QsText { text: parent.displayText; font.family: Vars.fontFamily; color: Theme.on_surface; font.pixelSize: 14; verticalAlignment: Text.AlignVCenter; leftPadding: 10 }
             }
 
@@ -322,7 +323,7 @@ ColumnLayout {
                 model: ["None", "m3Standard", "m3StandardDecelerate", "m3StandardAccelerate", "m3EmphasizedDecelerate", "m3EmphasizedAccelerate", "m3ExpressiveSpatialFast", "m3ExpressiveSpatialSlow"]
                 onActivated: function(index) { rootPage.referenceCurve = model[index]; curveCanvas.requestPaint(); }
                 
-                background: Rectangle { color: Theme.surface_container_highest; radius: Vars.radiusSmall }
+                background: Rectangle { color: Vars.tColor(Theme.surface_container_highest, Vars.componentOpacity); radius: Vars.radiusSmall }
                 contentItem: QsText { text: parent.displayText; font.family: Vars.fontFamily; color: Theme.on_surface; font.pixelSize: 14; verticalAlignment: Text.AlignVCenter; leftPadding: 10 }
             }
 
@@ -337,8 +338,9 @@ ColumnLayout {
             Rectangle {
                 Layout.fillWidth: true
                 height: 40
-                color: Theme.surface_container_high
+                color: Vars.tColor(Theme.surface_container_high, Vars.componentOpacity)
                 radius: Vars.radiusSmall
+                antialiasing: true
                 RowLayout {
                     anchors.fill: parent
                     anchors.margins: 12
@@ -374,8 +376,9 @@ ColumnLayout {
             Rectangle {
                 Layout.fillWidth: true
                 height: 40
-                color: Theme.surface_container_high
+                color: Vars.tColor(Theme.surface_container_high, Vars.componentOpacity)
                 radius: Vars.radiusSmall
+                antialiasing: true
                 RowLayout {
                     anchors.fill: parent
                     anchors.margins: 12
@@ -414,8 +417,9 @@ ColumnLayout {
             Rectangle {
                 Layout.fillWidth: true
                 height: 80
-                color: Theme.surface_container_high
+                color: Vars.tColor(Theme.surface_container_high, Vars.componentOpacity)
                 radius: Vars.radiusMedium
+                antialiasing: true
                 clip: true
 
                 Rectangle {
@@ -440,7 +444,7 @@ ColumnLayout {
                 Button {
                     anchors.bottom: parent.bottom; anchors.right: parent.right; anchors.margins: 8
                     width: 80; height: 32
-                    background: Rectangle { color: Theme.surface_variant; radius: Vars.radiusSmall }
+                    background: Rectangle { color: Vars.tColor(Theme.surface_variant, Vars.componentOpacity); radius: Vars.radiusSmall }
                     contentItem: QsText { text: "Test"; font.family: Vars.fontFamily; font.bold: true; color: Theme.on_surface; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
                     onClicked: {
                         if (rootPage.testAnimObj) {
@@ -484,7 +488,7 @@ ColumnLayout {
                 spacing: Vars.spacingSmall
                 Button {
                     Layout.fillWidth: true; height: 40
-                    background: Rectangle { color: Theme.surface_container_highest; radius: Vars.radiusSmall }
+                    background: Rectangle { color: Vars.tColor(Theme.surface_container_highest, Vars.componentOpacity); radius: Vars.radiusSmall }
                     contentItem: QsText { text: "Apply Target"; font.family: Vars.fontFamily; font.bold: true; color: Theme.on_surface; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
                     onClicked: applyCurve()
                 }
@@ -498,8 +502,9 @@ ColumnLayout {
             
             Rectangle {
                 Layout.fillWidth: true; height: 40
-                color: Theme.surface_container_highest
+                color: Vars.tColor(Theme.surface_container_highest, Vars.componentOpacity)
                 radius: Vars.radiusSmall
+                antialiasing: true
                 border.color: savePresetBtn.activeFocus ? Theme.primary : "transparent"
                 border.width: 1
                 RowLayout {
@@ -515,7 +520,7 @@ ColumnLayout {
                     Button {
                         id: savePresetBtn
                         Layout.preferredWidth: 60; Layout.fillHeight: true
-                        background: Rectangle { color: Theme.surface_variant; radius: Vars.radiusSmall }
+                        background: Rectangle { color: Vars.tColor(Theme.surface_variant, Vars.componentOpacity); radius: Vars.radiusSmall }
                         contentItem: QsText { text: "Save"; font.family: Vars.fontFamily; color: Theme.on_surface; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
                         onClicked: {
                             // Ensure the current curve is in localEdits

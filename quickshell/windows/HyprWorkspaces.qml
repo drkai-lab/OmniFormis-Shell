@@ -4,7 +4,7 @@ import ".."
 import QtQuick.Layouts
 import Quickshell
 import Quickshell.Hyprland
-import "../theme/variables.js" as Vars
+import "../theme"
 import "../core/primitives" as Primitives
 Item {
     id: mainContainer
@@ -109,6 +109,7 @@ Item {
     Primitives.SquircleMask {
         id: bg
         layer.enabled: false
+        layer.samples: 32
         anchors.fill: parent
         color: Vars.tColor(Theme.surface, Vars.panelOpacity)
         property real targetRad: Math.min(mainContainer.width, mainContainer.height) / 2

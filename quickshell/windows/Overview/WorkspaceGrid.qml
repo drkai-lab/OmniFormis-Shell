@@ -3,9 +3,8 @@ import QtQuick.Layouts
 import Quickshell
 import "../.."
 import "../../theme"
-import "../.."
+import "../../core/primitives" as Primitives
 import Quickshell.Hyprland
-import "../../theme/variables.js" as Vars
 
 GridLayout {
     id: root
@@ -63,7 +62,7 @@ GridLayout {
             Layout.preferredWidth: root.wsWidth
             Layout.preferredHeight: root.wsHeight
 
-            Rectangle {
+            Primitives.SquircleMask {
                 id: wsTile
                 anchors.fill: parent
                 property real rOuter: Math.max(0, Vars.radiusExtraLarge - overviewPanel.bgPadding)
@@ -75,9 +74,9 @@ GridLayout {
                 bottomRightRadius: (wsContainer.visualRow === (overviewContainer ? overviewContainer.gridRows : 2) - 1 && wsContainer.visualCol === (overviewContainer ? overviewContainer.gridColumns : 5) - 1) ? rOuter : rInner
                 clip: true
 
-                color: wsContainer.hoveredWhileDragging ? (Vars.tColor(Theme.on_surface, Vars.componentOpacity)) : wsContainer.isFocused ? (Vars.tColor(Theme.primary, Vars.componentOpacity)) : (Vars.tColor(Theme.surface_container_highest, Vars.componentOpacity))
-                border.width: (wsContainer.isFocused || wsContainer.hoveredWhileDragging) ? 2 : 0
-                border.color: (wsContainer.isFocused || wsContainer.hoveredWhileDragging) ? Theme.primary : "transparent"
+                color: wsContainer.hoveredWhileDragging ? (Vars.tColor(Theme.on_surface, Vars.componentOpacity)) : wsContainer.isFocused ? (Vars.tColorSelected(Theme.primary)) : (Vars.tColor(Theme.surface_container_highest, Vars.componentOpacity))
+                // border.width: (wsContainer.isFocused || wsContainer.hoveredWhileDragging) ? 2 : 0
+                // border.color: (wsContainer.isFocused || wsContainer.hoveredWhileDragging) ? Theme.primary : "transparent"
 
                 Behavior on color {
                     enabled: !root.gameMode
@@ -87,14 +86,7 @@ GridLayout {
                         easing.bezierCurve: Vars.customExpressiveSpatialSlow
                     }
                 }
-                Behavior on border.color {
-                    enabled: !root.gameMode
-                    ColorAnimation {
-                        duration: Vars.animationDuration
-                        easing.type: Easing.BezierSpline
-                        easing.bezierCurve: Vars.customExpressiveSpatialSlow
-                    }
-                }
+
 
                 // Workspace number watermark
                 QsText {
@@ -117,7 +109,7 @@ GridLayout {
                         root.closeRequested();
                     }
 
-                    Rectangle {
+                    Primitives.SquircleMask {
                         anchors.fill: parent
                         topLeftRadius: wsTile.topLeftRadius
                         topRightRadius: wsTile.topRightRadius

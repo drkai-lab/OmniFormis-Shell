@@ -2,7 +2,7 @@ import QtQuick
 import QtQuick.Layouts
 import Quickshell
 import Quickshell.Services.Mpris
-import "../../theme/variables.js" as Vars
+import "../../theme"
 import "../../core/primitives" as Primitives
 import "../.."
 import QtQuick.Effects
@@ -31,6 +31,9 @@ Rectangle {
     property string currentMediaPlayerShape: Vars.mediaPlayerShape !== undefined ? Vars.mediaPlayerShape : "12SidedCookie"
     property real currentMediaPlayerArtScale: Vars.mediaPlayerArtScale !== undefined ? Vars.mediaPlayerArtScale : 1.0
 
+    property real currentMediaPlayerArtOffsetX: Vars.mediaPlayerArtOffsetX !== undefined ? Vars.mediaPlayerArtOffsetX : 0
+    property real currentMediaPlayerArtOffsetY: Vars.mediaPlayerArtOffsetY !== undefined ? Vars.mediaPlayerArtOffsetY : 0
+
     Timer {
         interval: 100
         running: true
@@ -44,11 +47,150 @@ Rectangle {
             if (mediaPlayerRoot.currentMediaPlayerArtScale !== scale) {
                 mediaPlayerRoot.currentMediaPlayerArtScale = scale;
             }
+            var offsetX = Vars.mediaPlayerArtOffsetX !== undefined ? Vars.mediaPlayerArtOffsetX : 0;
+            if (mediaPlayerRoot.currentMediaPlayerArtOffsetX !== offsetX) {
+                mediaPlayerRoot.currentMediaPlayerArtOffsetX = offsetX;
+            }
+            var offsetY = Vars.mediaPlayerArtOffsetY !== undefined ? Vars.mediaPlayerArtOffsetY : 0;
+            if (mediaPlayerRoot.currentMediaPlayerArtOffsetY !== offsetY) {
+                mediaPlayerRoot.currentMediaPlayerArtOffsetY = offsetY;
+            }
         }
     }
 
-    Layout.fillWidth: true
-    Layout.preferredHeight: 180
+    property bool forceVerticalExpansion: false
+    property bool isExpanded: false
+    property string lyricsText: ""
+    property bool isLoadingLyrics: false
+    property string currentLyricsTrack: ""
+    property bool isVertical: Vars.mediaPlayerOrientation === "Vertical"
+    property bool isHorizontalExpansion: !forceVerticalExpansion && !isVertical && Vars.mediaPlayerLyricsExpansion === "Horizontal"
+    property var syncedLyricsLines: []
+    property int currentLyricIndex: -1
+    property bool hasSyncedLyrics: false
+
+    function parseSyncedLyrics(lrcText) {
+        var lines = lrcText.split("\n");
+        var parsed = [];
+        var regex = /\[(\d{1,3}):(\d{1,2})(?:\.(\d{1,3}))?\](.*)/;
+        for (var i = 0; i < lines.length; i++) {
+            var match = regex.exec(lines[i]);
+            if (match) {
+                var min = parseInt(match[1]) || 0;
+                var sec = parseInt(match[2]) || 0;
+                var msStr = match[3] || "0";
+                var ms = parseInt(msStr);
+                if (msStr.length === 1) ms *= 100;
+                else if (msStr.length === 2) ms *= 10;
+                var timeInSec = min * 60 + sec + ms / 1000.0;
+                parsed.push({ time: timeInSec, text: match[4].trim() });
+            }
+        }
+        syncedLyricsLines = parsed;
+        hasSyncedLyrics = parsed.length > 0;
+    }
+
+    property bool autoScrollLyrics: Vars.mediaPlayerLyricsAutoScroll !== undefined ? Vars.mediaPlayerLyricsAutoScroll : true
+
+    function cleanTrackTitle(title) {
+        if (!title) return "";
+        return title
+            .replace(/\s*\(feat\..*?\)/gi, "")
+            .replace(/\s*\[feat\..*?\]/gi, "")
+            .replace(/\s*\(ft\..*?\)/gi, "")
+            .replace(/\s*\[ft\..*?\]/gi, "")
+            .replace(/\s*\(remastered.*?\)/gi, "")
+            .replace(/\s*\[remastered.*?\]/gi, "")
+            .replace(/\s*\(live.*?\)/gi, "")
+            .replace(/\s*\[live.*?\]/gi, "")
+            .replace(/\s*\(official.*?\)/gi, "")
+            .replace(/\s*\[official.*?\]/gi, "")
+            .replace(/\s*-\s*remastered.*/gi, "")
+            .replace(/\s*-\s*live.*/gi, "")
+            .replace(/\s*-\s*single.*/gi, "")
+            .replace(/\s*-\s*ep.*/gi, "")
+            .trim();
+    }
+
+    function fetchLyrics(artist, title) {
+        if (!artist || !title) return;
+        var queryTrack = artist + " - " + title;
+        if (currentLyricsTrack === queryTrack) return;
+        
+        currentLyricsTrack = queryTrack;
+        isLoadingLyrics = true;
+        lyricsText = "Loading lyrics...";
+        hasSyncedLyrics = false;
+        syncedLyricsLines = [];
+        
+        var cleanedTitle = cleanTrackTitle(title);
+
+        var cmdArray = ["/home/boing/Dotfiles/scripts/lyrics_tool/target/release/lyrics-fetcher", artist, cleanedTitle || title, "--raw"];
+        var cmd = JSON.stringify(cmdArray);
+        var qmlString = 'import QtQuick; import Quickshell.Io; Process { ' +
+                        'command: ' + cmd + '; ' +
+                        'running: true; ' +
+                        'stdout: StdioCollector { ' +
+                        '    onStreamFinished: { ' +
+                        '        var out = this.text.trim(); ' +
+                        '        if (out.length > 0 && !out.startsWith("Error:") && !out.includes("not found")) { ' +
+                        '            mediaPlayerRoot.lyricsText = out; ' +
+                        '            mediaPlayerRoot.isLoadingLyrics = false; ' +
+                        '            mediaPlayerRoot.parseSyncedLyrics(out); ' +
+                        '        } else { ' +
+                        '            mediaPlayerRoot.lyricsText = "No lyrics found."; ' +
+                        '            mediaPlayerRoot.isLoadingLyrics = false; ' +
+                        '        } ' +
+                        '    } ' +
+                        '} ' +
+                        'onExited: destroy() ' +
+                        '}';
+        Qt.createQmlObject(qmlString, mediaPlayerRoot);
+    }
+
+    property string currentTrackId: mprisPlayer ? (mprisPlayer.trackArtist + " - " + (mprisPlayer.trackTitle || "")) : ""
+    onCurrentTrackIdChanged: {
+        if (isExpanded) {
+            fetchLyrics(mprisPlayer.trackArtist, mprisPlayer.trackTitle || (mprisPlayer.metadata ? mprisPlayer.metadata["xesam:title"] : ""));
+        }
+    }
+
+    onIsExpandedChanged: {
+        if (isExpanded) {
+            fetchLyrics(mprisPlayer ? mprisPlayer.trackArtist : "", mprisPlayer ? (mprisPlayer.trackTitle || (mprisPlayer.metadata ? mprisPlayer.metadata["xesam:title"] : "")) : "");
+        }
+    }
+
+    Timer {
+        interval: 100
+        repeat: true
+        running: mprisPlayer && mprisPlayer.isPlaying && isExpanded && hasSyncedLyrics && autoScrollLyrics
+        onTriggered: {
+            if (!mprisPlayer || !hasSyncedLyrics) return;
+            var posSec = mprisPlayer.position / timeScale;
+            var newIndex = -1;
+            for (var i = 0; i < syncedLyricsLines.length; i++) {
+                if (posSec >= syncedLyricsLines[i].time) {
+                    newIndex = i;
+                } else {
+                    break;
+                }
+            }
+            if (newIndex !== currentLyricIndex) {
+                currentLyricIndex = newIndex;
+            }
+        }
+    }
+
+    Layout.fillWidth: isExpanded && isHorizontalExpansion ? false : true
+    Layout.preferredWidth: isExpanded && isHorizontalExpansion ? 900 : -1
+    Layout.preferredHeight: isExpanded && !isHorizontalExpansion ? 650 : (isVertical ? 300 : 180)
+    Behavior on Layout.preferredHeight {
+        NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.OutCubic }
+    }
+    Behavior on Layout.preferredWidth {
+        NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.OutCubic }
+    }
     color: "transparent"
 
     Primitives.SquircleMask {
@@ -86,13 +228,14 @@ Rectangle {
         id: combinedBackground
         anchors.fill: parent
         layer.enabled: true
+        layer.samples: 32
         visible: false
 
-        // Base background for when there is no album art
+        // Base background for when there is no album art or in opaque mode
         Rectangle {
             anchors.fill: parent
             color: Vars.tColor(Theme.surface_container_highest, Vars.componentOpacity)
-            visible: bgArt.source === ""
+            visible: bgArt.source === "" || !Vars.isTranslucent()
         }
 
         // Stage 1: Blur the background image
@@ -100,6 +243,7 @@ Rectangle {
             id: blurredBgLayer
             anchors.fill: parent
             layer.enabled: true
+            layer.samples: 32
             layer.effect: MultiEffect {
                 blurEnabled: true
                 blurMax: Vars.blurAmount
@@ -107,7 +251,7 @@ Rectangle {
                 saturation: 1.2
                 autoPaddingEnabled: false
             }
-            visible: bgArt.source !== ""
+            visible: bgArt.source !== "" && Vars.isTranslucent()
 
             Image {
                 anchors.fill: parent
@@ -121,7 +265,7 @@ Rectangle {
             anchors.fill: parent
             color: Theme.surface_container_highest
             opacity: (Vars._translucent && !Vars.gameMode) ? (Vars.componentOpacity * 0.8) : 0.85
-            visible: bgArt.source !== ""
+            visible: bgArt.source !== "" && Vars.isTranslucent()
         }
     }
 
@@ -129,7 +273,7 @@ Rectangle {
     Item {
         anchors.fill: parent
         layer.enabled: true
-        layer.samples: 16
+        layer.samples: 32
         layer.effect: MultiEffect {
             shadowEnabled: !Vars.gameMode && !Vars._translucent
             shadowBlur: 1.0
@@ -148,7 +292,15 @@ Rectangle {
 
     property int slideDirection: 1
 
-    property real timeScale: mprisPlayer && mprisPlayer.length > 10000000 ? 1000000 : (mprisPlayer && mprisPlayer.length > 10000 ? 1000 : 1)
+    property real timeScale: {
+        if (!mprisPlayer) return 1000000;
+        if (mprisPlayer.length > 10000000) return 1000000;
+        if (mprisPlayer.length > 10000) return 1000;
+        if (mprisPlayer.length > 0) return 1;
+        if (mprisPlayer.position > 10000000) return 1000000;
+        if (mprisPlayer.position > 10000) return 1000;
+        return 1000000;
+    }
 
     function formatTime(val) {
         if (isNaN(val) || val <= 0)
@@ -174,25 +326,47 @@ Rectangle {
         id: contentLayer
         anchors.fill: parent
         layer.enabled: true
-        layer.samples: 16
+        layer.samples: 32
         layer.effect: MultiEffect {
             maskEnabled: true
             maskSource: rootMask
         }
 
-        RowLayout {
+        GridLayout {
             anchors.fill: parent
             anchors.margins: 16
-            spacing: 16
+            rowSpacing: 16
+            columnSpacing: 16
+            columns: (isExpanded && isHorizontalExpansion) ? 2 : 1
 
-            // Left: Album Art with upward glow
-            Item {
-                width: 148
-                height: 148
+            GridLayout {
+                Layout.fillWidth: true
+                Layout.fillHeight: isExpanded && isHorizontalExpansion
+                columnSpacing: 16
+                rowSpacing: 16
+                columns: isVertical ? 1 : 2
+
+                // Left: Album Art with upward glow
+                Item {
+                    Layout.preferredWidth: 148
+                    Layout.preferredHeight: 148
+                    Layout.alignment: isVertical ? Qt.AlignHCenter : Qt.AlignVCenter
 
                 Item {
                     id: albumArtContainer
-                    anchors.fill: parent
+                    width: parent.width
+                    height: parent.height
+                    anchors.centerIn: parent
+                    anchors.horizontalCenterOffset: mediaPlayerRoot.currentMediaPlayerArtOffsetX
+                    anchors.verticalCenterOffset: mediaPlayerRoot.currentMediaPlayerArtOffsetY
+                    
+                    Behavior on anchors.horizontalCenterOffset {
+                        NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard }
+                    }
+                    Behavior on anchors.verticalCenterOffset {
+                        NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customStandard }
+                    }
+
                     scale: mediaPlayerRoot.currentMediaPlayerArtScale
                     Behavior on scale {
                         NumberAnimation {
@@ -212,6 +386,8 @@ Rectangle {
                     visible: false
                     layer.enabled: true
                     layer.samples: 32
+                    layer.smooth: true
+                    layer.textureSize: Qt.size(width * Math.max(1, mediaPlayerRoot.currentMediaPlayerArtScale) * 2, height * Math.max(1, mediaPlayerRoot.currentMediaPlayerArtScale) * 2)
 
                     Item {
                         id: rotationWrapper
@@ -276,6 +452,10 @@ Rectangle {
                     id: albumContent
                     anchors.fill: parent
                     visible: false
+                    layer.enabled: true
+                    layer.samples: 32
+                    layer.smooth: true
+                    layer.textureSize: Qt.size(width * Math.max(1, mediaPlayerRoot.currentMediaPlayerArtScale) * 2, height * Math.max(1, mediaPlayerRoot.currentMediaPlayerArtScale) * 2)
 
                     // Fallback icon
                     Rectangle {
@@ -378,11 +558,12 @@ Rectangle {
                     Rectangle {
                         id: playerSelectorPill
                         Layout.alignment: Qt.AlignVCenter
-                        Layout.preferredWidth: playerSelectorRow.implicitWidth + 16 // Less padding
-                        Layout.preferredHeight: 28 // Smaller height
+                        Layout.preferredWidth: playerSelectorRow.implicitWidth + 24
+                        Layout.preferredHeight: 36
                         Layout.minimumWidth: Layout.preferredWidth
-                        radius: 14 // Scaled radius
-                        color: Vars.tColor(Theme.on_surface_variant, Vars.componentOpacity)
+                        radius: 18
+                        antialiasing: true
+                        color: Theme.primary
                         visible: Mpris.players.values.length > 1
 
                         RowLayout {
@@ -392,22 +573,23 @@ Rectangle {
                             QsText {
                                 text: mprisPlayer ? (mprisPlayer.identity || "Unknown") : "Player"
                                 font.family: Vars.fontFamily
-                                font.pixelSize: 12 // Slightly smaller text
-                                color: Theme.on_surface_variant
-                                setWeight: 500
+                                font.pixelSize: 14
+                                color: Theme.on_primary
+                                setWeight: 600
                             }
                             QsText {
                                 font.family: "Material Symbols Rounded"
-                                font.pixelSize: 16 // Slightly smaller icon
+                                font.pixelSize: 20
                                 antialiasing: true
                                 renderType: Text.QtRendering
                                 font.hintingPreference: Font.PreferNoHinting
-                                color: Theme.on_surface_variant
+                                color: Theme.on_primary
                                 setWeight: 700
                                 text: "\ue5cf" // expand_more
                             }
                         }
                         MouseArea {
+                            id: playerSelectorMouse
                             anchors.fill: parent
                             cursorShape: Qt.PointingHandCursor
                             onClicked: playerDropdown.visible = !playerDropdown.visible
@@ -421,6 +603,7 @@ Rectangle {
                         Layout.preferredHeight: 52
                         Layout.minimumWidth: 52
                         radius: 18
+                        antialiasing: true
                         color: Theme.primary
 
                         QsText {
@@ -499,6 +682,7 @@ Rectangle {
                         width: 2
                         height: 30
                         radius: 1
+                        antialiasing: true
                         color: Theme.on_surface
                     }
 
@@ -508,9 +692,13 @@ Rectangle {
                         anchors.verticalCenter: parent.verticalCenter
                         anchors.left: parent.left
                         width: Math.max(0, handle.x - 6)
-                        height: 12
+                        height: 24
                         renderTarget: Canvas.FramebufferObject
                         antialiasing: true
+                        smooth: true
+                        layer.enabled: true
+                        layer.samples: 32
+                        layer.smooth: true
 
                         property color waveColor: Theme.primary
                         property real phase: 0
@@ -529,21 +717,31 @@ Rectangle {
                             ctx.clearRect(0, 0, width, height);
                             if (width <= 0)
                                 return;
-                            ctx.beginPath();
+
+                            var lw = Vars.mediaPlayerWaveThickness !== undefined ? Vars.mediaPlayerWaveThickness : 2.5;
                             var amplitude = 3;
                             var frequency = 0.25;
-                            ctx.lineWidth = Vars.mediaPlayerWaveThickness !== undefined ? Vars.mediaPlayerWaveThickness : 2.5;
+
+                            ctx.beginPath();
+                            ctx.lineWidth = lw;
                             ctx.lineCap = "round";
                             ctx.lineJoin = "round";
                             ctx.strokeStyle = waveColor;
 
-                            for (var x = 0; x <= width; x++) {
+                            var pad = lw / 2;
+                            var startX = pad;
+                            var endX = Math.max(startX, width - pad);
+
+                            for (var x = startX; x <= endX; x += 0.5) {
                                 var y = height / 2 + Math.sin(x * frequency - phase) * amplitude;
-                                if (x === 0)
+                                if (x === startX)
                                     ctx.moveTo(x, y);
                                 else
                                     ctx.lineTo(x, y);
                             }
+                            var finalY = height / 2 + Math.sin(endX * frequency - phase) * amplitude;
+                            ctx.lineTo(endX, finalY);
+
                             ctx.stroke();
                         }
 
@@ -560,6 +758,7 @@ Rectangle {
                         anchors.right: parent.right
                         height: 2
                         radius: 1
+                        antialiasing: true
                         color: Theme.on_surface_variant
 
                         // Unplayed part dot (from the image)
@@ -569,6 +768,7 @@ Rectangle {
                             width: 4
                             height: 4
                             radius: 2
+                            antialiasing: true
                             color: Theme.on_surface_variant
                         }
                     }
@@ -619,27 +819,137 @@ Rectangle {
                         }
                     }
                 }
+                // Expand Lyrics Button
+                QsText {
+                    font.family: "Material Symbols Rounded"
+                    font.pixelSize: 26
+                    antialiasing: true
+                    renderType: Text.QtRendering
+                    font.hintingPreference: Font.PreferNoHinting
+                    color: Theme.on_surface_variant
+                    text: mediaPlayerRoot.isExpanded ? "\ue5ce" : "\ue5cf" // expand_less : expand_more
+                    MouseArea {
+                        anchors.fill: parent
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: mediaPlayerRoot.isExpanded = !mediaPlayerRoot.isExpanded
+                    }
+                }
             }
         }
+    }
+
+    // Lyrics Area
+    Item {
+        Layout.fillWidth: true
+        Layout.fillHeight: true
+        Layout.preferredWidth: mediaPlayerRoot.isHorizontalExpansion ? 400 : -1
+        visible: mediaPlayerRoot.isExpanded
+        clip: true
+        
+        ListView {
+            id: lyricsListView
+            anchors.fill: parent
+            visible: mediaPlayerRoot.hasSyncedLyrics
+            model: mediaPlayerRoot.syncedLyricsLines
+            clip: true
+            spacing: 12
+            
+            currentIndex: mediaPlayerRoot.currentLyricIndex
+            preferredHighlightBegin: height / 2 - 20
+            preferredHighlightEnd: height / 2 + 20
+            highlightRangeMode: mediaPlayerRoot.autoScrollLyrics ? ListView.StrictlyEnforceRange : ListView.NoHighlightRange
+            highlightMoveDuration: Vars.animationDuration
+
+            header: Item { width: lyricsListView.width; height: Math.max(0, lyricsListView.height / 2 - 20) }
+            footer: Item { width: lyricsListView.width; height: Math.max(0, lyricsListView.height / 2 - 20) }
+            
+            Behavior on contentY {
+                enabled: mediaPlayerRoot.autoScrollLyrics && !lyricsListView.dragging && !lyricsListView.flicking
+                NumberAnimation {
+                    duration: 400
+                    easing.type: Easing.OutCubic
+                }
+            }
+            
+            delegate: QsText {
+                width: ListView.view.width
+                text: modelData.text
+                font.family: Vars.fontFamily
+                font.pixelSize: (mediaPlayerRoot.autoScrollLyrics && index === mediaPlayerRoot.currentLyricIndex) ? 22 : 16
+                setWeight: (mediaPlayerRoot.autoScrollLyrics && index === mediaPlayerRoot.currentLyricIndex) ? 800 : 500
+                color: (mediaPlayerRoot.autoScrollLyrics && index === mediaPlayerRoot.currentLyricIndex) ? Theme.on_surface : Theme.on_surface_variant
+                opacity: mediaPlayerRoot.autoScrollLyrics ? (index === mediaPlayerRoot.currentLyricIndex ? 1.0 : 0.6) : 0.85
+                wrapMode: Text.WordWrap
+                horizontalAlignment: Text.AlignHCenter
+                
+                Behavior on font.pixelSize { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.OutCubic } }
+                Behavior on opacity { NumberAnimation { duration: Vars.animationDuration } }
+            }
+        }
+        
+        Flickable {
+            anchors.fill: parent
+            visible: !mediaPlayerRoot.hasSyncedLyrics && !mediaPlayerRoot.isLoadingLyrics
+            contentWidth: width
+            contentHeight: lyricsTextColumn.implicitHeight
+            boundsBehavior: Flickable.StopAtBounds
+            flickableDirection: Flickable.VerticalFlick
+            
+            Column {
+                id: lyricsTextColumn
+                width: parent.width
+                spacing: 24
+
+                QsText {
+                    width: parent.width
+                    text: "[ Unsynced Lyrics ]"
+                    font.family: Vars.fontFamily
+                    font.pixelSize: 14
+                    color: Theme.on_surface_variant
+                    font.italic: true
+                    horizontalAlignment: Text.AlignHCenter
+                    visible: mediaPlayerRoot.lyricsText !== "Loading lyrics..." && 
+                             mediaPlayerRoot.lyricsText !== "No lyrics found." && 
+                             mediaPlayerRoot.lyricsText !== "Error parsing lyrics." && 
+                             mediaPlayerRoot.lyricsText !== "Lyrics not found."
+                }
+                
+                QsText {
+                    id: lyricsTextElement
+                    width: parent.width
+                    text: mediaPlayerRoot.lyricsText
+                    font.family: Vars.fontFamily
+                    font.pixelSize: 16
+                    color: Theme.on_surface
+                    opacity: 0.85
+                    wrapMode: Text.WordWrap
+                    horizontalAlignment: Text.AlignHCenter
+                }
+            }
+        }
+
+        Primitives.LoadingIndicator {
+            anchors.centerIn: parent
+            width: 96
+            height: 96
+            running: mediaPlayerRoot.isLoadingLyrics
+        }
+    }
     }
     } // end of contentLayer
 
     // MPRIS Player Dropdown
     Item {
         id: playerDropdown
-        x: {
-            if (typeof playerSelectorPill !== 'undefined' && playerSelectorPill !== null) {
+        x: 0
+        y: 0
+        
+        onVisibleChanged: {
+            if (visible && typeof playerSelectorPill !== 'undefined' && playerSelectorPill !== null) {
                 var p = playerSelectorPill.mapToItem(mediaPlayerRoot, 0, 0);
-                return p.x - (width - playerSelectorPill.width) - 12; // Aligned just left of the play button's bounds
+                x = p.x - (width - playerSelectorPill.width);
+                y = p.y + playerSelectorPill.height + 8;
             }
-            return parent.width - width - Vars.spacingMedium - 64;
-        }
-        y: {
-            if (typeof playerSelectorPill !== 'undefined' && playerSelectorPill !== null) {
-                var p = playerSelectorPill.mapToItem(mediaPlayerRoot, 0, 0);
-                return p.y + playerSelectorPill.height + 8;
-            }
-            return Vars.spacingMedium + 32;
         }
         width: 180
         height: playerColumn.implicitHeight + 8
@@ -651,16 +961,18 @@ Rectangle {
             id: dropdownMask
             anchors.fill: parent
             radius: playerDropdown.radius
+            antialiasing: true
             color: "black"
             visible: false
             layer.enabled: true
-            layer.samples: 8
+            layer.samples: 32
         }
 
         Item {
             id: dropdownShadow
             anchors.fill: parent
             layer.enabled: true
+            layer.samples: 32
             layer.effect: MultiEffect {
                 shadowEnabled: !Vars.gameMode && !Vars._translucent
                 shadowBlur: 1.0
@@ -673,31 +985,20 @@ Rectangle {
                 id: dropdownFinalMasked
                 anchors.fill: parent
                 layer.enabled: true
+                layer.samples: 32
                 layer.effect: MultiEffect {
                     maskEnabled: true
                     maskSource: dropdownMask
                 }
 
-                ShaderEffectSource {
-                    anchors.fill: parent
-                    sourceItem: mediaPlayerRoot
-                    sourceRect: Qt.rect(playerDropdown.x, playerDropdown.y, playerDropdown.width, playerDropdown.height)
-                    
-                    layer.enabled: true
-                    layer.effect: MultiEffect {
-                        blurEnabled: true
-                        blurMax: Vars.blurAmount
-                        blur: 1.0
-                        autoPaddingEnabled: false
-                    }
-                }
+                // removed ShaderEffectSource to prevent double-blur in translucent mode
 
                 Rectangle {
                     anchors.fill: parent
                     radius: playerDropdown.radius
-                    color: Vars.tColor(Theme.surface_container_highest, Vars.componentOpacity)
-                    border.color: Theme.outline_variant
-                    border.width: 1
+                    antialiasing: true
+                    color: Theme.primary
+                    border.width: 0
                 }
 
             } // End of dropdownFinalMasked
@@ -714,7 +1015,8 @@ Rectangle {
                     width: playerColumn.width
                     height: 36
                     radius: Vars.radiusSmall
-                    color: itemMouse.containsMouse ? Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.08) : "transparent"
+                    antialiasing: true
+                    color: itemMouse.containsMouse ? Qt.rgba(Theme.on_primary.r, Theme.on_primary.g, Theme.on_primary.b, 0.12) : "transparent"
 
                     RowLayout {
                         anchors.fill: parent
@@ -726,7 +1028,7 @@ Rectangle {
                             text: modelData.identity || "Unknown"
                             font.family: Vars.fontFamily
                             font.pixelSize: 14
-                            color: mprisPlayer === modelData ? Theme.primary : Theme.on_surface
+                            color: mprisPlayer === modelData ? Theme.on_primary : Qt.rgba(Theme.on_primary.r, Theme.on_primary.g, Theme.on_primary.b, 0.7)
                             Layout.fillWidth: true
                             elide: Text.ElideRight
                             verticalAlignment: Text.AlignVCenter
@@ -738,7 +1040,7 @@ Rectangle {
                             antialiasing: true
                             renderType: Text.QtRendering
                             font.hintingPreference: Font.PreferNoHinting
-                            color: Theme.primary
+                            color: Theme.on_primary
                             text: "\ue876" // check
                             visible: mprisPlayer === modelData
                             verticalAlignment: Text.AlignVCenter

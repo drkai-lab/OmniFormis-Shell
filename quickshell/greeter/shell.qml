@@ -40,6 +40,7 @@ ShellRoot {
                 width: 500; height: 500
                 anchors.centerIn: parent
                 radius: 250
+                antialiasing: true
                 color: Theme.primary
                 opacity: 0.03
             }

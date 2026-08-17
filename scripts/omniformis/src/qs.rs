@@ -122,18 +122,29 @@ pub fn kill() {
     println!("Killing Quickshell...");
     let _ = Command::new("sh")
         .arg("-c")
-        .arg("pkill -9 quickshell; pkill -9 .quickshell-wra")
+        .arg("pkill -9 quickshell; pkill -9 .quickshell-wra; pkill -f qs-watchdog")
         .status();
 }
 
-pub fn start(detached: bool) {
-    println!("Starting Quickshell...");
+pub fn launch(detached: bool) {
+    println!("Launching Quickshell...");
     if detached {
         let _ = Command::new("sh")
             .arg("-c")
-            .arg("quickshell > /dev/null 2>&1 &")
+            .arg("nohup bash /home/boing/Dotfiles/quickshell/scripts/qs-watchdog.sh > /dev/null 2>&1 &")
             .spawn();
     } else {
-        let _ = Command::new("quickshell").status();
+        let _ = Command::new("bash")
+            .arg("/home/boing/Dotfiles/quickshell/scripts/qs-watchdog.sh")
+            .status();
     }
 }
+
+pub fn reload() {
+    println!("Reloading Quickshell...");
+    let _ = Command::new("sh")
+        .arg("-c")
+        .arg("bash /home/boing/Dotfiles/scripts/reload.sh")
+        .status();
+}
+

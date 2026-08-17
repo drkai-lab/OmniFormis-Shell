@@ -6,7 +6,7 @@ import QtQuick.Shapes
 import Quickshell
 import Quickshell.Io
 import "../.."
-import "../../theme/variables.js" as Vars
+import "../../theme"
 
 ColumnLayout {
     id: rootPage
@@ -30,9 +30,12 @@ ColumnLayout {
 
     function prettyTitle(key) {
         var custom = {
-            "clockShowTicks": "Clock: Show Ticks",
-            "clockShowCenterDot": "Clock: Show Center Dot",
-            "clockShape": "Clock Widget Shape",
+            "clockShape": "Desktop Clock Outline Shape",
+            "clockShowTicks": "Show Minute Ticks",
+            "clockShowCenterDot": "Show Center Dot Pivot",
+            "clockShowDate": "Show Orbiting Date",
+            "clockSecondHandStyle": "Second Hand Style",
+            "clockHandThickness": "Clock Hand Thickness",
             "wallpaperMaskShape": "Wallpaper Mask Shape",
             "wallpaperMaskScale": "Wallpaper Mask Scale",
             "wallpaperMaskColor": "Wallpaper Mask Color",
@@ -41,7 +44,14 @@ ColumnLayout {
             "wallpaperMaskOffsetY": "Wallpaper Mask Y Offset",
             "mediaPlayerShape": "Media Player Widget Shape",
             "mediaPlayerArtScale": "Media Player Art Scale",
+            "mediaPlayerArtOffsetX": "Media Player Art X Offset",
+            "mediaPlayerArtOffsetY": "Media Player Art Y Offset",
             "mediaPlayerWaveThickness": "Media Player Wave Thickness",
+            "mediaPlayerOrientation": "Orientation",
+            "mediaPlayerLyricsExpansion": "Lyrics Direction",
+            "mediaPlayerLyricsAutoScroll": "Auto Scroll",
+            "mediaPlayerExpandOverlaps": "Overlay Mode (No Layout Push)",
+            "desktopMediaPlayerAnchorExpandFix": "Lock Anchor Position on Expand",
             "gameMode": "Game Mode Optimization",
             "animationDuration": "Master Animation Duration",
             "flickDeceleration": "Scroll Deceleration Rate",
@@ -103,7 +113,13 @@ ColumnLayout {
             "wallpaperMaskOffsetY": "Vertical Y-axis pixel shift for positioning the wallpaper clipping mask.",
             "mediaPlayerShape": "Select the Material 3 cutout shape contour for the desktop audio player widget.",
             "mediaPlayerArtScale": "Scale zoom factor for album artwork displayed inside the desktop audio player.",
+            "mediaPlayerArtOffsetX": "Horizontal X-axis pixel shift for positioning the album artwork.",
+            "mediaPlayerArtOffsetY": "Vertical Y-axis pixel shift for positioning the album artwork.",
             "mediaPlayerWaveThickness": "Thickness of the wavy timeline stroke inside the media player widget.",
+            "mediaPlayerOrientation": "Choose between a Horizontal or Vertical layout for the Media Player.",
+            "mediaPlayerLyricsExpansion": "Direction in which the media player expands to show lyrics.",
+            "mediaPlayerLyricsAutoScroll": "Enable automatic scrolling and active line highlighting for synchronized lyrics.",
+            "desktopMediaPlayerAnchorExpandFix": "Prevent desktop media player anchor from shifting position when expanded.",
             "gameMode": "Suspend heavy decorative shell animations and blur effects for optimal gaming performance.",
             "animationDuration": "Master transition duration in milliseconds for interface micro-animations.",
             "flickDeceleration": "Friction rate applied when coasting through scrollable UI flick views.",
@@ -158,7 +174,7 @@ ColumnLayout {
         var cmdArray = [];
         var isLive = false;
         if (isQs) {
-            var liveVars = ["clockShape", "clockShowTicks", "clockShowCenterDot", "wallpaperMaskShape", "wallpaperMaskScale", "wallpaperMaskColor", "wallpaperMaskEnabled", "wallpaperMaskOffsetX", "wallpaperMaskOffsetY", "mediaPlayerShape", "mediaPlayerArtScale", "mediaPlayerWaveThickness", "gameMode", "fontWeight", "fontItalic", "fontRounding", "fontGrading", "fontBaselineEnabled"];
+            var liveVars = ["clockShape", "clockShowTicks", "clockShowCenterDot", "clockShowDate", "clockSecondHandStyle", "clockHandThickness", "wallpaperMaskShape", "wallpaperMaskScale", "wallpaperMaskColor", "wallpaperMaskEnabled", "wallpaperMaskOffsetX", "wallpaperMaskOffsetY", "mediaPlayerShape", "mediaPlayerArtScale", "mediaPlayerArtOffsetX", "mediaPlayerArtOffsetY", "mediaPlayerWaveThickness", "mediaPlayerOrientation", "mediaPlayerLyricsExpansion", "mediaPlayerLyricsAutoScroll", "mediaPlayerExpandOverlaps", "desktopMediaPlayerAnchorExpandFix", "gameMode", "fontWeight", "fontItalic", "fontRounding", "fontGrading", "fontBaselineEnabled", "radiusAmount", "radiusSmall", "cornerPower", "spacingSmall", "spacingMedium", "spacingLarge", "paddingSmall", "paddingMedium", "paddingLarge", "fontFamily", "animationDuration", "flickDeceleration", "maximumFlickVelocity", "blurAmount", "panelOpacity", "componentOpacity", "overviewGridRows", "overviewGridColumns", "overviewScale", "gameLibraryRows", "gameLibraryColumns", "gameLibraryScale", "panelStyle", "pillPosition"];
             isLive = liveVars.indexOf(key) !== -1 || key.startsWith("desktop");
             cmdArray = ["/home/boing/.local/bin/omniformis", "qs", "set", key, String(val)];
         } else {
@@ -171,11 +187,11 @@ ColumnLayout {
         if (isQs && isLive) {
             try {
                 if (val === "true" || val === "false") {
-                    Vars[key] = (val === "true");
+                    Vars.setLive(key, (val === "true"));
                 } else if (!isNaN(Number(val)) && val !== "") {
-                    Vars[key] = Number(val);
+                    Vars.setLive(key, Number(val));
                 } else {
-                    Vars[key] = val;
+                    Vars.setLive(key, val);
                 }
             } catch (e) {
                 console.warn("SettingsApp: Failed to update live variable: " + key + " = " + val + ". Error: " + e);
@@ -261,7 +277,6 @@ ColumnLayout {
         model: settingsModel
         focus: true
         bottomMargin: 112
-        KeyNavigation.up: searchBar.searchInput
 
         // boundsBehavior: Flickable.StopAtBounds
         flickDeceleration: Vars.flickDeceleration
@@ -302,8 +317,6 @@ ColumnLayout {
                 } else if (event.key === Qt.Key_K || event.key === Qt.Key_D) {
                     if (currentIndex > 0) {
                         decrementCurrentIndex();
-                    } else {
-                        searchBar.forceActiveFocus();
                     }
                     event.accepted = true;
                 } else if (event.key === Qt.Key_L || event.key === Qt.Key_H || event.key === Qt.Key_F || event.key === Qt.Key_A) {
@@ -334,6 +347,7 @@ ColumnLayout {
                     implicitWidth: sectionBadgeText.implicitWidth + 18
                     implicitHeight: 24
                     radius: 12
+                    antialiasing: true
                     color: Qt.rgba(Theme.primary.r, Theme.primary.g, Theme.primary.b, 0.12)
                     Layout.alignment: Qt.AlignVCenter
 
@@ -632,6 +646,11 @@ ColumnLayout {
                         min = 1.0;
                         max = 10.0;
                         step = 0.5;
+                    } else if (key === "clockHandThickness") {
+                        type = "slider";
+                        min = 2;
+                        max = 24;
+                        step = 1;
                     } else if (key === "fontWeight") {
                         type = "slider";
                         min = 100;
@@ -662,7 +681,7 @@ ColumnLayout {
                         min = 1;
                         max = 20;
                         step = 1;
-                    } else if (key === "wallpaperMaskOffsetX" || key === "wallpaperMaskOffsetY") {
+                    } else if (key === "wallpaperMaskOffsetX" || key === "wallpaperMaskOffsetY" || key === "mediaPlayerArtOffsetX" || key === "mediaPlayerArtOffsetY") {
                         type = "slider";
                         min = -500;
                         max = 500;
@@ -686,9 +705,15 @@ ColumnLayout {
                     } else if (key === "clockShape") {
                         type = "shape";
                         enumsStr = "Circle|||Square|||VerySunny|||Sunny|||4SidedCookie|||6SidedCookie|||7SidedCookie|||9SidedCookie|||12SidedCookie|||SoftBurst|||SoftBoom|||Flower|||Puffy|||Bun";
+                    } else if (key === "clockSecondHandStyle") {
+                        type = "enum";
+                        enumsStr = "Orbiting Dot|||Traditional Line|||Hidden";
                     } else if (key === "mediaPlayerShape") {
                         type = "shape";
                         enumsStr = "Circle|||Square|||Slanted|||Arch|||Flag|||Arrow|||Semicircle|||Oval|||Pill|||Triangle|||Diamond|||Clamshell|||Pentagon|||Gem|||VerySunny|||Sunny|||4SidedCookie|||6SidedCookie|||7SidedCookie|||9SidedCookie|||12SidedCookie|||GhostIsh|||4LeafClover|||8LeafClover|||Burst|||SoftBurst|||Boom|||SoftBoom|||Flower|||Puffy|||PuffyDiamond|||PixelCircle|||PixelTriangle|||Bun|||Heart";
+                    } else if (key === "mediaPlayerOrientation" || key === "mediaPlayerLyricsExpansion") {
+                        type = "enum";
+                        enumsStr = "Horizontal|||Vertical";
                     } else if (key === "panelStyle") {
                         type = "enum";
                         enumsStr = "Floating|||Attached|||Framed";
@@ -761,16 +786,18 @@ ColumnLayout {
                 id: fabMask
                 anchors.fill: parent
                 radius: reloadFab.radius
+                antialiasing: true
                 color: "black"
                 visible: false
                 layer.enabled: true
-                layer.samples: 4
+                layer.samples: 32
             }
 
             Item {
                 id: shadowContainer
                 anchors.fill: parent
                 layer.enabled: true
+                layer.samples: 32
                 layer.effect: MultiEffect {
                     shadowEnabled: true
                     shadowBlur: 1.0
@@ -783,6 +810,7 @@ ColumnLayout {
                     id: finalMaskedContainer
                     anchors.fill: parent
                     layer.enabled: true
+                    layer.samples: 32
                     layer.effect: MultiEffect {
                         maskEnabled: true
                         maskSource: fabMask
@@ -794,6 +822,7 @@ ColumnLayout {
                         sourceRect: Qt.rect(rootPage.width - reloadFab.width - 32 - settingsList.x, rootPage.height - reloadFab.height - 32 - settingsList.y, reloadFab.width, reloadFab.height)
                         
                         layer.enabled: true
+                        layer.samples: 32
                         layer.effect: MultiEffect {
                             blurEnabled: true
                             blurMax: Vars.blurAmount
@@ -805,6 +834,7 @@ ColumnLayout {
                     Rectangle {
                         anchors.fill: parent
                         radius: reloadFab.radius
+                        antialiasing: true
                         color: Vars.tColor(Theme.primary, Vars.componentOpacity)
                         border.color: Theme.outline_variant
                         border.width: 1

@@ -7,7 +7,7 @@ import Quickshell.Wayland
 import Quickshell.Hyprland
 import Quickshell.Widgets
 import "../theme"
-import "../theme/variables.js" as Vars
+import "../theme"
 import "../core/primitives" as Primitives
 import ".."
 import Quickshell.Io
@@ -229,6 +229,7 @@ Item {
                 id: panelBackground
                 property bool isBackgroundActive: overviewContainer.visibleState || (MorphState.openCount === 0 && MorphState.activeItem === panelBackground && panelBackground.width > 105)
                 layer.enabled: true
+                layer.samples: 32
 
                 anchors.top: (!Vars.pillPosition || Vars.pillPosition === "Top") ? parent.top : undefined
                 anchors.bottom: Vars.pillPosition === "Bottom" ? parent.bottom : undefined
@@ -375,6 +376,7 @@ Item {
                 color: panelBackground.color
                 opacity: panelBackground.opacity
                 radius: Math.max(0, Math.min(Vars.radiusExtraLarge, Math.min(panelBackground.width, panelBackground.height) / 2))
+                antialiasing: true
             }
 
             InvertedCorner {
@@ -385,6 +387,7 @@ Item {
                 color: panelBackground.color
                 opacity: panelBackground.opacity
                 radius: Math.max(0, Math.min(Vars.radiusExtraLarge, Math.min(panelBackground.width, panelBackground.height) / 2))
+                antialiasing: true
             }
 
             InvertedCorner {
@@ -395,6 +398,7 @@ Item {
                 color: panelBackground.color
                 opacity: panelBackground.opacity
                 radius: Math.max(0, Math.min(Vars.radiusExtraLarge, Math.min(panelBackground.width, panelBackground.height) / 2))
+                antialiasing: true
             }
 
             InvertedCorner {
@@ -405,6 +409,7 @@ Item {
                 color: panelBackground.color
                 opacity: panelBackground.opacity
                 radius: Math.max(0, Math.min(Vars.radiusExtraLarge, Math.min(panelBackground.width, panelBackground.height) / 2))
+                antialiasing: true
             }
 
             InvertedCorner {
@@ -415,6 +420,7 @@ Item {
                 color: panelBackground.color
                 opacity: panelBackground.opacity
                 radius: Math.max(0, Math.min(Vars.radiusExtraLarge, Math.min(panelBackground.width, panelBackground.height) / 2))
+                antialiasing: true
             }
 
             InvertedCorner {
@@ -425,6 +431,7 @@ Item {
                 color: panelBackground.color
                 opacity: panelBackground.opacity
                 radius: Math.max(0, Math.min(Vars.radiusExtraLarge, Math.min(panelBackground.width, panelBackground.height) / 2))
+                antialiasing: true
             }
 
             InvertedCorner {
@@ -435,6 +442,7 @@ Item {
                 color: panelBackground.color
                 opacity: panelBackground.opacity
                 radius: Math.max(0, Math.min(Vars.radiusExtraLarge, Math.min(panelBackground.width, panelBackground.height) / 2))
+                antialiasing: true
             }
 
             InvertedCorner {
@@ -445,6 +453,7 @@ Item {
                 color: panelBackground.color
                 opacity: panelBackground.opacity
                 radius: Math.max(0, Math.min(Vars.radiusExtraLarge, Math.min(panelBackground.width, panelBackground.height) / 2))
+                antialiasing: true
             }
 
             // === KEYBOARD NAVIGATION ===

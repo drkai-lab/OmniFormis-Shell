@@ -190,6 +190,7 @@ Item {
                             Layout.preferredWidth: 320
                             Layout.preferredHeight: 64
                             radius: 32
+                            antialiasing: true
                             color: root.authError ? Theme.error_container : Theme.surface_container_highest
                             border.color: passwordInput.activeFocus ? Theme.primary : "transparent"
                             border.width: 2

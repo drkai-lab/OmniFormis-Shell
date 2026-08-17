@@ -6,7 +6,7 @@ import Quickshell
 import Quickshell.Io
 import Quickshell.Networking
 import "../../.."
-import "../../../theme/variables.js" as Vars
+import "../../../theme"
 import "../../../core/primitives" as Primitives
 import ".."
 
@@ -152,28 +152,21 @@ Item {
                         Item {
                             anchors.fill: parent
                             layer.enabled: true
+                            layer.samples: 32
                             opacity: parent.targetColor.a
                             Rectangle {
                                 anchors.fill: parent
-                                radius: 16
                                 color: Qt.rgba(parent.parent.targetColor.r, parent.parent.targetColor.g, parent.parent.targetColor.b, 1.0)
 
-                                Rectangle {
-                                    width: 16
-                                    height: 16
-                                    color: parent.color
-                                    anchors.bottom: parent.bottom
-                                    anchors.left: parent.left
-                                    visible: Networking.wifiEnabled
-                                }
-                                Rectangle {
-                                    width: 16
-                                    height: 16
-                                    color: parent.color
-                                    anchors.bottom: parent.bottom
-                                    anchors.right: parent.right
-                                    visible: Networking.wifiEnabled
-                                }
+                                property bool hasNetworks: rootWifiPage.wifiDevice && rootWifiPage.wifiDevice.networks.values.length > 0
+                                property bool firstNetworkConnected: hasNetworks && rootWifiPage.wifiDevice.networks.values[0].connected
+                                topLeftRadius: 16
+                                topRightRadius: 16
+                                bottomLeftRadius: Networking.wifiEnabled && hasNetworks ? (firstNetworkConnected ? 16 : 4) : 16
+                                bottomRightRadius: Networking.wifiEnabled && hasNetworks ? (firstNetworkConnected ? 16 : 4) : 16
+                                
+                                Behavior on bottomLeftRadius { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customExpressiveSpatialSlow } }
+                                Behavior on bottomRightRadius { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customExpressiveSpatialSlow } }
                             }
                         }
 
@@ -198,7 +191,8 @@ Item {
                                 width: 52
                                 height: 32
                                 radius: 16
-                                color: Networking.wifiEnabled ? (Vars.tColor(Theme.primary, 0.8)) : (Vars.tColor(Theme.surface_variant, Vars.componentOpacity))
+                                antialiasing: true
+                                color: Networking.wifiEnabled ? Theme.primary : Theme.surface_variant
                                 border.color: wifiHeader.activeFocus ? Theme.on_surface : "transparent"
                                 border.width: wifiHeader.activeFocus ? 2 : 0
                                 Behavior on color {
@@ -212,6 +206,7 @@ Item {
                                     width: 24
                                     height: 24
                                     radius: 12
+                                    antialiasing: true
                                     color: Networking.wifiEnabled ? Theme.on_primary : Theme.on_surface_variant
                                     anchors.verticalCenter: parent.verticalCenter
                                     anchors.left: parent.left
@@ -251,6 +246,7 @@ Item {
                         Layout.preferredHeight: 120
                         visible: Networking.wifiEnabled && (!rootWifiPage.wifiDevice || rootWifiPage.wifiDevice.networks.values.length === 0)
                         radius: 16
+                        antialiasing: true
                         color: Vars.tColor(Theme.surface_container, Vars.componentOpacity)
 
                         ColumnLayout {
@@ -298,26 +294,20 @@ Item {
                         Item {
                             anchors.fill: parent
                             layer.enabled: true
+                            layer.samples: 32
                             opacity: parent.targetColor.a
                             Rectangle {
                                 anchors.fill: parent
-                                radius: 16
                                 color: Qt.rgba(parent.parent.targetColor.r, parent.parent.targetColor.g, parent.parent.targetColor.b, 1.0)
 
-                                Rectangle {
-                                    width: 16
-                                    height: 16
-                                    color: parent.color
-                                    anchors.top: parent.top
-                                    anchors.left: parent.left
-                                }
-                                Rectangle {
-                                    width: 16
-                                    height: 16
-                                    color: parent.color
-                                    anchors.top: parent.top
-                                    anchors.right: parent.right
-                                }
+                                property bool lastNetworkConnected: rootWifiPage.wifiDevice && rootWifiPage.wifiDevice.networks.values.length > 0 && rootWifiPage.wifiDevice.networks.values[rootWifiPage.wifiDevice.networks.values.length - 1].connected
+                                topLeftRadius: lastNetworkConnected ? 16 : 4
+                                topRightRadius: lastNetworkConnected ? 16 : 4
+                                bottomLeftRadius: 16
+                                bottomRightRadius: 16
+                                
+                                Behavior on topLeftRadius { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customExpressiveSpatialSlow } }
+                                Behavior on topRightRadius { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customExpressiveSpatialSlow } }
                             }
                         }
 
@@ -429,6 +419,7 @@ Item {
                     width: 40
                     height: 40
                     radius: 20
+                    antialiasing: true
                     color: backInfoHover.pressed ? Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.12) : (backInfoHover.containsMouse ? Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.08) : "transparent")
                     QsText {
                         anchors.centerIn: parent
@@ -469,6 +460,7 @@ Item {
                 Layout.fillWidth: true
                 Layout.preferredHeight: 100
                 radius: 16
+                antialiasing: true
                 color: Vars.tColor(Theme.surface_container, Vars.componentOpacity)
 
                 ColumnLayout {
@@ -495,6 +487,7 @@ Item {
                 Layout.fillWidth: true
                 Layout.preferredHeight: 64
                 radius: 16
+                antialiasing: true
                 color: Vars.tColor(Theme.surface_container_highest, Vars.componentOpacity)
 
                 RowLayout {
@@ -514,6 +507,7 @@ Item {
                         width: 32
                         height: 32
                         radius: 16
+                        antialiasing: true
                         color: copyHover.containsMouse ? Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.08) : "transparent"
                         QsText {
                             anchors.centerIn: parent
@@ -577,6 +571,7 @@ Item {
                     width: 40
                     height: 40
                     radius: 20
+                    antialiasing: true
                     color: backAuthHover.pressed ? Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.12) : (backAuthHover.containsMouse ? Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.08) : "transparent")
                     QsText {
                         anchors.centerIn: parent
@@ -617,6 +612,7 @@ Item {
                 Layout.fillWidth: true
                 Layout.preferredHeight: 180
                 radius: 16
+                antialiasing: true
                 color: Vars.tColor(Theme.surface_container, Vars.componentOpacity)
 
                 ColumnLayout {
@@ -628,6 +624,7 @@ Item {
                         Layout.preferredHeight: 56
                         Layout.alignment: Qt.AlignHCenter
                         radius: 8
+                        antialiasing: true
                         color: "transparent"
                         border.color: rootWifiPage.authError ? Theme.error : (authPwdInput.activeFocus ? Theme.primary : Theme.outline)
                         border.width: authPwdInput.activeFocus ? 3 : 2

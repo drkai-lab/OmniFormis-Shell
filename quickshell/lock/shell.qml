@@ -5,7 +5,7 @@ import Quickshell
 import Quickshell.Wayland
 import Quickshell.Services.Pam
 import Quickshell.Widgets
-import "../theme/variables.js" as Vars
+import "../theme"
 import "../"
 import "../desktop/Widgets" as Widgets
 import "../core/primitives" as Primitives
@@ -135,6 +135,7 @@ ShellRoot {
                             Layout.preferredWidth: 320
                             Layout.preferredHeight: 64
                             radius: 32
+                            antialiasing: true
                             color: root.authError ? Theme.error_container : Theme.surface_container_highest
                             border.color: passwordInput.activeFocus ? Theme.primary : "transparent"
                             border.width: 2

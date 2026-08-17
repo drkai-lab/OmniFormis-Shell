@@ -6,7 +6,7 @@ import Quickshell
 import Quickshell.Io
 import Quickshell.Bluetooth
 import "../../.."
-import "../../../theme/variables.js" as Vars
+import "../../../theme"
 import "../../../core/primitives" as Primitives
 
 Item {
@@ -18,7 +18,7 @@ Item {
     property bool isSelected: modelData.connected
     property bool showForget: false
     
-    property color targetColor: isSelected ? (Vars.tColor(Theme.secondary_container, Vars.componentOpacity)) : (btMouse.containsMouse ? Qt.tint((Vars.tColor(Theme.surface_container, Vars.componentOpacity)), Qt.rgba(Theme.on_surface.r, Theme.on_surface.g, Theme.on_surface.b, 0.08)) : (Vars.tColor(Theme.surface_container, Vars.componentOpacity)))
+    property color targetColor: isSelected ? (Vars.tColorSelected(Theme.primary_container)) : (btMouse.containsMouse ? (Vars.tColor(Theme.surface_container_highest, Vars.componentOpacity)) : (Vars.tColor(Theme.surface_container_high, Vars.componentOpacity)))
     Behavior on targetColor { ColorAnimation { duration: Vars.animationDuration } }
     
     property bool hasDeviceBelow: {
@@ -33,18 +33,22 @@ Item {
     Item {
         anchors.fill: parent
         layer.enabled: true
+        layer.samples: 32
         opacity: parent.targetColor.a
         Rectangle {
             anchors.fill: parent
             color: Qt.rgba(parent.parent.targetColor.r, parent.parent.targetColor.g, parent.parent.targetColor.b, 1.0)
             
-            property real baseRadius: parent.parent.isSelected ? 36 : 16
-            property real edgeRadius: parent.parent.isSelected ? 36 : 4
+            property real baseRadius: Vars.radiusLarge
+            property real edgeRadius: 4
             
-            topLeftRadius: edgeRadius
-            topRightRadius: edgeRadius
-            bottomLeftRadius: parent.parent.hasDeviceBelow ? edgeRadius : baseRadius
-            bottomRightRadius: parent.parent.hasDeviceBelow ? edgeRadius : baseRadius
+            property bool deviceAboveConnected: index > 0 && rootPage.adapter && rootPage.adapter.devices.values[index - 1].connected
+            property bool deviceBelowConnected: index < (rootPage.adapter && rootPage.adapter.devices.values ? rootPage.adapter.devices.values.length - 1 : 0) && rootPage.adapter.devices.values[index + 1].connected
+            
+            topLeftRadius: parent.parent.isSelected ? height / 2 : (deviceAboveConnected ? baseRadius : edgeRadius)
+            topRightRadius: parent.parent.isSelected ? height / 2 : (deviceAboveConnected ? baseRadius : edgeRadius)
+            bottomLeftRadius: parent.parent.isSelected ? height / 2 : (deviceBelowConnected ? baseRadius : (parent.parent.hasDeviceBelow ? edgeRadius : baseRadius))
+            bottomRightRadius: parent.parent.isSelected ? height / 2 : (deviceBelowConnected ? baseRadius : (parent.parent.hasDeviceBelow ? edgeRadius : baseRadius))
 
             Behavior on topLeftRadius { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customExpressiveSpatialSlow } }
             Behavior on topRightRadius { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customExpressiveSpatialSlow } }
@@ -100,8 +104,8 @@ Item {
         }
         ColumnLayout {
             Layout.alignment: Qt.AlignVCenter; spacing: 0; Layout.fillWidth: true
-            QsText { text: modelData.name ? modelData.name : "Unknown Device"; font.family: Vars.fontFamily; font.pixelSize: 16; color: Theme.on_surface; Layout.fillWidth: true; horizontalAlignment: Text.AlignLeft }
-            QsText { text: modelData.connected ? "Connected" : "Available"; font.family: Vars.fontFamily; font.pixelSize: 11; setWeight: 500; color: Theme.on_surface_variant; visible: text !== ""; Layout.fillWidth: true; horizontalAlignment: Text.AlignLeft }
+            QsText { text: modelData.name ? modelData.name : "Unknown Device"; font.family: Vars.fontFamily; font.pixelSize: 16; color: modelData.connected ? Theme.on_primary_container : Theme.on_surface; Layout.fillWidth: true; horizontalAlignment: Text.AlignLeft }
+            QsText { text: modelData.connected ? "Connected" : "Available"; font.family: Vars.fontFamily; font.pixelSize: 11; setWeight: 500; color: modelData.connected ? Theme.on_primary_container : Theme.on_surface_variant; visible: text !== ""; Layout.fillWidth: true; horizontalAlignment: Text.AlignLeft }
         }
         Item {
             width: 40; height: 40
@@ -130,13 +134,16 @@ Item {
     Rectangle {
         anchors.fill: parent
         
-        property real baseRadius: parent.isSelected ? 36 : 16
-        property real edgeRadius: parent.isSelected ? 36 : 4
+        property real baseRadius: Vars.radiusLarge
+        property real edgeRadius: 4
         
-        topLeftRadius: edgeRadius
-        topRightRadius: edgeRadius
-        bottomLeftRadius: parent.hasDeviceBelow ? edgeRadius : baseRadius
-        bottomRightRadius: parent.hasDeviceBelow ? edgeRadius : baseRadius
+        property bool deviceAboveConnected: index > 0 && rootPage.adapter && rootPage.adapter.devices.values[index - 1].connected
+        property bool deviceBelowConnected: index < (rootPage.adapter && rootPage.adapter.devices.values ? rootPage.adapter.devices.values.length - 1 : 0) && rootPage.adapter.devices.values[index + 1].connected
+        
+        topLeftRadius: btDelegate.isSelected ? height / 2 : (deviceAboveConnected ? baseRadius : edgeRadius)
+        topRightRadius: btDelegate.isSelected ? height / 2 : (deviceAboveConnected ? baseRadius : edgeRadius)
+        bottomLeftRadius: btDelegate.isSelected ? height / 2 : (deviceBelowConnected ? baseRadius : (parent.hasDeviceBelow ? edgeRadius : baseRadius))
+        bottomRightRadius: btDelegate.isSelected ? height / 2 : (deviceBelowConnected ? baseRadius : (parent.hasDeviceBelow ? edgeRadius : baseRadius))
 
         Behavior on topLeftRadius { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customExpressiveSpatialSlow } }
         Behavior on topRightRadius { NumberAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customExpressiveSpatialSlow } }

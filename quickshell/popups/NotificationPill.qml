@@ -4,7 +4,7 @@ import ".."
 import QtQuick.Layouts
 import Quickshell
 import Quickshell.Services.Notifications
-import "../theme/variables.js" as Vars
+import "../theme"
 import "../core/primitives" as Primitives
 Item {
     id: root
@@ -73,6 +73,7 @@ Item {
     Primitives.SquircleMask {
         id: panel
         layer.enabled: true
+        layer.samples: 32
         layer.effect: MultiEffect { shadowEnabled: true; shadowBlur: 1.0; shadowColor: Qt.rgba(0,0,0,0.25); shadowVerticalOffset: 4; shadowHorizontalOffset: 0 }
         anchors.top: parent.top
         anchors.horizontalCenter: parent.horizontalCenter
@@ -83,6 +84,7 @@ Item {
         color: (Vars._translucent && !Vars.gameMode) ? Qt.rgba((root.expanded ? root.expandedColor.r : Theme.primary.r), (root.expanded ? root.expandedColor.g : Theme.primary.g), (root.expanded ? root.expandedColor.b : Theme.primary.b), Vars.panelOpacity) : (root.expanded ? root.expandedColor : Theme.primary)
         Behavior on color { ColorAnimation { duration: Vars.animationDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Vars.customExpressiveSpatialSlow } }
         radius: root.expanded ? Vars.radiusLarge : height / 2
+        antialiasing: true
 
         opacity: root.expanded ? 1.0 : 0.0
         visible: true
